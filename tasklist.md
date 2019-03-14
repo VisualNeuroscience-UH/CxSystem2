@@ -46,13 +46,13 @@ Here's the suggested task list for implementing `CxSystem2`. The approximate pri
 * N12) [2] Is some notion of scheduler required? (based on this:  `Slurm interface should divide trials between nodes in the same way it divides array runs. Currently it tries to run all the trials in the first node only.`) 
 * N13) [2] Remote Slurm manager module (as a cluster interface), which will keep track of processes (which completed/failed/timed out; how much time it took; how much memory was used), (Slurm workload manager might already be able to report a lot of information, leverage those before implementing from scratch)
 
-## Testing 
+## 4) Testing 
 
 T1) [0] Test `Brian2GeNN` and `C++` standalone device and make sure *magic* network is still a must for  using the standalone devices. If so, the same complex global playground is still required, otherwise A LOT of things should be changed to replace that. 
 
 T2) [0] Create a simple test program that run a test on `CxSystem` and saves output and connection values in a file. Then it can test it against another file saved. (to compare `CxSystem` and `CxSystem2` on the same configuration file)
 
-## Documentation
+## 5) Documentation
 
 * D1) [2] very simple guide to use CxSystem2 using very light package managers like pipenv and not anaconda 
 * D2) [3] Add basic CI and unit test writing documentation
