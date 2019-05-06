@@ -38,5 +38,71 @@ Maybe limiting the * import of brian to units?, such as “from brian2.units imp
 Explicit list of used imported global variables at the top of the file?
 
 
-Version 21st Feb 2019
+
+## Workflow: GitFlow
+
+<https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow>
+
+Repository access: single repository/shared maintenance (= everyone on the team considered a maintainer and is granted access to upload changes)
+
+ 
+
+### Current stable release
+
+GitHub repository: <https://github.com/VisualNeuroscience-UH/CxSystem>
+
+Branch for current stable release: *master*
+
+Documentation: <https://cxsystem.readthedocs.io/en/master/>
+
+Hotfix = something that can’t wait for the next stable release
+
+**When starting on a hotfix in a stable release, branch from: *master*** 
+
+o   *git checkout master -> git checkout -b hotfix_branch*
+
+When merging a hotfix to master, use: 
+
+o   *git checkout master* -> *git merge hotfix_branch*
+
+o   *git checkout develop -> git merge hotfix_branch* (so that *develop* gets the hotfix, too)
+
+ 
+
+### Development
+
+Development branch: *develop*
+
+**When starting on a new feature, branch from: *develop***
+
+When updating your feature branch with new developments others might have done, use:
+
+o    *git pull develop*
+
+When merging your new feature (after others have reviewed it), use: 
+
+o   *git checkout develop -> git merge feature_branch*
+
+ 
+
+### New releases
+
+Once develop has acquired enough new features for a release, fork a *release* branch:
+
+o   *git checkout develop -> git checkout -b release/X.Y*
+
+o   where X.Y stands for the release version, e.g. “2.0”
+
+“Feature freeze” = no new features can be added after this point to the release branch
+
+Only bug fixes, documentation generation, and other release-oriented tasks should go in this branch
+
+When the release branch is finished, use:
+
+o   *git checkout master -> git merge release/X.Y*
+
+o   *git checkout develop -> git merge release/X.Y* (so that *develop* gets all the bug fixes, too)
+
+
+Version 6th May 2019
 
