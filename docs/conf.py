@@ -308,4 +308,4 @@ texinfo_documents = [
 #MOCK_MODULES = ['ntpath','numpy', 'scipy.io', 'os', 'cPickle', 'zlib','bz2','shutil']
 #MOCK_MODULES = ['ntpath','numpy','scipy.io','os']
 #sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-autodoc_mock_imports = ['csr_matrix','scipy.io', 'brian2' , 'ntpath','numpy', 'scipy.io', 'os','matplotlib.pyplot' ,'cPickle', 'zlib','bz2','shutil', 'multiprocessing', 'time','pandas', 'itertools','brian2genn', 'ast','ntpath','scipy.sparse','datetime','time','__builtin__','csv','threading','networkx.drawing','random','operator','matplotlib','networkx','sys','scipy']
+autodoc_mock_imports = ['csr_matrix','scipy.io', 'brian2' , 'ntpath','numpy', 'scipy.io', 'os','matplotlib.pyplot' ,'cPickle', 'zlib','bz2','shutil', 'multiprocessing', 'time','pandas', 'itertools','brian2genn', 'ast','ntpath','scipy.sparse','datetime','time','builtins','csv','threading','networkx.drawing','random','operator','matplotlib','networkx','sys','scipy']

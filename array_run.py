@@ -59,8 +59,8 @@ class array_run(object):
         try:
             self.trials_per_config = int(self.parameter_finder(self.anatomy_df,'trials_per_config'))
         except TypeError:
-            print(" - trials_per_config is not defined in the configuration ")
-                   "file, the default value is 1"
+            print(" - trials_per_config is not defined in the configuration "
+                   "file, the default value is 1")
             self.trials_per_config = 1
         try:
             self.device = self.parameter_finder(self.anatomy_df, 'device')

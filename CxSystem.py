@@ -27,7 +27,7 @@ import _pickle as pickle
 import zlib
 import bz2
 import time
-import __builtin__
+import builtins
 import csv
 import shutil
 import pandas
@@ -329,15 +329,15 @@ class CxSystem(object):
                     self.benchmarking_data['Device'] = self.device
                     self.benchmarking_data['File Suffix'] = self.StartTime_str[1:]
                     if self.device.lower() != 'python':
-                        self.benchmarking_data['Python Compilation'] = __builtin__.code_generation_start - self.start_time
-                        self.benchmarking_data['Brian Code generation'] = __builtin__.compile_start - __builtin__.code_generation_start
-                        self.benchmarking_data['Device-Specific Compilation'] = __builtin__.run_start - __builtin__.compile_start
+                        self.benchmarking_data['Python Compilation'] = builtins.code_generation_start - self.start_time
+                        self.benchmarking_data['Brian Code generation'] = builtins.compile_start - builtins.code_generation_start
+                        self.benchmarking_data['Device-Specific Compilation'] = builtins.run_start - builtins.compile_start
                     else:
-                        self.benchmarking_data['Python Compilation'] = __builtin__.run_start - self.start_time
+                        self.benchmarking_data['Python Compilation'] = builtins.run_start - self.start_time
                         self.benchmarking_data['Brian Code generation'] = '-'
                         self.benchmarking_data['Device-Specific Compilation'] = '-'
                     self.saving_start_time = time.time()
-                    self.benchmarking_data['Run'] = self.saving_start_time -  __builtin__.run_start
+                    self.benchmarking_data['Run'] = self.saving_start_time -  builtins.run_start
                 except AttributeError:
                     print(" -  The system could not perform the benchmarking since the brian2/brian2genn libraries are not modified to do so.")
                     self.do_benchmark = 0
