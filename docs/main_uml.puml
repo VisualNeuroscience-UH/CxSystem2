@@ -1,0 +1,139 @@
+@startuml
+
+note "called by neuron_group()" as N1
+note "called by synapse()" as N2
+note "called by relay()" as N3
+note "called by the constructor" as N4
+note "spawning CxSystems" as N5
+note "run in cluster" as N6
+
+package "CxSystem module"{
+class CxSystem {
+void neuron_group()
+void synapse()
+void monitors()
+void relay()
+gather_result()
+.. relay() methods ..
+void video()
+void VPM()
+void spike()
+..
+}
+
+}
+
+package "physiology_reference module"{
+class neuron_reference{
+output_neuron{}
+void PC()
+void BC()
+void L1i()
+void MC()
+void SS()
+void VPM()
+}
+
+class synapse_reference{
+output_synapse{}
+void STDP()
+void STDP_with_scaling()
+void Fixed()
+}
+synapse_reference <-up- N2
+N2 -- CxSystem
+neuron_reference <-up- N1
+N1 -- CxSystem
+
+}
+
+package "parameter_parser" {
+class "synapse_parser"{
+.. Instance Variables ..
+output_namespace{}
+....
+void _change_calcium()
+void STDP()
+void STDP_with_scaling()
+void Fixed()
+}
+class "neuron_parser"{
+
+output_namespace{}
+void _PC()
+void _BC()
+void _L1i()
+void _MC()
+void _SS()
+}
+neuron_parser <-up- neuron_reference
+synapse_parser <-up- synapse_reference
+}
+
+package "save_data module"{
+class save_data {
+data{}
+syntax_bank[]
+void gather_result()
+void save_to_file()
+}
+CxSystem-left->save_data
+}
+package "stimuli module" {
+class stimuli {
+void generate_inputs()
+void data_loader()
+void data_saver()
+}
+CxSystem-right-N3
+N3-right->stimuli
+}
+
+
+package parallel_runs <<Rectangle>>  {
+    class CxSystem_1
+    class CxSystem_2
+    class CxSystem_3
+    class CxSystem_4
+
+
+}
+package "array_run module" {
+class array_run{
+anatomy_df
+physiology_df
+void arr_run()
+void spawner()
+void df_builder_for_array_run()
+}
+CxSystem-down-N4
+N4-down->array_run
+array_run-left-N5
+N5 -down-> parallel_runs
+}
+package "cluster_run module" {
+class cluster_run{
+}
+array_run-right-N6
+N6-down->cluster_run
+cluster_run->cluster
+}
+
+package cluster <<Rectangle>>  {
+    class Node_1
+    class Node_2
+    class Node_3
+    class Node_4
+Node_1-down->parallel_runs
+Node_2-down->parallel_runs
+Node_3-down->parallel_runs
+Node_4-down->parallel_runs
+}
+
+
+interface Model_and_Network_config
+interface Physiological_config
+Physiological_config ..> CxSystem
+Model_and_Network_config ..> CxSystem
+@enduml
+
