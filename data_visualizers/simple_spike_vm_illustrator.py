@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import _pickle as pickle
+import pickle as pickle
 import zlib
 import os
 import bz2

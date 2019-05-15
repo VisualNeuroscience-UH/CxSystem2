@@ -11,7 +11,7 @@ from scipy.sparse import csr_matrix
 import copy
 import zlib
 import bz2
-import _pickle as pickle
+import pickle as pickle
 
 
 def _status_printer(str):

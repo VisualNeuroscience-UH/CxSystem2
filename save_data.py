@@ -13,7 +13,7 @@ from brian2  import *
 from numpy import *
 import os
 import ntpath
-import _pickle as pickle
+import pickle as pickle
 import zlib
 import bz2
 

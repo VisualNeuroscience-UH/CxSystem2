@@ -17,7 +17,7 @@ import os
 import pandas as pd
 import zlib
 import bz2
-import _pickle as pickle
+import pickle as pickle
 import sys
 import itertools
 

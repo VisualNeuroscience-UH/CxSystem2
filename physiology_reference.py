@@ -100,7 +100,7 @@ class neuron_reference(object):
         self.output_neuron['w_positions'] = self._get_w_positions(self.output_neuron['number_of_neurons'],
                                                                 'fixed_grid', general_grid_radius,min_distance)
         # self.output_neuron['w_positions'] = 17 * log(self.output_neuron['z_positions'] + 1)
-        self.output_neuron['z_positions'] =  map(lambda x: e ** (x/17) - 1,self.output_neuron['w_positions'] )
+        self.output_neuron['z_positions'] =  list(map(lambda x: e ** (x/17) - 1,self.output_neuron['w_positions'] ))
         print(" -  Customized " + str(cell_type) + " neuron in layer " +
                str(layers_idx) + " initialized with " + \
               str(self.output_neuron['number_of_neurons']) + " neurons.")

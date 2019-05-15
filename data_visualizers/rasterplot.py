@@ -9,7 +9,7 @@ import re
 import pandas as pd
 import os.path
 import zlib
-import _pickle as pickle
+import pickle as pickle
 import bz2
 
 

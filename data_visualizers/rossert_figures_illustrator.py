@@ -6,7 +6,7 @@ import scipy.io as spio
 import scipy.stats as st
 from tabulate import tabulate
 import matplotlib.pyplot as plt
-import _pickle as pickle
+import pickle as pickle
 import zlib
 import bz2
 

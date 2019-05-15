@@ -23,7 +23,7 @@ import ast
 import ntpath
 from scipy.sparse import csr_matrix
 from datetime import datetime
-import _pickle as pickle
+import pickle as pickle
 import zlib
 import bz2
 import time
@@ -303,8 +303,7 @@ class CxSystem(object):
 
     def set_device(self,*args):
         self.device = args[0]
-        assert self.device.lower() in ['genn', 'cpp',
-                               'python'], ' -  Device %s is not defined. ' % self.device
+        assert self.device.lower() in ['genn', 'cpp','python'], ' -  Device %s is not defined. ' % self.device
         if self.device.lower() == 'genn':
             print(" -  System is going to be run using GeNN devices, " \
                   "Errors may rise if Brian2/Brian2GeNN/GeNN is not installed correctly or the limitations are not " \
@@ -563,29 +562,51 @@ class CxSystem(object):
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_values_list) == self.current_parameters_list_orig_len,\
             " -  One or more of of the columns for NeuronGroup definition is missing in the following line:\n %s " % str(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values())
-        idx = -1
-        net_center = 0 + 0j
-        number_of_neurons = 0
-        tonic_current = ''
-        n_background_inputs = ''
-        n_background_inhibition = ''
-        noise_sigma = ''
-        gemean = ''
-        gestd = ''
-        gimean = ''
-        gistd = ''
-        neuron_type = ''
-        layer_idx = 0
-        threshold = ''
-        reset = ''
-        refractory = ''
-        monitors = ''
+        local_namespace = {}
+        local_namespace['idx'] = -1
+        local_namespace['net_center'] = 0 + 0j
+        local_namespace['number_of_neurons'] = 0
+        local_namespace['tonic_current'] = ''
+        local_namespace['n_background_inputs'] = ''
+        local_namespace['n_background_inhibition'] = ''
+        local_namespace['noise_sigma'] = ''
+        local_namespace['gemean'] = ''
+        local_namespace['gestd'] = ''
+        local_namespace['gimean'] = ''
+        local_namespace['gistd'] = ''
+        local_namespace['neuron_type'] = ''
+        local_namespace['layer_idx'] = 0
+        local_namespace['threshold'] = ''
+        local_namespace['reset'] = ''
+        local_namespace['refractory'] = ''
+        local_namespace['monitors'] = ''
+
         for column in _all_columns:
             try:
                 tmp_value_idx = self.current_parameters_list[self.current_parameters_list==column].index.item()
-                exec ("%s=self.current_values_list[tmp_value_idx]" % column)
+                tmp_var_str = "local_namespace['%s']=self.current_values_list[tmp_value_idx]" % column
+                exec(tmp_var_str)
             except ValueError:
-                exec ("%s='--'" % column)
+                exec ("local_namespace['%s']='--'" % column)
+
+        idx = local_namespace['idx']
+        net_center = local_namespace['net_center']
+        number_of_neurons = local_namespace['number_of_neurons']
+        tonic_current = local_namespace['tonic_current']
+        n_background_inputs = local_namespace['n_background_inputs']
+        n_background_inhibition = local_namespace['n_background_inhibition']
+        noise_sigma = local_namespace['noise_sigma']
+        gemean = local_namespace['gemean']
+        gestd = local_namespace['gestd']
+        gimean = local_namespace['gimean']
+        gistd = local_namespace['gistd']
+        neuron_type = local_namespace['neuron_type']
+        layer_idx = local_namespace['layer_idx']
+        threshold = local_namespace['threshold']
+        reset = local_namespace['reset']
+        refractory = local_namespace['refractory']
+        monitors = local_namespace['monitors']
+
         assert idx not in self.NG_indices, \
             " -  Multiple indices with same values exist in the configuration file."
         self.NG_indices.append(idx)
@@ -682,8 +703,10 @@ class CxSystem(object):
 
         # Add Poisson-distributed background input
         try:
-            background_rate = self.physio_config_df.ix[where(self.physio_config_df.values == 'background_rate')[0]]['Value'].item()
-            background_rate_inhibition = self.physio_config_df.ix[where(self.physio_config_df.values == 'background_rate_inhibition')[0]]['Value'].item()
+            background_rate = self.physio_config_df.loc[where(self.physio_config_df.values == 'background_rate')[0]][
+                'Value'].item()
+            background_rate_inhibition = self.physio_config_df.loc[where(self.physio_config_df.values ==
+                                                                         'background_rate_inhibition')[0]]['Value'].item()
             background_noise_flag = 1
         except ValueError:
             background_noise_flag = 0
@@ -1409,17 +1432,18 @@ class CxSystem(object):
                 # In order to use the dynamic compiler in a sub-routine, the scope in which the syntax is going to be run
                 # should be defined, hence the globals(), locals(). They indicate that the syntaxes should be run in both
                 # global and local scope
-                exec ("%s=%s" % (thread_NN_name, thread_number_of_neurons) in
+                exec ("%s=%s" % (thread_NN_name, thread_number_of_neurons),
                       globals(), locals())
-                exec ("%s=%s" % (thread_NE_name, Eq) in globals(), locals())
-                exec ("%s=%s" % (thread_NT_name, "'emit_spike>=1'") in
+                exec ("%s=%s" % (thread_NE_name, Eq) , globals(), locals())
+                exec ("%s=%s" % (thread_NT_name, "'emit_spike>=1'") ,
                       globals(), locals())
-                exec ("%s=%s" % (thread_NRes_name, "'emit_spike=0'") in
+                exec ("%s=%s" % (thread_NRes_name, "'emit_spike=0'") ,
                       globals(), locals())
                 exec ("%s= NeuronGroup(%s, model=%s,method='%s', "
                       "threshold=%s, reset=%s)" \
                      % (thread_NG_name, thread_NN_name, thread_NE_name,
-                        self.numerical_integration_method,thread_NT_name, thread_NRes_name) in globals(), locals())
+                        self.numerical_integration_method,thread_NT_name,
+                        thread_NRes_name) , globals(), locals())
                 if hasattr(self, 'loaded_brian_data'):
                     # in case the NG index are different. for example a MC_L2 neuron might have had
                     # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1441,7 +1465,7 @@ class CxSystem(object):
                       "'w_positions'])*mm\n" \
                      "%s.y=imag(self.customized_neurons_list[%d]['w_positions'])*mm" % \
                      (thread_NG_name, self.video_input_idx, thread_NG_name,
-                      self.video_input_idx) in globals(), locals())
+                      self.video_input_idx) , globals(), locals())
                 self.save_output_data.data['positions_all']['z_coord'][thread_NG_name] = \
                     self.customized_neurons_list[self.video_input_idx]['z_positions']
                 self.save_output_data.data['positions_all']['w_coord'][thread_NG_name] = \
@@ -1451,9 +1475,9 @@ class CxSystem(object):
                 # that connects SpikeGeneratorGroup() and relay neurons.
                 exec ("%s = Synapses(SPK_GENERATOR, %s, "
                       "on_pre='emit_spike+=1')" % \
-                     (thread_SGsyn_name, thread_NG_name) in globals(),
+                     (thread_SGsyn_name, thread_NG_name) , globals(),
                       locals())# connecting the SpikeGeneratorGroup() and relay group.
-                exec ("%s.connect(j='i')" % thread_SGsyn_name in globals(),
+                exec ("%s.connect(j='i')" % thread_SGsyn_name , globals(),
                       locals()) # SV change
                 setattr(self.main_module, thread_NG_name, eval(thread_NG_name))
                 setattr(self.main_module, thread_SGsyn_name, eval(thread_SGsyn_name))
@@ -1497,8 +1521,8 @@ class CxSystem(object):
             spike_times = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='spike_times'].index.item()].replace(' ',',')
             spike_times_list = ast.literal_eval(spike_times[0:spike_times.index('*')])
             spike_times_unit = spike_times[spike_times.index('*')+1:]
-            exec ('spike_times_ = spike_times_list * %s' %(spike_times_unit)
-                  in globals(), locals())
+            exec ('spike_times_ = spike_times_list * %s' %(spike_times_unit),
+                  locals(), globals())
             try:
                 net_center = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='net_center'].index.item()]
                 net_center = complex(net_center)
@@ -1514,11 +1538,11 @@ class CxSystem(object):
             spikes_str = 'GEN_SP=tile(arange(%s),%d)'%(number_of_neurons,len(spike_times_))
             times_str = 'GEN_TI = repeat(%s,%s)*%s'%(spike_times[0:spike_times.index('*')],number_of_neurons,spike_times_unit)
             SG_str = 'GEN = SpikeGeneratorGroup(%s, GEN_SP, GEN_TI)'%number_of_neurons
-            exec (spikes_str in globals(), locals())  # running the string
+            exec (spikes_str , globals(), locals())  # running the string
             # containing the syntax for Spike indices in the input neuron group.
-            exec (times_str in globals(), locals() ) # running the string
+            exec (times_str , globals(), locals() ) # running the string
             # containing the syntax for time indices in the input neuron group.
-            exec (SG_str in globals(), locals())  # running the string
+            exec (SG_str , globals(), locals())  # running the string
             # containing the syntax for creating the SpikeGeneratorGroup() based on the input .mat file.
 
             setattr(self.main_module, SG_Name, eval(SG_Name))
@@ -1536,17 +1560,18 @@ class CxSystem(object):
             Eq = """'''emit_spike : 1
                             x : meter
                             y : meter'''"""
-            exec ("%s=%s" % (_dyn_neuronnumber_name, number_of_neurons) in
+            exec ("%s=%s" % (_dyn_neuronnumber_name, number_of_neurons) ,
                   globals(), locals())
-            exec ("%s=%s" % (_dyn_neuron_eq_name, Eq) in globals(), locals())
-            exec ("%s=%s" % (_dyn_neuron_thres_name, "'emit_spike>=1'") in
+            exec ("%s=%s" % (_dyn_neuron_eq_name, Eq) , locals(),globals())
+            exec ("%s=%s" % (_dyn_neuron_thres_name, "'emit_spike>=1'") ,
                   globals(), locals())
-            exec ("%s=%s" % (_dyn_neuron_reset_name, "'emit_spike=0'") in
+            exec ("%s=%s" % (_dyn_neuron_reset_name, "'emit_spike=0'") ,
                   globals(), locals())
             exec ("%s= NeuronGroup(%s, model=%s, method='%s',threshold=%s, "
                   "reset=%s)" \
                  % (_dyn_neurongroup_name, _dyn_neuronnumber_name,
-                    _dyn_neuron_eq_name, self.numerical_integration_method, _dyn_neuron_thres_name, _dyn_neuron_reset_name) in globals(), locals())
+                    _dyn_neuron_eq_name, self.numerical_integration_method,
+                    _dyn_neuron_thres_name, _dyn_neuron_reset_name) , globals(), locals())
             if hasattr(self, 'loaded_brian_data'): # load the positions if available
                 # in case the NG index are different. for example a MC_L2 neuron might have had
                 # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1569,7 +1594,7 @@ class CxSystem(object):
                   "'w_positions'])*mm\n"\
                  "%s.y=imag(self.customized_neurons_list[%d]['w_positions'])*mm" \
                  %(_dyn_neurongroup_name, current_idx, _dyn_neurongroup_name,
-                   current_idx) in globals(), locals())
+                   current_idx) , globals(), locals())
             # saving the positions :
             self.save_output_data.data['positions_all']['z_coord'][_dyn_neurongroup_name] = \
                 self.customized_neurons_list[current_idx]['z_positions']
@@ -1579,7 +1604,7 @@ class CxSystem(object):
             SGsyn_name = 'SGEN_Syn'  # variable name for the Synapses() object
             # that connects SpikeGeneratorGroup() and relay neurons.
             exec ("%s = Synapses(GEN, %s, on_pre='emit_spike+=1')" \
-                 % (SGsyn_name, _dyn_neurongroup_name) in globals(), locals()
+                 % (SGsyn_name, _dyn_neurongroup_name) , globals(), locals()
                   ) # connecting the SpikeGeneratorGroup() and relay group.
             eval(SGsyn_name).connect(j='i')
             setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
@@ -1620,15 +1645,15 @@ class CxSystem(object):
             # In order to use the dynamic compiler in a sub-routine, the scope in which the syntax is going to be run
             # should be defined, hence the globals(), locals(). They indicate that the syntaxes should be run in both
             # global and local scope
-            exec ("%s=%s" % (NN_name, number_of_neurons) in globals(), locals())
-            exec ("%s=%s" % (NE_name, Eq) in globals(), locals())
-            exec ("%s=%s" % (NT_name, "'emit_spike>=1'") in globals(), locals())
-            exec ("%s=%s" % (NRes_name, "'emit_spike=0'") in globals(),
+            exec ("%s=%s" % (NN_name, number_of_neurons) , globals(), locals())
+            exec ("%s=%s" % (NE_name, Eq) , globals(), locals())
+            exec ("%s=%s" % (NT_name, "'emit_spike>=1'") , globals(), locals())
+            exec ("%s=%s" % (NRes_name, "'emit_spike=0'") , globals(),
                   locals())
             exec ("%s= NeuronGroup(%s, model=%s,method='%s', threshold=%s, "
                   "reset=%s)" \
                  % (NG_name, NN_name, NE_name, self.numerical_integration_method, NT_name,
-                    NRes_name) in globals(), locals())
+                    NRes_name) , globals(), locals())
             if hasattr(self, 'loaded_brian_data'):
                 # in case the NG index are different. for example a MC_L2 neuron might have had
                 # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1650,7 +1675,7 @@ class CxSystem(object):
                   "'w_positions'])*mm\n" \
                  "%s.y=imag(self.customized_neurons_list[%d]['w_positions'])*mm" % \
                  (NG_name, self.spike_input_group_idx, NG_name,
-                  self.spike_input_group_idx) in globals(), locals())
+                  self.spike_input_group_idx) , globals(), locals())
             self.save_output_data.data['positions_all']['z_coord'][NG_name] = \
                 self.customized_neurons_list[self.spike_input_group_idx]['z_positions']
             self.save_output_data.data['positions_all']['w_coord'][NG_name] = \
@@ -1660,9 +1685,9 @@ class CxSystem(object):
             # that connects SpikeGeneratorGroup() and relay neurons.
             exec ("%s = Synapses(SPK_GENERATOR, %s, on_pre='emit_spike+=1')" % \
                  (SGsyn_name,
-                  NG_name) in globals(), locals() ) # connecting the
+                  NG_name) , globals(), locals() ) # connecting the
             # SpikeGeneratorGroup() and relay group.
-            exec ("%s.connect(j='i')" % SGsyn_name in globals(), locals() ) #
+            exec ("%s.connect(j='i')" % SGsyn_name , globals(), locals() ) #
             # SV change
             setattr(self.main_module, NG_name, eval(NG_name))
             setattr(self.main_module, SGsyn_name, eval(SGsyn_name))

@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
-import _pickle as pickle
+import pickle as pickle
 import zlib
 import os
 from brian2 import *

@@ -13,7 +13,7 @@ from brian2  import *
 # import scipy.io as sio
 from scipy import io
 import os
-import _pickle as pickle
+import pickle as pickle
 import zlib
 import bz2
 import shutil
