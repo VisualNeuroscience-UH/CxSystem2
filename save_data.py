@@ -62,7 +62,7 @@ class save_data(object):
         Gather the result by running the syntaxes previously saved in the syntax bank before running the simulation.
         '''
         for syntax in self.syntax_bank:
-            exec (syntax)
+            exec(syntax)
         self.save_to_file()
 
     def save_to_file(self):
