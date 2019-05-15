@@ -34,7 +34,7 @@ import pandas
 import threading
 import array_run
 import multiprocessing
-prefs.codegen.target = 'cython'
+prefs.codegen.target = 'auto'
 
 class CxSystem(object):
     '''
