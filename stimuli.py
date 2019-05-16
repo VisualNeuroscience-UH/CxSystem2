@@ -81,7 +81,7 @@ class stimuli(object):
         frames = TimedArray(np.transpose(sparse_stimulus),
                             dt=frameduration * ms)  # video_data has to be shape (frames, neurons), dt=frame rate
         self.frames = frames
-        exec ('self.factor = %s' %freq)
+        exec('self.factor = %s' %freq)
         self.i_patterns[len(self.i_patterns)] = frames.values * self.factor  # These must be final firing rates
         _all_stim = squeeze(_V1_mats['stimulus'])
         if len(_all_stim.shape) == 2:
