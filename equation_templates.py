@@ -292,7 +292,7 @@ class EquationHelper(object):
         try:
             membrane_equation = membrane_equation.substitute(all_membrane_model_strings)
         except KeyError:
-            print 'Undefined key in membrane equation'
+            print('Undefined key in membrane equation')
         membrane_equation = str(membrane_equation)
 
         eq_lines = membrane_equation.splitlines()
@@ -319,4 +319,4 @@ class EquationHelper(object):
 
 if __name__ == '__main__':
     x = EquationHelper(neuron_model='EIF', is_pyramidal=True, compartment='a0', exc_model='AMPA_NMDA_BIEXP', inh_model='I_ALPHA')
-    print x.getMembraneEquation(return_string=True)
+    print(x.getMembraneEquation(return_string=True))

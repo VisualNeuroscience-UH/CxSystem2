@@ -132,7 +132,7 @@ class Animator:
 
     def _status_printer(self, str):
         cleaner = ' ' * 100
-        print '\r' + cleaner + '\r' + str,
+        print('\r' + cleaner + '\r' + str,end="")
 
 
 ### MAIN BEGINS HERE

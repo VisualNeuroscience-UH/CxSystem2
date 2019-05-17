@@ -544,7 +544,7 @@ class neuron_reference(object):
     def value_extractor(self, df, key_name):
         non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec "%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx])
+            exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx]))
         try:
             return eval(key_name)
         except (NameError, TypeError):
@@ -567,7 +567,7 @@ class neuron_reference(object):
                     df_reset_index = df_reset_index[0:df_reset_index[df_reset_index['Key'] == key_name].index[0]]
                     for neural_parameter in df_reset_index['Key'].dropna():
                         if neural_parameter  in df['Value'][df['Key'] == key_name].item():
-                            exec "%s =self.value_extractor(df,neural_parameter)" % (neural_parameter)
+                            exec("%s =self.value_extractor(df,neural_parameter)" % (neural_parameter))
                     return eval(df['Value'][df['Key'] == key_name].item())
                 else:
                     raise('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%df['Value'][df['Key'] == key_name].item())
@@ -903,7 +903,7 @@ class synapse_reference(object):
                     df_reset_index = df_reset_index[0:df_reset_index[df_reset_index['Key'] == key_name].index[0]]
                     for neural_parameter in df_reset_index['Key'].dropna():
                         if neural_parameter  in df['Value'][df['Key'] == key_name].item():
-                            exec "%s =self.value_extractor(df,neural_parameter)" % (neural_parameter)
+                            exec("%s =self.value_extractor(df,neural_parameter)" % (neural_parameter))
                     return eval(df['Value'][df['Key'] == key_name].item())
                 else:
                     raise('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%df['Value'][df['Key'] == key_name].item())
