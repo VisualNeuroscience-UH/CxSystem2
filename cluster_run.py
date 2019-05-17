@@ -20,7 +20,7 @@ import os
 import pandas as pd
 import zlib
 import bz2
-import cPickle as pickle
+import pickle as pickle
 import sys
 import itertools
 import getpass
@@ -86,7 +86,7 @@ class cluster_run(object):
         scp.put(physio_file_address, self.remote_repo_path + '/_tmp_physio_config.csv')
         print(" -  config files transfered to cluster")
         # ask user to set the number of nodes, time and memory:
-        raw_input(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
+        input(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
                   "\nNote that the number of nodes in default slurm file should always be set to 1. Instead you should enter the number of nodes in the CxSystem network config file. "
                   "\nAlso the default number of CPUs=16 does not need to be changed most of the times. "
                   "\nPress a key to contiue ...")
@@ -127,8 +127,8 @@ class cluster_run(object):
         with open ('./_cluster_tmp/_tmp_checker_data.pkl'.replace('/',os.sep),'wb') as ff:
             pickle.dump(checker_data,ff)
         print(" -  _tmp_checker_data saved. To download the result and clean the environments after getting the email, run 'python cluster_run.py'\n" \
-              u"Alternatively you can run it in another terminal and it will "
-               u"do its job when the results are ready.")
+              "Alternatively you can run it in another terminal and it will "
+               "do its job when the results are ready.")
 
 
     def ssh_commander(self,command,print_flag):

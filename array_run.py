@@ -165,7 +165,7 @@ class array_run(object):
             self.all_titles = ['default_config']
 
         if self.multidimension_array_run :
-            self.tmp_df  = pd.DataFrame(list(itertools.product(*self.metadata_dict.values())), columns=self.metadata_dict.keys())
+            self.tmp_df  = pd.DataFrame(list(itertools.product(*list(self.metadata_dict.values()))), columns=list(self.metadata_dict.keys()))
             self.tmp_df = self.tmp_df[self.all_titles]
             self.tmp_df = self.tmp_df.sort_values(by=self.all_titles).reset_index(drop=True)
             self.final_metadata_df = self.final_metadata_df.reindex(self.tmp_df.index)
@@ -173,8 +173,8 @@ class array_run(object):
                 self.final_metadata_df['Dimension-%d Parameter'%(col_idx+1)] = col_title
                 self.final_metadata_df['Dimension-%d Value' % (col_idx + 1)] = self.tmp_df[col_title]
         else:
-            index_len = len([item for sublist in self.metadata_dict.values() for item in sublist])
-            self.final_metadata_df= self.final_metadata_df.reindex(range(index_len))
+            index_len = len([item for sublist in list(self.metadata_dict.values()) for item in sublist])
+            self.final_metadata_df= self.final_metadata_df.reindex(list(range(index_len)))
             counter = 0
             for par_idx,parameter in enumerate(self.all_titles):
                 for val in self.metadata_dict[parameter]:
@@ -252,11 +252,11 @@ class array_run(object):
         for j in jobs:
             j.join()
 
-        for item in paths.keys():
+        for item in list(paths.keys()):
             self.final_metadata_df['Full path'][item] = paths[item]
-        self.data_saver(os.path.join(os.path.dirname(paths[paths.keys()[0]]),self.metadata_filename),self.final_metadata_df)
+        self.data_saver(os.path.join(os.path.dirname(paths[list(paths.keys())[0]]),self.metadata_filename),self.final_metadata_df)
         print(" -  Array run metadata saved at: %s"%os.path.join(
-            os.path.dirname(paths[paths.keys()[0]]),self.metadata_filename))
+            os.path.dirname(paths[list(paths.keys())[0]]),self.metadata_filename))
 
     def parameter_finder(self,df,keyword):
         location = where(df.values == keyword)
@@ -375,7 +375,7 @@ class array_run(object):
             elif df_type == 'physiology':
                 if title not in self.physio_titles:
                     self.physio_titles.append(title)
-            if title in self.metadata_dict.keys():
+            if title in list(self.metadata_dict.keys()):
                 if value not in self.metadata_dict[title]:
                     self.metadata_dict[title].append(value)
             else:

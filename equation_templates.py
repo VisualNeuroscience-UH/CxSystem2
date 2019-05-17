@@ -250,7 +250,7 @@ class EquationHelper(object):
         else:
             self.compartment_type = 'dendrite'
 
-        assert neuron_model in EquationHelper.NeuronModels.keys(), \
+        assert neuron_model in list(EquationHelper.NeuronModels.keys()), \
             "Neuron model must be defined in NeuronModels"
         assert exc_model in EquationHelper.ExcModelNames, \
             "Undefined excitation model!"
