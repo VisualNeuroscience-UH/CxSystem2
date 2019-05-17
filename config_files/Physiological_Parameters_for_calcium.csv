@@ -1,23 +1,25 @@
 Variable,Key,Value,Comment
 "# From Markram et al Cell 2015, Table S6. Prescribed Parameters for Synaptic Transmission, Related to Figures 9 and 10.",,,
-calcium_concentration,,{2.5&3.5},
-EE_weights_gain,,0.5,
-EI_weights_gain,,0.5,
-_weights,w_TC_E-E_connections,(0.7 * EE_weights_gain) * nS,"#Cruikshank et al 2007, nature neuroscience"
+calcium_concentration,,{1.65|2.05|0.05},
+background_rate,,0.16*Hz,
+background_rate_inhibition,,0.08*Hz,
+excitatory_strength,,0.72*nS,
+inhibitory_synapse_factor,,1.15,# *1.15* x 0.72nS = 0.83nS
+EE_weights_gain,,1.0*0.5,# was: 0.5 * 0.72*nS
+EI_weights_gain,,0.6*0.5,# was: 0.43*0.6 nS; original is 0.72*0.6 = 0.43 nS
+IE_weights_gain,,0.25,
+II_weights_gain,,0.25,
+_weights,w_TC_E-E_connections,0.7 * EE_weights_gain * nS,"#Cruikshank et al 2007, nature neuroscience"
 ,w_TC_E-I_connections,(3 * EI_weights_gain) * nS,
-,w_L23PC-L23PC,0.68 * nS,# Not used in the current model
-,w_L4Exc-L4Exc,0.68* nS,# Not used in the current model
-,w_L4SS-L23PC,0.19 * nS,# Not used in the current model
-,w_L5TTPC-L5TTPC,1.5 * nS,# Not used in the current model
-,w_L5STPC-L5STPC, 0.8 * nS,# Not used in the current model
-,w_All_other_E-E_connections,(0.72*EE_weights_gain) * nS ,
-,w_L5TTPC-L5MC,0.11 * nS,# Not used in the current model
-,w_L5PC-L5BC/L5ChC,0.72 * nS,# Not used in the current model
-,w_All_other_E-I_connections,(0.43*EI_weights_gain) * nS,
-,w_L5MC-L5TTPC,0.75 * nS,# Not used in the current model
-,"w_L23(NBC,LBC)/L23ChC-23PC",0.91 * nS,# Not used in the current model
-,w_All_other_I-E_connections,0.83 * nS,
-,w_All_I-I_connections,0.83 * nS,
+,w_All_other_E-E_connections,excitatory_strength*EE_weights_gain,"# See Markram et al 2015, Table S6"
+,w_All_other_E-I_connections,excitatory_strength*EI_weights_gain,# was: (0.43*EI_weights_gain) * nS
+,w_All_other_I-E_connections,IE_weights_gain * inhibitory_synapse_factor * excitatory_strength,# was: 0.83*nS
+,w_All_I-I_connections,II_weights_gain * inhibitory_synapse_factor * excitatory_strength,# was: 0.83*nS
+,,,
+background_E_E_weight,,EE_weights_gain * excitatory_strength,
+background_E_I_weight,,EI_weights_gain * excitatory_strength,
+background_I_E_weight,,inhibitory_synapse_factor * excitatory_strength,
+background_I_I_weight,,inhibitory_synapse_factor * excitatory_strength,
 Cp,,0.001,"# Synaptic potentiation coefficient according to van Rossum J Neurosci 2000, here relative to initial value"
 Cd,,0.003,# Synaptic depression coefficient according to van Rossum J Neurosci 2000
 conn_prob_gain,,1,# This is used for compensation of small number of neurons and thus incoming synapses
@@ -230,7 +232,7 @@ delay,delay_in_SS,3.0*ms,# this values are all set to 3*ms since in VCX all valu
 VPM,,,
 ,,,
 PC,Cm,(1*ufarad*cm**-2),
-,gL,(4.2e-5*siemens*cm**-2),
+,gL,(4.2e-5*siemens*cm**-2),# Reference?
 ,Area_tot_pyram,25000 *.75* um**2,
 ,fract_areas,"{ 1: array([ 0.2 ,  0.03,  0.15,  0.2 ]),
             2: array([ 0.2 ,  0.03,  0.15,  0.15,  0.2 ]),
@@ -239,7 +241,7 @@ PC,Cm,(1*ufarad*cm**-2),
 ,Vr,-70.11 * mV,
 ,EL,-70.11 * mV,
 ,VT,-41.61 * mV,
-,V_res,-70.11 * mV,
+,V_res,-55 * mV,
 ,DeltaT,2*mV,
 ,Vcut,-25 * mV,
 ,Ee,0*mV,
@@ -249,10 +251,10 @@ PC,Cm,(1*ufarad*cm**-2),
 ,tau_e,3 * ms,"# 1.7 ms from Markram Cell 2015. This however misses NMDA contribution (12% according to Markram Cell 2015). Given this proportion and AMPA tau 3 ms and NMDA tau 200 ms(NMDA fast decay; both from Spruston JPhysiol 1995), we get double exponential decay"
 ,tau_eX, 3 * ms,
 ,tau_i,8.3 * ms,
+,gL_soma,0.24 * nS,# Redundant – calculated here just for visualization purposes
 ,,,
 ,,,
-,,,
-BC,C,59 * pF,"# Somatosensory cortex, Beierlein 2000 - Badel et al., 2008: 90 pF self.output_namespace['C'] = 60 * pF  # neuroelectro portal"
+BC,C,100 * pF,"# Somatosensory cortex, Beierlein 2000 - Badel et al., 2008: 90 pF self.output_namespace['C']; 58 * pF   neuroelectro portal"
 ,gL,10 * nS,# Beierlein 2000 -  Badel et al -> 10 nS (calculated from tau_m)
 ,Vr,-67.66 * mV,
 ,EL,-67.66 * mV  ,# mean of neuro-electro portal#-64 * mV # Badel et al. 2008
@@ -282,8 +284,7 @@ L1i,gL,3.2 * nS  ,"# 3.2 nsiemens mean of cell types in L1, Muralidhar 2014 Fron
 ,Vcut,VT+ 5*DeltaT,
 ,,,
 ,,,
-,,,
-MC,C,59 * pF,"# 92.1 +- 8.4, Paluszkiewicz 2011 J Neurophysiol, 59 pF Neuroelectro"
+MC,C,92.1 * pF,"# 92.1 +- 8.4, Paluszkiewicz 2011 J Neurophysiol, 71 pF Neuroelectro"
 ,taum_soma,21.22 * ms,# self.output_namespace['C'] = 60 * pF  # neuroelectro portal
 ,EL,-60.38 * mV,
 ,VT,-42.29 * mV,
@@ -293,14 +294,14 @@ MC,C,59 * pF,"# 92.1 +- 8.4, Paluszkiewicz 2011 J Neurophysiol, 59 pF Neuroelect
 ,Ei,-75 * mV,
 ,tau_e,3 * ms  ,# Markram Cell 2015
 ,tau_i, 8.3 * ms  ,"# Now from Markram Cell 2015 #7 * ms # Amatrudo et al, 2012 (rise time: 2.5)"
-,gL,C/taum_soma,
+,gL,4.2 *nS,# C/taum_soma = 90 / 21.22 ~ 4.2
 ,V_res,VT- 4 * mV,
 ,Vcut,VT+ 5*DeltaT,
 ,,,
 ,,,
-SS,Cm,(1 * ufarad * cm ** -2),"# Capacitance, multiplied by the compartmental area to get the final C(compartment)"
-,gl,(4.2e-5 * siemens * cm ** -2),"# leak conductance, -''-  Amatrudo et al, 2005 (ja muut) - tuned down to fix R_in,# 0.38 is summation of array([0.2, 0.03, 0.15])"
-,Area_tot_pyram,25000 * .75 * um ** 2,
+SS,C,110*pF,# Top of the hat estimate
+,gL,3.1 * nS,# Top of the hat estimate
+,taum_soma,C/gL,# Top of the hat estimate
 ,Vr,-70 * mV,
 ,EL,-70 * mV,
 ,VT,-45 * mV,
@@ -314,6 +315,3 @@ SS,Cm,(1 * ufarad * cm ** -2),"# Capacitance, multiplied by the compartmental ar
 ,tau_e,3 * ms,
 ,tau_eX,3 * ms,
 ,tau_i,8.3 * ms,
-,C,0.03 * Cm * Area_tot_pyram *2,
-,gL,0.03 * gl * Area_tot_pyram *2,
-,taum_soma,C/gL,

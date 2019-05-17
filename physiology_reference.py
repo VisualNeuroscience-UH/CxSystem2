@@ -880,7 +880,7 @@ class synapse_reference(object):
     def value_extractor(self, df, key_name):
         non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec "%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx])
+            exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx]))
         try:
             return eval(key_name)
         except (NameError, TypeError):
