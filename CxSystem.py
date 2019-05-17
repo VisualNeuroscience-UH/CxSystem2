@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 __author__ = 'Andalibi, V., Hokkanen H., Vanni, S.'
 
@@ -585,6 +585,7 @@ class CxSystem(object):
         local_namespace['refractory'] = ''
         local_namespace['monitors'] = ''
 
+
         for column in _all_columns:
             try:
                 tmp_value_idx = self.current_parameters_list[self.current_parameters_list==column].index.item()
@@ -709,8 +710,8 @@ class CxSystem(object):
         # <editor-fold desc="...Poisson-distributed background input">
         # Add Poisson-distributed background input
 
-        background_rate = self.physio_config_df.ix[where(self.physio_config_df.values == 'background_rate')[0]]['Value'].item()
-        background_rate_inhibition = self.physio_config_df.ix[where(self.physio_config_df.values == 'background_rate_inhibition')[0]]['Value'].item()
+        background_rate = self.physio_config_df.loc[where(self.physio_config_df.values == 'background_rate')[0]]['Value'].item()
+        background_rate_inhibition = self.physio_config_df.loc[where(self.physio_config_df.values =='background_rate_inhibition')[0]]['Value'].item()
 
         # For changing connection weight of background input according to calcium level
         try:
@@ -1874,8 +1875,9 @@ if __name__ == '__main__' :
         except IndexError:
             CM = CxSystem(net_config, phys_config)
     except IndexError:
-        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/config_files/Markram_config_file.csv', \
-                      os.path.dirname(os.path.realpath(__file__)) + '/config_files/Physiological_Parameters.csv', )
+        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/config_files/pytest_Rev2_Step2gamma_Anatomy_config_local.csv', \
+                      os.path.dirname(os.path.realpath(__file__)) +
+                      '/config_files/pytest_Rev2_Step2gamma_Physiology_config.csv', )
         CM.run()
     # from data_visualizers.data_visualization import DataVisualization
     #

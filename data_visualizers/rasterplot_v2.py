@@ -452,13 +452,13 @@ class SimulationData(object):
         :param ax: matplotlib Axes-object to draw plot on, optional
         :return: nothing
         """
-        print 'Working on ' + self.datafile
+        print('Working on ' + self.datafile)
         spike_dict = dict()
         indices_dict = dict()
         number_of_group = {value: key for (key,value) in SimulationData.default_group_numbering.items()}
 
         for group in self.neuron_groups:
-            print '   Processing ' + group
+            print('   Processing ' + group)
             group_sp = self.spikedata[group]
             N = len(group_sp[0])  # = len(group_sp[1])
             if N > 0:
@@ -476,7 +476,7 @@ class SimulationData(object):
 
                     spike_dict[group] = spikes
                 else:
-                    print '   Group ' + group + ' has too few spiking neurons (or sampling was too sparse)! Skipping...'
+                    print('   Group ' + group + ' has too few spiking neurons (or sampling was too sparse)! Skipping...')
 
 
         try:
@@ -512,7 +512,7 @@ class SimulationData(object):
         :param ax: matplotlib Axes-object to draw plot on, optional
         :return: nothing
         """
-        print 'Working on ' + self.datafile
+        print('Working on ' + self.datafile)
         spike_dict = dict()
         indices_dict = dict()
         runtime = self.data['runtime']
@@ -525,7 +525,7 @@ class SimulationData(object):
         max_neurons_per_group = [int(self.group_neuroncounts[i] / sampling_factor) for i in range(1, N_neurongroups)]
 
         for group in self.neuron_groups:
-            print '   Processing ' + group
+            print('   Processing ' + group)
             group_sp = self.spikedata[group]
             # N = len(group_sp[0])  # = len(group_sp[1])
             N = len(group_sp['i'])  # = len(group_sp[1])
@@ -552,7 +552,7 @@ class SimulationData(object):
                     #spikes = spikes[spikes.time <= time_limits[1]][spikes.time >= time_limits[0]]
                     spike_dict[group] = spikes
                 else:
-                    print '   Group ' + group + ' has too few spiking neurons (or sampling was sparse)! Skipping...'
+                    print('   Group ' + group + ' has too few spiking neurons (or sampling was sparse)! Skipping...')
 
 
         try:
@@ -1000,7 +1000,7 @@ class SimulationData(object):
 
         """
         for group_id in range(1,16+1):
-            print self.default_group_numbering[group_id] + ', mean of 1-neuron CoV of ISIs (irregularity): ' + str(self._isi_cv_group(group_id))
+            print(self.default_group_numbering[group_id] + ', mean of 1-neuron CoV of ISIs (irregularity): ' + str(self._isi_cv_group(group_id)))
 
     def _spikecounthistogram_group(self, group_id, bin_size=3 * ms, ax=None):
         """
@@ -1524,7 +1524,7 @@ class ExperimentData(object):
 
         # Go through simulation files
         n_files = len(self.simulation_files)
-        print 'Beginning analysis of ' + str(n_files) + ' files'
+        print('Beginning analysis of ' + str(n_files) + ' files')
 
         # Takes forever unless parallel-processed
         pool = mp.ProcessingPool(processes=int(mp.cpu_count()*0.75))
