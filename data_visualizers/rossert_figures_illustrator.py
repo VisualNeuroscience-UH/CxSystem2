@@ -9,8 +9,12 @@ import matplotlib.pyplot as plt
 import pickle as pickle
 import zlib
 import bz2
+from brian2 import *
+import seaborn as sns
 
-
+# To have editable text in output pdfs:
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
 
 class illustrator:
     def __init__(self, mode,CXOutputPath,FilePattern,IllustratorOutputFile,InputTime,latency_threshold):
@@ -72,19 +76,19 @@ class illustrator:
                 ThisTrial = self.data_loader(os.path.join(self.CXOutputPath, FileName))
                 for Group in self.final_data['SortedGroupsList'] :
                     try:
-                        SpikeTimeIndices = np.where(ThisTrial['spikes_all'][Group][0] == self.final_data['CellIndex'][Group])
-                        SpikeTimes = ThisTrial['spikes_all'][Group][1][SpikeTimeIndices]
+                        SpikeTimeIndices = np.where(ThisTrial['spikes_all'][Group]['i'] == self.final_data['CellIndex'][Group])
+                        SpikeTimes = ThisTrial['spikes_all'][Group]['t'][SpikeTimeIndices]/second
                     except IndexError:
                         SpikeTimes = np.array([])
                     self.final_data['GroupsSpikes'][Group].append(SpikeTimes)
                     if len(ThisTrial['spikes_all'][Group]) > 0:
                         temp_tuple = [(tmp_idx, t - self.final_data['InputTime']) for tmp_idx, t in
-                                      enumerate(ThisTrial['spikes_all'][Group][1]) if (t - self.final_data['InputTime'] > 0 \
+                                      enumerate(ThisTrial['spikes_all'][Group]['t']/second) if (t - self.final_data['InputTime'] > 0 \
                                                                                        and t - self.final_data['InputTime'] < self.final_data['LatencyThreshold'])]
                         if temp_tuple:
                             WithinThreshIdx = [row[0] for row in temp_tuple]
                             latency = [row[1] for row in temp_tuple]
-                            NeuronsIdx = ThisTrial['spikes_all'][Group][0][WithinThreshIdx]
+                            NeuronsIdx = ThisTrial['spikes_all'][Group]['i'][WithinThreshIdx]
                             uniqued_NeuronIdx = []
                             uniqued_latency = []
                             for neuron_tpm in np.unique(NeuronsIdx):
@@ -103,8 +107,7 @@ class illustrator:
                                 if not Neuron in self.final_data['GroupDelays'][Group]:
                                     self.final_data['GroupDelays'][Group][Neuron] = []
                                 self.final_data['GroupDelays'][Group][Neuron].append(uniqued_latency[itemidx])
-                    print('\r%d out of %d file finished.' % (idx + 1,
-                    len(self.final_data['FileList'])))
+                    print('\r%d out of %d file finished.' % (idx + 1,len(self.final_data['FileList'])))
 
             for group in self.final_data['GroupDelays'].keys():
                 for neuron in self.final_data['GroupDelays'][group].keys():
@@ -125,12 +128,15 @@ class illustrator:
             self.final_data = self.data_loader(IllustratorOutputFile)
 
     def Responses(self,PlotStartTime,PlotEndTime,DoSkip=[]):
-        NotSkippedGroups = [G for G in self.final_data['SortedGroupsList'] if not any(ext in G for ext in DoSkip)]
+        NotSkippedGroups = [G for G in self.final_data['SortedGroupsList']] #if not any(ext in G for ext in DoSkip)]
+        # NotSkippedGroups = ['NG8_L23_LBC_L2', 'NG17_L4_PC_L4toL1', 'NG23_L4_MC_L4', 'NG30_L5_TTPC1_L5toL1', 'NG34_L5_NBC_L5', 'NG44_L6_TPC_L4_L6toL4']
+        NotSkippedGroups = ['NG3_L23_BC_L2', 'NG5_L4_PC1_L4toL1', 'NG9_L4_MC_L4', 'NG10_L5_PC_L5toL1', 'NG11_L5_BC_L5', 'NG14_L6_PC2_L6toL4']
         # spio.savemat(os.path.join(self.CXOutputPath,'SpikesToPlot.mat'),GroupsSpikes)
         # else:
         #     GroupsSpikes = self.loadmat(os.path.join(self.CXOutputPath,'SpikesToPlot.mat'))
 
-        f, axarr = plt.subplots(int(round(len(NotSkippedGroups)/2.)), 2, sharex=True, figsize=(8, 17))
+        f, axarr = plt.subplots(int(round(len(NotSkippedGroups)/2.)), 2, sharex=True, figsize=(22.5/2.54, 9.9/2.54))
+        # f, axarr = plt.subplots(len(NotSkippedGroups), 1, sharex=True) #, figsize=(30, 17))
         axarr_twins = [col.twinx() for row in axarr for col in row]
         axarr_twins = np.reshape(axarr_twins, (int(round(len(NotSkippedGroups)/2.)), 2))
         PSTH_bin = 0.005
@@ -142,7 +148,7 @@ class illustrator:
             Scatter_Ys = np.concatenate(
                 [(np.ones(len(TimePoint)) * (int(TimePoint_idx) + 1)).astype(int) for TimePoint_idx, TimePoint in
                  enumerate(self.final_data['GroupsSpikes'][Group])])
-            axarr[plt_y_idx, plt_x_idx].scatter(Scatter_Xs, Scatter_Ys, s=1, color='0.5')
+            axarr[plt_y_idx, plt_x_idx].scatter(Scatter_Xs, Scatter_Ys, s=1, color='k')  # NEW
             Step_Xs = np.arange(0, self.final_data['runtime'], PSTH_bin)
             Step_Ys = np.zeros_like(Step_Xs)
             for X in np.unique(Scatter_Xs):
@@ -155,8 +161,10 @@ class illustrator:
             axarr_twins[plt_y_idx, plt_x_idx].spines['top'].set_color('none')
             axarr[plt_y_idx, plt_x_idx].xaxis.set_ticks_position('bottom')
             axarr_twins[plt_y_idx, plt_x_idx].xaxis.set_ticks_position('bottom')
+            plt.xticks([3.96, 3.98, 4.00, 4.02, 4.04, 4.06])  # NEW
             axarr[plt_y_idx, plt_x_idx].set_ylim(0, len(self.final_data['FileList']))
-            CurrentTitle = Group[Group.index('_') + 1:].replace('_L',' Layer ').replace('toL',' to Layer ')
+           # CurrentTitle = Group[Group.index('_') + 1:].replace('_L',' Layer ').replace('toL',' to Layer ')
+            CurrentTitle = Group[Group.index('_') + 1:]  # NEW
             axarr[plt_y_idx, plt_x_idx].set_title(CurrentTitle)
             axarr[plt_y_idx, plt_x_idx].set_xlim(PlotStartTime, PlotEndTime)
             axarr_twins[plt_y_idx, plt_x_idx].set_xlim(PlotStartTime, PlotEndTime)
@@ -175,10 +183,10 @@ class illustrator:
             statistics.append([CurrentTitle,st.chisquare(cropped_steps)[0],st.chisquare(cropped_steps)[1]])
         axarr[-1,0].set_xlabel('time (s)')
         axarr[-1,1].set_xlabel('time (s)')
-        plt.locator_params(axis='x', nbins=5)
-        plt.tight_layout()
+        #plt.locator_params(axis='x', nbins=5)
+        #plt.tight_layout()
         plt.show()
-        f.savefig(os.path.join(self.IllustratorOutputFolder,'cell_type_response.eps'))
+        f.savefig(os.path.join(self.IllustratorOutputFolder,'cell_type_response.pdf'))
         with open (os.path.join(self.IllustratorOutputFolder,'table.txt'),'w') as table_file:
             table_file.write(tabulate(statistics,headers=['Group Name','Chi-Square','p-Value']))
 
@@ -238,8 +246,15 @@ class illustrator:
                 pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
 
 if __name__ == '__main__':
-    illus = illustrator(mode='saving',CXOutputPath='/opt3/Noise_Test/',FilePattern='CxOutput_',
-                        IllustratorOutputFile='/opt3/CxOutput/Outputs/Illustrator_Output/Illus_out.gz',InputTime=0.5,latency_threshold=0.03)
-    illus.Responses(PlotStartTime=0.46,PlotEndTime=0.56,DoSkip=['PC_L6toL1','PC_L6toL4'])
-    illus.ResponseLatency()
+    # illus = illustrator(mode='saving',CXOutputPath='/opt3/Noise_Test/',FilePattern='CxOutput_',
+    #                     IllustratorOutputFile='/opt3/CxOutput/Outputs/Illustrator_Output/Illus_out.gz',InputTime=0.5,latency_threshold=0.03)
+    # illus.Responses(PlotStartTime=0.46,PlotEndTime=0.56,DoSkip=['PC_L6toL1','PC_L6toL4'])
+    # illus.ResponseLatency()
     # rossert_fig9C = illustrator('/opt3/CxOutput/Ouputs', 'Gain-EE1EI1', 'cell_type_response_latency',InputTime=0.5)
+
+    # Onset illustrations for paper
+    sns.set_style('white')
+    illus = illustrator(mode='saving', CXOutputPath='/opt3/tmp/rev2_gamma_thalstimca15/step2_nmda', FilePattern='step2_',
+                        IllustratorOutputFile='/home/shohokka/rossertfigs/Illus_out.gz', InputTime=4.0,
+                        latency_threshold=0.03)
+    illus.Responses(PlotStartTime=3.96, PlotEndTime=4.06)  # , DoSkip=['PC_L6toL1', 'PC_L6toL4'])

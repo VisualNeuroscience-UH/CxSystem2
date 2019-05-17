@@ -41,14 +41,13 @@ class save_data(object):
         self.save_folder = ntpath.dirname(self.save_path)
         self.save_extension = os.path.splitext(self.save_path)[1]
         if os.getcwd() in self.save_path:
-            print(" -  The output of the system is saved in %s"
-                   %os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
+            print(" -  The output of the system is saved in %s" %os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
             self.save_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
             self.save_path = os.path.join(self.save_folder,self.save_filename)
         self.data = {}
         self.syntax_bank = []
 
-    def create_key(self,key):
+    def create_key(self, key):
         '''
         In case the user wants to save a peculiar variable, this method can be used to check and create a new key in data dictionary (if does not exist).
 

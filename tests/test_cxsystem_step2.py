@@ -7,9 +7,6 @@ import pdb
 from brian2.units import *
 import brian2
 import equation_templates as eqt
-# from data_visualizers.rasterplot_v2 import SimulationData
-import zlib
-import cPickle as pickle
 
 
 '''
@@ -244,20 +241,11 @@ def cxsystem_run_fixture():
 	os.rmdir(CM.save_brian_data_folder)
 	
 # @pytest.mark.skip(reason="too slow")
-def test_outputfile_exists(cxsystem_run_fixture):
+def test_outputfile(cxsystem_run_fixture):
 	'''Test for existing outputfile'''
 	outputfilelist = [item for item in os.listdir(CM.output_folder) if item.startswith('output')]
 	assert os.access(os.path.join(CM.output_folder,outputfilelist[0]), os.W_OK)
 
-def test_outputfile_result(cxsystem_run_fixture):
-	filename = os.path.join(CM.output_folder, os.listdir(CM.output_folder)[0])
-	with open(filename, 'rb') as fb:
-		d_pickle = zlib.decompress(fb.read())
-		data = pickle.loads(d_pickle)
-	pdb.set_trace()
-	# data = SimulationData._loadgz(filename)
-	pass
-	
 # # @pytest.mark.xfail(reason='not implemented yet')		
 # def test__set_save_brian_data_path(cxsystem_run_fixture):
 	# assert isinstance(CM.save_brian_data_path, basestring) 

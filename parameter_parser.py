@@ -12,9 +12,6 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 from brian2  import *
 import numpy as np
-from matplotlib import pyplot
-import sys
-import pandas
 
 
 
@@ -57,12 +54,15 @@ class synapse_parser(object):
         synapse_parser.type_ref = array (['STDP','STDP_with_scaling', 'Fixed', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
         assert output_synapse['type'] in synapse_parser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
+        # Commented Cp and Cd out because not used in this branch /HH
         # self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
         # self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
         try:
             self.sparseness = self.value_extractor(self.physio_config_df,'sp_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
         except:
             pass
+
+        # Commented ilam out because not used in this branch /HH
         # self.ilam = self.value_extractor(self.physio_config_df,'ilam_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
 
         self.calcium_concentration = self.value_extractor(self.physio_config_df, 'calcium_concentration' )
@@ -74,8 +74,7 @@ class synapse_parser(object):
     def value_extractor(self, df, key_name):
         non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][
-                non_dict_idx]))
+            exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx]))
         try:
             return eval(key_name)
         except (NameError, TypeError):
@@ -239,8 +238,15 @@ class synapse_parser(object):
         :param output_synapse: This is the dictionary created in neuron_reference() in brian2_obj_namespaces module. This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable. Following STDP values are set in this method: wght_max, wght0.
         '''
 
-        mean_wght = self.value_extractor(self.physio_config_df,'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+        try:
+            mean_wght = eval(self.output_synapse['custom_weight']) /nS
+            print (' ! Using custom weight: %f nS' % mean_wght)
+        except:
+            mean_wght = self.value_extractor(self.physio_config_df,'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+
         min_wght = mean_wght / 2.
+
+
 
         # SCALE the weight parameters wrt calcium
         # Calcium scaling is just multiplication by a constant so we can scale min and mean wght
@@ -260,31 +266,31 @@ class synapse_parser(object):
         min_delay = mean_delay / 2.
         self.output_namespace['delay'] = '(%f + %f * rand()) * ms' % (min_delay, mean_delay)
 
-    def Fixed_normal(self):
-        '''
-         The Fixed method for assigning the parameters for Fixed synaptic connection to the customized_synapses() object.
-
-         :param output_synapse: This is the dictionary created in neuron_reference() in brian2_obj_namespaces module. This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable. Following STDP values are set in this method: wght_max, wght0.
-         '''
-
-        mean_wght = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
-        sd_wght = mean_wght / 2.
-
-        # SCALE mean & SD of weight wrt calcium level
-        # Calcium scaling is just multiplication by a constant so we can scale mean and SD wght
-        # instead of scaling individual weights separately after randomization (change of variables of the Gaussian PDF)
-        if self.calcium_concentration > 0:
-            mean_wght = self._scale_by_calcium(self.calcium_concentration, mean_wght)
-            sd_wght  = self._scale_by_calcium(self.calcium_concentration, sd_wght) # we don't want to prescribe SDs separately in this model
-
-        # SET the weight
-        self.output_namespace['init_wght'] = '(%f + %f*randn()) * nS' % (mean_wght, sd_wght)
-        # Note that we don't scale randomized weights individually, but the parameters going into the randomization
-
-        # SET synaptic delay
-        mean_delay = self.value_extractor(self.physio_config_df, 'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
-        sd_delay = mean_delay / 2.
-        self.output_namespace['delay'] = '(%f + %f*randn()) * ms' % (mean_delay, sd_delay)
+    # def Fixed_normal(self):
+    #     '''
+    #      The Fixed method for assigning the parameters for Fixed synaptic connection to the customized_synapses() object.
+    #
+    #      :param output_synapse: This is the dictionary created in neuron_reference() in brian2_obj_namespaces module. This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable. Following STDP values are set in this method: wght_max, wght0.
+    #      '''
+    #
+    #     mean_wght = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+    #     sd_wght = mean_wght / 2.
+    #
+    #     # SCALE mean & SD of weight wrt calcium level
+    #     # Calcium scaling is just multiplication by a constant so we can scale mean and SD wght
+    #     # instead of scaling individual weights separately after randomization (change of variables of the Gaussian PDF)
+    #     if self.calcium_concentration > 0:
+    #         mean_wght = self._scale_by_calcium(self.calcium_concentration, mean_wght)
+    #         sd_wght  = self._scale_by_calcium(self.calcium_concentration, sd_wght) # we don't want to prescribe SDs separately in this model
+    #
+    #     # SET the weight
+    #     self.output_namespace['init_wght'] = '(%f + %f*randn()) * nS' % (mean_wght, sd_wght)
+    #     # Note that we don't scale randomized weights individually, but the parameters going into the randomization
+    #
+    #     # SET synaptic delay
+    #     mean_delay = self.value_extractor(self.physio_config_df, 'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
+    #     sd_delay = mean_delay / 2.
+    #     self.output_namespace['delay'] = '(%f + %f*randn()) * ms' % (mean_delay, sd_delay)
 
     def Depressing(self):
         '''
@@ -293,7 +299,12 @@ class synapse_parser(object):
          '''
 
         # GET weight params
-        mean_wght = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+        try:
+            mean_wght = eval(self.output_synapse['custom_weight']) /nS
+            print (' ! Using custom weight: %f nS' % mean_wght)
+        except:
+            mean_wght = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+
         min_wght = mean_wght / 2.
 
         # GET time constant
@@ -321,7 +332,12 @@ class synapse_parser(object):
 
          '''
         # GET weight params
-        mean_wght = self.value_extractor(self.physio_config_df,'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+        try:
+            mean_wght = eval(self.output_synapse['custom_weight']) /nS
+            print(' ! Using custom weight: %f nS' % mean_wght)
+        except:
+            mean_wght = self.value_extractor(self.physio_config_df,'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+
         min_wght = mean_wght / 2.
 
         # GET time constants
@@ -356,8 +372,15 @@ class neuron_parser (object):
         self.physio_config_df = physio_config_df
         neuron_parser.type_ref = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_E','HH_I'])
         assert output_neuron['type'] in neuron_parser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['category']
+
+        # Handling of "neuron subtype" parameters; new since Aug 2018
+        if output_neuron['subtype'] == '--':
+            neuron_type_to_find = output_neuron['type']
+        else:
+            neuron_type_to_find = output_neuron['subtype']
+
         self.output_namespace = {}
-        variable_start_idx = self.physio_config_df['Variable'][self.physio_config_df['Variable'] == output_neuron['type']].index[0]
+        variable_start_idx = self.physio_config_df['Variable'][self.physio_config_df['Variable'] == neuron_type_to_find].index[0]
         try:
             variable_end_idx = self.physio_config_df['Variable'].dropna().index.tolist()[
                 self.physio_config_df['Variable'].dropna().index.tolist().index(variable_start_idx) + 1]
@@ -365,60 +388,16 @@ class neuron_parser (object):
         except IndexError:
             cropped_df = self.physio_config_df.loc[variable_start_idx:]
 
+        # "Root variables" extracted so that neuron parameters can refer to variables globals in physio config
         root_variables = self.physio_config_df[self.physio_config_df['Key'].isnull()].dropna(subset=['Variable'])
         cropped_with_root = root_variables.append(cropped_df)
 
-
         for neural_parameter in cropped_df['Key'].dropna():
-            self.output_namespace[neural_parameter] = self.value_extractor(cropped_with_root,neural_parameter)
+            self.output_namespace[neural_parameter] = self.value_extractor(cropped_with_root, neural_parameter)
+
 
         getattr(self, '_'+ output_neuron['type'])(output_neuron)
 
-        # // AdEx-specific code BEGINS //
-        try:
-            flag_adex = self.value_extractor(self.physio_config_df, 'flag_adex')
-            if flag_adex == 1:
-                rheobase = self.output_namespace['rheobase_adex']
-                depolarization_level = self.value_extractor(self.physio_config_df, 'depolarization_level')
-
-                if output_neuron['type'] == 'PC':
-                    rheobase = rheobase[output_neuron['dend_comp_num']-1]
-                    # print('-> dend extent: '+str(output_neuron[
-                    # 'dend_comp_num']))
-
-                self.output_namespace['adex_depolarization'] = rheobase * depolarization_level
-                # print('Rheobase: '+str(rheobase))
-            else:
-                # print('Using NON-adaptive EIF model')
-                self.output_namespace['adex_depolarization'] = 0*pA
-        except:
-            self.output_namespace['adex_depolarization'] = 0 * pA
-        # // AdEx-specific code ENDS //
-
-
-    def _compute_adex_rheobase(self):
-        a = self.output_namespace['a']
-        gL = np.sum(self.output_namespace['gL'])
-        tau_w = self.output_namespace['tau_w']
-        tau_m = self.output_namespace['taum_soma']
-        VT = self.output_namespace['VT']
-        EL = self.output_namespace['EL']
-        DeltaT = self.output_namespace['DeltaT']
-
-        bif_type = (a / gL) * (tau_w / tau_m)
-
-        if bif_type < 1:  # saddle-node bifurcation
-            rheobase = (gL + a) * (VT - EL - DeltaT + DeltaT * log(1 + a / gL))
-
-        elif bif_type > 1:  # Andronov-Hopf bifurcation
-            rheobase = (gL + a) * (VT - EL - DeltaT + DeltaT * log(1 + tau_m / tau_w)) + DeltaT * gL * (
-            (a / gL) - (tau_m / tau_w))
-
-        else:
-            print('Unable to compute rheobase!')
-            rheobase = 0 * pA
-
-        return rheobase
 
     def _PC(self,output_neuron):
         '''
@@ -429,12 +408,19 @@ class neuron_parser (object):
         '''
 
         # total capacitance in compartments. The *2 comes from Markram et al Cell 2015: corrects for the dendritic spine area
-        self.output_namespace['C']= self.output_namespace['fract_areas'][output_neuron['dend_comp_num']] * self.output_namespace['Cm'] * self.output_namespace['Area_tot_pyram'] *2
+        if 'spine_factor' not in self.output_namespace:
+            self.output_namespace['spine_factor'] = 2
+            # Should print something
+
+        self.output_namespace['C']= self.output_namespace['fract_areas'][output_neuron['dend_comp_num']] * self.output_namespace['Cm'] * self.output_namespace['Area_tot_pyram'] * self.output_namespace['spine_factor']
         # if output_neuron['soma_layer'] in [6]: # neuroelectro portal layer5/6 capacitance ??????
         #     self.output_namespace['C'] = self.output_namespace['fract_areas'][output_neuron['dend_comp_num']] * self.output_namespace['Cm'] * self.output_namespace['Area_tot_pyram']
         # total g_leak in compartments
         self.output_namespace['gL']= self.output_namespace['fract_areas'][output_neuron['dend_comp_num']] * self.output_namespace['gL'] * self.output_namespace['Area_tot_pyram']
         self.output_namespace['taum_soma'] = self.output_namespace['C'][1] / self.output_namespace['gL'][1]
+
+        # self.output_namespace['tonic_current'] = self.output_namespace['tonic_current'][output_neuron['dend_comp_num'] -1]
+        self.output_namespace['tonic_current'] = self.output_namespace['tonic_current']
 
     def _BC(self,output_neuron):
         pass
@@ -459,8 +445,7 @@ class neuron_parser (object):
     def value_extractor(self, df, key_name):
         non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][
-                non_dict_idx]))
+            exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx]))
         try:
             return eval(key_name)
         except (NameError, TypeError):
@@ -483,8 +468,7 @@ class neuron_parser (object):
                     df_reset_index = df_reset_index[0:df_reset_index[df_reset_index['Key'] == key_name].index[0]]
                     for neural_parameter in df_reset_index['Key'].dropna():
                         if neural_parameter  in df['Value'][df['Key'] == key_name].item():
-                            exec("%s =self.value_extractor(df,"
-                                  "neural_parameter)" % (neural_parameter))
+                            exec("%s =self.value_extractor(df,neural_parameter)" % (neural_parameter))
                     return eval(df['Value'][df['Key'] == key_name].item())
                 except TypeError:
                     raise TypeError('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%df['Value'][df['Key'] == key_name].item())

@@ -83,9 +83,8 @@ class CellGroupData:
         return own_Ncell_dict, ordered_own_Ncell_list, proportion_MC, proportion_BC
         #check the sum
         # for layer in layers:
-        #     print(layer)
-        #     print(sum(list(v for k, v in own_Ncell_dict.iteritems() if
-        #     layer in k.lower())))
+        #     print layer
+        #     print sum(list(v for k, v in own_Ncell_dict.iteritems() if layer in k.lower()))
         # cellsum=0
         # for group_tuple in ordered_own_Ncell_list:
         #     cellsum += group_tuple[1]

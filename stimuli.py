@@ -41,11 +41,10 @@ class stimuli(object):
         self.output_folder = output_folder
         self.output_file_suffix = output_file_suffix
         self.output_file_extension = output_file_extension
-        # print("\nWarning: Generated input spike sequence exist in
-        # %s/input%s " \
+        # print "\nWarning: Generated input spike sequence exist in %s/input%s " \
         #       "\nThe input will NOT be overwritten. " \
         #       "\nIf you need the spikes regenerated or permanently saved, \nplease rename or remove the previous spike sequence file.\n" % (
-        #       self.output_folder,self.output_file_extension))
+        #       self.output_folder,self.output_file_extension)
     def generate_inputs(self, freq):
         '''
         The method for generating input based on the .mat file, using the internal _initialize_inputs() and _calculate_input_seqs() methods.
@@ -86,8 +85,7 @@ class stimuli(object):
         _all_stim = squeeze(_V1_mats['stimulus'])
         if len(_all_stim.shape) == 2:
             slash_indices = [idx for idx, ltr in enumerate(self.input_mat_path) if ltr == '/']
-            print(' -  One video stimulus found in file ' +
-                   self.input_mat_path[slash_indices[-1]+1:])
+            print(' -  One video stimulus found in file ' + self.input_mat_path[slash_indices[-1]+1:])
 
     def calculate_input_seqs(self):
         '''
