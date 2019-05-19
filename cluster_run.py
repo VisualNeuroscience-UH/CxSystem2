@@ -16,6 +16,7 @@ from brian2 import *
 import multiprocessing
 import time
 import shutil
+import datetime
 import os
 import pandas as pd
 import zlib
@@ -26,6 +27,7 @@ import itertools
 import getpass
 import paramiko
 from scp import SCPClient
+from builtins import input
 
 class cluster_run(object):
 
@@ -63,7 +65,7 @@ class cluster_run(object):
         except NameError:
             self.username = input('username: ')
         self.password = getpass.getpass('password: ')
-        self.suffix =  '_' + str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
+        self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
         print (" -  temp file suffix is %s" %self.suffix)
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
@@ -71,7 +73,7 @@ class cluster_run(object):
         self.client.connect(self.cluster_address, port=22, username=self.username, password=self.password)
         print(" -  Connected to %s"%self.cluster_address)
         scp = SCPClient(self.client.get_transport())
-        ls_result = self.ssh_commander('cd %s;ls'%self.remote_repo_path,0)
+        ls_result = str(self.ssh_commander('cd %s;ls'%self.remote_repo_path,0))
         if 'CxSystem.py' in ls_result: # path is to CxSystem folder
             pass
         elif 'CxSystem' in ls_result and "No such file or directory" not in ls_result: # path is to CxSystem root folder
@@ -98,7 +100,7 @@ class cluster_run(object):
         # building slurm :
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
             with open("./slurm.job".replace('/',os.sep),'r') as sl1:
-                with open ("./_cluster_tmp/_tmp_slurm_%d.job".replace('/',os.sep)%item_idx,'wb') as sl2:
+                with open ("./_cluster_tmp/_tmp_slurm_%d.job".replace('/',os.sep)%item_idx,'w') as sl2:  # wb -> w
                     for line in sl1:
                         sl2.write(line)
                     # for item_idx,item in enumerate(array_run_obj.clipping_indices):
