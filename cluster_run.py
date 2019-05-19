@@ -9,7 +9,7 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-import pip
+#import pip
 import sys
 import CxSystem as CX
 from brian2 import *

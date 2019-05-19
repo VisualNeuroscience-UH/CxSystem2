@@ -208,7 +208,7 @@ class array_run(object):
         working.value += 1
         np.random.seed(idx)
         tr = idx % self.trials_per_config
-        idx = idx/self.trials_per_config
+        idx = int(idx/self.trials_per_config)
         device = self.parameter_finder(self.df_anat_final_array[idx], 'device')
         if self.number_of_process == 1 and self.do_benchmark == 1 and device == 'Python':
             # this should be used to clear the cache of weave for benchmarking. otherwise weave will mess it up
