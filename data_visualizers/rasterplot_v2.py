@@ -23,7 +23,7 @@ import re
 import pandas as pd
 import os.path
 import zlib
-import cPickle as pickle
+import pickle
 import bz2
 from brian2 import *
 import random
@@ -91,7 +91,7 @@ class SimulationData(object):
         # Let's make plotting agnostic about neuron groups! Will need changes in methods as well...
         if group_numbering is None:
             #self.group_numbering = SimulationData.default_group_numbering
-            group_names = self.data['number_of_neurons'].keys()
+            group_names = list(self.data['number_of_neurons'].keys())  # python3 change
             self.group_numbering = {int(re.findall('NG(\d+)_\w+', group_names[i])[0]): group_names[i] for i in range(len(group_names))}
         else:
             self.group_numbering = group_numbering
@@ -160,56 +160,56 @@ class SimulationData(object):
     def _flatten(self, l):
         return [item for sublist in l for item in sublist]
 
-    def value_extractor(self, df, key_name):
-        """
-        Method for extracting simulation parameters from anatomy and physiology configurations inside data files.
-        This method coexists in several classes - a Configuration class is needed?
-
-        :param df: dataframe to go through (now either self.anatomy_df or self.physio_df)
-        :param key_name: simulation parameter to extract
-        :return: value of the specified simulation parameter
-        """
-        # TODO - separate class Configuration for anatomy/physiology configs
-
-        non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
-        for non_dict_idx in non_dict_indices:
-            exec "%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx])
-        try:
-            return eval(key_name)
-        except (NameError, TypeError):
-            pass
-        try:
-            if type(key_name) == list:
-                variable_start_idx = df['Variable'][df['Variable'] == key_name[0]].index[0]
-                try:
-                    variable_end_idx = df['Variable'].dropna().index.tolist()[
-                        df['Variable'].dropna().index.tolist().index(variable_start_idx) + 1]
-                    cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
-                except IndexError:
-                    cropped_df = df.loc[variable_start_idx:]
-                return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
-            else:
-                return eval(df['Value'][df['Key'] == key_name].item())
-        except NameError:
-            new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
-            return self.value_extractor(df,new_key)
-        except ValueError:
-            raise ValueError("Parameter %s not found in the configuration file."%key_name)
-
-    def get_sim_parameter(self, param_name):
-        """
-        Get value of a given parameter from anatomy or physiology configuration (no need to specify which)
-
-        :param param_name: str, parameter name to search for
-        :return:
-        """
-        try:
-            return self.value_extractor(self.physio_df, param_name)
-        except:
-            try:
-                return self.value_extractor(self.anatomy_df, param_name)
-            except:
-                return '???'
+    # def value_extractor(self, df, key_name):
+    #     """
+    #     Method for extracting simulation parameters from anatomy and physiology configurations inside data files.
+    #     This method coexists in several classes - a Configuration class is needed?
+    #
+    #     :param df: dataframe to go through (now either self.anatomy_df or self.physio_df)
+    #     :param key_name: simulation parameter to extract
+    #     :return: value of the specified simulation parameter
+    #     """
+    #     # TODO - separate class Configuration for anatomy/physiology configs
+    #
+    #     non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
+    #     for non_dict_idx in non_dict_indices:
+    #         exec "%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx])
+    #     try:
+    #         return eval(key_name)
+    #     except (NameError, TypeError):
+    #         pass
+    #     try:
+    #         if type(key_name) == list:
+    #             variable_start_idx = df['Variable'][df['Variable'] == key_name[0]].index[0]
+    #             try:
+    #                 variable_end_idx = df['Variable'].dropna().index.tolist()[
+    #                     df['Variable'].dropna().index.tolist().index(variable_start_idx) + 1]
+    #                 cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
+    #             except IndexError:
+    #                 cropped_df = df.loc[variable_start_idx:]
+    #             return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
+    #         else:
+    #             return eval(df['Value'][df['Key'] == key_name].item())
+    #     except NameError:
+    #         new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
+    #         return self.value_extractor(df,new_key)
+    #     except ValueError:
+    #         raise ValueError("Parameter %s not found in the configuration file."%key_name)
+    #
+    # def get_sim_parameter(self, param_name):
+    #     """
+    #     Get value of a given parameter from anatomy or physiology configuration (no need to specify which)
+    #
+    #     :param param_name: str, parameter name to search for
+    #     :return:
+    #     """
+    #     try:
+    #         return self.value_extractor(self.physio_df, param_name)
+    #     except:
+    #         try:
+    #             return self.value_extractor(self.anatomy_df, param_name)
+    #         except:
+    #             return '???'
 
     def _check_group_name(self, group):
         """
@@ -306,7 +306,7 @@ class SimulationData(object):
             pow_spectrum = [pow(np.linalg.norm(x), 2) / counts_n for x in counts_tf]
 
         except IndexError:
-            print 'No spikes in group ' + neuron_group + '.'
+            print ('No spikes in group ' + neuron_group + '.')
             pow_spectrum = freqs
 
 
@@ -1544,7 +1544,7 @@ class ExperimentData(object):
             stats = pd.concat(list(results))
             stats.to_csv(self.experiment_path + output_filename)
         except:
-            print 'Nothing to analyse!'
+            print ('Nothing to analyse!')
 
     # TODO :: Function for automatic plotting of synchrony, irregularity & mean firing rate
 
@@ -1713,8 +1713,8 @@ if __name__ == '__main__':
     #a = SimulationData('/opt3/tmp/rev2_test/betaconfig_test2_20180919_19332474_background_rate0.6H_k1.4_python_5000ms.bz2')
     #a.publicationplot()
 
-    exp = ExperimentData('/opt3/tmp/rev2_gamma/', 'step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric')
-    exp.computestats('stats_step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
+    # exp = ExperimentData('/opt3/tmp/rev2_gamma/', 'step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric')
+    # exp.computestats('stats_step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
 
 
     ###### Depol x calcium plot ######
@@ -1774,3 +1774,6 @@ if __name__ == '__main__':
     #                    group_numbering={1: 'NG1_SS_L4', 2: 'NG2_BC_L4'}, group_neuroncounts={1: 3200, 2: 800},
     #                    group_to_type={1: 'SS', 2: 'BC'})
     # a.publicationplot(plot_type=1, sampling_factor=1, time_rounding=5)
+
+
+    SimulationData('/home/shohokka/PycharmProjects/CxSystem2/results/output_20190519_15003030_python_2000ms.gz').publicationplot()
