@@ -9,23 +9,25 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-import pip
+#import pip
 import sys
 import CxSystem as CX
 from brian2 import *
 import multiprocessing
 import time
 import shutil
+import datetime
 import os
 import pandas as pd
 import zlib
 import bz2
-import cPickle as pickle
+import pickle as pickle
 import sys
 import itertools
 import getpass
 import paramiko
 from scp import SCPClient
+from builtins import input
 
 class cluster_run(object):
 
@@ -63,7 +65,7 @@ class cluster_run(object):
         except NameError:
             self.username = input('username: ')
         self.password = getpass.getpass('password: ')
-        self.suffix =  '_' + str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
+        self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
         print (" -  temp file suffix is %s" %self.suffix)
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
@@ -71,7 +73,7 @@ class cluster_run(object):
         self.client.connect(self.cluster_address, port=22, username=self.username, password=self.password)
         print(" -  Connected to %s"%self.cluster_address)
         scp = SCPClient(self.client.get_transport())
-        ls_result = self.ssh_commander('cd %s;ls'%self.remote_repo_path,0)
+        ls_result = str(self.ssh_commander('cd %s;ls'%self.remote_repo_path,0))
         if 'CxSystem.py' in ls_result: # path is to CxSystem folder
             pass
         elif 'CxSystem' in ls_result and "No such file or directory" not in ls_result: # path is to CxSystem root folder
@@ -86,7 +88,7 @@ class cluster_run(object):
         scp.put(physio_file_address, self.remote_repo_path + '/_tmp_physio_config.csv')
         print(" -  config files transfered to cluster")
         # ask user to set the number of nodes, time and memory:
-        raw_input(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
+        input(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
                   "\nNote that the number of nodes in default slurm file should always be set to 1. Instead you should enter the number of nodes in the CxSystem network config file. "
                   "\nAlso the default number of CPUs=16 does not need to be changed most of the times. "
                   "\nPress a key to contiue ...")
@@ -98,7 +100,7 @@ class cluster_run(object):
         # building slurm :
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
             with open("./slurm.job".replace('/',os.sep),'r') as sl1:
-                with open ("./_cluster_tmp/_tmp_slurm_%d.job".replace('/',os.sep)%item_idx,'wb') as sl2:
+                with open ("./_cluster_tmp/_tmp_slurm_%d.job".replace('/',os.sep)%item_idx,'w') as sl2:  # wb -> w
                     for line in sl1:
                         sl2.write(line)
                     # for item_idx,item in enumerate(array_run_obj.clipping_indices):
@@ -127,8 +129,8 @@ class cluster_run(object):
         with open ('./_cluster_tmp/_tmp_checker_data.pkl'.replace('/',os.sep),'wb') as ff:
             pickle.dump(checker_data,ff)
         print(" -  _tmp_checker_data saved. To download the result and clean the environments after getting the email, run 'python cluster_run.py'\n" \
-              u"Alternatively you can run it in another terminal and it will "
-               u"do its job when the results are ready.")
+              "Alternatively you can run it in another terminal and it will "
+               "do its job when the results are ready.")
 
 
     def ssh_commander(self,command,print_flag):

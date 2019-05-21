@@ -63,7 +63,7 @@ class neuron_reference(object):
         self.output_neuron['soma_layer'] = int(layers_idx[0])
         # _comparts_tmp1 & 2 are for extracting the layer of the compartments if applicable
         if self.output_neuron['type'] == 'PC':
-            self._comparts_tmp1 = array(range(layers_idx[0] - 1, layers_idx[1] - 1, -1))
+            self._comparts_tmp1 = array(list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1)))
             self._comparts_tmp2 = delete(self._comparts_tmp1, where(
                 self._comparts_tmp1 == 3)) if 3 in self._comparts_tmp1 else self._comparts_tmp1
             self.output_neuron['dends_layer'] = self._comparts_tmp2
@@ -168,7 +168,7 @@ class neuron_reference(object):
         r = general_grid_radius / mm
         possible_pos_idx = arange (-r,r,min_distance/mm)
         if layout == 'fixed_grid':
-            _positions = [(rnd.choice(possible_pos_idx),rnd.choice(possible_pos_idx)) for a1,a2 in zip(range(N),range(N))]
+            _positions = [(rnd.choice(possible_pos_idx),rnd.choice(possible_pos_idx)) for a1,a2 in zip(list(range(N)),list(range(N)))]
             for idx,item in enumerate(_positions):
                 while sqrt(_positions[idx][0]**2 + _positions[idx][1]**2)>r:
                     _positions[idx] =  (rnd.choice(possible_pos_idx),rnd.choice(possible_pos_idx))
