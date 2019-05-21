@@ -242,7 +242,7 @@ class CxSystem(object):
                         next_def_line_idx = self.anat_and_sys_conf_df[0].__len__()
                     for self.value_line_idx in range(def_idx+1,next_def_line_idx):
                         if type(self.anat_and_sys_conf_df.loc[self.value_line_idx, 0]) == str:
-                            if self.anat_and_sys_conf_df.loc[self.value_line_idx,0] in self.parameter_to_method_mapping.keys() and self.anat_and_sys_conf_df.loc[self.value_line_idx, 0][0]!= '#':
+                            if self.anat_and_sys_conf_df.loc[self.value_line_idx,0] in list(self.parameter_to_method_mapping.keys()) and self.anat_and_sys_conf_df.loc[self.value_line_idx, 0][0]!= '#':
                                 self.current_parameters_list = self.anat_and_sys_conf_df.loc[def_idx,1:].dropna()
                                 self.current_parameters_list = self.current_parameters_list[~self.current_parameters_list.str.contains('#')]
                                 self.current_values_list = self.anat_and_sys_conf_df.loc[self.value_line_idx,self.current_parameters_list.index].dropna()
@@ -370,15 +370,15 @@ class CxSystem(object):
             print(" -  Device is not defined in the configuration file. The "
                    "default device is Python.")
             self.device = 'Python'
-        for ParamIdx, parameter in self.current_parameters_list.iteritems():
-            if parameter not in self.parameter_to_method_mapping.keys():
+        for ParamIdx, parameter in self.current_parameters_list.items():
+            if parameter not in list(self.parameter_to_method_mapping.keys()):
                 print(" -  System parameter %s not defined." % parameter)
         options_with_priority = [it for it in self.parameter_to_method_mapping if not isnan(self.parameter_to_method_mapping[it][0])]
         parameters_to_set_prioritized = [it for priority_idx in range(len(options_with_priority)) for it in self.parameter_to_method_mapping if self.parameter_to_method_mapping[it][0] == priority_idx]
         for correct_parameter_to_set in parameters_to_set_prioritized:
-            for ParamIdx,parameter in self.current_parameters_list.iteritems():
+            for ParamIdx,parameter in self.current_parameters_list.items():
                 if parameter == correct_parameter_to_set:
-                    assert (parameter in self.parameter_to_method_mapping.keys()), ' -  The tag %s is not defined.' % parameter
+                    assert (parameter in list(self.parameter_to_method_mapping.keys())), ' -  The tag %s is not defined.' % parameter
                     self.parameter_to_method_mapping[parameter][1](self.current_values_list[ParamIdx])
                     break
         if self.sys_mode == '':
@@ -482,7 +482,7 @@ class CxSystem(object):
                 self.loaded_brian_data = pickle.load(fb)
         print(' -  Brian data file loaded from %s'%os.path.abspath(
             self.load_brian_data_path))
-        if 'scale' in self.loaded_brian_data.keys():
+        if 'scale' in list(self.loaded_brian_data.keys()):
             self.scale = self.loaded_brian_data['scale']
             print(" -   scale of the system loaded from brian file")
 
@@ -564,7 +564,7 @@ class CxSystem(object):
         assert not any(self.current_values_list.loc[obligatory_indices] == '--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_values_list) == self.current_parameters_list_orig_len,\
-            " -  One or more of of the columns for NeuronGroup definition is missing in the following line:\n %s " % str(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values())
+            " -  One or more of of the columns for NeuronGroup definition is missing in the following line:\n %s " % str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
         local_namespace = {}
         local_namespace['idx'] = -1
         local_namespace['net_center'] = 0 + 0j
@@ -847,7 +847,7 @@ class CxSystem(object):
             # in case the NG index are different.
             # for example a MC_L2 neuron might have had index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
             Group_type = _dyn_neurongroup_name[_dyn_neurongroup_name.index('_')+1:]
-            GroupKeyName =[kk for kk in self.loaded_brian_data['positions_all']['w_coord'].keys() if Group_type in kk][0]
+            GroupKeyName =[kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if Group_type in kk][0]
             self.customized_neurons_list[current_idx]['w_positions'] = self.loaded_brian_data['positions_all']['w_coord'][GroupKeyName]
             self.customized_neurons_list[current_idx]['z_positions'] = self.loaded_brian_data['positions_all']['z_coord'][GroupKeyName]
             print(" -  Position for the group %s loaded"
@@ -944,7 +944,7 @@ class CxSystem(object):
         for mon_arg in mon_args:
             # Extracting the monitor tag
             mon_tag = mon_arg[mon_arg.index('['):mon_arg.index(']') + 1]
-            assert mon_tag in monitor_options.keys(),'%s is not recognized as a type of monitor ' %mon_tag
+            assert mon_tag in list(monitor_options.keys()),'%s is not recognized as a type of monitor ' %mon_tag
             mon_arg = mon_arg.replace(mon_tag, '').split('+')
             for sub_mon_arg in mon_arg:  # going through each state variable:
                 Mon_str = "=%s(%s" % (str(monitor_options[mon_tag][1]),
@@ -1054,7 +1054,7 @@ class CxSystem(object):
         assert not any(self.current_values_list.loc[obligatory_indices].isnull()), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_values_list) == self.current_parameters_list_orig_len, \
-        " -  One or more of of the columns for synapse definition is missing in the following line:\n %s " %str(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values())
+        " -  One or more of of the columns for synapse definition is missing in the following line:\n %s " %str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
         _options = {
             '[C]': self.neuron_group,
         }
@@ -1103,12 +1103,12 @@ class CxSystem(object):
                     " -  When targeting multiple compartments near soma, their number of connections, i.e. 'n', should be defined separately. Unless it's marked as '--'"
 
             current_post_syn_tags = current_post_syn_idx[current_post_syn_idx.index('['):current_post_syn_idx.index(']') + 1]
-            assert current_post_syn_tags in _options.keys(), \
+            assert current_post_syn_tags in list(_options.keys()), \
                 ' -  The synaptic tag %s is not defined.'% current_post_syn_tags
             if current_post_syn_tags == '[C]':  # [C] means the target is a compartment
                 _post_group_idx, _post_com_idx = current_post_syn_idx.split('[' + 'C' + ']')
                 assert int(_post_group_idx) < len(self.neurongroups_list),\
-                ' -  The synapse in the following line is targeting a group index that is not defined:\n%s'%str(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values())
+                ' -  The synapse in the following line is targeting a group index that is not defined:\n%s'%str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
                 self.current_values_list.values[index_of_post_syn_idx] = _post_group_idx
                 pre_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in
                                      self.customized_neurons_list if tmp_group['idx'] == int(current_pre_syn_idx)][0]
@@ -1158,7 +1158,7 @@ class CxSystem(object):
                 self.current_values_list = [self.current_values_list]
         else:
             assert int(current_post_syn_idx) < len(self.neurongroups_list), \
-                ' -  The synapse in the following line is targeting a group index that is not defined:\n%s' % str(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values())
+                ' -  The synapse in the following line is targeting a group index that is not defined:\n%s' % str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
             pre_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in \
                                  self.customized_neurons_list if int(tmp_group['idx']) == \
                                  int(current_pre_syn_idx)][0]
@@ -1253,7 +1253,7 @@ class CxSystem(object):
                     self.default_load_flag = -1
                     _do_load = int(syn[index_of_load_connection].replace('<--', ''))
                     if _do_load ==1:
-                        assert hasattr(self,'loaded_brian_data'), " -  Synaptic connection in the following line is set to be loaded, however the load_brian_data_path is not defined in the parameters. The connection is being created:\n%s"%str(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values())
+                        assert hasattr(self,'loaded_brian_data'), " -  Synaptic connection in the following line is set to be loaded, however the load_brian_data_path is not defined in the parameters. The connection is being created:\n%s"%str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
                 else:
                     _do_load = int(syn[self.current_parameters_list[self.current_parameters_list=='load_connection'].index.item()])
             except TypeError:
@@ -1276,7 +1276,7 @@ class CxSystem(object):
             # Loading connections from file
             if (self.default_load_flag==1 or (self.default_load_flag==-1 and _do_load == 1 )) and \
                     hasattr(self,'loaded_brian_data') and not self.load_positions_only:
-                assert _syn_ref_name in self.loaded_brian_data.keys(), \
+                assert _syn_ref_name in list(self.loaded_brian_data.keys()), \
                     " -  The data for the following connection was not found in the loaded brian data: %s" % _syn_ref_name
 
                 # 1) Try-except necessary; run fails if no connections exist from 1 group to another
@@ -1512,7 +1512,7 @@ class CxSystem(object):
                     # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
                     thread_Group_type = thread_NG_name[thread_NG_name.index('_') + 1:]
                     thread_GroupKeyName = \
-                    [kk for kk in self.loaded_brian_data['positions_all']['w_coord'].keys() if thread_Group_type in kk][0]
+                    [kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if thread_Group_type in kk][0]
                     self.customized_neurons_list[self.video_input_idx]['w_positions'] = \
                     self.loaded_brian_data['positions_all']['w_coord'][thread_GroupKeyName]
                     self.customized_neurons_list[self.video_input_idx]['z_positions'] = \
@@ -1643,7 +1643,7 @@ class CxSystem(object):
                 # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
                 Group_type = _dyn_neurongroup_name[_dyn_neurongroup_name.index('_') + 1:]
                 GroupKeyName = \
-                [kk for kk in self.loaded_brian_data['positions_all']['w_coord'].keys() if Group_type in kk][0]
+                [kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if Group_type in kk][0]
                 self.customized_neurons_list[current_idx]['w_positions'] = self.loaded_brian_data['positions_all']['w_coord'][GroupKeyName]
                 self.customized_neurons_list[current_idx]['z_positions'] = self.loaded_brian_data['positions_all']['z_coord'][GroupKeyName]
                 print(" -  Positions for the group %s loaded" %
@@ -1725,7 +1725,7 @@ class CxSystem(object):
                 # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
                 Group_type = NG_name[NG_name.index('_') + 1:]
                 GroupKeyName = \
-                    [kk for kk in self.loaded_brian_data['positions_all']['w_coord'].keys() if Group_type in kk][
+                    [kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if Group_type in kk][
                         0]
                 self.customized_neurons_list[self.spike_input_group_idx]['w_positions'] = \
                     self.loaded_brian_data['positions_all']['w_coord'][GroupKeyName]
@@ -1776,7 +1776,7 @@ class CxSystem(object):
         }
         _input_type = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='type'].index.item()]
         _all_columns = input_type_to_method_mapping[_input_type][0] # all possible columns of parameters for the current type of input in configuration fil
-        assert _input_type in input_type_to_method_mapping.keys(), ' -  The input type %s of the configuration file is ' \
+        assert _input_type in list(input_type_to_method_mapping.keys()), ' -  The input type %s of the configuration file is ' \
             'not defined' % _input_type
 
         _obligatory_params = input_type_to_method_mapping[_input_type][1]

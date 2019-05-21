@@ -165,7 +165,7 @@ class array_run(object):
             self.all_titles = ['default_config']
 
         if self.multidimension_array_run :
-            self.tmp_df  = pd.DataFrame(list(itertools.product(*self.metadata_dict.values())), columns=self.metadata_dict.keys())
+            self.tmp_df  = pd.DataFrame(list(itertools.product(*list(self.metadata_dict.values()))), columns=list(self.metadata_dict.keys()))
             self.tmp_df = self.tmp_df[self.all_titles]
             self.tmp_df = self.tmp_df.sort_values(by=self.all_titles).reset_index(drop=True)
             self.final_metadata_df = self.final_metadata_df.reindex(self.tmp_df.index)
@@ -173,8 +173,8 @@ class array_run(object):
                 self.final_metadata_df['Dimension-%d Parameter'%(col_idx+1)] = col_title
                 self.final_metadata_df['Dimension-%d Value' % (col_idx + 1)] = self.tmp_df[col_title]
         else:
-            index_len = len([item for sublist in self.metadata_dict.values() for item in sublist])
-            self.final_metadata_df= self.final_metadata_df.reindex(range(index_len))
+            index_len = len([item for sublist in list(self.metadata_dict.values()) for item in sublist])
+            self.final_metadata_df= self.final_metadata_df.reindex(list(range(index_len)))
             counter = 0
             for par_idx,parameter in enumerate(self.all_titles):
                 for val in self.metadata_dict[parameter]:
@@ -187,8 +187,8 @@ class array_run(object):
         if self.run_in_cluster==1 and self.cluster_start_idx == -1 and self.cluster_step == -1: # this runs to run the Cxsystems over the cluster
             self.total_configs = len(self.df_anat_final_array)* self.trials_per_config
             self.config_per_node = self.total_configs / self.cluster_number_of_nodes
-            self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)[:self.total_configs / self.config_per_node]
-            cluster_run.cluster_run(self,anat_file_address,physio_file_address)
+            self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)[:int(self.total_configs / self.config_per_node)]
+            cluster_run.cluster_run(self, anat_file_address, physio_file_address)
             return
         if cluster_start_idx != -1 and cluster_step != -1: # this runs in cluster
             self.spawner(self.cluster_start_idx,self.cluster_step)
@@ -208,7 +208,7 @@ class array_run(object):
         working.value += 1
         np.random.seed(idx)
         tr = idx % self.trials_per_config
-        idx = idx/self.trials_per_config
+        idx = int(idx/self.trials_per_config)
         device = self.parameter_finder(self.df_anat_final_array[idx], 'device')
         if self.number_of_process == 1 and self.do_benchmark == 1 and device == 'Python':
             # this should be used to clear the cache of weave for benchmarking. otherwise weave will mess it up
@@ -252,11 +252,11 @@ class array_run(object):
         for j in jobs:
             j.join()
 
-        for item in paths.keys():
+        for item in list(paths.keys()):
             self.final_metadata_df['Full path'][item] = paths[item]
-        self.data_saver(os.path.join(os.path.dirname(paths[paths.keys()[0]]),self.metadata_filename),self.final_metadata_df)
+        self.data_saver(os.path.join(os.path.dirname(paths[list(paths.keys())[0]]),self.metadata_filename),self.final_metadata_df)
         print(" -  Array run metadata saved at: %s"%os.path.join(
-            os.path.dirname(paths[paths.keys()[0]]),self.metadata_filename))
+            os.path.dirname(paths[list(paths.keys())[0]]),self.metadata_filename))
 
     def parameter_finder(self,df,keyword):
         location = where(df.values == keyword)
@@ -375,7 +375,7 @@ class array_run(object):
             elif df_type == 'physiology':
                 if title not in self.physio_titles:
                     self.physio_titles.append(title)
-            if title in self.metadata_dict.keys():
+            if title in list(self.metadata_dict.keys()):
                 if value not in self.metadata_dict[title]:
                     self.metadata_dict[title].append(value)
             else:
