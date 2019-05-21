@@ -7,6 +7,9 @@ import pdb
 from brian2.units import *
 import brian2
 import equation_templates as eqt
+import zlib
+import pickle
+
 
 
 '''
@@ -178,17 +181,36 @@ class TestPhysiologyReference:
 		assert CM.customized_neurons_list[2]['z_positions'] == list(map(
 			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[2]['w_positions'] ))
 			
-	def test_PC2(self):
-		'''Testing only some parts'''
-		assert 'PC2' in CM.customized_neurons_list[2]['object_name']
-		assert '-ge_soma/tau_e' in \
-			str(CM.customized_neurons_list[2]['equation'].eq_expressions)
-
 	def test_PC1(self):
 		'''Testing only some parts'''
 		assert 'PC1' in CM.customized_neurons_list[1]['object_name']
 		assert '-ge_soma/tau_e' in \
 			str(CM.customized_neurons_list[1]['equation'].eq_expressions)
+		assert 'vm_a2' in \
+			str(CM.customized_neurons_list[1]['equation'].eq_expressions)
+			
+	def test_PC2(self):
+		'''Testing only some parts'''
+		assert 'PC2' in CM.customized_neurons_list[2]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[2]['equation'].eq_expressions)
+		assert 'vm_a2' in \
+			str(CM.customized_neurons_list[2]['equation'].eq_expressions)
+
+	def test_SS(self):
+		assert 'SS' in CM.customized_neurons_list[3]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[3]['equation'].eq_expressions)
+			
+	def test_BC(self):
+		assert 'BC' in CM.customized_neurons_list[4]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[4]['equation'].eq_expressions)
+			
+	def test_MC(self):
+		assert 'MC' in CM.customized_neurons_list[5]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[5]['equation'].eq_expressions)
 			
 #TAHAN JAIT TEST SYNAPSE REFERENCE
 
@@ -236,7 +258,45 @@ def test_outputfile(cxsystem_run_fixture):
 	'''Test for existing outputfile'''
 	outputfilelist = [item for item in os.listdir(CM.output_folder) if item.startswith('output')]
 	assert os.access(os.path.join(CM.output_folder,outputfilelist[0]), os.W_OK)
-
+	
+def test_output_spikecount(cxsystem_run_fixture, capsys):
+	
+	output_fullpath = os.path.join(path, 'tests\\output_files\\output_20190521_20551250_python_200ms.gz')
+	with open(output_fullpath, 'rb') as fb:
+		d_pickle = zlib.decompress(fb.read())
+		data = pickle.loads(d_pickle)
+		spikes_all = data['spikes_all']
+	new_output_name = [item for item in os.listdir(CM.output_folder) if item.startswith('output')] #Assuming just one outputfile in this folder
+	new_output_fullpath = os.path.join(path, CM.output_folder, new_output_name[0])
+	with open(new_output_fullpath, 'rb') as fb:
+		new_d_pickle = zlib.decompress(fb.read())
+		new_data = pickle.loads(new_d_pickle)
+		new_spikes_all = new_data['spikes_all']
+	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
+	for key in keys:
+		# pdb.set_trace()
+		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
+		assert 0.97 <= spike_count_proportion <= 1.03
+		# # # positions_shifted = [z + 5j for z in list(new_data['positions_all']['z_coord'][key])]
+		# # # import matplotlib.pyplot as plt
+		# # # plt.plot(data['positions_all']['z_coord'][key], 'k.')
+		# # # # plt.plot(new_data['positions_all']['z_coord'][key], 'r.')
+		# # # plt.plot(positions_shifted, 'r.')
+		# # # plt.show()
+		# data['positions_all']['z_coord'][key]
+		# new_data['positions_all']['z_coord'][key]
+		with capsys.disabled():
+			print(f'\nProportion of spike counts (new/old) for {key} is {spike_count_proportion}')
+		# import matplotlib.pyplot as plt
+		# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
+		# plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
+		# plt.show()
+		# shared_N = {k: new_spikes_all[key][k] for k in new_spikes_all[key] 
+						# if k in spikes_all[key] 
+						# and new_spikes_all[key][k] == spikes_all[key][k]}
+		# all_items = spikes_all[key]['N']
+		
+		
 # # @pytest.mark.xfail(reason='not implemented yet')		
 # def test__set_save_brian_data_path(cxsystem_run_fixture):
 	# assert isinstance(CM.save_brian_data_path, str) 
