@@ -258,7 +258,7 @@ def cxsystem_run_fixture():
 
 @pytest.fixture(scope='module')
 def get_spike_data():
-	output_fullpath = os.path.join(path, 'tests\\output_files\\output_20190522_18331465_python_200ms.gz')
+	output_fullpath = os.path.join(path, 'tests','output_files','output_20190522_18331465_python_200ms.gz')
 	with open(output_fullpath, 'rb') as fb:
 		d_pickle = zlib.decompress(fb.read())
 		data = pickle.loads(d_pickle)
