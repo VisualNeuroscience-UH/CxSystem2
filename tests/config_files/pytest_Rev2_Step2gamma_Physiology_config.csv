@@ -18,7 +18,7 @@ tau_fd,,140*ms,
 U_f,,0.09,
 ,,,
 ### BACKGROUND INPUT ###,,,
-background_rate,,0.3*Hz,
+background_rate,,0*Hz, # Was 0.3*Hz
 background_rate_inhibition,,0*Hz,
 tonic_depol_level,,1.55,# From rheobase
 ,,,
