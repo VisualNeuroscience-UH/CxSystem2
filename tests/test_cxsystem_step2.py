@@ -258,7 +258,7 @@ def cxsystem_run_fixture():
 
 @pytest.fixture(scope='module')
 def get_spike_data():
-	output_fullpath = os.path.join(path, 'tests','output_files','output_20190522_20283767_python_200ms.gz')
+	output_fullpath = os.path.join(path, 'tests','output_files','output_20190524_06070215_python_200ms.gz')
 	with open(output_fullpath, 'rb') as fb:
 		d_pickle = zlib.decompress(fb.read())
 		data = pickle.loads(d_pickle)
@@ -285,8 +285,8 @@ def test_spikecount_5percent_tolerance(cxsystem_run_fixture, capsys, get_spike_d
 	for key in keys:
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
 		assert 0.95 <= spike_count_proportion <= 1.05
-		# with capsys.disabled():
-			# print(f'\nProportion of spike counts (new/old) for {key} is {spike_count_proportion}')
+		with capsys.disabled():
+			print(f'\nProportion of spike counts (new/old) for {key} is {spike_count_proportion}')
 		# import matplotlib.pyplot as plt
 		# # key = 'NG1_L4_PC1_L4toL1'
 		# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
