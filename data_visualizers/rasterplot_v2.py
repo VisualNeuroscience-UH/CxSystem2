@@ -160,42 +160,6 @@ class SimulationData(object):
     def _flatten(self, l):
         return [item for sublist in l for item in sublist]
 
-    # def value_extractor(self, df, key_name):
-    #     """
-    #     Method for extracting simulation parameters from anatomy and physiology configurations inside data files.
-    #     This method coexists in several classes - a Configuration class is needed?
-    #
-    #     :param df: dataframe to go through (now either self.anatomy_df or self.physio_df)
-    #     :param key_name: simulation parameter to extract
-    #     :return: value of the specified simulation parameter
-    #     """
-    #     # TODO - separate class Configuration for anatomy/physiology configs
-    #
-    #     non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
-    #     for non_dict_idx in non_dict_indices:
-    #         exec "%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx])
-    #     try:
-    #         return eval(key_name)
-    #     except (NameError, TypeError):
-    #         pass
-    #     try:
-    #         if type(key_name) == list:
-    #             variable_start_idx = df['Variable'][df['Variable'] == key_name[0]].index[0]
-    #             try:
-    #                 variable_end_idx = df['Variable'].dropna().index.tolist()[
-    #                     df['Variable'].dropna().index.tolist().index(variable_start_idx) + 1]
-    #                 cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
-    #             except IndexError:
-    #                 cropped_df = df.loc[variable_start_idx:]
-    #             return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
-    #         else:
-    #             return eval(df['Value'][df['Key'] == key_name].item())
-    #     except NameError:
-    #         new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
-    #         return self.value_extractor(df,new_key)
-    #     except ValueError:
-    #         raise ValueError("Parameter %s not found in the configuration file."%key_name)
-
     def value_extractor(self, df, key_name):
         non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
@@ -436,7 +400,6 @@ class SimulationData(object):
             ax.axvline(x=fund_freq, linestyle='--', color='grey')
             plt.show()
 
-
     def _isi_cdf_group(self, group_id, t_limits=None, ax=None):
 
         # if t_limits is None:
@@ -528,7 +491,6 @@ class SimulationData(object):
         else:
             ax.scatter(spike_df.time, spike_df.neuron_index, s=0.6, c='gray')
 
-
     def publicationplot(self, sampling_factor=30, time_rounding=3, time_limits=None, plot_type=2, ax=None):
         """
         Plots a simplified rasterplot with only layers labeled, not neuron groups. Takes relative amount of
@@ -583,7 +545,7 @@ class SimulationData(object):
 
         try:
             spike_df = pd.concat(spike_dict)
-            spike_df.time = numpy.round(spike_df.time/second, time_rounding)  # Decrease time-resolution here
+            spike_df.time = np.round(spike_df.time/second, time_rounding)  # Decrease time-resolution here
         except:
             spike_df = pd.DataFrame(data={'time':[0], 'neuron_index':[0]})  # if there's nothing to concat, create an empty df
 
@@ -628,8 +590,6 @@ class SimulationData(object):
             ax.set_xticks(np.arange(runtime + 0.1, step=1))
             ax.set_xlabel('Time [s]', fontsize=12, fontweight='bold')
             ax.set_xlim([time_limits[0], time_limits[1]])
-
-
 
     def voltage_rasterplot(self, max_per_group=20, dt_downsampling_factor=10):
         """
@@ -1056,7 +1016,6 @@ class SimulationData(object):
         else:
             ax.hist(spike_counts, bins='auto')
 
-
     def spikecount_hist(self):
         """
         Plots the spike count histogram of all groups
@@ -1073,7 +1032,6 @@ class SimulationData(object):
             plt.ylabel('Frequency (timebins)')
 
         plt.show()
-
 
     def _firingrates_group(self, group_id, bin_size=3*ms):
         """
@@ -1442,7 +1400,7 @@ class ExperimentData(object):
             for param_name in parameters_to_extract:
                 param_value = sim.get_sim_parameter(param_name)
                 try:
-                    param_value = round(array([param_value])[0], settings['dec_places'])  # Get rid of unit
+                    param_value = np.round(array([param_value])[0], settings['dec_places'])  # Get rid of unit
                 except TypeError:
                     pass
 
@@ -1450,7 +1408,7 @@ class ExperimentData(object):
 
             # COMPUTE population measures
             n_spiking, mean_firing_rates, isicovs, fanofactors = sim.pop_measures(settings['time_to_drop'])
-            n_spiking_total = sum(n_spiking.values())
+            n_spiking_total = sum(list(n_spiking.values()))
             osc_freq_ft = sim.global_osc_freq(t_limits=[settings['time_to_drop'], -1])
             osc_freq_ac = 0 #sim.global_osc_freq_autocorr()
 
@@ -1459,7 +1417,7 @@ class ExperimentData(object):
             # -> Group activities (= n_spiking/n_total)
             group_activities = []
             for group_id in sim.group_numbering.keys():
-                activity = round(n_spiking[group_id] / sim.group_neuroncounts[group_id], settings['dec_places'])
+                activity = np.round(n_spiking[group_id] / sim.group_neuroncounts[group_id], settings['dec_places'])
                 group_activities.append(activity)
 
             # -> Firing rates
@@ -1467,7 +1425,7 @@ class ExperimentData(object):
             for group_id in sim.group_numbering.keys():
                 with np.errstate(divide='raise'):
                     try:
-                        firing_rate = round(mean(mean_firing_rates[group_id]), settings['dec_places'])
+                        firing_rate = np.round(mean(mean_firing_rates[group_id]), settings['dec_places'])
                     except:
                         firing_rate = 0
                 group_firing_rates.append(firing_rate)
@@ -1476,17 +1434,17 @@ class ExperimentData(object):
                                         if settings['rate_min'] < rate < settings['rate_max']])
             n_firing_rate_normal = np.int32(n_firing_rate_normal)
 
-            neuron_count = sum(sim.group_neuroncounts.values())
+            neuron_count = sum(list(sim.group_neuroncounts.values()))
             try:
                 rates_sum = sum(rate for rate in flatten(mean_firing_rates.values()))
             except:
                 rates_sum = 0
 
-            mfr_all = round(rates_sum / neuron_count, settings['dec_places'])
+            mfr_all = np.round(rates_sum / neuron_count, settings['dec_places']) / Hz
             isicovs_flat = flatten(isicovs.values())
             n_atleast_twospikes = len(isicovs_flat)
             if n_atleast_twospikes > 0:
-                mfr_spiking = round(rates_sum / n_atleast_twospikes, settings['dec_places'])
+                mfr_spiking = np.round(rates_sum / n_atleast_twospikes, settings['dec_places']) / Hz
             else:
                 mfr_spiking = 'NA'
 
@@ -1495,7 +1453,7 @@ class ExperimentData(object):
                                if settings['isicov_min'] < isicov < settings['isicov_max']])
             n_irregular = np.int32(n_irregular)
             try:
-                irregularity_mean = round(mean(isicovs_flat), settings['dec_places'])
+                irregularity_mean = np.round(mean(isicovs_flat), settings['dec_places'])
             except:
                 irregularity_mean = 'NA'
 
@@ -1512,11 +1470,11 @@ class ExperimentData(object):
             mean_synchrony = sim.mean_synchrony(time_to_drop=settings['time_to_drop'])
 
             # Finally, transform numbers into frequencies
-            n_total_neurons = sum(sim.group_neuroncounts.values())
-            p_spiking = round(n_spiking_total / n_total_neurons, settings['dec_places'])
+            n_total_neurons = sum(list(sim.group_neuroncounts.values()))
+            p_spiking = np.round(n_spiking_total / n_total_neurons, settings['dec_places'])
             if n_spiking_total > 0:
-                p_firing_rate_normal = round(n_firing_rate_normal / n_spiking_total, settings['dec_places'])
-                p_irregular = round(n_irregular / n_spiking_total, settings['dec_places'])
+                p_firing_rate_normal = np.round(n_firing_rate_normal / n_spiking_total, settings['dec_places'])
+                p_irregular = np.round(n_irregular / n_spiking_total, settings['dec_places'])
             else:
                 p_firing_rate_normal = ''
                 p_irregular = ''
@@ -1532,7 +1490,7 @@ class ExperimentData(object):
         except KeyError:
             pass
 
-    def computestats(self, output_filename='stats.csv', parameters_to_extract=[], settings=None):
+    def computestats(self, output_filename='stats.csv', parameters_to_extract=[], settings=None, n_cpu=None):
         """
         Computes activity measures of all simulations belonging to the experiment and
         aggregates it to a single CSV file. Computation is done in parallel fashion.
@@ -1553,7 +1511,11 @@ class ExperimentData(object):
         print('Beginning analysis of ' + str(n_files) + ' files')
 
         # Takes forever unless parallel-processed
-        pool = mp.ProcessingPool(processes=int(mp.cpu_count()*0.75))
+        if n_cpu is None:
+            pool = mp.ProcessingPool(processes=int(mp.cpu_count()*0.75))
+        else:
+            pool = n_cpu
+
         results = []
 
         with tqdm(total=n_files, desc='Analysing simulations') as progress:
@@ -1734,13 +1696,9 @@ def combined_metrics_plot():
 # MAIN
 if __name__ == '__main__':
 
-
-    # a = SimulationData('/opt3/tmp/rev2_test/betaconfig_test_20180919_17183215_background_rate0.2H_k0.2_python_5000ms.bz2')
-    #a = SimulationData('/opt3/tmp/rev2_test/betaconfig_test2_20180919_19332474_background_rate0.6H_k1.4_python_5000ms.bz2')
-    #a.publicationplot()
-
-    # exp = ExperimentData('/opt3/tmp/rev2_gamma/', 'step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric')
-    # exp.computestats('stats_step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
+    exp = ExperimentData('/opt3/tmp/p3_transition/', 'step2_eifstp_gabab_Jeigeneric')
+    exp.computestats('stats_step2_local.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
+    # exp._computestats_single_sim('step2_eifstp_gabab_Jeigeneric_20190519_17243783_background_rate0.6H_k2.8_python_5000ms.bz2')
 
 
     ###### Depol x calcium plot ######
@@ -1796,7 +1754,3 @@ if __name__ == '__main__':
     # # print a.show_spikes_at_t(ax,7, 0.0063*second)
     # plt.show()
 
-    # a = SimulationData('/opt3/tmp/coba/01_testrun_20180216_11294826_k11.16_python_2000ms.bz2',
-    #                    group_numbering={1: 'NG1_SS_L4', 2: 'NG2_BC_L4'}, group_neuroncounts={1: 3200, 2: 800},
-    #                    group_to_type={1: 'SS', 2: 'BC'})
-    # a.publicationplot(plot_type=1, sampling_factor=1, time_rounding=5)
