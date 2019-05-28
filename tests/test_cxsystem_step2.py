@@ -7,6 +7,9 @@ import pdb
 from brian2.units import *
 import brian2
 import equation_templates as eqt
+import zlib
+import pickle
+
 
 
 '''
@@ -68,7 +71,7 @@ class TestInit:
 		)
 		
 	def test_input_argument_types(self):
-		assert isinstance(CM.StartTime_str, basestring) 
+		assert isinstance(CM.StartTime_str, str) 
 		# assert CM.array_run == bool(CM.array_run), "Indirect test for input arg instantiated_from_array_run"
 		assert isinstance(CM.array_run, int), "Indirect test for input arg instantiated_from_array_run"
 		assert isinstance(CM.cluster_run_start_idx, int) 
@@ -99,18 +102,9 @@ class TestConfigurationExecutor:
 		assert len(CM.customized_neurons_list[1]['z_positions']) == 267
 		assert len(CM.customized_neurons_list[2]['z_positions']) == 109
 		assert type(CM.customized_neurons_list[0]['z_positions'][0]) == np.complex128
-		assert CM.customized_neurons_list[0].keys() == [
-			'z_positions', 'w_positions', 'equation', 'type', 'idx']
-		assert CM.customized_neurons_list[1].keys() == [
-			'reset', 'w_positions', 'total_comp_num', 'soma_layer', 
-			'idx', 'subtype', 'z_positions', 'equation', 'dends_layer', 
-			'namespace', 'refractory', 'object_name', 'dend_comp_num', 
-			'w_center', 'threshold', 'number_of_neurons', 'type', 'z_center']
-		assert CM.customized_neurons_list[2].keys() == [
-			'reset', 'w_positions', 'total_comp_num', 'soma_layer', 
-			'idx', 'subtype', 'z_positions', 'equation', 'dends_layer', 
-			'namespace', 'refractory', 'object_name', 'dend_comp_num', 
-			'w_center', 'threshold', 'number_of_neurons', 'type', 'z_center']
+		assert len(CM.customized_neurons_list[0].keys()) == 5
+		assert len(CM.customized_neurons_list[1].keys()) == 18
+		assert len(CM.customized_neurons_list[2].keys()) == 18		
 
 	def test__set_scale(self):
 		# assert CM.scale == 1
@@ -124,21 +118,21 @@ class TestConfigurationExecutor:
 		assert CM.min_distance.dim.__str__() == 'm'
 
 	def test_do_init_vms(self):
-		assert isinstance(CM.do_init_vms, int)
+		assert CM.do_init_vms in (0,1)
 	
 	# @pytest.mark.xfail()
 	def test__set_save_brian_data_path(self):
-		assert isinstance(CM.save_brian_data_path, basestring) 
+		assert isinstance(CM.save_brian_data_path, str) 
 
 	# @pytest.mark.xfail()	
 	def test__set_load_brian_data_path(self):
-		assert isinstance(CM.load_brian_data_path, basestring) 
+		assert isinstance(CM.load_brian_data_path, str) 
 
 	def test_load_positions_only(self):
-		assert isinstance(CM.load_positions_only, int)
+		assert CM.load_positions_only in (0,1)
 
 	def test_set_profiling(self):
-		assert isinstance(CM.profiling, int)
+		assert CM.profiling in (0,1)
 		
 	def test_neuron_group(self):
 		'''
@@ -146,8 +140,8 @@ class TestConfigurationExecutor:
 		'''
 		assert all(isinstance(x, np.complex128) for x in CM.customized_neurons_list[0]['z_positions'])
 		assert all(isinstance(x, np.complex128) for x in CM.customized_neurons_list[0]['w_positions'])
-		assert isinstance(CM.customized_neurons_list[0]['equation'],basestring)
-		assert isinstance(CM.customized_neurons_list[0]['type'],basestring)
+		assert isinstance(CM.customized_neurons_list[0]['equation'],str)
+		assert isinstance(CM.customized_neurons_list[0]['type'],str)
 		assert isinstance(CM.customized_neurons_list[0]['idx'],int)
 
 	def test_monitors(self):
@@ -165,46 +159,68 @@ class TestConfigurationExecutor:
 		'''
 		Test the types of obligatory synapse parameters. 
 		'''
-		assert isinstance(CM.customized_synapses_list[0]['pre_eq'],basestring)
-		assert isinstance(CM.customized_synapses_list[0]['pre_group_type'],basestring)
+		assert isinstance(CM.customized_synapses_list[0]['pre_eq'],str)
+		assert isinstance(CM.customized_synapses_list[0]['pre_group_type'],str)
 		assert isinstance(CM.customized_synapses_list[0]['equation'],brian2.equations.equations.Equations)
 		assert isinstance(CM.customized_synapses_list[0]['namespace'],dict)
 		assert isinstance(CM.customized_synapses_list[0]['post_group_idx'],int)
 		assert isinstance(CM.customized_synapses_list[0]['sparseness'],float)
-		assert isinstance(CM.customized_synapses_list[0]['receptor'],basestring)
+		assert isinstance(CM.customized_synapses_list[0]['receptor'],str)
 		assert isinstance(CM.customized_synapses_list[0]['pre_group_idx'],int)
-		assert isinstance(CM.customized_synapses_list[0]['post_comp_name'],basestring)
-		assert isinstance(CM.customized_synapses_list[0]['type'],basestring)
-		assert isinstance(CM.customized_synapses_list[0]['post_group_type'],basestring)
+		assert isinstance(CM.customized_synapses_list[0]['post_comp_name'],str)
+		assert isinstance(CM.customized_synapses_list[0]['type'],str)
+		assert isinstance(CM.customized_synapses_list[0]['post_group_type'],str)
 		
 class TestPhysiologyReference:
 	
 	def test_neuron_reference_init(self):
-		assert CM.customized_neurons_list[0]['z_positions'] == map(
-			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[0]['w_positions'] )
-		assert CM.customized_neurons_list[1]['z_positions'] == map(
-			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[1]['w_positions'] )
-		assert CM.customized_neurons_list[2]['z_positions'] == map(
-			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[2]['w_positions'] )
+		assert CM.customized_neurons_list[0]['z_positions'] == list(map(
+			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[0]['w_positions'] ))
+		assert CM.customized_neurons_list[1]['z_positions'] == list(map(
+			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[1]['w_positions'] ))
+		assert CM.customized_neurons_list[2]['z_positions'] == list(map(
+			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[2]['w_positions'] ))
 			
-	def test_PC2(self):
-		'''Testing only some parts'''
-		assert 'PC2' in CM.customized_neurons_list[2]['object_name']
-		assert '-ge_soma/tau_e' in \
-			str(CM.customized_neurons_list[2]['equation'].eq_expressions)
-
 	def test_PC1(self):
-		'''Testing only some parts'''
+		'''Testing one part of equation in soma and one in apical dendrite'''
 		assert 'PC1' in CM.customized_neurons_list[1]['object_name']
 		assert '-ge_soma/tau_e' in \
 			str(CM.customized_neurons_list[1]['equation'].eq_expressions)
+		assert 'vm_a2' in \
+			str(CM.customized_neurons_list[1]['equation'].eq_expressions)
+			
+	def test_PC2(self):
+		'''Testing one part of equation in soma and one in apical dendrite'''
+		assert 'PC2' in CM.customized_neurons_list[2]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[2]['equation'].eq_expressions)
+		assert 'vm_a2' in \
+			str(CM.customized_neurons_list[2]['equation'].eq_expressions)
+
+	def test_SS(self):
+		'''Testing one part of equation'''
+		assert 'SS' in CM.customized_neurons_list[3]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[3]['equation'].eq_expressions)
+			
+	def test_BC(self):
+		'''Testing one part of equation'''
+		assert 'BC' in CM.customized_neurons_list[4]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[4]['equation'].eq_expressions)
+			
+	def test_MC(self):
+		'''Testing one part of equation'''
+		assert 'MC' in CM.customized_neurons_list[5]['object_name']
+		assert '-ge_soma/tau_e' in \
+			str(CM.customized_neurons_list[5]['equation'].eq_expressions)
 			
 #TAHAN JAIT TEST SYNAPSE REFERENCE
 
 class TestEquationHelper:
 
 	def test_neuron_model(self):
-		assert eqt.EquationHelper.NeuronModels.keys() == ['ADEX_PC', 'ADEX', 'EIF_PC', 'EIF']
+		assert len(eqt.EquationHelper.NeuronModels.keys()) == 4
 		assert isinstance(eqt.EquationHelper.NeuronModels['EIF'],dict)
 		
 		
@@ -239,19 +255,66 @@ def cxsystem_run_fixture():
 	os.rmdir(CM.output_folder)
 	[os.remove(os.path.join(CM.save_brian_data_folder,item)) for item in os.listdir(CM.save_brian_data_folder) if item.startswith('connections')]
 	os.rmdir(CM.save_brian_data_folder)
-	
+
+@pytest.fixture(scope='module')
+def get_spike_data():
+	output_fullpath = os.path.join(path, 'tests','output_files','output_20190524_06070215_python_200ms.gz')
+	with open(output_fullpath, 'rb') as fb:
+		d_pickle = zlib.decompress(fb.read())
+		data = pickle.loads(d_pickle)
+		spikes_all = data['spikes_all']
+	new_output_name = [item for item in os.listdir(CM.output_folder) if item.startswith('output')] #Assuming just one outputfile in this folder
+	new_output_fullpath = os.path.join(path, CM.output_folder, new_output_name[0])
+	with open(new_output_fullpath, 'rb') as fb:
+		new_d_pickle = zlib.decompress(fb.read())
+		new_data = pickle.loads(new_d_pickle)
+		new_spikes_all = new_data['spikes_all']
+
+	return spikes_all, new_spikes_all
+
 # @pytest.mark.skip(reason="too slow")
 def test_outputfile(cxsystem_run_fixture):
 	'''Test for existing outputfile'''
 	outputfilelist = [item for item in os.listdir(CM.output_folder) if item.startswith('output')]
 	assert os.access(os.path.join(CM.output_folder,outputfilelist[0]), os.W_OK)
+	
+# @pytest.mark.xfail(reason='not identical spikes')		
+def test_spikecount_5percent_tolerance(cxsystem_run_fixture, capsys, get_spike_data):
+	spikes_all, new_spikes_all = get_spike_data
+	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
+	for key in keys:
+		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
+		assert 0.95 <= spike_count_proportion <= 1.05
+		with capsys.disabled():
+			print(f'\nProportion of spike counts (new/old) for {key} is {spike_count_proportion}')
+		# import matplotlib.pyplot as plt
+		# # key = 'NG1_L4_PC1_L4toL1'
+		# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
+		# plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
+		# plt.show()
 
+def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
+	spikes_all, new_spikes_all = get_spike_data
+	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
+	for key in keys:
+		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
+		assert spike_count_proportion == 1.0
+
+def test_spiketiming_strict(cxsystem_run_fixture, get_spike_data):
+	spikes_all, new_spikes_all = get_spike_data
+	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
+	for key in keys:
+		# pdb.set_trace()
+		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
+		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
+		
+		
 # # @pytest.mark.xfail(reason='not implemented yet')		
 # def test__set_save_brian_data_path(cxsystem_run_fixture):
-	# assert isinstance(CM.save_brian_data_path, basestring) 
+	# assert isinstance(CM.save_brian_data_path, str) 
 	
 # def test__set_load_brian_data_path(cxsystem_run_fixture):
-	# assert isinstance(CM.load_brian_data_path, basestring) 
+	# assert isinstance(CM.load_brian_data_path, str) 
 # @pytest.mark.xfail(reason='not implemented yet')		
 
  

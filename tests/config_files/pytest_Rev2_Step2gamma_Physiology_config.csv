@@ -1,6 +1,6 @@
 Variable,Key,Value,Comment
 ### MODELING SETUP ###,,,
-model_variation,,1,# 0 not used? Remove from CxSystem?
+model_variation,,0,# 0 not used? Remove from CxSystem?
 neuron_model,,'EIF',# EIF model defined in equation_template.py module
 excitation_model,,'SIMPLE_E',
 inhibition_model,,'SIMPLE_I_GABAB',
@@ -18,9 +18,9 @@ tau_fd,,140*ms,
 U_f,,0.09,
 ,,,
 ### BACKGROUND INPUT ###,,,
-background_rate,,0.3*Hz,
+background_rate,,0*Hz, # Was 0.3*Hz
 background_rate_inhibition,,0*Hz,
-tonic_depol_level,,0.95,# From rheobase
+tonic_depol_level,,1.55,# From rheobase
 ,,,
 ### MAIN CONNECTION WEIGHTS ###,,,
 J,,0.72*nS,# E to E weight
