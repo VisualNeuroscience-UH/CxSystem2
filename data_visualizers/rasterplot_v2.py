@@ -1800,6 +1800,3 @@ if __name__ == '__main__':
     #                    group_numbering={1: 'NG1_SS_L4', 2: 'NG2_BC_L4'}, group_neuroncounts={1: 3200, 2: 800},
     #                    group_to_type={1: 'SS', 2: 'BC'})
     # a.publicationplot(plot_type=1, sampling_factor=1, time_rounding=5)
-
-
-    SimulationData('/home/shohokka/PycharmProjects/CxSystem2/results/output_20190519_15003030_python_2000ms.gz').publicationplot()
