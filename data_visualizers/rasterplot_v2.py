@@ -1696,8 +1696,8 @@ def combined_metrics_plot():
 # MAIN
 if __name__ == '__main__':
 
-    exp = ExperimentData('/opt3/tmp/p3_transition/', 'step2_eifstp_gabab_Jeigeneric')
-    exp.computestats('stats_step2_local.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
+    exp = ExperimentData('/opt3/tmp/p3_transition_taito/', 'step2_eifstp_gabab_Jeigeneric')
+    exp.computestats('stats_step2_taito.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
     # exp._computestats_single_sim('step2_eifstp_gabab_Jeigeneric_20190519_17243783_background_rate0.6H_k2.8_python_5000ms.bz2')
 
 
