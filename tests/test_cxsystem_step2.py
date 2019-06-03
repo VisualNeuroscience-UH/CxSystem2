@@ -9,7 +9,8 @@ import brian2
 import equation_templates as eqt
 import zlib
 import pickle
-from scipy.stats import ks_2samp
+from scipy.stats import ks_2samp, wasserstein_distance
+
 
 
 '''
@@ -18,14 +19,8 @@ Note that the -U will upgrade necessary dependencies for pytest.
 
 Run pytest at CxSystem root, such as git repo root.
 Only Python device is tested currently, cpp and GeNN devices are not tested.
-Defaultclock cannot be tested, because I dont know how to access defaultclock.dt in CxSystem.set_default_clock
-data_loader not tested
-visualise_connectivity not tested
-multi_y_plotter not tested
 
-in physiology_reference.py
-_get_w_positions not tested
-value_extractor not tested -- the example conf file simulation never goes there
+Simo Vanni 2019
 '''
 
 cwd = os.getcwd()
@@ -314,7 +309,7 @@ def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
 	for key in keys:
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
 		with capsys.disabled():
-			print('Proportion of spike counts (new/old) for {0} is {1}'.format(key, spike_count_proportion))
+			print('Proportion of spike counts (new/old) for {0} is {1:.2f}'.format(key, spike_count_proportion))
 		# assert spike_count_proportion == 1.0
 
 def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
@@ -341,40 +336,35 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
 		spikes_time_indeces_float = spikes_all[key]['t']/time_resolution
 		spikes_index_time_matrix[spikes_all[key]['i'],spikes_time_indeces_float.astype(int)] = 1
 		spikes_index_time_matrix = spikes_index_time_matrix[all_spiking_neurons,:]
-		# import matplotlib.pyplot as plt
-		# plt.imshow(index_time_matrix);plt.show()
+
 		new_spikes_index_time_matrix = np.zeros([max(all_spiking_neurons)+1,int(time_vector_length)])
 		new_spikes_time_indeces_float = new_spikes_all[key]['t']/time_resolution
 		new_spikes_index_time_matrix[new_spikes_all[key]['i'],new_spikes_time_indeces_float.astype(int)] = 1
 		new_spikes_index_time_matrix = new_spikes_index_time_matrix[all_spiking_neurons,:]
-		# calculate ksstat for all spike sequences for each neuron
-		
-		# TÄHÄN JÄIT: ks STAT arvot pieniä, random permutation ei näyttäisi muuttavan sitä.
-		
+				
 		cumulative_ks = 0
-		for neuron_idx in all_spiking_neurons:
-			# ksstat = ks_2samp(spikes_index_time_matrix[neuron_idx,:],new_spikes_index_time_matrix[neuron_idx,:])
-			ksstat = ks_2samp(spikes_index_time_matrix[neuron_idx,:],new_spikes_index_time_matrix[neuron_idx,:])
+		cumulative_wd = 0
+		for idx, neuron_idx in enumerate(all_spiking_neurons):
+
+			spike_data = np.nonzero(spikes_index_time_matrix[idx,:])[0]
+			new_spike_data = np.nonzero(new_spikes_index_time_matrix[idx,:])[0]
+			
+			ksstat = ks_2samp(spike_data,new_spike_data)
+			wass_dist = wasserstein_distance(spike_data,new_spike_data)
+			
 			cumulative_ks += ksstat[0]
+			cumulative_wd += wass_dist
+			
 		mean_ks = cumulative_ks/len(all_spiking_neurons)
+		mean_wd = (time_resolution / msecond ) * cumulative_wd/len(all_spiking_neurons)
 		
-		# report median of these stats
+		# report mean of these stats
 		with capsys.disabled():
-			print('Mean KS statistics for {0} is {1}'.format(key,mean_ks)) # Quantified spiketiming similarity
+			# print('Mean KS statistics for {0} is {1:.2f}'.format(key,mean_ks)) # Quantified spiketiming similarity
+			print('Mean Wasserstein Distance (spike shift) for {0} is {1:.2f} ms'.format(key,mean_wd)) # Quantified spiketiming similarity
 
-		import matplotlib.pyplot as plt
-		# key = 'NG1_L4_PC1_L4toL1'
-		plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
-		plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
-		plt.show()
-
-
-
-		
-# # @pytest.mark.xfail(reason='not implemented yet')		
-# def test__set_save_brian_data_path(cxsystem_run_fixture):
-	# assert isinstance(CM.save_brian_data_path, str) 
-	
-# def test__set_load_brian_data_path(cxsystem_run_fixture):
-	# assert isinstance(CM.load_brian_data_path, str) 
-# @pytest.mark.xfail(reason='not implemented yet')
+		# if key == 'NG1_L4_PC1_L4toL1': # Put here the cell group whose spikes u want to see, and remove the comment marks
+			# import matplotlib.pyplot as plt
+			# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
+			# plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
+			# plt.show()
