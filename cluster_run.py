@@ -9,7 +9,7 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-#import pip
+import pip
 import sys
 import CxSystem as CX
 from brian2 import *
@@ -65,8 +65,13 @@ class cluster_run(object):
         except NameError:
             self.username = input('username: ')
         self.password = getpass.getpass('password: ')
+
+        # Create time-stamped suffix for configurations uploaded to cluster.
+        # Otherwise configs in the next run will overwrite the previously uploaded ones,
+        # even if the jobs are still in queue.
         self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
         print (" -  temp file suffix is %s" %self.suffix)
+
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
         self.client.set_missing_host_key_policy(paramiko.WarningPolicy)
@@ -84,14 +89,18 @@ class cluster_run(object):
             self.ssh_commander('mkdir %s;cd %s;git clone https://github.com/VisualNeuroscience-UH/CxSystem;cd CxSystem; git checkout %s' % (self.remote_repo_path,self.remote_repo_path,self.remote_branch),0)
             self.remote_repo_path = self.remote_repo_path +  '/CxSystem'
             print(" -  CxSystem cloned in cluster.")
-        scp.put(anat_file_address, self.remote_repo_path+ '/_tmp_anat_config.csv')
-        scp.put(physio_file_address, self.remote_repo_path + '/_tmp_physio_config.csv')
+
+        # Mark the config files on the cluster with timestamps
+        # Note! This might be problematic if several users are using the same CxSystem installation at the same time
+        scp.put(anat_file_address, self.remote_repo_path+ '/_tmp_anat_config%s.csv' % self.suffix)
+        scp.put(physio_file_address, self.remote_repo_path + '/_tmp_physio_config%s.csv' % self.suffix)
+
         print(" -  config files transfered to cluster")
         # ask user to set the number of nodes, time and memory:
         input(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
                   "\nNote that the number of nodes in default slurm file should always be set to 1. Instead you should enter the number of nodes in the CxSystem network config file. "
                   "\nAlso the default number of CPUs=16 does not need to be changed most of the times. "
-                  "\nPress a key to contiue ...")
+                  "\nPress a key to continue ...")
         if not os.path.exists('./_cluster_tmp'.replace('/',os.sep)):
             os.mkdir('./_cluster_tmp'.replace('/',os.sep))
             print(" -  _cluster_tmp folder created locally to keep the "
