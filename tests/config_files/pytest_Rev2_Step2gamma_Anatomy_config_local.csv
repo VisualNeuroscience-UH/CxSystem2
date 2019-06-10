@@ -1,5 +1,5 @@
 row_type,runtime,device,sys_mode,scale,grid_radius, min_distance, do_init_vms,output_path_and_filename,connections_saving_path_and_filename,connections_loading_path_and_filename,load_positions_only,do_benchmark,profiling,save_generated_video_input_flag,multidimension_array_run,number_of_process,trials_per_config,default_clock
-params,0.2*second,Python,local,1,210*um, 1*um,0,./tests/temp_output_files/output.gz,./tests/temp_connection_files/connections.gz,./tests/connection_files/connections_20190517_06115909_python_200ms.gz,0,0,0,0,0,1,1,0.1*ms
+params,0.2*second,cpp,local,1,210*um, 1*um,0,./tests/temp_output_files/output.gz,./tests/temp_connection_files/connections.gz,./tests/connection_files/connections_20190517_06115909_python_200ms.gz,0,0,0,0,0,1,1,0.1*ms
 ,,,,,,,,,,,,,,,,,,
 row_type,idx,type,number_of_neurons,radius,spike_times,net_center,monitors,,,,,,,,,,,
 IN,0, VPM,60,92*um,[0.02]*second, -- ,[Sp],,,,,,,,,,,
