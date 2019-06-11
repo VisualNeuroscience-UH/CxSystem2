@@ -18,7 +18,7 @@ row_type,receptor,pre_syn_idx,post_syn_idx,syn_type,p,n,monitors,load_connection
 #### input to L4_PCs and L4_SS:,,,,,,,,,,,,,,,,,,
 S,ge,0,1[C]0ba,Depressing,--,3+4,--,1-->,1-->,--,,,,,,,,
 S,ge,0,2[C]0ba,Depressing,--,3+4,--,1,1,--,,,,,,,,
-S,ge,0,3,Depressing,--,7,--,1,1,--,,,,,,,,
+S,ge,0,3,Depressing,--,{0 & 4 & 8 & 12 & 16},--,1,1,--,,,,,,,,
 #### input to L4_BCs:,,,,,,,,,,--,,,,,,,,
 S,ge,0,4,Depressing,--,8,--,1,1,--,,,,,,,,
 #### other connections:,,,,,,,,,,--,,,,,,,,
