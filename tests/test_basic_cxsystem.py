@@ -9,6 +9,7 @@ import brian2
 import equation_templates as eqt
 import zlib
 import pickle
+import shutil
 from scipy.stats import ks_2samp, wasserstein_distance
 
 
@@ -87,7 +88,6 @@ class TestConfigurationExecutor:
 	def test_relay(self):
 		''' This is expected to fail if corresponding parameters in the 
 			configuration file changes'''
-		# pdb.set_trace()
 		assert len(CM.customized_neurons_list) == 6
 		assert len(CM.customized_neurons_list[0]['z_positions']) == 60
 		assert len(CM.customized_neurons_list[1]['z_positions']) == 267
@@ -102,7 +102,6 @@ class TestConfigurationExecutor:
 		assert isinstance(CM.scale, float)
 
 	def test__set_grid_radius(self):
-		# pdb.set_trace()
 		assert CM.general_grid_radius.dim.__str__() == 'm'
 
 	def test__set_min_distance(self):
@@ -206,7 +205,6 @@ class TestPhysiologyReference:
 		assert '-ge_soma/tau_e' in \
 			str(CM.customized_neurons_list[5]['equation'].eq_expressions)
 			
-#TAHAN JAIT TEST SYNAPSE REFERENCE
 
 class TestEquationHelper:
 
@@ -242,10 +240,8 @@ def cxsystem_run_fixture():
 	yield # Run the tests here
 	
 	#Executing teardown code
-	[os.remove(os.path.join(CM.output_folder,item)) for item in os.listdir(CM.output_folder) if item.startswith('output')]
-	os.rmdir(CM.output_folder)
-	[os.remove(os.path.join(CM.save_brian_data_folder,item)) for item in os.listdir(CM.save_brian_data_folder) if item.startswith('connections')]
-	os.rmdir(CM.save_brian_data_folder)
+	shutil.rmtree(CM.output_folder) 		
+	shutil.rmtree(CM.save_brian_data_folder) 
 
 @pytest.fixture(scope='module')
 def get_spike_data():
@@ -276,13 +272,6 @@ def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_
 	for key in keys:
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
 		assert 0.9 <= spike_count_proportion <= 1.1
-		# with capsys.disabled():
-			# print(f'\nProportion of spike counts (new/old) for {key} is {spike_count_proportion}')
-		# import matplotlib.pyplot as plt
-		# # key = 'NG1_L4_PC1_L4toL1'
-		# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
-		# plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
-		# plt.show()
 
 @pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')		
 def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
@@ -297,7 +286,7 @@ def test_spiketiming_strict(cxsystem_run_fixture, get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
-		# pdb.set_trace()
+
 		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
 		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
 		
