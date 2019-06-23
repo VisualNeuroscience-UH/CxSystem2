@@ -9,6 +9,8 @@ import brian2
 import equation_templates as eqt
 import zlib
 import pickle
+import shutil
+from scipy.stats import ks_2samp, wasserstein_distance
 
 
 
@@ -18,23 +20,14 @@ Note that the -U will upgrade necessary dependencies for pytest.
 
 Run pytest at CxSystem root, such as git repo root.
 Only Python device is tested currently, cpp and GeNN devices are not tested.
-Defaultclock cannot be tested, because I dont know how to access defaultclock.dt in CxSystem.set_default_clock
-data_loader not tested
-visualise_connectivity not tested
-multi_y_plotter not tested
 
-in physiology_reference.py
-_get_w_positions not tested
-value_extractor not tested -- the example conf file simulation never goes there
+Simo Vanni 2019
 '''
 
 cwd = os.getcwd()
 path, file = os.path.split(cx.__file__)
-# # anatomy_and_system_config = os.path.join(path, 'tests', 'config_files', 'pytest_COBAEIF_config.csv')
-# anatomy_and_system_config = os.path.join(path, 'tests', 'config_files', 'pytest_COBAEIF_config_make_connection.csv')
-# physiology_config = os.path.join(path, 'tests', 'config_files', 'pytest_Physiological_Parameters_for_COBAEIF.csv')
-anatomy_and_system_config = os.path.join(path, 'tests', 'config_files', 'pytest_Rev2_Step2gamma_Anatomy_config_local.csv')
-physiology_config = os.path.join(path, 'tests', 'config_files', 'pytest_Rev2_Step2gamma_Physiology_config.csv')
+anatomy_and_system_config = os.path.join(path, 'tests', 'config_files', 'pytest_Anatomy_config.csv')
+physiology_config = os.path.join(path, 'tests', 'config_files', 'pytest_Physiology_config.csv')
 CM = cx.CxSystem(anatomy_and_system_config, physiology_config, instantiated_from_array_run=0)
 
 def test_cwd():
@@ -72,7 +65,6 @@ class TestInit:
 		
 	def test_input_argument_types(self):
 		assert isinstance(CM.StartTime_str, str) 
-		# assert CM.array_run == bool(CM.array_run), "Indirect test for input arg instantiated_from_array_run"
 		assert isinstance(CM.array_run, int), "Indirect test for input arg instantiated_from_array_run"
 		assert isinstance(CM.cluster_run_start_idx, int) 
 		assert isinstance(CM.cluster_run_step, int) 
@@ -96,7 +88,6 @@ class TestConfigurationExecutor:
 	def test_relay(self):
 		''' This is expected to fail if corresponding parameters in the 
 			configuration file changes'''
-		# pdb.set_trace()
 		assert len(CM.customized_neurons_list) == 6
 		assert len(CM.customized_neurons_list[0]['z_positions']) == 60
 		assert len(CM.customized_neurons_list[1]['z_positions']) == 267
@@ -111,7 +102,6 @@ class TestConfigurationExecutor:
 		assert isinstance(CM.scale, float)
 
 	def test__set_grid_radius(self):
-		# pdb.set_trace()
 		assert CM.general_grid_radius.dim.__str__() == 'm'
 
 	def test__set_min_distance(self):
@@ -174,12 +164,12 @@ class TestConfigurationExecutor:
 class TestPhysiologyReference:
 	
 	def test_neuron_reference_init(self):
-		assert CM.customized_neurons_list[0]['z_positions'] == list(map(
-			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[0]['w_positions'] ))
-		assert CM.customized_neurons_list[1]['z_positions'] == list(map(
-			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[1]['w_positions'] ))
-		assert CM.customized_neurons_list[2]['z_positions'] == list(map(
-			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[2]['w_positions'] ))
+		assert all(np.round(CM.customized_neurons_list[0]['z_positions'],decimals=2) == np.round(list(map(
+			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[0]['w_positions'] )),decimals=2))
+		assert all(np.round(CM.customized_neurons_list[1]['z_positions'],decimals=2) == np.round(list(map(
+			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[1]['w_positions'] )),decimals=2))
+		assert all(np.round(CM.customized_neurons_list[2]['z_positions'],decimals=2) == np.round(list(map(
+			lambda x: np.e ** (x/17) - 1,CM.customized_neurons_list[2]['w_positions'] )),decimals=2))
 			
 	def test_PC1(self):
 		'''Testing one part of equation in soma and one in apical dendrite'''
@@ -215,7 +205,6 @@ class TestPhysiologyReference:
 		assert '-ge_soma/tau_e' in \
 			str(CM.customized_neurons_list[5]['equation'].eq_expressions)
 			
-#TAHAN JAIT TEST SYNAPSE REFERENCE
 
 class TestEquationHelper:
 
@@ -251,10 +240,8 @@ def cxsystem_run_fixture():
 	yield # Run the tests here
 	
 	#Executing teardown code
-	[os.remove(os.path.join(CM.output_folder,item)) for item in os.listdir(CM.output_folder) if item.startswith('output')]
-	os.rmdir(CM.output_folder)
-	[os.remove(os.path.join(CM.save_brian_data_folder,item)) for item in os.listdir(CM.save_brian_data_folder) if item.startswith('connections')]
-	os.rmdir(CM.save_brian_data_folder)
+	shutil.rmtree(CM.output_folder) 		
+	shutil.rmtree(CM.save_brian_data_folder) 
 
 @pytest.fixture(scope='module')
 def get_spike_data():
@@ -279,20 +266,14 @@ def test_outputfile(cxsystem_run_fixture):
 	assert os.access(os.path.join(CM.output_folder,outputfilelist[0]), os.W_OK)
 	
 # @pytest.mark.xfail(reason='not identical spikes')		
-def test_spikecount_5percent_tolerance(cxsystem_run_fixture, capsys, get_spike_data):
+def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
-		assert 0.95 <= spike_count_proportion <= 1.05
-		with capsys.disabled():
-			print(f'\nProportion of spike counts (new/old) for {key} is {spike_count_proportion}')
-		# import matplotlib.pyplot as plt
-		# # key = 'NG1_L4_PC1_L4toL1'
-		# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
-		# plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
-		# plt.show()
+		assert 0.9 <= spike_count_proportion <= 1.1
 
+@pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')		
 def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
@@ -300,21 +281,81 @@ def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
 		assert spike_count_proportion == 1.0
 
+@pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')		
 def test_spiketiming_strict(cxsystem_run_fixture, get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
-		# pdb.set_trace()
+
 		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
 		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
 		
-		
-# # @pytest.mark.xfail(reason='not implemented yet')		
-# def test__set_save_brian_data_path(cxsystem_run_fixture):
-	# assert isinstance(CM.save_brian_data_path, str) 
-	
-# def test__set_load_brian_data_path(cxsystem_run_fixture):
-	# assert isinstance(CM.load_brian_data_path, str) 
-# @pytest.mark.xfail(reason='not implemented yet')		
+def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
+	spikes_all, new_spikes_all = get_spike_data
+	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
+	with capsys.disabled():
+			print('\n')
+	for key in keys:
+		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
+		with capsys.disabled():
+			print('Proportion of spike counts (new/old) for {0} is {1:.2f}'.format(key, spike_count_proportion))
+		# assert spike_count_proportion == 1.0
 
- 
+def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
+	spikes_all, new_spikes_all = get_spike_data
+	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
+
+	time_resolution = 0.1 * msecond
+	run_time = CM.runtime
+	time_vector_length = run_time / time_resolution
+	
+	with capsys.disabled():
+			print('\n')
+			
+	for key in keys:
+		
+		new_spikes_all[key]['N']
+		spikes_all[key]['N']
+		
+		# find union of firing neurons in the two sets
+		all_spiking_neurons = np.union1d(spikes_all[key]['i'],new_spikes_all[key]['i'])
+		
+		#create time vectors of zeros and ones for all neurons and both datasets
+		spikes_index_time_matrix = np.zeros([max(all_spiking_neurons)+1,int(time_vector_length)]) # +1 because indexing starts at 0
+		spikes_time_indeces_float = spikes_all[key]['t']/time_resolution
+		spikes_index_time_matrix[spikes_all[key]['i'],spikes_time_indeces_float.astype(int)] = 1
+		spikes_index_time_matrix = spikes_index_time_matrix[all_spiking_neurons,:]
+
+		new_spikes_index_time_matrix = np.zeros([max(all_spiking_neurons)+1,int(time_vector_length)])
+		new_spikes_time_indeces_float = new_spikes_all[key]['t']/time_resolution
+		new_spikes_index_time_matrix[new_spikes_all[key]['i'],new_spikes_time_indeces_float.astype(int)] = 1
+		new_spikes_index_time_matrix = new_spikes_index_time_matrix[all_spiking_neurons,:]
+				
+		cumulative_ks = 0
+		cumulative_wd = 0
+		for idx, neuron_idx in enumerate(all_spiking_neurons):
+
+			spike_data = np.nonzero(spikes_index_time_matrix[idx,:])[0]
+			new_spike_data = np.nonzero(new_spikes_index_time_matrix[idx,:])[0]
+			
+			ksstat = ks_2samp(spike_data,new_spike_data)
+			wass_dist = wasserstein_distance(spike_data,new_spike_data)
+			
+			cumulative_ks += ksstat[0]
+			cumulative_wd += wass_dist
+			
+		mean_ks = cumulative_ks/len(all_spiking_neurons)
+		mean_wd = (time_resolution / msecond ) * cumulative_wd/len(all_spiking_neurons)
+		
+		# report mean of these stats
+		with capsys.disabled():
+			# print('Mean KS statistics for {0} is {1:.2f}'.format(key,mean_ks)) # Quantified spiketiming similarity
+			print('Mean Wasserstein Distance (spike shift) for {0} is {1:.2f} ms'.format(key,mean_wd)) # Quantified spiketiming similarity
+
+		# np.save(key, spikes_index_time_matrix)
+		# np.save('New_' + key, new_spikes_index_time_matrix)
+		# if key == 'NG1_L4_PC1_L4toL1': # Put here the cell group whose spikes u want to see, and remove the comment marks
+			# import matplotlib.pyplot as plt
+			# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
+			# plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
+			# plt.show()

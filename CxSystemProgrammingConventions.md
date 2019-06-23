@@ -10,13 +10,13 @@ Understanding how brain process information is a wicked research question, which
 
 ## Dependencies
 
-* Python >= 3.5
+* Python >= 3.6
 * Brian2 >= 2.1.3
 * brian2genn (ver?)
 * pandas
-* paramiko
 * cluster run requires additionally 
-   * client-side: scp, getpass 
+   * client-side: paramiko, scp, getpass
+   * server-side: - 
 * rasterplot requires: pathos, tqdm, seaborn
 
 ## Good design principles
