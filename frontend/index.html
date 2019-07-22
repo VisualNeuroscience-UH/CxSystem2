@@ -6,84 +6,66 @@
 
 
 <body>
-    <h1>CxSystem2 Configuration</h1>
+    <h1 class="h1">CxSystem2</h1>
+    <div class="panel">
+            <!-- <div style="width:15%;"> -->
+                    <button style="width:15%;" onclick="document.getElementById('fileChooser').click()">Load Configuration</button>
+                    <input type="file" id="fileChooser" style="display: none"> 
+                    <button class="download_config" onclick="downloadjson()">Download modified configuration</button>
+                    <div id="container"></div>
+            <!-- </div> -->
+    </div>
+     
     <div class='content'> 
     <div class="tabsdiv">
     <div class="tabs__topbar">
-            <button class="tabs__button" data-for-tab="1">Tab1</button>
-            <button class="tabs__button" data-for-tab="2">Tab2</button>
-            <button class="tabs__button" data-for-tab="3">Tab3</button>
+            <button class="tabs__button" data-for-tab="1">Overview</button>
+            <button class="tabs__button" data-for-tab="2">Cell Types</button>
+            <button class="tabs__button" data-for-tab="3">Connections</button>
+            <button class="tabs__button" data-for-tab="4">Other</button>
     </div>
     <div class="tabs">
-
         <div class="tabs__content " data-tab="1">
-            <h2>hello</h2>
-            <p>
-                asdfj ksldkfl ksldkflsdf 
-            </p>
+            <div overview-tag="filename"></div>
+            <div overview-tag="simulation-params"></div>
         </div>
         <div class="tabs__content" data-tab="2">
-            <h2>hello2</h2>
+            <!-- <h2>Cell Types</h2> -->
             <p>
                     asdfj ksldkfl ksldkflsdf 
                 </p>
     
         </div>
         <div class="tabs__content" data-tab="3">
-            <h2>hell3o</h2>
             <p>
                     asdfj ksldkfl ksldkflsdf 
+            </p>    
+        </div>
+        <div class="tabs__content" data-tab="4">
+            <p>
+                   vaasdf sdf 
                 </p>    
         </div>
     </div>
     </div>
 
     <div class="paramsdiv">
-        Hello 
+        more info :)
     </div>
 
     </div>
 
-    <script>
-        function setupTabs() {
-            document.querySelectorAll(".tabs__button").forEach(button => {
-                button.addEventListener("click", () => {
-                    const topBar = button.parentElement;
-                    const tabsContainer = topBar.nextElementSibling; 
-                    const tabNumber = button.dataset.forTab; 
-                    const tabToActivate = tabsContainer.querySelector(`.tabs__content[data-tab="${tabNumber}"]`);
-                    
-                    // console.log (topBar);
-                    // console.log (tabsContainer);
-                    // console.log (tabNumber);
-                    // console.log (tabToActivate);
-                    topBar.querySelectorAll('.tabs__button').forEach(button => {
-                        button.classList.remove("tabs__button--active");
-                    })
-                    tabsContainer.querySelectorAll('.tabs__content').forEach(tab => {
-                        tab.classList.remove("tabs__content--active");
-                    })
-
-                    button.classList.add("tabs__button--active");
-                    tabToActivate.classList.add("tabs__content--active");
-                })
-            })
-        }
-
-        document.addEventListener("DOMContentLoaded",() => {
-            setupTabs();
-
-            document.querySelectorAll(".tabs__topbar").forEach(tabsContainer => {
-                tabsContainer.querySelector(".tabs__button").click();
-            })
-        })
-    </script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js"></script>
-    <script>
-        Split(['.tabsdiv','.paramsdiv'],{
-            gutterSize: 3,
-            sizes: [70,40],
-            minSize:[300,300]
-        });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.2/ajv.bundle.js"></script>
+    <script src="scripts/main.js"></script>
+
+
+
+    
+
+
+
 </body>

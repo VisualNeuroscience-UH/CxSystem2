@@ -1,3 +1,28 @@
+.h1{
+    color: green;
+    font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+}
+
+.download_config{
+    width:25%; 
+    float: right; 
+    display:block; 
+    background-color:brown; 
+    color:white; 
+}
+
+.panel{
+    background: lightblue;
+    border: 3px solid lightblue;
+}
+
+.overviewlines{
+    display: inline;
+    color: green;
+    font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+    font-weight: bold;
+}
+
 .content{
     width: 100%;
     height: 100%;
@@ -57,3 +82,20 @@
     margin-left: 1px;
     margin-right: 1px;
 }
+
+.td_editbox {
+    border: none;
+}
+
+.overview_table{
+    border:2px;
+}
+
+.table__savebutton {
+    display: none; 
+} 
+
+/* .table__savebuttons--active {
+    border: none; 
+}  */
+
