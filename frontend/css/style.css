@@ -1,0 +1,93 @@
+.h1{
+    color: green;
+    font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+    margin-left: 20px;
+}
+
+.download_config{
+    margin-top:10px;
+    margin-right:20px;
+    float: right; 
+}
+
+.load_config{
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+.topbar{
+    background: #cccccc;
+    border: 3px solid #555; 
+}
+
+.overviewlines{
+    display: inline;
+    color: green;
+    font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+    font-weight: bold;
+}
+
+.content{
+    width: 100%;
+    height: 100%;
+    display: flex; 
+    justify-items: center;
+    border: 1px solid #dddddd;
+}
+
+.main_tabs {
+    border: 1px solid #cccccc;
+    display: flex; 
+}
+
+.tabs__topbar {
+    flex-shrink: 0; 
+    background: #cccccc;
+}
+
+.tabs__button{
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+
+.tabs__content {
+    padding: 15px;
+    font-size: 0.8rem;
+    display: none; 
+}
+
+.tabs__content--active{
+    display: block; 
+}
+
+.tabs__content > :first-child{
+    margin-top: 0; 
+}
+
+
+.td_editbox {
+    border: none;
+}
+
+.overview_table{
+    border:2px;
+}
+
+.table__savebutton {
+    display: none; 
+} 
+
+
+label + p{
+    margin-top:0px  !important;
+}
+
+label>input{
+    margin-right:3px !important;
+}
+
+button[type="button"]{
+margin-top: 10px !important; 
+}

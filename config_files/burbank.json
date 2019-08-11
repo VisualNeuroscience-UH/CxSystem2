@@ -1,0 +1,153 @@
+{
+    "params": {
+    "runtime": "1000*ms",
+    "device": "Cpp",
+    "sys_mode": "local",
+    "scale": 1,
+    "grid_radius": "1000*um",
+    "min_distance": "1*um",
+    "do_init_vms": 1,
+    "output_path_and_filename": "./results/output.gz",
+    "#save_brian_data_path": "/opt3/CX_Output/brian_data.gz",
+    "#load_brian_data_path": "/opt3/CX_Output/sivanni/brian_data_20161028_142108.gz",
+    "#load_positions_only": 1,
+    "do_benchmark": 0,
+    "save_generated_video_input_flag": 1,
+    "multidimension_array_run": 0,
+    "number_of_process": 20,
+    "default_clock": "0.01 * ms",
+    "trials_per_config": 1
+    },
+    "IN": {
+        "idx": 0,
+        "path": "./video_input_files/V1_input_layer_.mat",
+        "type": "video",
+        "freq": "190*Hz",
+        "monitors": "[Sp]"
+      },
+      "G": {
+        "1":{
+        "number_of_neurons": 512,
+        "neuron_type": "PC",
+        "layer_idx": "[4->2]",
+        "net_center": "5+0j",
+        "monitors": "[Sp] [St]vm[rec](10-511-20)",
+        "noise_sigma": "10*mV"
+      },
+      "2": {
+        "number_of_neurons": 500,
+        "neuron_type": "PC",
+        "layer_idx": "[2->1]",
+        "net_center": "5+0j",
+        "monitors": "[Sp] [St]vm[rec](10-499-20)",
+        "noise_sigma": "10*mV"
+      },
+      "3": {
+        "number_of_neurons": 300,
+        "neuron_type": "BC",
+        "layer_idx": 4,
+        "net_center": "5+0j",
+        "monitors": "[Sp] [St]vm[rec](10-299-20)",
+        "noise_sigma": "10*mV"
+      },
+      "4": {
+        "idx": 4,
+        "number_of_neurons": 300,
+        "neuron_type": "BC",
+        "layer_idx": 2,
+        "net_center": "5+0j",
+        "monitors": "[Sp] [St]vm[rec](10-299-20)",
+        "noise_sigma": "10*mV"
+      }
+      },
+      "S":{
+        "1":{
+            "receptor": "ge",
+            "pre_syn_idx": 0,
+            "post_syn_idx": "1[C]0ba",
+            "syn_type": "Fixed",
+            "p": "0.5+0.5",
+            "n": "2+2",
+            "monitors": "--",
+            "load_connection": "0-->",
+            "save_connection": "0-->"
+          },
+          "2":{
+            "receptor": "ge",
+            "pre_syn_idx": 1,
+            "post_syn_idx": "2[C]0ba",
+            "syn_type": "STDP_with_scaling",
+            "p": "0.5+0.5",
+            "n": "1+1",
+            "monitors": "[St]wght[rec](0-100-20)+spike_sensor[rec](0-100-20)",
+            "load_connection": 0,
+            "save_connection": 0
+          },
+          "3":{
+            "receptor": "ge",
+            "pre_syn_idx": 2,
+            "post_syn_idx": "1[C]1",
+            "syn_type": "STDP_with_scaling",
+            "p": 1,
+            "n": 8,
+            "monitors": "[St]wght[rec](0-100-20)+spike_sensor[rec](0-100-20)",
+            "load_connection": 0,
+            "save_connection": 0
+          },
+          "4":{
+            "receptor": "ge",
+            "pre_syn_idx": 1,
+            "post_syn_idx": 3,
+            "syn_type": "Fixed",
+            "p": 0.5,
+            "n": 1,
+            "monitors": "--",
+            "load_connection": 0,
+            "save_connection": 0
+          },
+          "5":{
+            "receptor": "gi",
+            "pre_syn_idx": 3,
+            "post_syn_idx": "1[C]0s",
+            "syn_type": "Fixed",
+            "p": 0.5,
+            "n": 1,
+            "monitors": "--",
+            "load_connection": 0,
+            "save_connection": 0
+          },
+          "6":{
+            "receptor": "ge",
+            "pre_syn_idx": 2,
+            "post_syn_idx": 4,
+            "syn_type": "Fixed",
+            "p": 0.5,
+            "n": 1,
+            "monitors": "--",
+            "load_connection": 0,
+            "save_connection": 0
+          },
+          "7":{
+            "receptor": "gi",
+            "pre_syn_idx": 4,
+            "post_syn_idx": "2[C]0s",
+            "syn_type": "Fixed",
+            "p": 0.5,
+            "n": 1,
+            "monitors": "--",
+            "load_connection": "0<--",
+            "save_connection": 0
+          },
+          "8":{
+            "receptor": "ge",
+            "pre_syn_idx": 1,
+            "post_syn_idx": "1[C]0ba",
+            "syn_type": "Fixed",
+            "p": "0.03+0.03",
+            "n": "1+1",
+            "monitors": "[St]wght[rec](0-100-20)",
+            "load_connection": 0,
+            "save_connection": 0
+          }
+      }
+}

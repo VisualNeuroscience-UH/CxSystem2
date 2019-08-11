@@ -2,66 +2,75 @@
 <!-- <link rel="stylesheet" href="/assets/dcode.css">
 <link rel="shortcut icon" href="/assets/favicon.ico"> -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
-
+<link rel="stylesheet" href="css/style.css">
+<link rel='stylesheet' href='css/foundation-5.5.3/css/foundation.min.css'>
+  
+<link rel='stylesheet' href='css/font-awesome-4.0.3/css/font-awesome.css'>
+<script src="scripts/json-editor/dist/jsoneditor.min.js"></script>
+<script src="scripts/jquery-3.4.1.min.js"></script>
+<script src="scripts/schema.js"></script>
+<script>
+// Set the default CSS theme and icon library globally
+JSONEditor.defaults.theme = 'foundation5';
+JSONEditor.defaults.iconlib = 'fontawesome4';
+</script>
 
 <body>
     <h1 class="h1">CxSystem2</h1>
-    <div class="panel">
-            <!-- <div style="width:15%;"> -->
-                    <button style="width:15%;" onclick="document.getElementById('fileChooser').click()">Load Configuration</button>
+    <div class="">
+                    <button class="load_config round" onclick="document.getElementById('fileChooser').click()">Load Configuration</button>
                     <input type="file" id="fileChooser" style="display: none"> 
-                    <button class="download_config" onclick="downloadjson()">Download modified configuration</button>
+                    <button class="download_config round success" onclick="downloadphysiology()">Download Physio</button>
+                    <button class="download_config round success" onclick="downloadanatomy()">Download configuration</button>
+                    
                     <div id="container"></div>
-            <!-- </div> -->
     </div>
      
-    <div class='content'> 
+    <!-- <div class='content'>  -->
     <div class="tabsdiv">
     <div class="tabs__topbar">
             <button class="tabs__button" data-for-tab="1">Overview</button>
             <button class="tabs__button" data-for-tab="2">Cell Types</button>
             <button class="tabs__button" data-for-tab="3">Connections</button>
-            <button class="tabs__button" data-for-tab="4">Other</button>
+            <button class="tabs__button " data-for-tab="4">Other</button>
     </div>
-    <div class="tabs">
-        <div class="tabs__content " data-tab="1">
-            <div overview-tag="filename"></div>
-            <div overview-tag="simulation-params"></div>
+    <div class="main_tabs">
+        <div class="tabs__content" data-tab="1">
+            <!-- <div overview-tag="filename"></div>
+            <div overview-tag="simulation-params"></div> -->
+            <div id='params_holder' class='medium-12 columns'></div>
         </div>
         <div class="tabs__content" data-tab="2">
-            <!-- <h2>Cell Types</h2> -->
-            <p>
-                    asdfj ksldkfl ksldkflsdf 
-                </p>
-    
+<div class="medium-12 columns">
+    <button id='submit'>Submit (console.log)</button>
+    <button id='restore'>Restore to Default</button>
+    <button id='enable_disable'>Disable/Enable Form</button>
+    <span id='valid_indicator'></span>  
+</div>
+
+            <div id='neurons_holder'></div>
         </div>
         <div class="tabs__content" data-tab="3">
-            <p>
-                    asdfj ksldkfl ksldkflsdf 
-            </p>    
+            <div id='connections_holder'></div>
         </div>
         <div class="tabs__content" data-tab="4">
-            <p>
-                   vaasdf sdf 
-                </p>    
+            <div id='physio_holder'></div>
         </div>
     </div>
     </div>
-
-    <div class="paramsdiv">
+<!-- <div class="paramsdiv">
         more info :)
-    </div>
+    </div> -->
 
-    </div>
+    <!-- </div> -->
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.2/ajv.bundle.js"></script>
     <script src="scripts/main.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
 
 
     
