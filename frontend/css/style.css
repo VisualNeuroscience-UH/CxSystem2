@@ -89,11 +89,10 @@ label>input{
     margin-right:3px !important;
 }
 
-button[type="button"]{
-/* margin-top: 10px !important;  */
+/* button[type="button"]{
 margin-left: -20px !important; 
 margin-bottom: 0px !important; 
-}
+} */
 
 a > span{
     font-size: 12px !important;   
@@ -118,6 +117,6 @@ dl + div > div {
     /* margin-top: -50px !important; */
 }
 
-h3 > div > button {
-    margin-left: 50px !important;
-}
+/* button[type="button"] {
+    margin-left: 100px !important;
+} */
