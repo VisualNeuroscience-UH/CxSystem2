@@ -31,6 +31,8 @@ function add_to_overview_tab(inp_data) {
 }
 
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
     setupTabs();
 
@@ -42,85 +44,107 @@ document.addEventListener("DOMContentLoaded", () => {
 $('.tabs__button').click(function () {
     $(this).addClass("tabs__button--active");
 })
-// Split(['.tabsdiv','.paramsdiv'],{
-//     gutterSize: 3,
-//     sizes: [70,40],
-//     minSize:[300,300]
-// });
 
 
 
 
 
 
-var json_input;
-document.getElementById('fileChooser').onchange = function () {
-    var file = this.files[0];
+
+
+
+
+
+function readSingleFile(e) {
+    var file = e.target.files[0];
+    if (!file) {
+      return;
+    }
     var reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = function () {
-        // console.log(this.result);
-        json_input = JSON.parse(this.result);
-        document.querySelector('[overview-tag="filename"]').innerHTML = "<p class='overviewlines'> Loaded Filename: </p> " + file.name;
-
-
-        function show(json) {
-            var content = '<table class="overview_table" id="myTable" border=1>';
-            var key_idx = 0;
-            for (var key in json) {
-                content +=
-                    '<tr id =' + key_idx + '>' +
-                    '<td class="td_editbox">' +
-                    '<span id="key_' + key_idx + '" class="text">' + key + '</span>' +
-                    '</td>' +
-                    '<td class="td_editbox">' +
-                    '<span><input type="text" value="' + json[key] + '" text_input_id="value_' + key_idx + '" /></span>' +
-                    '</td>' +
-                    '<td class="td_editbox">' +
-                    '<button class="table__savebutton" save_button_id="value_' + key_idx + '" id="TableFieldSaveButton">save</button>' +
-                    '</td>' +
-                    '</tr>';
-                key_idx += 1;
-            }
-            content += '</table>';
-            $('div[overview-tag="simulation-params"]').append(content);
-        }
-
-        $(document).on("keyup", "input:text", function (e) {
-            let current_key_idx = get_key_idx($(this).attr('text_input_id'));
-            let current_value = String(json_input.params[Object.keys(json_input.params)[current_key_idx]]);
-            if ($(this).val() != current_value) { // check to save only if the value is changed
-                $('button[save_button_id="' + $(this).attr('text_input_id') + '"]').removeClass('table__savebutton')
-                if (e.which === 13 || e.which === 9) {
-                    json_input.params[Object.keys(json_input.params)[current_key_idx]] = $(this).val(); // change the value in the json 
-                    $('button[save_button_id="' + $(this).attr('text_input_id') + '"]').addClass('table__savebutton'); // hide the button 
-                }
-            }
-            else { // hide the save button since the values are again the same 
-                $('button[save_button_id="' + $(this).attr('text_input_id') + '"]').addClass('table__savebutton');
-            }
-        });
-
-
-        $(document).on("click", "#TableFieldSaveButton", function () {
-
-            let current_key_idx = get_key_idx($(this).attr('save_button_id'));
-            let changed_val = $('input[text_input_id="' + $(this).attr('save_button_id') + '"]').val()
-            json_input.params[Object.keys(json_input.params)[current_key_idx]] = changed_val; // change the value in the json 
-            $('button[save_button_id="' + $(this).attr('save_button_id') + '"]').addClass('table__savebutton');
-            // alert("to be implemented!");
-        });
-
-
-        show(json_input.params);
-
-        function get_key_idx(inp_tag_value) {
-            let length = inp_tag_value.split('_').length;
-            return parseInt(inp_tag_value.split('_')[length - 1]);
-        }
+    reader.onload = function(e) {
+      var contents = e.target.result;
+      displayContents(contents);
     };
+    reader.readAsText(file);
+  }
+  document.getElementById('file-input').addEventListener('change', readSingleFile, false);
 
-};
+  $(document).ready(function(){
+    $('#sign_up').click(function(){
+        alert('Sign new href executed.');
+    });
+});
+
+// var json_input;
+// document.getElementById('fileChooser').onchange = function () {
+//     var file = this.files[0];
+//     var reader = new FileReader();
+//     reader.readAsText(file);
+//     reader.onload = function () {
+//         // console.log(this.result);
+//         json_input = JSON.parse(this.result);
+//         document.querySelector('[overview-tag="filename"]').innerHTML = "<p class='overviewlines'> Loaded Filename: </p> " + file.name;
+
+
+//         function show(json) {
+//             var content = '<table class="overview_table" id="myTable" border=1>';
+//             var key_idx = 0;
+//             for (var key in json) {
+//                 content +=
+//                     '<tr id =' + key_idx + '>' +
+//                     '<td class="td_editbox">' +
+//                     '<span id="key_' + key_idx + '" class="text">' + key + '</span>' +
+//                     '</td>' +
+//                     '<td class="td_editbox">' +
+//                     '<span><input type="text" value="' + json[key] + '" text_input_id="value_' + key_idx + '" /></span>' +
+//                     '</td>' +
+//                     '<td class="td_editbox">' +
+//                     '<button class="table__savebutton" save_button_id="value_' + key_idx + '" id="TableFieldSaveButton">save</button>' +
+//                     '</td>' +
+//                     '</tr>';
+//                 key_idx += 1;
+//             }
+//             content += '</table>';
+//             $('div[overview-tag="simulation-params"]').append(content);
+//         }
+
+//         $(document).on("keyup", "input:text", function (e) {
+//             let current_key_idx = get_key_idx($(this).attr('text_input_id'));
+//             let current_value = String(json_input.params[Object.keys(json_input.params)[current_key_idx]]);
+//             if ($(this).val() != current_value) { // check to save only if the value is changed
+//                 $('button[save_button_id="' + $(this).attr('text_input_id') + '"]').removeClass('table__savebutton')
+//                 if (e.which === 13 || e.which === 9) {
+//                     json_input.params[Object.keys(json_input.params)[current_key_idx]] = $(this).val(); // change the value in the json 
+//                     $('button[save_button_id="' + $(this).attr('text_input_id') + '"]').addClass('table__savebutton'); // hide the button 
+//                 }
+//             }
+//             else { // hide the save button since the values are again the same 
+//                 $('button[save_button_id="' + $(this).attr('text_input_id') + '"]').addClass('table__savebutton');
+//             }
+//         });
+
+
+//         $(document).on("click", "#TableFieldSaveButton", function () {
+
+//             let current_key_idx = get_key_idx($(this).attr('save_button_id'));
+//             let changed_val = $('input[text_input_id="' + $(this).attr('save_button_id') + '"]').val()
+//             json_input.params[Object.keys(json_input.params)[current_key_idx]] = changed_val; // change the value in the json 
+//             $('button[save_button_id="' + $(this).attr('save_button_id') + '"]').addClass('table__savebutton');
+//             // alert("to be implemented!");
+//         });
+
+
+//         show(json_input.params);
+
+//         function get_key_idx(inp_tag_value) {
+//             let length = inp_tag_value.split('_').length;
+//             return parseInt(inp_tag_value.split('_')[length - 1]);
+//         }
+//     };
+
+// };
+
+
 
 function downloadanatomy() {
     var editors_data = {
@@ -392,16 +416,16 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
 });
 
 
-// Hook up the submit button to log to the console
-document.getElementById('submit').addEventListener('click', function () {
-    // Get the value from the editor
-    console.log(editor.getValue());
-});
+// // Hook up the submit button to log to the console
+// document.getElementById('submit').addEventListener('click', function () {
+//     // Get the value from the editor
+//     console.log(editor.getValue());
+// });
 
-// Hook up the Restore to Default button
-document.getElementById('restore').addEventListener('click', function () {
-    editor.setValue(starting_value);
-});
+// // Hook up the Restore to Default button
+// document.getElementById('restore').addEventListener('click', function () {
+//     editor.setValue(starting_value);
+// });
 
 // Hook up the validation indicator to update its 
 // status whenever the editor changes

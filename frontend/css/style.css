@@ -1,8 +1,3 @@
-.h1{
-    color: green;
-    font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
-    margin-left: 20px;
-}
 
 .download_config{
     margin-top:10px;
@@ -15,14 +10,8 @@
     margin-left: 20px;
 }
 
-.topbar{
-    background: #cccccc;
-    border: 3px solid #555; 
-}
-
 .overviewlines{
     display: inline;
-    color: green;
     font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
     font-weight: bold;
 }
@@ -36,26 +25,38 @@
 }
 
 .main_tabs {
-    border: 1px solid #cccccc;
+    /* border: 1px solid #cccccc; */
     display: flex; 
+    background-color: #f2f2f2; 
 }
 
 .tabs__topbar {
     flex-shrink: 0; 
-    background: #cccccc;
+    background-color: #008CBA;
+    border-bottom: 1px solid #333; 
+    border-top: 1px solid #333; 
 }
 
 .tabs__button{
-    margin-left: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-right: -5px;
+    /* margin-top: 5px; */
+    margin-bottom: 0px;
+    background-color: #333;
+    border: 1px solid #fffdfd;
+    /* border-top-right-radius: 10px; */
+    /* border-top-left-radius: 30px; */
 }
 
+/* .tabs__button--active{
+    border: 1px solid #555555;
+} */
 
 .tabs__content {
     padding: 15px;
     font-size: 0.8rem;
     display: none; 
+    /* border: 1px solid #cccccc; */
+    background-color: #f2f2f2; 
 }
 
 .tabs__content--active{
@@ -89,5 +90,34 @@ label>input{
 }
 
 button[type="button"]{
-margin-top: 10px !important; 
+/* margin-top: 10px !important;  */
+margin-left: -20px !important; 
+margin-bottom: 0px !important; 
+}
+
+a > span{
+    font-size: 12px !important;   
+
+    color: white;
+}
+
+dd>a{
+    border: 1px solid #333 !important;
+    background-color: #008CBA !important;
+    margin-bottom: 2px;
+    font-weight: bold;
+}
+
+dd{
+    width: 150px !important;
+    
+}
+
+dl + div > div {
+    margin-left: 50px !important;
+    /* margin-top: -50px !important; */
+}
+
+h3 > div > button {
+    margin-left: 50px !important;
 }
