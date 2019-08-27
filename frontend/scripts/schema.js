@@ -1,79 +1,3 @@
-main_schema = {
-    "title": "Person",
-    "type": "object",
-    "id": "person",
-    "properties": {
-        "name": {
-            "type": "string",
-            "description": "First and Last name",
-            "minLength": 4
-        },
-        "age": {
-            "type": "integer",
-            "default": 21,
-            "minimum": 18,
-            "maximum": 99
-        },
-        "gender": {
-            "type": "string",
-            "enum": [
-                "male",
-                "female"
-            ]
-        },
-        "location": {
-            "type": "object",
-            "title": "Location",
-            "properties": {
-                "city": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                },
-                "citystate": {
-                    "type": "string",
-                    "description": "This is generated automatically from the previous two fields",
-                    "template": "{{city}}, {{state}}",
-                    "watch": {
-                        "city": "person.location.city",
-                        "state": "person.location.state"
-                    }
-                }
-            }
-        },
-        "pets": {
-            "type": "array",
-            "format": "table",
-            "title": "Pets",
-            "uniqueItems": true,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "cat",
-                            "dog",
-                            "bird",
-                            "reptile",
-                            "other"
-                        ],
-                        "default": "dog"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "fixed": {
-                        "type": "boolean",
-                        "title": "spayed / neutered"
-                    }
-                }
-            }
-        }
-    }
-};
-
 runtime_params_schema = {
     "title": "Params",
     "type": "object",
@@ -117,7 +41,6 @@ runtime_params_schema = {
             "minimum": 1,
             "maximum": 100,
         },
-
         "output_filename": {
             "type": "string",
             "description": "relative path to the output filename",
@@ -182,14 +105,6 @@ runtime_params_schema = {
         }
     }
 };
-
-// "IN": {
-//     "idx": 0,
-//     "path": "./video_input_files/V1_input_layer_.mat",
-//     "type": "video",
-//     "freq": "190*Hz",
-//     "monitors": "[Sp]"
-//   },
 
 neurons_schema = {
     type: "array",
