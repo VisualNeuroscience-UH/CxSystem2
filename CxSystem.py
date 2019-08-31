@@ -36,6 +36,8 @@ import array_run
 import multiprocessing
 import equation_templates as eqt
 prefs.codegen.target = 'auto'
+import config_file_converter as fileconverter
+import pathlib as pth
 
 class CxSystem(object):
     '''
@@ -155,12 +157,19 @@ class CxSystem(object):
         self.profiling = 0
         self.array_run_in_cluster = array_run_in_cluster
         self.awaited_conf_lines = []
-        self.physio_config_df = pandas.read_csv(physiology_config) if type(physiology_config) == str else physiology_config
+
+
+
+        # self.physio_config_df = pandas.read_csv(physiology_config) if type(physiology_config) == str else physiology_config
+        self.physio_config_df = self.read_config_file(physiology_config, header=True)
         self.physio_config_df = self.physio_config_df.applymap(lambda x: NaN if str(x)[0] == '#' else x)
-        self.anat_and_sys_conf_df = pandas.read_csv(anatomy_and_system_config,header=None) if type(anatomy_and_system_config) == str else anatomy_and_system_config
+
+        # self.anat_and_sys_conf_df = pandas.read_csv(anatomy_and_system_config,header=None) if type(anatomy_and_system_config) == str else anatomy_and_system_config
+        self.anat_and_sys_conf_df = self.read_config_file(anatomy_and_system_config)
         self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.applymap(lambda x: x.strip() if type(x) == str else x)
+
         ## dropping the commented lines :
-        self.anat_and_sys_conf_df =  self.anat_and_sys_conf_df.drop(self.anat_and_sys_conf_df[0].index[self.anat_and_sys_conf_df[0][self.anat_and_sys_conf_df[0].str.contains('#') == True].index.tolist()]).reset_index(drop=True)
+        self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.drop(self.anat_and_sys_conf_df[0].index[self.anat_and_sys_conf_df[0][self.anat_and_sys_conf_df[0].str.contains('#') == True].index.tolist()]).reset_index(drop=True)
         self.physio_config_df = self.physio_config_df.drop(self.physio_config_df['Variable'].index[self.physio_config_df['Variable'][self.physio_config_df['Variable'].str.contains('#') == True].index.tolist()]).reset_index(drop=True)
         # merging the params lines into one row:
         params_indices = where(self.anat_and_sys_conf_df.values == 'params')
@@ -288,6 +297,28 @@ class CxSystem(object):
             return self.value_extractor(df,new_key)
         except ValueError:
             raise ValueError("Parameter %s not found in the configuration file."%key_name)
+
+    def read_config_file(self, conf, header = False):
+        '''
+        This function reads the file and convert it to csv from json if necessary.
+        It only works by loading the csv without headers. (header=none)
+        If you need the first row as header, do it manually
+        :param conf:
+        :return:
+        '''
+        if type(conf) == str:
+            if '.json' in conf.lower():
+                converter = fileconverter.filetype_converter(conf)
+                data = converter.get_csv()
+            else:
+                data = pandas.read_csv(conf, header=None)
+        else:
+            data = conf
+        if header is True:
+            new_header = data.iloc[0]  # grab the first row for the header
+            data = data[1:]  # take the data less the header row
+            data.columns = new_header  # set the header row as the df header
+        return data
 
     def set_default_clock(self,*args):
         defaultclock.dt = eval(args[0])
@@ -1875,9 +1906,14 @@ if __name__ == '__main__' :
         except IndexError:
             CM = CxSystem(net_config, phys_config)
     except IndexError:
-        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/config_files/pytest_Rev2_Step2gamma_Anatomy_config_local.csv', \
+        # CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/config_files/pytest_Rev2_Step2gamma_Anatomy_config_local.csv', \
+        #               os.path.dirname(os.path.realpath(__file__)) +
+        #               '/config_files/pytest_Rev2_Step2gamma_Physiology_config.csv', )
+
+        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/tests/config_files/pytest_Anatomy_config.json', \
                       os.path.dirname(os.path.realpath(__file__)) +
-                      '/config_files/pytest_Rev2_Step2gamma_Physiology_config.csv', )
+                      '/tests/config_files/pytest_Physiology_config.json', )
+
         CM.run()
     # from data_visualizers.data_visualization import DataVisualization
     #
