@@ -1,111 +1,202 @@
-runtime_params_schema = {
-    "title": "Params",
+main_schema = {
+    "title": "Person",
+    "type": "object",
+    "id": "person",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "First and Last name",
+            "minLength": 4
+        },
+        "age": {
+            "type": "integer",
+            "default": 21,
+            "minimum": 18,
+            "maximum": 99
+        },
+        "gender": {
+            "type": "string",
+            "enum": [
+                "male",
+                "female"
+            ]
+        },
+        "location": {
+            "type": "object",
+            "title": "Location",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "citystate": {
+                    "type": "string",
+                    "description": "This is generated automatically from the previous two fields",
+                    "template": "{{city}}, {{state}}",
+                    "watch": {
+                        "city": "person.location.city",
+                        "state": "person.location.state"
+                    }
+                }
+            }
+        },
+        "pets": {
+            "type": "array",
+            "format": "table",
+            "title": "Pets",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "cat",
+                            "dog",
+                            "bird",
+                            "reptile",
+                            "other"
+                        ],
+                        "default": "dog"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "fixed": {
+                        "type": "boolean",
+                        "title": "spayed / neutered"
+                    }
+                }
+            }
+        }
+    }
+};
+
+runtime_params_schema = { 
+    "title": "SimulationConfig",  // Params->simulation_config (let's try to avoid ambiguity) -HH
     "type": "object",
     "id": "params",
     "properties": {
         "runtime": {
             "type": "integer",
-            "description": "Duration of simulation in miliseconds",
+            "description": "Duration of simulation in milliseconds (ms)",
             "default": 1000,
             "minimum": 10,
             "maximum": 30000,
         },
         "device": {
             "type": "string",
-            "description": "Brian simulation device type",
+            "description": "Sets the device for Brian2 code generation",
             "enum": ["C++", "Python", "GeNN"]
         },
-        "sys_mode": {
-            "type": "string",
-            "description": "System mode: local means ... , expanded means ... ",
-            "enum": ["Local", "Expanded"]
-        },
-        "scale": {
-            "type": "integer",
-            "description": "Defines how much the network is scaled",
-            "default": 1,
-            "minimum": 1,
-            "maximum": 10,
-        },
+        // Leave this out for now as we don't use or test it actively -HH
+        //"sys_mode": {
+        //    "type": "string",
+        //    "description": "System mode: local means ... , expanded means ... ",
+        //    "enum": ["Local", "Expanded"]
+        //},
+        // Leave this out for now as we don't use or test it actively -HH
+        // "scale": {
+        //    "type": "integer",
+        //    "description": "Defines how much the network is scaled",
+        //    "default": 1,
+        //    "minimum": 1,
+        //    "maximum": 10,
+        //},
         "grid_radius": {
             "type": "integer",
-            "description": "Defines grid radius in micrometer (um)",
+            "description": "Sets the half-width of the 2D square grid where neurons are placed (in micrometers, µm)",
             "default": 1000,
             "minimum": 10,
             "maximum": 10000,
         },
         "min_distance": {
             "type": "integer",
-            "description": "Defines minimum distance between the neurons in micrometer (um)",
+            "description": "Sets the minimum distance between neurons in micrometers (µm)",
             "default": 1,
             "minimum": 1,
             "maximum": 100,
         },
+
         "output_filename": {
             "type": "string",
-            "description": "relative path to the output filename",
+            "description": "Sets the relative path to where results are stored",
             "default": "./results/output.gz"
         },
-        "export_simdata_filename": {
+        "export_simdata_filename": {  // TODO: "simdata" is ambiguous -HH
             "type": "string",
-            "description": "relative path of the filename to save the output connection information ",
-            "default": "./simdata/data.gz"
+            "description": "Sets the relative path to where the network configuration with synaptic weights are stored (export)",
+            "default": "./net_configs/connections.gz"
         },
         "import_simdata_filename": {
             "type": "string",
-            "description": "relative path of the filename to load the output connection information from",
-            "default": "./simdata/data.gz"
+            "description": "Sets the relative path from where the network configuration with synaptic weights are retrieved (import)",
+            "default": "./net_configs/connections.gz"
         },
-        "number_of_process": {
+        "number_of_process": {  // TYPO: process -> processes -HH
             "type": "integer",
-            "description": "Defines number of processes for array run",
+            "description": "Sets the number of CPU cores to use in parallel",
             "default": 1,
             "minimum": 1,
             "maximum": 32,
         },
         "default_clock": {
             "type": "integer",
-            "description": "Defines simulation clock in micro-seconds (us)",
+            "description": "Sets the simulation timestep in microseconds (µs)",
             "default": 10,
             "minimum": 1,
             "maximum": 1000,
         },
         "trials_per_config": {
             "type": "integer",
-            "description": "Defines how many times each simulation should be repeated",
+            "description": "Sets the number of trials for each set of parameters",
             "default": 1,
             "minimum": 1,
             "maximum": 20,
         },
         "init_vms": {
             "type": "boolean",
-            "description": "If checked, the initial membrane voltages will be randomized",
+            "description": "Randomize initial membrane voltages (between leak reversal and threshold potential)",
             "format": "checkbox"
         },
         "load_positions_only": {
             "type": "boolean",
-            "description": "If checked, only the neuron positions will be loaded from the simulation data file (and connection info will not be loaded)",
+            "description": "Import neuron positions but randomize connections",
             "format": "checkbox"
         },
 
         "benchmark": {
             "type": "boolean",
-            "description": "If checked, the simulation will be benchamrked",
+            "description": "Benchmark the simulation using Brian2's profiling tool",
             "format": "checkbox"
         },
-        "save_generated_input_video": {
+        // Leave this out for now as we don't use or test it actively -HH
+        //"save_generated_input_video": {
+        //    "type": "boolean",
+        //    "description": "If checked, the generated video for input will be saved",
+        //    "format": "checkbox"
+        //},
+        "multidimension_array_run": { // TODO - check what this means
             "type": "boolean",
-            "description": "If checked, the generated video for input will be saved",
-            "format": "checkbox"
-        },
-        "multidimension_array_run": {
-            "type": "boolean",
-            "description": "If checked, the array runs will be considered as a multi-dimentional simulations",
+            "description": "Sets whether to run all possible parameter combinations in array run",
             "format": "checkbox"
         }
     }
 };
 
+// "IN": {
+//     "idx": 0,
+//     "path": "./video_input_files/V1_input_layer_.mat",
+//     "type": "video",
+//     "freq": "190*Hz",
+//     "monitors": "[Sp]"
+//   },
+
+// The referee for Hokkanen_2019_NeCo insisted that we not use "neuron groups" and 
+// we switched to "cell types" in the paper. However, we haven't really discussed how we should call the different levels of
+// descriptions we have, so I'm sticking here with the good old "neuron group". -HH
 neurons_schema = {
     type: "array",
     title: "NeuronGroups",
@@ -121,39 +212,69 @@ neurons_schema = {
             "properties": {
                 "idx": {
                     "type": "integer",
-                    "description": "Duration of simulation in miliseconds",
+                    "description": "Running index for the neuron group",
                     "default": "{{i}}",
                 },
                 "number_of_neurons": {
                     "type": "integer",
-                    "description": "Defines number of neurons in neuron group ",
+                    "description": "Sets the number of neurons in the neuron group",
                     "default": 100,
                     "minimum": 1,
                     "maximum": 10000,
                 },
+                // neuron_type refers to hardcoded types in the CxSystem code.
+                // In NeCo setup, only PC and 1 pointlike class is needed. -HH
                 "neuron_type": {
                     "type": "string",
-                    "description": "Defines the neuron type",
-                    "enum": ["PC", "BC", "MC", "L1i"]
+                    "description": "Sets the cell class",
+                    "enum": ["PC", "BC", "MC", "L1i"]  
+                },
+                "neuron_subtype": {
+                    "type": "string",
+                    "description": "Sets the cell type",
+                    "enum": ["XXX", "YYY", "ZZZ"]
                 },
                 "layer_idx": {
                     "type": "string",
-                    "description": "Defines ",
-                    "enum": ["1", "2", "3", "4", "5", "6", "[2->1]", "[3->1]", "[4->1]", "[5->1]", "[6->1]", "[3->2]", "[4->2]", "[5->2]", "[6->2]", "[4->3]", "[5->3]", "[6->3]", "[5->4]", "[6->4]", "[6->5]"]
+                    "description": "Sets the layer where the neuron population is located (L2/3 = 2)",
+                    "enum": ["1", "2", "4", "5", "6", 
+                    "[2->1]", "[4->1]", "[5->1]", "[6->1]", 
+                    "[4->2]", "[5->2]", "[6->2]", 
+                    "[5->4]", "[6->4]", 
+                    "[6->5]"]
                 },
                 "net_center": {
                     "type": "string",
-                    "description": "net center ",
+                    "description": "Center point of the network in 2D",
+                    "default": "0+0j"
                 },
-                "noise_sigma": {
-                    "type": "string",
-                    "description": "defines noise",
+                "spike_monitor": {
+                    "type": "boolean",
+                    "description": "Add a spike monitor",
+                    "format": "checkbox"
                 },
-                "monitors": {
+                "state_monitors": {
                     "type": "string",
                     "format": "text",
-                    "description": "defines noise",
-                }
+                    "description": "Sets the state monitors",
+                },                
+                "noise_sigma": {
+                    "type": "string",
+                    "description": "Sets the internal membrane noise (mV)",
+                    "default": "0*mV"
+                },
+                "n_background_inputs": {
+                    "type": "integer",
+                    "description": "Sets the number of excitatory background inputs",
+                    "default": 0
+                },
+                "n_background_inhibition": {
+                    "type": "integer",
+                    "description": "Sets the number of inhibitory background inputs",
+                    "default": 0
+                },                
+
+
             }
         },
         {
@@ -163,37 +284,38 @@ neurons_schema = {
             "properties": {
                 "idx": {
                     "type": "integer",
-                    "description": "Duration of simulation in miliseconds",
+                    "description": "Running index for the input group",
                     "default": "{{i}}",
                 },
-                "path": {
-                    "type": "string",
-                    "description": "Defines path to input video",
-                },
+                // Leave this out for now as we don't use or test it actively -HH
+                //"path": { 
+                //    "type": "string",
+                //    "description": "Defines path to input video",
+                //},
                 "type": {
                     "type": "string",
-                    "description": "Defines path to input video",
-                    "enum": ["Video", "VPM"]
+                    "description": "Sets the type of input",
+                    "enum": ["VPM"]
                 },
                 "number_of_neurons": {
                     "type": "integer",
-                    "description": "Defines number of neurons in neuron group ",
+                    "description": "Sets the number of neurons in the input group",
                     "default": 100,
                     "minimum": 1,
                     "maximum": 10000,
                 },
                 "radius": {
                     "type": "string",
-                    "description": "defines",
+                    "description": "Sets the radius of the circle to be stimulated",
                 },
                 "spike_times": {
                     "type": "string",
-                    "description": "Defines the spike times ",
+                    "description": "Sets the spike times",
                 },
                 "monitors": {
                     "type": "string",
                     "format": "text",
-                    "description": "defines noise",
+                    "description": "Sets the monitors of the input group",
                 }
             }
         }
@@ -212,12 +334,12 @@ connections_schema = {
         "properties": {
             "receptor": {
                 "type": "string",
-                "description": "Defines the receptor types",
+                "description": "Sets whether the connection is excitatory or inhibitory",
                 "enum": ["ge", "gi"]
             },
             "pre_syn_idx": {
                 "type": "integer",
-                "description": "Defines ...",
+                "description": "Sets the presynaptic neuron group index",
                 "default": 0,
                 "minimum": 0,
                 "maximum": 100
@@ -225,38 +347,38 @@ connections_schema = {
             "post_syn_idx": {
                 "type": "string",
                 "format": "text",
-                "description": "Defines ...",
+                "description": "Sets the postsynaptic neuron group index",
             },
             "syn_type": {
                 "type": "string",
-                "description": "Defines  ",
+                "description": "Sets whether the synapse has short-term plasticity or not",
                 "default": "Fixed",
-                "enum": ["Fixed",]
+                "enum": ["Fixed", "Depressing", "Facilitating"]
             },
             "p": {
                 "type": "string",
-                "description": "Defines ",
+                "description": "Sets the connection probability",
                 "format": "text",
             },
             "n": {
-                "type": "string",
-                "description": "Defines ",
+                "type": "integer",
+                "description": "Sets the number of synapses per connection",
                 "format": "text",
             },
             "monitors": {
                 "type": "string",
                 "format": "text",
-                "description": "defines noise",
+                "description": "Sets the monitors",
             },
             "load_connection": {
-                "type": "string",
-                "format": "text",
-                "description": "defines noise",
+                "type": "boolean",
+                "format": "checkbox",
+                "description": "Sets whether the connection will be loaded",
             },
             "save_connection": {
-                "type": "string",
-                "format": "text",
-                "description": "defines noise",
+                "type": "boolean",
+                "format": "checkbox",
+                "description": "Sets whether the connection will be saved",
             },
         }
     }
