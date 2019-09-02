@@ -1,0 +1,122 @@
+
+.download_config{
+    margin-top:10px;
+    margin-right:20px;
+    float: right; 
+}
+
+.load_config{
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+.overviewlines{
+    display: inline;
+    font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+    font-weight: bold;
+}
+
+.content{
+    width: 100%;
+    height: 100%;
+    display: flex; 
+    justify-items: center;
+    border: 1px solid #dddddd;
+}
+
+.main_tabs {
+    /* border: 1px solid #cccccc; */
+    display: flex; 
+    background-color: #f2f2f2; 
+}
+
+.tabs__topbar {
+    flex-shrink: 0; 
+    background-color: #008CBA;
+    border-bottom: 1px solid #333; 
+    border-top: 1px solid #333; 
+}
+
+.tabs__button{
+    margin-right: -5px;
+    /* margin-top: 5px; */
+    margin-bottom: 0px;
+    background-color: #333;
+    border: 1px solid #fffdfd;
+    /* border-top-right-radius: 10px; */
+    /* border-top-left-radius: 30px; */
+}
+
+/* .tabs__button--active{
+    border: 1px solid #555555;
+} */
+
+.tabs__content {
+    padding: 15px;
+    font-size: 0.8rem;
+    display: none; 
+    /* border: 1px solid #cccccc; */
+    background-color: #f2f2f2; 
+}
+
+.tabs__content--active{
+    display: block; 
+}
+
+.tabs__content > :first-child{
+    margin-top: 0; 
+}
+
+
+.td_editbox {
+    border: none;
+}
+
+.overview_table{
+    border:2px;
+}
+
+.table__savebutton {
+    display: none; 
+} 
+
+
+label + p{
+    margin-top:0px  !important;
+}
+
+label>input{
+    margin-right:3px !important;
+}
+
+/* button[type="button"]{
+margin-left: -20px !important; 
+margin-bottom: 0px !important; 
+} */
+
+a > span{
+    font-size: 12px !important;   
+
+    color: white;
+}
+
+dd>a{
+    border: 1px solid #333 !important;
+    background-color: #008CBA !important;
+    margin-bottom: 2px;
+    font-weight: bold;
+}
+
+dd{
+    width: 150px !important;
+    
+}
+
+dl + div > div {
+    margin-left: 50px !important;
+    /* margin-top: -50px !important; */
+}
+
+/* button[type="button"] {
+    margin-left: 100px !important;
+} */
