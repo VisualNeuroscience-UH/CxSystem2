@@ -313,7 +313,11 @@ class CxSystem(object):
             else:
                 data = pandas.read_csv(conf, header=None)
         else:
-            data = conf
+            if type(conf) == dict: # it means we've received json data
+                converter = fileconverter.filetype_converter(conf)
+                data = converter.get_csv_from_json_data()
+            else:
+                data = conf
         if header is True:
             new_header = data.iloc[0]  # grab the first row for the header
             data = data[1:]  # take the data less the header row
@@ -1910,9 +1914,9 @@ if __name__ == '__main__' :
         #               os.path.dirname(os.path.realpath(__file__)) +
         #               '/config_files/pytest_Rev2_Step2gamma_Physiology_config.csv', )
 
-        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/tests/config_files/pytest_Anatomy_config.json', \
+        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/tests/config_files/pytest_Anatomy_config.csv', \
                       os.path.dirname(os.path.realpath(__file__)) +
-                      '/tests/config_files/pytest_Physiology_config.json', )
+                      '/tests/config_files/pytest_Physiology_config.csv', )
 
         CM.run()
     # from data_visualizers.data_visualization import DataVisualization
