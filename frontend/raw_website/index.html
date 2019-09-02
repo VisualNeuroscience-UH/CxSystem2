@@ -1,0 +1,136 @@
+<title>CxSystem2</title>
+<!-- <link rel="stylesheet" href="/assets/dcode.css">
+<link rel="shortcut icon" href="/assets/favicon.ico"> -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+<link rel='stylesheet' href='css/foundation-5.5.3/css/foundation.min.css'>
+<link rel='stylesheet' href='css/font-awesome-4.0.3/css/font-awesome.css'>
+
+<script src="scripts/jsoneditor.min.js"></script>
+<script src="scripts/jquery-3.4.1.min.js"></script>
+<script src="scripts/schema.js"></script>
+<script src="css/foundation-5.5.3/js/foundation.min.js"></script>
+<script>
+    // Set the default CSS theme and icon library globally
+    JSONEditor.defaults.theme = 'foundation5';
+    JSONEditor.defaults.iconlib = 'fontawesome4';
+</script>
+
+<body>
+
+      
+    <nav class="top-bar" data-topbar role="navigation">
+            <ul class="title-area">
+              <li class="name">
+                <h1><a href="#">
+                        <img
+                        src="images/cxsystem.svg" 
+                        height="40px"
+                        width="40px" />
+                    CxSystem2</a></h1>
+              </li>
+            </ul>
+            <section class="top-bar-section">
+                    <ul class="left">
+<!--                          <li class="active"><a href="javascript:void(0);" onclick="downloadanatomy()">Import Parameters</a></li>-->
+                          <li class="active"><input type="file" id="file-input" style="display: none;" /></li>
+                          <li class="active"><a href="javascript:void(0);" onclick="downloadphysiology()">Import Physiology</a></li>
+                          
+                          <li class="active"><a href="javascript:void(0);" onclick="downloadanatomy()">Export Parameters</a></li>
+                          <li class="active"><a href="javascript:void(0);" onclick="downloadphysiology()">Export Physiology</a></li>          
+                    </ul>
+                
+                  </section>
+
+
+
+          </nav>
+
+
+
+          <!-- <nav class="top-bar" data-topbar role="navigation">
+                
+              
+
+              </nav> -->
+    
+
+
+
+<!-- 
+
+              <ul class="tabs" data-tab role="tablist">
+                    <li class="tab-title active" role="presentation"><a href="#panel2-1" role="tab" tabindex="0" aria-selected="true" aria-controls="panel2-1">Tab 1</a></li>
+                    <li class="tab-title" role="presentation"><a href="#panel2-2" role="tab" tabindex="0" aria-selected="false" aria-controls="panel2-2">Tab 2</a></li>
+                    <li class="tab-title" role="presentation"><a href="#panel2-3" role="tab" tabindex="0" aria-selected="false" aria-controls="panel2-3">Tab 3</a></li>
+                    <li class="tab-title" role="presentation"><a href="#panel2-4" role="tab" tabindex="0" aria-selected="false" aria-controls="panel2-4">Tab 4</a></li>
+                  </ul>
+                  <div class="tabs-content">
+                    <section role="tabpanel" aria-hidden="false" class="content active" id="panel2-1">
+                      <h2>First panel content goes here...</h2>
+                    </section>
+                    <section role="tabpanel" aria-hidden="true" class="content" id="panel2-2">
+                      <h2>Second panel content goes here...</h2>
+                    </section>
+                    <section role="tabpanel" aria-hidden="true" class="content" id="panel2-3">
+                      <h2>Third panel content goes here...</h2>
+                    </section>
+                    <section role="tabpanel" aria-hidden="true" class="content" id="panel2-4">
+                      <h2>Fourth panel content goes here...</h2>
+                    </section>
+                  </div> -->
+
+
+              
+
+
+    <div class="">
+<!--        <input type="file" id="file-input" style="display: none;" />-->
+        <div id="container"></div>
+    </div>
+
+
+    <div class="tabsdiv">
+        <div class="tabs__topbar">
+            <button class="tabs__button" data-for-tab="1">Overview</button>
+            <button class="tabs__button" data-for-tab="2">Cell Types</button>
+            <button class="tabs__button" data-for-tab="3">Connections</button>
+            <button class="tabs__button " data-for-tab="4">Other</button>
+        </div>
+        <div class="main_tabs">
+            <div class="tabs__content" data-tab="1">
+                <div id='params_holder' class='medium-12 columns'></div>
+            </div>
+            <div class="tabs__content" data-tab="2">
+                <div class="medium-12 columns">
+                    <!-- <button id='submit'>Submit (console.log)</button>
+                    <button id='restore'>Restore to Default</button>
+                    <button id='enable_disable'>Disable/Enable Form</button> -->
+                    <span id='valid_indicator' style="margin-left: -15px; margin-down 5px; "> hi </span>
+                </div>
+
+                <div id='neurons_holder'></div>
+            </div>
+            <div class="tabs__content" data-tab="3">
+                <div id='connections_holder'></div>
+            </div>
+            <div class="tabs__content" data-tab="4">
+                <div id='physio_holder'></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.2/ajv.bundle.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+
+
+
+
+
+
+</body>
