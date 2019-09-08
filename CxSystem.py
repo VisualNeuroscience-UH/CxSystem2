@@ -38,6 +38,7 @@ import equation_templates as eqt
 prefs.codegen.target = 'auto'
 import config_file_converter as fileconverter
 import pathlib as pth
+from CxGUI import gui
 
 class CxSystem(object):
     '''
@@ -63,7 +64,7 @@ class CxSystem(object):
     _SpikeMonitor_prefix = 'SpMon'
     _StateMonitor_prefix = 'StMon'
 
-    def __init__(self, anatomy_and_system_config, physiology_config, output_file_suffix = "", instantiated_from_array_run = 0, cluster_run_start_idx=-1,cluster_run_step=-1, array_run_in_cluster =0):
+    def __init__(self, anatomy_and_system_config=None, physiology_config=None, output_file_suffix = "", instantiated_from_array_run = 0, cluster_run_start_idx=-1,cluster_run_step=-1, array_run_in_cluster =0):
         '''
         Initialize the cortical system by parsing both of the configuration files.
 
@@ -83,6 +84,9 @@ class CxSystem(object):
         * save_data: The save_data() object for saving the final data.
 
         '''
+        if anatomy_and_system_config is None or physiology_config is None:
+            self.runGUI()
+            return
         self.start_time = time.time()
         self.main_module = sys.modules['__main__']
         try:  # try to find the Cxmodule in the sys.modules, to find if the __main__ is CxSystem.py or not
@@ -234,6 +238,9 @@ class CxSystem(object):
            self.anat_and_sys_conf_df = self.awaited_conf_lines
            self.configuration_executor()
         print(" -  Cortical Module initialization Done.")
+
+    def runGUI(self):
+        gui.runserver()
 
 
     def configuration_executor(self):
