@@ -1,2 +1,3 @@
-from . import CxSystem
+from CxSystem import CxSystem
 
+CxSystem()
