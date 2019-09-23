@@ -297,9 +297,9 @@ class filetype_converter():
         return csv_data
 
     def get_csv_from_json_data(self):
-        with open('.\\tmp.json', 'w') as f:
+        with open(Path.home().joinpath('tmp.json'), 'w') as f:
             json.dump(self.json_data, f)
-        self.original_path = Path('.\\tmp.json')
+        self.original_path = Path.home().joinpath('tmp.json')
         self.directory = self.original_path.parent.absolute()
         self.filename_without_extension = self.original_path.stem
         self.json_to_csv()
@@ -308,7 +308,7 @@ class filetype_converter():
         else:
             csv_data = pandas.read_csv(self.original_path, header=None)
         self.clean()
-        os.remove(".\\tmp.json")
+        os.remove(Path.home().joinpath('tmp.json'))
         return csv_data
 
     def get_json(self, clean = True):
