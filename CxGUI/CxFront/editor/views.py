@@ -4,8 +4,10 @@ from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 import logging
 import sys, os, json
-[sys.path.append(i) for i in ['.', '..','C:\\Users\\vafaa\\gitrepos\\CxSystem2']]
-import CxSystem as Cx
+from pathlib import Path
+[sys.path.append(i) for i in ['.', '..', '../..']]
+from CxSystem import CxSystem as Cx
+
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -38,7 +40,7 @@ def simulate(request):
     anatomy = received_data['anatomy']
     physiology = { "physio_data": received_data['physiology']}
 
-    os.chdir('C:\\Users\\vafaa\\gitrepos\\CxSystem2')
+    os.chdir(Path.cwd().parent.parent)
     # we can either save the data temporarily as json and use those for simulating, or pass the data itself and config_file_converter will take care of the save_to_file part
     # with open('.\\tmp_anatomy.json', 'w') as f:
     #     json.dump(anatomy, f)
@@ -46,6 +48,6 @@ def simulate(request):
     #     json.dump(physiology, f)
     # CM = Cx.CxSystem('.\\tmp_anatomy.json', '.\\tmp_physio.json')
 
-    CM = Cx.CxSystem(anatomy, physiology)
+    CM = Cx(anatomy, physiology)
     CM.run()
     return HttpResponse("simulation started successfully")
