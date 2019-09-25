@@ -40,6 +40,10 @@ def simulate(request):
     anatomy = received_data['anatomy']
     physiology = { "physio_data": received_data['physiology']}
 
+    # let's store the current folder because we have to change the folder and we need to change back after simulation
+    cwd = Path.cwd()
+
+    # go to the CxSystem root because of the relative paths
     os.chdir(Path.cwd().parent.parent)
     # we can either save the data temporarily as json and use those for simulating, or pass the data itself and config_file_converter will take care of the save_to_file part
     # with open('.\\tmp_anatomy.json', 'w') as f:
@@ -50,4 +54,7 @@ def simulate(request):
 
     CM = Cx(anatomy, physiology)
     CM.run()
+
+    # change folder to where we were before
+    os.chdir(cwd)
     return HttpResponse("simulation started successfully")
