@@ -7,7 +7,7 @@ import sys, os, json
 from pathlib import Path
 [sys.path.append(i) for i in ['.', '..', '../..']]
 from CxSystem import CxSystem as Cx
-
+import multiprocessing
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -17,6 +17,21 @@ def index(request):
     template = loader.get_template('editor/index.html')
     return HttpResponse(template.render({}, request))
     # return HttpResponse("Hello, world. You're at the polls index.")
+
+
+def CxSpawner(anatomy, physiology,root_path):
+    '''
+    The function that each spawned process runs and parallel instances of CxSystems are created here.
+
+    :param idx: index of the requested parallel CxSystem.
+    :param working: the index of the process that is being currently performed. This is to keep track of running processes to prevent spawning more than required processes.
+    :param paths: The path for saving the output of the current instance of CxSystem.
+    '''
+    print(root_path)
+    os.chdir(root_path)
+
+    cm =  Cx(anatomy, physiology)
+    cm.run()
 
 @csrf_exempt
 def simulate(request):
@@ -44,7 +59,8 @@ def simulate(request):
     cwd = Path.cwd()
 
     # go to the CxSystem root because of the relative paths
-    os.chdir(Path.cwd().parent.parent)
+    # os.chdir(Path.cwd().parent.parent)
+
     # we can either save the data temporarily as json and use those for simulating, or pass the data itself and config_file_converter will take care of the save_to_file part
     # with open('.\\tmp_anatomy.json', 'w') as f:
     #     json.dump(anatomy, f)
@@ -52,9 +68,14 @@ def simulate(request):
     #     json.dump(physiology, f)
     # CM = Cx.CxSystem('.\\tmp_anatomy.json', '.\\tmp_physio.json')
 
-    CM = Cx(anatomy, physiology)
-    CM.run()
+
+    p = multiprocessing.Process(target=CxSpawner, args=(anatomy, physiology,Path.cwd().parent.parent))
+    p.start()
+    # p.join()
+
+    # CM = Cx(anatomy, physiology)
+    # CM.run()
 
     # change folder to where we were before
-    os.chdir(cwd)
+    # os.chdir(cwd)
     return HttpResponse("simulation started successfully")
