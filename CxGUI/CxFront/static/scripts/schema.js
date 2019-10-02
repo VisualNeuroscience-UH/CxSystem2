@@ -18,11 +18,8 @@ runtime_params_schema = {
             "enum": ["local", "expanded"]
         },
         "scale": {
-            "type": "integer",
+            "type": "string",
             "description": "Defines how much the network is scaled",
-            "default": 1,
-            "minimum": 1,
-            "maximum": 10,
         },
         "grid_radius": {
             "type": "string",

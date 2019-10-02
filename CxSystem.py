@@ -165,6 +165,7 @@ class CxSystem(object):
 
 
         # self.physio_config_df = pandas.read_csv(physiology_config) if type(physiology_config) == str else physiology_config
+
         self.physio_config_df = self.read_config_file(physiology_config, header=True)
         self.physio_config_df = self.physio_config_df.applymap(lambda x: NaN if str(x)[0] == '#' else x)
 
@@ -325,7 +326,7 @@ class CxSystem(object):
                 data = converter.get_csv_from_json_data()
             else:
                 data = conf
-        if header is True:
+        if header is True and type(conf) == dict or type(conf) == str:
             new_header = data.iloc[0]  # grab the first row for the header
             data = data[1:]  # take the data less the header row
             data.columns = new_header  # set the header row as the df header
