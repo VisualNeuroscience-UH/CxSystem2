@@ -228,7 +228,7 @@ class CxSystem(object):
             self.array_run = 1
             return
         try:
-            self.conn_prob_gain = int(self.physio_config_df.loc[where(self.physio_config_df.values=='conn_prob_gain')[0]]['Value'].item())
+            self.conn_prob_gain = int(next(iter(self.physio_config_df.loc[where(self.physio_config_df.values=='conn_prob_gain')[0]]['Value']) , 'no match'))
         except ValueError:
             self.conn_prob_gain =1
         self.configuration_executor()
@@ -351,6 +351,7 @@ class CxSystem(object):
             print(" -  System is going to be run using GeNN devices, " \
                   "Errors may rise if Brian2/Brian2GeNN/GeNN is not installed correctly or the limitations are not " \
                   "taken in to account.")
+        print(f" -  CxSystem is running on {self.device} device")
 
     def run(self):
         if not self.array_run:
@@ -602,8 +603,7 @@ class CxSystem(object):
         is missing. Following obligatory columns should be defined:\n%s\n ' \
                                                                 % str([_all_columns[ii] for ii in _obligatory_params])
         obligatory_columns = list(array(_all_columns)[_obligatory_params])
-        obligatory_indices = [self.current_parameters_list[self.current_parameters_list == ii].index.item() for ii in
-                              obligatory_columns]
+        obligatory_indices = [next(iter(self.current_parameters_list[self.current_parameters_list == ii].index)) for ii in obligatory_columns]
         assert not any(self.current_values_list.loc[obligatory_indices] == '--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_values_list) == self.current_parameters_list_orig_len,\
@@ -631,7 +631,7 @@ class CxSystem(object):
 
         for column in _all_columns:
             try:
-                tmp_value_idx = self.current_parameters_list[self.current_parameters_list==column].index.item()
+                tmp_value_idx = int(next(iter(self.current_parameters_list[self.current_parameters_list==column].index), 'no match'))
                 tmp_var_str = "local_namespace['%s']=self.current_values_list[tmp_value_idx]" % column
                 exec(tmp_var_str)
             except ValueError:
@@ -753,8 +753,8 @@ class CxSystem(object):
         # <editor-fold desc="...Poisson-distributed background input">
         # Add Poisson-distributed background input
 
-        background_rate = self.physio_config_df.loc[where(self.physio_config_df.values == 'background_rate')[0]]['Value'].item()
-        background_rate_inhibition = self.physio_config_df.loc[where(self.physio_config_df.values =='background_rate_inhibition')[0]]['Value'].item()
+        background_rate = next(iter(self.physio_config_df.loc[where(self.physio_config_df.values == 'background_rate')[0]]['Value']))
+        background_rate_inhibition = next(iter(self.physio_config_df.loc[where(self.physio_config_df.values =='background_rate_inhibition')[0]]['Value']))
 
         # For changing connection weight of background input according to calcium level
         try:
@@ -1092,8 +1092,7 @@ class CxSystem(object):
             ' -  One or more of the obligatory columns for input definition is missing. Obligatory columns are:\n%s\n ' \
                                                                 % str([_all_columns[ii] for ii in _obligatory_params])
         obligatory_columns = list(array(_all_columns)[_obligatory_params])
-        obligatory_indices = [self.current_parameters_list[self.current_parameters_list == ii].index.item() for ii in
-                              obligatory_columns]
+        obligatory_indices = [next(iter(self.current_parameters_list[self.current_parameters_list == ii].index)) for ii in obligatory_columns]
         assert not any(self.current_values_list.loc[obligatory_indices].isnull()), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_values_list) == self.current_parameters_list_orig_len, \
@@ -1232,13 +1231,17 @@ class CxSystem(object):
                 monitors = syn[index_of_monitors]
             except (ValueError, NameError):
                 monitors = '--'
-            pre_type = syn[self.current_parameters_list[self.current_parameters_list=='pre_type'].index.item()]
-            post_type = syn[self.current_parameters_list[self.current_parameters_list=='post_type'].index.item()]
-            post_comp_name= syn[self.current_parameters_list[self.current_parameters_list=='post_comp_name'].index.item()]
+            pre_type_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='pre_type'].index))
+            pre_type = syn[pre_type_idx]
+            post_type_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='post_type'].index))
+            post_type = syn[post_type_idx]
+            post_comp_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='post_comp_name'].index))
+            post_comp_name= syn[post_comp_idx]
 
             # Get custom weight if defined
             try:
-                custom_weight = syn[self.current_parameters_list[self.current_parameters_list=='custom_weight'].index.item()]
+                custom_weight_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='custom_weight'].index))
+                custom_weight = syn[custom_weight_idx]
             except (ValueError, NameError):
                 custom_weight = '--'
 
@@ -1298,7 +1301,8 @@ class CxSystem(object):
                     if _do_load ==1:
                         assert hasattr(self,'loaded_brian_data'), " -  Synaptic connection in the following line is set to be loaded, however the load_brian_data_path is not defined in the parameters. The connection is being created:\n%s"%str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
                 else:
-                    _do_load = int(syn[self.current_parameters_list[self.current_parameters_list=='load_connection'].index.item()])
+                    load_connection_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='load_connection'].index), 'no match')
+                    _do_load = int(syn[load_connection_idx])
             except TypeError:
                 _do_load = 0
                 pass
@@ -1422,7 +1426,8 @@ class CxSystem(object):
                 num_tmp =tmp_namespace['num_tmp']
                 self.total_number_of_synapses += num_tmp
                 try:
-                    _current_connections = int(num_tmp/float(syn[self.current_parameters_list[self.current_parameters_list=='n'].index.item()])) / len(self.current_values_list)
+                    n_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='n'].index), 'no match')
+                    _current_connections = int(num_tmp/float(syn[n_idx])) / len(self.current_values_list)
                 except ValueError:
                     print(" -  number of synapses for last connection was "
                            "equal to number of connections")
@@ -1624,7 +1629,8 @@ class CxSystem(object):
             #     self.thr.join()
 
         def VPM(self): #ventral posteromedial (VPM) thalamic nucleus
-            spike_times = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='spike_times'].index.item()].replace(' ',',')
+            spike_times_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='spike_times'].index))
+            spike_times = self.current_values_list[spike_times_idx].replace(' ',',')
             spike_times_list = ast.literal_eval(spike_times[0:spike_times.index('*')])
             spike_times_unit = spike_times[spike_times.index('*')+1:]
             tmp_namespace = {}
@@ -1633,12 +1639,16 @@ class CxSystem(object):
                   locals(), globals())
             spike_times_ = tmp_namespace["spike_times_"]
             try:
-                net_center = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='net_center'].index.item()]
+                tmp_net_center_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='net_center'].index), 'no match')
+                net_center = self.current_values_list[tmp_net_center_idx]
                 net_center = complex(net_center)
             except ValueError:
                 net_center = 0 + 0j
-            number_of_neurons = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='number_of_neurons'].index.item()]
-            radius = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='radius'].index.item()]
+            num_of_neurons_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'number_of_neurons'].index))
+            number_of_neurons = self.current_values_list[num_of_neurons_idx]
+            
+            radius_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='radius'].index))
+            radius = self.current_values_list[radius_idx]
             print(" -  Creating an input based on the central %s neurons "
                    "..."%number_of_neurons)
             Spikes_Name = 'GEN_SP'
@@ -1817,7 +1827,8 @@ class CxSystem(object):
             'VPM': [['idx', 'type', 'number_of_neurons', 'radius', 'spike_times', 'net_center', 'monitors'],[0, 1, 2, 3, 4], VPM],
             'spikes': [ ['idx','type','input_spikes_filename','monitors'] , [0,1,2] ,  spikes ]
         }
-        _input_type = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='type'].index.item()]
+        param_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='type'].index)) # this is equivalent to item() which is depricated
+        _input_type = self.current_values_list[param_idx]
         _all_columns = input_type_to_method_mapping[_input_type][0] # all possible columns of parameters for the current type of input in configuration fil
         assert _input_type in list(input_type_to_method_mapping.keys()), ' -  The input type %s of the configuration file is ' \
             'not defined' % _input_type
@@ -1829,16 +1840,19 @@ class CxSystem(object):
         assert len (self.current_parameters_list) <= len(input_type_to_method_mapping[_input_type][0]), ' -  Too many parameters for the\
          current %s input. The parameters should be consist of:\n %s'%(_input_type,input_type_to_method_mapping[_input_type][0])
         obligatory_columns = list(array(input_type_to_method_mapping[_input_type][0])[input_type_to_method_mapping[_input_type][1]])
-        obligatory_indices = [self.current_parameters_list[self.current_parameters_list==ii].index.item() for ii in obligatory_columns]
+        # next(iter()) is equivalent to item() which is depricated
+        obligatory_indices = [next(iter(self.current_parameters_list[self.current_parameters_list==ii].index)) for ii in obligatory_columns]
         assert not any(self.current_values_list.loc[obligatory_indices]=='--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_parameters_list) == len(self.current_values_list), \
             ' -  The number of columns for the input are not equal to number of values in the configuration file.'
         try:
-            mons = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='monitors'].index.item()]
+            # next(iter()) is equivalent to item() which is depricated
+            mons = self.current_values_list[next(iter(self.current_parameters_list[self.current_parameters_list=='monitors'].index), 'no match')]
         except ValueError:
             mons = '--'
-        group_idx = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='idx'].index.item()]
+        # next(iter()) is equivalent to item() which is depricated
+        group_idx = self.current_values_list[next(iter(self.current_parameters_list[self.current_parameters_list=='idx'].index))]
 
         assert group_idx not in self.NG_indices, \
             " -  Error: multiple indices with same values exist in the configuration file."
