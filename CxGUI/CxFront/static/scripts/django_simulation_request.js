@@ -5,7 +5,9 @@ $(function () {
           '',
           'success'
         );
-
+        console.log(JSON.stringify( params_editor.getValue())
+                            .replace(/\+/g, encodeURIComponent('+'))
+                            .replace(/&/g, encodeURIComponent('&')));
         $.ajax({
             type: 'POST',
             url: 'simulate',
