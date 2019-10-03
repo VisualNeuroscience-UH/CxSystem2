@@ -326,7 +326,7 @@ class CxSystem(object):
                 data = converter.get_csv_from_json_data()
             else:
                 data = conf
-        if header is True and type(conf) == dict or type(conf) == str:
+        if header is True and (type(conf) == dict or type(conf) == str):
             new_header = data.iloc[0]  # grab the first row for the header
             data = data[1:]  # take the data less the header row
             data.columns = new_header  # set the header row as the df header
