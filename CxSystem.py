@@ -40,6 +40,8 @@ import config_file_converter as fileconverter
 import pathlib as pth
 from CxGUI import gui
 
+prefs.devices.cpp_standalone.extra_make_args_unix = []
+
 class CxSystem(object):
     '''
     The main object of cortical system module for building and running a customized model of cortical module based on \
