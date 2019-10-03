@@ -557,7 +557,8 @@ class SimulationData(object):
 
         try:
             spike_df = pd.concat(spike_dict)
-            spike_df.time = numpy.round(spike_df.time/second, time_rounding)  # Decrease time-resolution here
+            # This has stopped working, noticed 9/2019 >.<
+            # spike_df.time = numpy.round(spike_df.time/second, time_rounding)  # Decrease time-resolution here
         except:
             spike_df = pd.DataFrame(data={'time':[0], 'neuron_index':[0]})  # if there's nothing to concat, create an empty df
 
