@@ -226,7 +226,6 @@ inputs_schema = {
                     "idx": {
                         "type": "integer",
                         "description": "index"
-                        // "default": "{{i}}",
                     },
                     "path": {
                         "type": "string",
@@ -373,16 +372,13 @@ physio_schema = {
             "id": "vairablevalue",
             "properties": {
                 "Variable": {
-                    "type": "string",
-                    "description": "defines "
+                    "type": "string"
                 },
                 "Value": {
                     "type": "string",
-                    "description": "defines "
                 },
                 "Comment": {
-                    "type": "string",
-                    "description": "defines "
+                    "type": "string"
                 }
             }
         },
@@ -392,8 +388,7 @@ physio_schema = {
                 "id": "vairablekeyvalue",
                 "properties": {
                     "Variable": {
-                        "type": "string",
-                        "description": "defines "
+                        "type": "string"
                     },
                     "Key-Value": {
                         "type": "array",
@@ -402,16 +397,13 @@ physio_schema = {
                             "type": "object",
                             "properties": {
                                 "Key": {
-                                    "type": "string",
-                                    "description": "defines "
+                                    "type": "string"
                                 },
                                 "Value": {
-                                    "type": "string",
-                                    "description": "defines "
+                                    "type": "string"
                                 },
                                 "Comment": {
-                                    "type": "string",
-                                    "description": "defines "
+                                    "type": "string"
                                 }
                             }
                         }
