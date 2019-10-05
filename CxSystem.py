@@ -509,7 +509,9 @@ class CxSystem(object):
             pass
 
     def _set_load_brian_data_path(self, *args):
-        self.load_brian_data_path = args[0]
+        if len(args) > 0 : # arguments exists if the path is to be set, but the loading won't happen until on of the connections needs it
+            self.load_brian_data_path = args[0]
+            return
         assert os.path.splitext(self.load_brian_data_path)[1], " -  The connections_loading_path_and_filename should contain file extension (.gz, .bz2 or .pickle)"
         self.load_brian_data_filename = ntpath.basename(self.load_brian_data_path)
         self.load_brian_data_folder = ntpath.dirname(self.load_brian_data_path)
@@ -560,12 +562,11 @@ class CxSystem(object):
             print(" -  CxSystem is being build on the scale of %s" %args[0])
 
     def load_positions_only(self,*args):
-        assert int(args[0]) == 0 or int(args[0]) == 1, \
-            ' -  The load_positions_only flag should be either 0 or 1 but it is %s .' % args[0]
+        assert int(args[0]) == 0 or int(args[0]) == 1, ' -  The load_positions_only flag should be either 0 or 1 but it is %s .' % args[0]
         self.load_positions_only = int(args[0])
-        if self.load_positions_only and hasattr(self,'loaded_brian_data'):
-            print(" -  only positions are being loaded from the "
-                   "brian_data_file")
+        if self.load_positions_only:
+            self._set_load_brian_data_path()
+            print(" -  only positions are being loaded from the brian_data_file")
 
     def set_do_benchmark(self,*args):
         assert int(args[0]) in [0,1] , " -  Do benchmark flag should be either 0 or 1"
@@ -1313,6 +1314,10 @@ class CxSystem(object):
             except TypeError:
                 _do_load = 0
                 pass
+
+            if (self.default_load_flag==1 or (self.default_load_flag==-1 and _do_load == 1 )) and not hasattr(self,'loaded_brian_data'):
+                ## only load the file if it's not loaded already, and if the connections are supposed to tbe loaded frmo the file
+                self._set_load_brian_data_path()
 
             try:
                 index_of_save_connection = int(where(self.current_parameters_list.values=='save_connection')[0])
