@@ -301,12 +301,14 @@ class CxSystem(object):
                     cropped_df = df.loc[variable_start_idx:]
                 return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
             else:
-                return eval(df['Value'][df['Key'] == key_name].item())
+                return eval(next(iter(df['Value'][df['Key'] == key_name])))
         except NameError:
             new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
             return self.value_extractor(df,new_key)
         except ValueError:
             raise ValueError("Parameter %s not found in the configuration file."%key_name)
+        except Exception as e:
+            print(e)
 
     def read_config_file(self, conf, header = False):
         '''
@@ -423,7 +425,7 @@ class CxSystem(object):
         parameters_to_set_prioritized = [it for priority_idx in range(len(options_with_priority)) for it in self.parameter_to_method_mapping if self.parameter_to_method_mapping[it][0] == priority_idx]
         for correct_parameter_to_set in parameters_to_set_prioritized:
             for ParamIdx,parameter in self.current_parameters_list.items():
-                if parameter == correct_parameter_to_set:
+                if parameter == correct_parameter_to_set and str(self.current_values_list[ParamIdx])[0] != '#':
                     assert (parameter in list(self.parameter_to_method_mapping.keys())), ' -  The tag %s is not defined.' % parameter
                     self.parameter_to_method_mapping[parameter][1](self.current_values_list[ParamIdx])
                     break
@@ -689,7 +691,10 @@ class CxSystem(object):
 
         assert 'V' in str(noise_sigma.get_best_unit()), ' -  The unit of noise_sigma should be volt'
         if neuron_type == 'PC':  # extract the layer index of PC neurons separately
-            local_namespace['layer_idx'] = eval(local_namespace['layer_idx'].replace('->', ',') )
+            if local_namespace['layer_idx'].isdigit():
+                local_namespace['layer_idx'] = local_namespace['layer_idx']
+            else:
+                local_namespace['layer_idx'] = eval(local_namespace['layer_idx'].replace('->', ',') )
         layer_idx = local_namespace['layer_idx']
         try:
             number_of_neurons = str(int(int(number_of_neurons) * self.scale))

@@ -92,7 +92,43 @@ runtime_params_schema = {
             "type": "boolean",
             "description": "If checked, the array runs will be considered as a multi-dimentional simulations",
             "format": "checkbox"
-        }
+        },
+        "run_in_cluster": {
+            "type": "boolean",
+            "description": "If checked, the simulation will be simulated on cluster",
+            "format": "checkbox"
+        },
+        "cluster_job_file_path": {
+            "type": "string",
+            "description": "path to the template batch file for submitting job on cluster",
+        },
+        "cluster_number_of_nodes": {
+            "type": "integer",
+            "description": "Defines number of nodes to be employed for cluster run",
+            "default": 1,
+            "minimum": 1,
+            "maximum": 32,
+        },
+        "cluster_address": {
+            "type": "string",
+            "description": "path to the template batch file for submitting job on cluster",
+        },
+        "username": {
+            "type": "string",
+            "description": "username for loggin into cluster",
+        },
+        "remote_repo_path": {
+            "type": "string",
+            "description": "remote CxSystem folder path",
+        },
+        "remote_output_folder": {
+            "type": "string",
+            "description": "remote output folder",
+        },
+        "remote_branch": {
+            "type": "string",
+            "description": "remote CxSystem branch to run the simulation on",
+        },
     }
 };
 
@@ -102,7 +138,7 @@ neurons_schema = {
     format: "tabs",
     items: {
         title: "NeuronGroup",
-        headerTemplate: "Group{{i}} - {{self.neuron_type}}",
+        headerTemplate: "[G{{i}}] {{self.neuron_type}} at L{{self.layer_idx}}",
         properties: {
             "idx": {
                 "type": "integer",
@@ -128,7 +164,7 @@ neurons_schema = {
             "layer_idx": {
                 "type": "string",
                 "description": "Defines ",
-                "enum": ["1", "2", "3", "4", "5", "6", "[2->1]", "[3->1]", "[4->1]", "[5->1]", "[6->1]", "[3->2]", "[4->2]", "[5->2]", "[6->2]", "[4->3]", "[5->3]", "[6->3]", "[5->4]", "[6->4]", "[6->5]"]
+                "enum": ["1", "2", "3", "4", "5", "6", "[2->1]", "[3->1]", "[4->1]", "[5->1]", "[6->1]", "[3->2]", "[4->2]", "[5->2]", "[6->2]", "[4->3]", "[5->3]", "[6->3]", "[5->4]", "[6->4]", "[6->5]", "[6->6]"]
             },
             "net_center": {
                 "type": "string",
@@ -177,7 +213,7 @@ inputs_schema = {
     format: "tabs",
     items: {
         title: "InputGroup",
-        headerTemplate: "Group{{i}} - {{self.neuron_type}}",
+        headerTemplate: "Group{{i}} - {{self.type}}",
         options: {
             "keep_oneof_values": false
         },
@@ -264,7 +300,7 @@ connections_schema = {
     format: "tabs",
     items: {
         title: "Synapse",
-        headerTemplate: "Synapse{{i}} - {{self.device}}",
+        headerTemplate: "[S{{i}}] {{self.pre_syn_idx}}  ➤ {{self.post_syn_idx}}",
         "properties": {
             "receptor": {
                 "type": "string",
@@ -327,7 +363,7 @@ physio_schema = {
     format: "tabs",
     items: {
         title: "Physio",
-        headerTemplate: "Physio{{i}} - {{self.device}}",
+        headerTemplate: "{{self.Variable}}",
         options: {
             "keep_oneof_values": false
         },

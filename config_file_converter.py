@@ -265,7 +265,7 @@ class filetype_converter():
                                 if not (pd.isna(key) and pd.isna(value) and comment == ""):
                                     try:
                                         key_val = {"Key" : str(key).strip(" "),
-                                               "Value" : int(value),
+                                               "Value" : str(value),
                                                "Comment" : comment}
                                     except ValueError:
                                         key_val = {"Key": str(key).strip(" "),
@@ -334,11 +334,14 @@ class filetype_converter():
         self.get_csv(clean=False)
 
 if __name__ == '__main__':
-    p = Path('./tests/config_files/pytest_Anatomy_config.csv')
-    # p = Path('./tests/config_files/pytest_Anatomy_config.json')
+    from pprint import pprint
+    # p = Path('./tests/config_files/pytest_Anatomy_config.csv')
     # p = Path('./tests/config_files/pytest_Physiology_config.csv')
+    # p = Path('./tests/config_files/pytest_Anatomy_config.json')
     # p = Path('./tests/config_files/pytest_Physiology_config.json')
+    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Anatomy_config.csv')
+    p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Physiology_config.csv')
     converter = filetype_converter(p)
-    converter.save_as_json()
+    pprint(converter.save_as_json())
     # converter.save_as_csv()
     # pprint(converter.output)

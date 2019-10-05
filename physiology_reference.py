@@ -561,7 +561,7 @@ class neuron_reference(object):
                 return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
             else:
                 try:
-                    return eval(df['Value'][df['Key'] == key_name].item())
+                    return eval(next(iter(df['Value'][df['Key'] == key_name])))
                 except NameError:
                     df_reset_index = df.reset_index(drop=True)
                     df_reset_index = df_reset_index[0:df_reset_index[df_reset_index['Key'] == key_name].index[0]]
