@@ -93,6 +93,7 @@ class cluster_run(object):
             self.ssh_commander('mkdir %s;cd %s;git clone https://github.com/VisualNeuroscience-UH/CxSystem;cd CxSystem; git checkout %s' % (self.remote_repo_path,self.remote_repo_path,self.remote_branch),0)
             self.remote_repo_path = self.remote_repo_path +  '/CxSystem'
             print(" -  CxSystem cloned in cluster.")
+
         if 'json' in Path(anat_file_address).suffix.lower():
             converter = fileconverter.filetype_converter(anat_file_address)
             anat_file_address = converter.save_as_csv(overwrite=True)
@@ -104,10 +105,9 @@ class cluster_run(object):
         scp.put(physio_file_address, self.remote_repo_path + '/_tmp_physio_config{}.csv'.format(self.suffix))
         print(" -  config files transfered to cluster")
         # ask user to set the number of nodes, time and memory:
-        input(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
+        print(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
                   "\nNote that the number of nodes in default slurm file should always be set to 1. Instead you should enter the number of nodes in the CxSystem network config file. "
-                  "\nAlso the default number of CPUs=16 does not need to be changed most of the times. "
-                  "\nPress a key to contiue ...")
+                  "\nAlso the default number of CPUs=16 does not need to be changed most of the times. ")
         if not os.path.exists('./_cluster_tmp'.replace('/',os.sep)):
             os.mkdir('./_cluster_tmp'.replace('/',os.sep))
             print(" -  _cluster_tmp folder created locally to keep the "
