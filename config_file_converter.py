@@ -37,7 +37,7 @@ class filetype_converter():
             self.new_filepath = self.directory.joinpath(new_filename)
             counter = 1
             while self.new_filepath.is_file():
-                new_filename = self.filename_without_extension + f'_{counter}' + '.csv'
+                new_filename = self.filename_without_extension + '_' + str(counter) + '.csv'
                 self.new_filepath = self.directory.joinpath(new_filename)
                 counter+=1
 
@@ -163,7 +163,7 @@ class filetype_converter():
             self.new_filepath = self.directory.joinpath(new_filename)
             counter = 1
             while self.new_filepath.is_file():
-                new_filename = self.filename_without_extension + f'_{counter}' + '.json'
+                new_filename = self.filename_without_extension + '_'+ str(counter) + '.json'
                 self.new_filepath = self.directory.joinpath(new_filename)
                 counter+=1
 
