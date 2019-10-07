@@ -1,0 +1,7 @@
+brian2genn
+django
+matplotlib
+pandas
+pytest
+scipy
+scp
