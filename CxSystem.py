@@ -355,7 +355,7 @@ class CxSystem(object):
             print(" -  System is going to be run using GeNN devices, " \
                   "Errors may rise if Brian2/Brian2GeNN/GeNN is not installed correctly or the limitations are not " \
                   "taken in to account.")
-        print(f" -  CxSystem is running on {self.device} device")
+        print(" -  CxSystem is running on {} device".formate(self.device))
 
     def run(self):
         if not self.array_run:
@@ -1948,9 +1948,9 @@ if __name__ == '__main__' :
         #               os.path.dirname(os.path.realpath(__file__)) +
         #               '/config_files/pytest_Rev2_Step2gamma_Physiology_config.csv', )
 
-        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/tests/config_files/pytest_Anatomy_config.csv', \
+        CM = CxSystem(os.path.dirname(os.path.realpath(__file__)) + '/tests/config_files/pytest_Anatomy_config.json', \
                       os.path.dirname(os.path.realpath(__file__)) +
-                      '/tests/config_files/pytest_Physiology_config.csv', )
+                      '/tests/config_files/pytest_Physiology_config.json', )
 
         CM.run()
     # from data_visualizers.data_visualization import DataVisualization
