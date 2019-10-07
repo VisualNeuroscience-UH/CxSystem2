@@ -355,7 +355,7 @@ class CxSystem(object):
             print(" -  System is going to be run using GeNN devices, " \
                   "Errors may rise if Brian2/Brian2GeNN/GeNN is not installed correctly or the limitations are not " \
                   "taken in to account.")
-        print(" -  CxSystem is running on {} device".formate(self.device))
+        print(" -  CxSystem is running on {} device".format(self.device))
 
     def run(self):
         if not self.array_run:
