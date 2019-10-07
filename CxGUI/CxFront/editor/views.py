@@ -8,6 +8,7 @@ from pathlib import Path
 [sys.path.append(i) for i in ['.', '..', '../..']]
 from CxSystem import CxSystem as Cx
 import multiprocessing
+from getpass import getpass
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -27,6 +28,8 @@ def CxSpawner(anatomy, physiology,root_path):
     :param working: the index of the process that is being currently performed. This is to keep track of running processes to prevent spawning more than required processes.
     :param paths: The path for saving the output of the current instance of CxSystem.
     '''
+    from time import sleep
+    sleep(10)
     print(root_path)
     os.chdir(root_path)
 
@@ -66,8 +69,10 @@ def simulate(request):
     #     json.dump(physiology, f)
     # CM = Cx.CxSystem('.\\tmp_anatomy.json', '.\\tmp_physio.json')
 
-
+    if anatomy['params']['run_in_cluster'] == 1:
+        anatomy['params']['password'] = getpass('Please enter your password for user {}: '.format(anatomy["params"]["username"]))
     p = multiprocessing.Process(target=CxSpawner, args=(anatomy, physiology,Path.cwd().parent.parent))
+    p.name = "spawned_CxSystem"
     p.start()
 
 

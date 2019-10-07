@@ -22,7 +22,7 @@ class runserver:
         server_folder= Path(os.path.dirname(__file__)).joinpath('CxFront')
         if platform == 'win32':
             disable_file_system_redirection().__enter__()
-            os.system(f'cd {server_folder.as_posix()} && start chrome http://127.0.0.1:8000/ && python manage.py runserver')
+            os.system('cd {} && start chrome http://127.0.0.1:8000/ && python manage.py runserver'.format(server_folder.as_posix()))
         else:
-            os.system(f'cd {server_folder}; python manage.py runserver')
+            os.system('cd {}; python manage.py runserver'.format(server_folder))
         webbrowser.get('chrome').open_new('http://127.0.0.1:8000/')
