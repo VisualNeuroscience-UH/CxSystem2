@@ -5,129 +5,129 @@ runtime_params_schema = {
     "properties": {
         "runtime": {
             "type": "string",
-            "description": "Duration of simulation in brian units, e.g. 0.2*seconds",
+            "description": "Duration of simulation (e.g. 1500*ms or 1.5*second)",
         },
         "device": {
             "type": "string",
-            "description": "Brian simulation device type",
+            "description": "Device for Brian2 code generation",
             "enum": ["Cpp", "Python", "GeNN"]
         },
         "sys_mode": {
             "type": "string",
-            "description": "System mode: local means ... , expanded means ... ",
+            "description": "System mode: local means ... , expanded means ... (?)",
             "enum": ["local", "expanded"]
         },
         "scale": {
             "type": "string",
-            "description": "Defines how much the network is scaled",
+            "description": "Defines how much the network is scaled (?)",
         },
         "grid_radius": {
             "type": "string",
-            "description": "Defines grid radius in micrometer (um)",
+            "description": "Radius of the 2D circle inside which the neurons are randomly placed (e.g. 200*um)",
         },
         "min_distance": {
             "type": "string",
-            "description": "Defines minimum distance between the neurons in micrometer (um)",
+            "description": "Minimum distance between neurons (e.g. 1*um)",
         },
         "output_path_and_filename": {
             "type": "string",
-            "description": "relative path to the output filename",
+            "description": "Relative path and filename to where results are stored (e.g. ./results/output.gz)",
             "default": "./results/output.gz"
         },
         "connections_saving_path_and_filename": {
             "type": "string",
-            "description": "relative path of the filename to save the output connection information ",
+            "description": "Relative path and filename to where the network configuration with synaptic weights are stored (export)",
             "default": "./simdata/data.gz"
         },
         "connections_loading_path_and_filename": {
             "type": "string",
-            "description": "relative path of the filename to load the output connection information from",
+            "description": "Relative path and filename from where the network configuration with synaptic weights are retrieved (import)",
             "default": "./simdata/data.gz"
         },
         "number_of_process": {
             "type": "integer",
-            "description": "Defines number of processes for array run",
+            "description": "Number of CPU cores to use in parallel (for parameter searches; a single simulation cannot be run in parallel)",
             "default": 1,
             "minimum": 1,
             "maximum": 32,
         },
         "default_clock": {
             "type": "string",
-            "description": "Defines simulation clock in micro-seconds (us)",
+            "description": "Simulation time step (e.g. 0.1*ms)",
         },
         "trials_per_config": {
             "type": "integer",
-            "description": "Defines how many times each simulation should be repeated",
+            "description": "Number of trials for each set of parameters",
             "default": 1,
             "minimum": 1,
             "maximum": 20,
         },
         "do_init_vms": {
             "type": "boolean",
-            "description": "If checked, the initial membrane voltages will be randomized",
+            "description": "Randomize initial membrane voltages (between leak reversal and threshold potential)",
             "format": "checkbox"
         },
         "load_positions_only": {
             "type": "boolean",
-            "description": "If checked, only the neuron positions will be loaded from the simulation data file (and connection info will not be loaded)",
+            "description": "Import neuron positions from connectivity file but randomize connections",
             "format": "checkbox"
         },
 
         "do_benchmark": {
             "type": "boolean",
-            "description": "If checked, the simulation will be benchamrked",
+            "description": "Do a benchmark (?)",
             "format": "checkbox"
         },
         "save_generated_video_input_flag": {
             "type": "boolean",
-            "description": "If checked, the generated video for input will be saved",
+            "description": "If checked, the generated video for input will be saved (?)",
             "format": "checkbox"
         },
         "multidimension_array_run": {
             "type": "boolean",
-            "description": "If checked, the array runs will be considered as a multi-dimentional simulations",
+            "description": "Run all possible parameter combinations in array run (instead of 1D sweeps)",
             "format": "checkbox"
         },
         "profiling": {
             "type": "boolean",
-            "description": "If checked, the array runs will be considered as a multi-dimentional simulations",
+            "description": "Benchmark the simulation using Brian2's profiling tool",
             "format": "checkbox"
         },
         "run_in_cluster": {
             "type": "boolean",
-            "description": "If checked, the simulation will be simulated on cluster",
+            "description": "Run the simulation on a cluster",
             "format": "checkbox"
         },
         "cluster_job_file_path": {
             "type": "string",
-            "description": "path to the template batch file for submitting job on cluster",
+            "description": "Relative path and filename of the Slurm batch file",
         },
         "cluster_number_of_nodes": {
             "type": "integer",
-            "description": "Defines number of nodes to be employed for cluster run",
+            "description": "Number of nodes to be employed on the HPC server",
             "default": 1,
             "minimum": 1,
             "maximum": 32,
         },
         "cluster_address": {
             "type": "string",
-            "description": "path to the template batch file for submitting job on cluster",
+            "description": "Address of the HPC server (e.g. taito.csc.fi)",
         },
         "username": {
             "type": "string",
-            "description": "username for loggin into cluster",
+            "description": "Username on the HPC server",
         },
         "remote_repo_path": {
             "type": "string",
-            "description": "remote CxSystem folder path",
+            "description": "Absolute path to CxSystem2 on the HPC server",
         },
         "remote_output_folder": {
             "type": "string",
-            "description": "remote output folder",
+            "description": "Absolute path for storing results on the HPC server",
         },
         "remote_branch": {
             "type": "string",
-            "description": "remote CxSystem branch to run the simulation on",
+            "description": "GitHub branch of CxSystem2 to use for HPC simulations",
         },
     }
 };
@@ -142,54 +142,58 @@ neurons_schema = {
         properties: {
             "idx": {
                 "type": "integer",
-                "description": "index",
+                "description": "Running index for the neuron group",
                 // "default": "{{i}}",
             },
             "number_of_neurons": {
                 "type": "integer",
-                "description": "Defines number of neurons in neuron group ",
+                "description": "Number of neurons in the neuron group ",
                 "default": 100,
                 "minimum": 1,
                 "maximum": 10000,
             },
             "neuron_type": {
                 "type": "string",
-                "description": "Defines the neuron type",
+                "description": "Neuron type",
                 "enum": ["PC", "BC", "MC", "L1i","SS"]
             },
             'neuron_subtype':{
                   "type": "string",
-                "description": "Defines the neuron subtype",
+                "description": "Neuron subtype, i.e. reference to the concrete set of parameters",
             },
             "layer_idx": {
                 "type": "string",
-                "description": "Defines ",
-                "enum": ["1", "2", "3", "4", "5", "6", "[2->1]", "[3->1]", "[4->1]", "[5->1]", "[6->1]", "[3->2]", "[4->2]", "[5->2]", "[6->2]", "[4->3]", "[5->3]", "[6->3]", "[5->4]", "[6->4]", "[6->5]", "[6->6]"]
+                "description": "Layer where the neuron population is located (2 = layer 2/3)",
+                "enum": ["1", "2", "4", "5", "6",
+                    "[2->1]", "[4->1]", "[5->1]", "[6->1]",
+                    "[2->2]", "[4->2]", "[5->2]", "[6->2]",
+                    "[4->4]", "[5->4]", "[6->4]",
+                    "[5->5]", "[6->5]", "[6->6]"]
             },
             "net_center": {
                 "type": "string",
-                "description": "net center ",
+                "description": "Center point of the neuron population (e.g. 0+0j)",
             },
             "noise_sigma": {
                 "type": "string",
-                "description": "defines noise",
+                "description": "Membrane noise (e.g. 2*mV)",
             },
             "monitors": {
                 "type": "string",
                 "format": "text",
-                "description": "defines noise",
+                "description": "Monitors for recording spikes and state variables",
             },
             'n_background_inputs':{
                 "type": "integer",
-                "description": "background input"
+                "description": "Number of excitatory background synapses"
             },
             'n_background_inhibition':{
                 "type": "integer",
-                "description": "n_background_inhibition"
+                "description": "Number of inhibitory background synapses"
             },
             'gemean':{
                 "type": "string",
-                "description": ""
+                "description": "gemean"
             },
             'gestd':{
                 "type": "string",
@@ -201,7 +205,7 @@ neurons_schema = {
             },
             'gistd':{
                 "type": "string",
-                "description": ""
+                "description": "gistd"
             }
         }
     }
@@ -303,12 +307,12 @@ connections_schema = {
         "properties": {
             "receptor": {
                 "type": "string",
-                "description": "Defines the receptor types",
+                "description": "Sets whether the connection is excitatory or inhibitory",
                 "enum": ["ge", "gi"]
             },
             "pre_syn_idx": {
                 "type": "integer",
-                "description": "Defines ...",
+                "description": "Presynaptic neuron group index",
                 "default": 0,
                 "minimum": 0,
                 "maximum": 100
@@ -316,40 +320,40 @@ connections_schema = {
             "post_syn_idx": {
                 "type": "string",
                 "format": "text",
-                "description": "Defines ...",
+                "description": "Postsynaptic neuron group index",
             },
             "syn_type": {
                 "type": "string",
-                "description": "Defines  ",
+                "description": "Synapse model",
                 "default": "Fixed",
-                "enum": ["Fixed","Depressing"]
+                "enum": ["Fixed", "Depressing", "Facilitating"]
             },
             "p": {
                 "type": "string",
-                "description": "Defines ",
+                "description": "Connection probability",
             },
             "n": {
                 "type": "string",
-                "description": "Defines "
+                "description": "Number of synapses per connection"
             },
             "monitors": {
                 "type": "string",
                 "format": "text",
-                "description": "defines noise",
+                "description": "Monitors for synaptic state variables",
             },
             "load_connection": {
                 "type": "string",
                 "format": "text",
-                "description": "defines noise",
+                "description": "Load connection",
             },
             "save_connection": {
                 "type": "string",
                 "format": "text",
-                "description": "defines noise",
+                "description": "Save connection",
             },
             "custom_weight": {
                 "type": "string",
-                "description": "defines "
+                "description": "Synaptic weight for this specific connection (overrides more general weight definitions)"
             }
         }
     }
