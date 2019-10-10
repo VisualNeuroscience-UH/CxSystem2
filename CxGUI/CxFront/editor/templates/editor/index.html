@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel='stylesheet' href='/static/css/foundation-5.5.3/css/foundation.min.css'>
 <link rel='stylesheet' href='/static/css/font-awesome-4.0.3/css/font-awesome.css'>
+<link rel='stylesheet' href='/static/css/introjs.min.css'>
 
 <script src="/static/scripts/jsoneditor.min.js"></script>
 <!--<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>-->
@@ -38,18 +39,25 @@
     </ul>
     <section class="top-bar-section">
         <ul class="left">
-            <li class="active"><a href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import
+            <li class="active" data-step="1" data-intro="Use this button to import anatomy and physiology configuration files"><a href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import
                 Parameters/Physiology</a></li>
 <!--            <li class="active"><a href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import-->
 <!--                Physiology</a></li>-->
 
-            <li class="active"><a href="javascript:void(0);" onclick="downloadanatomy()">Export Parameters</a></li>
-            <li class="active"><a href="javascript:void(0);" onclick="downloadphysiology()">Export Physiology</a></li>
+            <li class="active"><a href="javascript:void(0);" onclick="downloadanatomy()"
+                                  data-step="2"
+                                  data-intro="When you are done changing the anatomy configuration file, use this button to download your changed configuration file.">Export Parameters</a></li>
+            <li class="active"><a href="javascript:void(0);" onclick="downloadphysiology()"
+                                  data-step="3"
+                                  data-intro="When you are done changing the physiology configuration file, use this button to download your changed configuration file.">Export Physiology</a></li>
+            <li class="active"><a href="javascript:void(0);" onclick="javascript:introJs().start();">Help</a></li>
         </ul>
         <ul class="right">
             <form action='simulate'>
                 {% csrf_token %}
-                <a class="button alert" href="javascript:void(0);" onclick="document.getElementById('simulator').click()">Simulate</a>
+                <a class="button alert" href="javascript:void(0);" onclick="document.getElementById('simulator').click()"
+                                    data-step="4"
+                                    data-intro="Use this button to initiate a simulation on the server">Simulate</a>
                 <input id="simulator" type="submit" value="Simulate" style="display: none;"/>
             </form>
         </ul>
@@ -66,11 +74,21 @@
 
 <div class="tabsdiv">
     <div class="tabs__topbar">
-        <button class="tabs__button" data-for-tab="1">Simulation</button>
-        <button class="tabs__button" data-for-tab="2">Inputs</button>
-        <button class="tabs__button" data-for-tab="3">NeuronGroups</button>
-        <button class="tabs__button" data-for-tab="4">Connections</button>
-        <button class="tabs__button " data-for-tab="5">Physiology</button>
+        <button class="tabs__button" data-for-tab="1"
+                data-step="5"
+                data-intro="Use this tab to configure the simulation parameters">Simulation</button>
+        <button class="tabs__button" data-for-tab="2"
+                data-step="6"
+                data-intro="Use this tab to configure the parameters related to the input">Inputs</button>
+        <button class="tabs__button" data-for-tab="3"
+                data-step="7"
+                data-intro="Use this tab to configure the parameters related to neuron groups in the simulation">NeuronGroups</button>
+        <button class="tabs__button" data-for-tab="4"
+                data-step="8"
+                data-intro="Use this tab to configure the parameters for synaptic connections">Connections</button>
+        <button class="tabs__button " data-for-tab="5"
+                data-step="9"
+                data-intro="Use this tab to configure the physiological parameters of the network ">Physiology</button>
     </div>
     <div class="main_tabs">
         <div class="tabs__content" data-tab="1">
@@ -105,6 +123,9 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.2/ajv.bundle.js"></script>
 <script src="/static/scripts/main.js"></script>
+<script src="/static/scripts/intro.min.js"></script>
+
+
 <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
 <script src="http://malsup.github.com/jquery.form.js"></script>
 

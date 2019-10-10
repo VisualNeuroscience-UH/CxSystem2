@@ -28,6 +28,10 @@ import getpass
 import paramiko
 from scp import SCPClient
 from builtins import input
+from sys import platform
+from pathlib import Path
+import config_file_converter as fileconverter
+
 
 class cluster_run(object):
 
@@ -64,7 +68,12 @@ class cluster_run(object):
             print ("Loggin in with user %s"%self.username)
         except NameError:
             self.username = input('username: ')
-        self.password = getpass.getpass('password: ')
+        try:
+            self.password = self.parameter_finder(array_run_obj.anatomy_df, 'password')
+        except NameError:
+            self.password = getpass.getpass('password: ')
+
+
         self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
         print (" -  temp file suffix is %s" %self.suffix)
         self.client = paramiko.SSHClient()
@@ -84,14 +93,21 @@ class cluster_run(object):
             self.ssh_commander('mkdir %s;cd %s;git clone https://github.com/VisualNeuroscience-UH/CxSystem;cd CxSystem; git checkout %s' % (self.remote_repo_path,self.remote_repo_path,self.remote_branch),0)
             self.remote_repo_path = self.remote_repo_path +  '/CxSystem'
             print(" -  CxSystem cloned in cluster.")
-        scp.put(anat_file_address, self.remote_repo_path+ '/_tmp_anat_config.csv')
-        scp.put(physio_file_address, self.remote_repo_path + '/_tmp_physio_config.csv')
+
+        if 'json' in Path(anat_file_address).suffix.lower():
+            converter = fileconverter.filetype_converter(anat_file_address)
+            anat_file_address = converter.save_as_csv(overwrite=True)
+        if 'json' in Path(physio_file_address).suffix.lower():
+            converter = fileconverter.filetype_converter(physio_file_address)
+            physio_file_address = converter.save_as_csv(overwrite=True)
+
+        scp.put(anat_file_address, self.remote_repo_path+ '/_tmp_anat_config{}.csv'.format(self.suffix))
+        scp.put(physio_file_address, self.remote_repo_path + '/_tmp_physio_config{}.csv'.format(self.suffix))
         print(" -  config files transfered to cluster")
         # ask user to set the number of nodes, time and memory:
-        input(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
+        print(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
                   "\nNote that the number of nodes in default slurm file should always be set to 1. Instead you should enter the number of nodes in the CxSystem network config file. "
-                  "\nAlso the default number of CPUs=16 does not need to be changed most of the times. "
-                  "\nPress a key to contiue ...")
+                  "\nAlso the default number of CPUs=16 does not need to be changed most of the times. ")
         if not os.path.exists('./_cluster_tmp'.replace('/',os.sep)):
             os.mkdir('./_cluster_tmp'.replace('/',os.sep))
             print(" -  _cluster_tmp folder created locally to keep the "
@@ -116,6 +132,10 @@ class cluster_run(object):
         self.chan = self.client.invoke_shell()
         self.chan.send('cd %s\n'%self.remote_repo_path)
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
+            if platform == 'win32':
+                print(" -  Converting the file using dos2unix")
+                self.chan.send('dos2unix _tmp_slurm_%d.job\n' % item_idx)
+                time.sleep(1)
             self.chan.send('sbatch _tmp_slurm_%d.job\n' %item_idx)
             time.sleep(1)
         print(" -  Slurm job successfully submitted")
@@ -183,11 +203,11 @@ if __name__ == '__main__':
     while waiting_flag:
         # if not ssh_commander(client,'cd %s; ls -d */' % (remote_result_abs_path), 0) and 'metadata' in ssh_commander(client,'cd %s; ls' % (remote_result_abs_path), 0):
         # just a better check:
-        if not checker_data['username'] in ssh_commander(client, 'squeue -l -u %s' % checker_data['username'], 0):
+        if not checker_data['username'] in ssh_commander(client, 'squeue -l -u %s' % checker_data['username'], 0).decode('utf-8'):
             # here it means there is no folder in result folder and therefore all simulations are done
             # so we copy back the result and remove the files on cluster
             print(" -  Copying the results from cluster...")
-            for item in ssh_commander(client, 'cd %s; ls' % (remote_result_abs_path), 0).split('\n'):
+            for item in ssh_commander(client, 'cd %s; ls' % (remote_result_abs_path), 0).decode('utf-8').split('\n'):
                 if item != '':
                     scp.get( remote_result_abs_path + '/' + item, os.path.join(checker_data['local_folder'], item))
             # cleaning

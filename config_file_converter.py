@@ -18,6 +18,7 @@ class filetype_converter():
             self.original_path = Path(input)
             self.directory = self.original_path.parent.absolute()
             self.filename_without_extension = self.original_path.stem
+        self.overwrite = False
         self.output = {}
         self.params = {}
         self.IN = []
@@ -35,11 +36,12 @@ class filetype_converter():
         if self.original_path.suffix == '.json':
             new_filename = self.filename_without_extension + '.csv'
             self.new_filepath = self.directory.joinpath(new_filename)
-            counter = 1
-            while self.new_filepath.is_file():
-                new_filename = self.filename_without_extension + f'_{counter}' + '.csv'
-                self.new_filepath = self.directory.joinpath(new_filename)
-                counter+=1
+            if not self.overwrite:
+                counter = 1
+                while self.new_filepath.is_file():
+                    new_filename = self.filename_without_extension + '_' + str(counter) + '.csv'
+                    self.new_filepath = self.directory.joinpath(new_filename)
+                    counter+=1
 
             with open(self.original_path, 'r') as f:
                 json_data = json.load(f)
@@ -161,11 +163,12 @@ class filetype_converter():
         if self.original_path.suffix == '.csv':
             new_filename = self.filename_without_extension + '.json'
             self.new_filepath = self.directory.joinpath(new_filename)
-            counter = 1
-            while self.new_filepath.is_file():
-                new_filename = self.filename_without_extension + f'_{counter}' + '.json'
-                self.new_filepath = self.directory.joinpath(new_filename)
-                counter+=1
+            if self.overwrite:
+                counter = 1
+                while self.new_filepath.is_file():
+                    new_filename = self.filename_without_extension + '_'+ str(counter) + '.json'
+                    self.new_filepath = self.directory.joinpath(new_filename)
+                    counter+=1
 
             with open(self.original_path, 'r') as f:
                 csv_data = pd.read_csv(f,header=None)
@@ -265,7 +268,7 @@ class filetype_converter():
                                 if not (pd.isna(key) and pd.isna(value) and comment == ""):
                                     try:
                                         key_val = {"Key" : str(key).strip(" "),
-                                               "Value" : int(value),
+                                               "Value" : str(value),
                                                "Comment" : comment}
                                     except ValueError:
                                         key_val = {"Key": str(key).strip(" "),
@@ -327,17 +330,26 @@ class filetype_converter():
     def clean(self):
         os.remove(self.new_filepath)
 
-    def save_as_json(self):
+    def save_as_json(self,overwrite=False):
+        self.overwrite = overwrite
         self.get_json(clean=False)
+        return self.new_filepath
 
-    def save_as_csv(self):
+    def save_as_csv(self,overwrite=False):
+        self.overwrite = overwrite
         self.get_csv(clean=False)
+        return self.new_filepath
 
 if __name__ == '__main__':
-    p = Path('./tests/config_files/pytest_Anatomy_config.csv')
-    # p = Path('./tests/config_files/pytest_Anatomy_config.json')
+    from pprint import pprint
+    # p = Path('./tests/config_files/pytest_Anatomy_config.csv')
     # p = Path('./tests/config_files/pytest_Physiology_config.csv')
+    # p = Path('./tests/config_files/pytest_Anatomy_config.json')
     # p = Path('./tests/config_files/pytest_Physiology_config.json')
+    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Anatomy_config.csv')
+    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Physiology_config.csv')
+    p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Anatomy_config.csv')
+    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Physiology_config.csv')
     converter = filetype_converter(p)
     converter.save_as_json()
     # converter.save_as_csv()

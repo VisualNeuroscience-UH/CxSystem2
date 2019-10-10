@@ -17,7 +17,15 @@
     "multidimension_array_run": 0,
     "number_of_process": 1,
     "trials_per_config": 1,
-    "default_clock": "0.1*ms"
+    "default_clock": "0.1*ms",
+    "run_in_cluster": 0,
+    "cluster_job_file_path": "./slurm.job",
+    "cluster_number_of_nodes": 1,
+    "cluster_address": "taito.csc.fi",
+    "username": "andalibi",
+    "remote_repo_path": "/homeappl/home/andalibi/CxSystem",
+    "remote_output_folder": "/homeappl/home/andalibi/CxSystem/out",
+    "remote_branch": "frontend"
   },
   "IN": [
     {
