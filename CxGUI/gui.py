@@ -21,20 +21,6 @@ class runserver:
     def __init__(self):
         crr_file_folder= Path(os.path.dirname(__file__))
         server_folder= crr_file_folder.joinpath('CxFront')
-        crt_path = os.path.join(crr_file_folder, "../certificates/server.crt")
-        key_path = os.path.join(crr_file_folder, "../certificates/server.key")
         if platform == 'win32':
             disable_file_system_redirection().__enter__()
-            if os.path.exists(crt_path) and os.path.exists(key_path):
-                os.system('cd ' + server_folder.as_posix()  + ' && start chrome https://127.0.0.1:8000/ && python manage.py runsslserver --certificate ' + crt_path + ' --key ' + key_path)
-                webbrowser.get('chrome').open_new('https://127.0.0.1:8000/')
-            else:
-                os.system('cd ' + server_folder.as_posix()  + ' && start chrome http://127.0.0.1:8000/ && python manage.py runserver')
-                webbrowser.get('chrome').open_new('http://127.0.0.1:8000/')
-        else:
-            if os.path.exists(crt_path) and os.path.exists(key_path):
-                os.system('cd  ' + server_folder.as_posix()  + '; python manage.py runsslserver --certificate ' + crt_path + ' --key ' + key_path)
-                webbrowser.get('chrome').open_new('https://127.0.0.1:8000/')
-            else:
-                os.system('cd  ' + server_folder.as_posix()  + '; python manage.py runserver')
-                webbrowser.get('chrome').open_new('http://127.0.0.1:8000/')
+        os.system('cd ' + server_folder.as_posix()  + ' && python manage.py runserver_plus --cert server_cert')
