@@ -139,6 +139,11 @@ input + a {
     margin-right: 10px !important;
 }
 
+
+a.disable {
+  pointer-events: none;
+  cursor: default;
+}
 /* button[type="button"] {
     margin-left: 100px !important;
 } */
