@@ -53,4 +53,6 @@ tests/__pycache__
 .hypothesis
 # Output data files which may be big
 
-
+# SSL certificates
+CxGUI/CxFront/server_cert.key
+CxGUI/CxFront/server_cert.crt
