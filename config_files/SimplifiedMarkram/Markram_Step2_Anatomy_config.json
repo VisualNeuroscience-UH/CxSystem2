@@ -22,10 +22,10 @@
     "cluster_job_file_path": "./slurm.job",
     "cluster_number_of_nodes": 3,
     "cluster_address": "taito.csc.fi",
-    "username": "shohokka",
-    "remote_repo_path": "/homeappl/home/shohokka/CxSystem",
-    "remote_output_folder": "/wrk/shohokka/rev2_gamma/",
-    "remote_branch": "synapticnoise"
+    "username": "andalibi",
+    "remote_repo_path": "/homeappl/home/andalibi/CxSystem",
+    "remote_output_folder": "/wrk/andalibi/tester_gui/",
+    "remote_branch": "frontend"
   },
   "IN": [
     {

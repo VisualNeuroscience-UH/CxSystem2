@@ -1,1 +1,3019 @@
-{"physio_data": [{"Variable": "model_variation", "Value": 1, "Comment": ""}, {"Variable": "neuron_model", "Value": "'EIF'", "Comment": ""}, {"Variable": "excitation_model", "Value": "'SIMPLE_E'", "Comment": ""}, {"Variable": "inhibition_model", "Value": "'SIMPLE_I_GABAB'", "Comment": ""}, {"Variable": "pc_neuron_model", "Value": "'EIF'", "Comment": ""}, {"Variable": "pc_excitation_model", "Value": "'SIMPLE_E'", "Comment": ""}, {"Variable": "pc_inhibition_model", "Value": "'SIMPLE_I_GABAB'", "Comment": ""}, {"Variable": "calcium_concentration", "Value": 2, "Comment": ""}, {"Variable": "U_E", "Value": "0.5", "Comment": ""}, {"Variable": "U_I", "Value": "0.25", "Comment": ""}, {"Variable": "tau_d", "Value": "670*ms", "Comment": ""}, {"Variable": "tau_f", "Value": "670*ms", "Comment": ""}, {"Variable": "tau_fd", "Value": "140*ms", "Comment": ""}, {"Variable": "U_f", "Value": "0.09", "Comment": ""}, {"Variable": "background_rate", "Value": "0.3*Hz", "Comment": ""}, {"Variable": "background_rate_inhibition", "Value": "0*Hz", "Comment": ""}, {"Variable": "tonic_depol_level", "Value": "0.95", "Comment": ""}, {"Variable": "J", "Value": "0.72*nS", "Comment": ""}, {"Variable": "J_I", "Value": "0.43*nS", "Comment": ""}, {"Variable": "k", "Value": "0.55", "Comment": ""}, {"Variable": "k_I", "Value": "1.93", "Comment": ""}, {"Variable": "flag_background_calcium_scaling", "Value": 1, "Comment": ""}, {"Variable": "background_E_E_weight", "Value": "J", "Comment": ""}, {"Variable": "background_E_I_weight", "Value": "J_I", "Comment": ""}, {"Variable": "background_I_E_weight", "Value": "k*J", "Comment": ""}, {"Variable": "background_I_I_weight", "Value": "k_I*J_I", "Comment": ""}, {"Variable": "_weights", "Key-Value": [{"Key": "w_TC_E-E_connections", "Value": "J", "Comment": ""}, {"Key": "w_TC_E-I_connections", "Value": "J_I", "Comment": ""}, {"Key": "w_All_other_E-E_connections", "Value": "J", "Comment": ""}, {"Key": "w_All_other_E-I_connections", "Value": "J_I", "Comment": ""}, {"Key": "w_All_other_I-E_connections", "Value": "k*J", "Comment": ""}, {"Key": "w_All_I-I_connections", "Value": "k_I*J_I", "Comment": ""}]}, {"Variable": "Ee_GLOBAL", "Value": "0*mV", "Comment": ""}, {"Variable": "Ei_GLOBAL", "Value": "-75*mV", "Comment": ""}, {"Variable": "tau_e_alpha_GLOBAL", "Value": "0.0*ms", "Comment": "# not used"}, {"Variable": "tau_i_alpha_GLOBAL", "Value": "0.0* ms", "Comment": "# not used"}, {"Variable": "tau_e_GLOBAL", "Value": "3.0*ms", "Comment": ""}, {"Variable": "tau_i_GLOBAL", "Value": "8.3*ms", "Comment": ""}, {"Variable": "scaling_alpha_GLOBAL", "Value": 9999, "Comment": "# not used"}, {"Variable": "scaling_nmda_GLOBAL", "Value": "0.4", "Comment": "# change"}, {"Variable": "scaling_gabab_GLOBAL", "Value": "0.2", "Comment": "# change"}, {"Variable": "E_nmda_GLOBAL", "Value": "0*mV", "Comment": ""}, {"Variable": "E_gabab_GLOBAL", "Value": "-93*mV", "Comment": ""}, {"Variable": "tau_decay_nmda_GLOBAL", "Value": "43*ms", "Comment": ""}, {"Variable": "tau_decay_gabab_GLOBAL", "Value": "260*ms", "Comment": ""}, {"Variable": "tau_rise_nmda_GLOBAL", "Value": "0.29*ms", "Comment": ""}, {"Variable": "tau_rise_gabab_GLOBAL", "Value": "3.5*ms", "Comment": ""}, {"Variable": "cw", "Key-Value": [{"Key": "cw_in_SS", "Value": "_weights['w_TC_E-E_connections']", "Comment": ""}, {"Key": "cw_in_PC", "Value": "_weights['w_TC_E-E_connections']", "Comment": ""}, {"Key": "cw_in_BC", "Value": "_weights['w_TC_E-I_connections']", "Comment": ""}, {"Key": "cw_in_L1i", "Value": "_weights['w_TC_E-I_connections']", "Comment": ""}, {"Key": "cw_SS_SS", "Value": "_weights['w_All_other_E-E_connections']", "Comment": ""}, {"Key": "cw_SS_PC", "Value": "_weights['w_All_other_E-E_connections']", "Comment": ""}, {"Key": "cw_SS_BC", "Value": "_weights['w_All_other_E-I_connections']", "Comment": ""}, {"Key": "cw_SS_MC", "Value": "_weights['w_All_other_E-I_connections']", "Comment": ""}, {"Key": "cw_SS_L1i", "Value": "_weights['w_All_other_E-I_connections']", "Comment": ""}, {"Key": "cw_PC_SS", "Value": "_weights['w_All_other_E-E_connections']", "Comment": ""}, {"Key": "cw_PC_PC", "Value": "_weights['w_All_other_E-E_connections']", "Comment": ""}, {"Key": "cw_PC_BC", "Value": "_weights['w_All_other_E-I_connections']", "Comment": ""}, {"Key": "cw_PC_MC", "Value": "_weights['w_All_other_E-I_connections']", "Comment": ""}, {"Key": "cw_PC_L1i", "Value": "_weights['w_All_other_E-I_connections']", "Comment": ""}, {"Key": "cw_BC_L1i", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_BC_SS", "Value": "_weights['w_All_other_I-E_connections']", "Comment": ""}, {"Key": "cw_BC_PC", "Value": "_weights['w_All_other_I-E_connections']", "Comment": ""}, {"Key": "cw_BC_BC", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_BC_MC", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_MC_SS", "Value": "_weights['w_All_other_I-E_connections']", "Comment": ""}, {"Key": "cw_MC_PC", "Value": "_weights['w_All_other_I-E_connections']", "Comment": ""}, {"Key": "cw_MC_BC", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_MC_MC", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_MC_L1i", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_L1i_SS", "Value": "_weights['w_All_other_I-E_connections']", "Comment": ""}, {"Key": "cw_L1i_BC", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_L1i_MC", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}, {"Key": "cw_L1i_PC", "Value": "_weights['w_All_other_I-E_connections']", "Comment": ""}, {"Key": "cw_L1i_L1i", "Value": "_weights['w_All_I-I_connections']", "Comment": ""}]}, {"Variable": "sp", "Key-Value": [{"Key": "sp_in_SS", "Value": "0.8", "Comment": ""}, {"Key": "sp_in_PC", "Value": "0.1125", "Comment": ""}, {"Key": "sp_in_BC", "Value": "0.1125", "Comment": ""}, {"Key": "sp_in_L1i", "Value": "0.1125", "Comment": ""}]}, {"Variable": "delay", "Key-Value": [{"Key": "delay_in_SS", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_in_PC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_in_BC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_in_L1i", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_SS_SS", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_SS_PC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_SS_BC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_SS_MC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_SS_L1i", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_PC_SS", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_PC_PC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_PC_BC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_PC_MC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_PC_L1i", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_BC_SS", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_BC_PC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_BC_BC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_BC_MC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_BC_L1i", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_MC_SS", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_MC_PC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_MC_BC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_MC_MC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_MC_L1i", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_L1i_SS", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_L1i_PC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_L1i_BC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_L1i_MC", "Value": "3.0*ms", "Comment": ""}, {"Key": "delay_L1i_L1i", "Value": "3.0*ms", "Comment": ""}]}, {"Variable": "VPM", "Value": "", "Comment": ""}, {"Variable": "L4_BC", "Key-Value": [{"Key": "C", "Value": "71.5221485275 * pF", "Comment": ""}, {"Key": "gL", "Value": "3.0266169453 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-72.4306544604 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-72.4306544604 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-54.6357022266 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-71.8537273192 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "48.0 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "8715.05791061 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L6_MC", "Key-Value": [{"Key": "C", "Value": "77.0389082582 * pF", "Comment": ""}, {"Key": "gL", "Value": "3.4302446812 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-72.1534795833 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-72.1534795833 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-53.8465513752 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-72.6656853122 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "56.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "10432.2087889 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L4_MC", "Key-Value": [{"Key": "C", "Value": "94.8071695368 * pF", "Comment": ""}, {"Key": "gL", "Value": "2.0295906845 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-70.8507355932 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-70.8507355932 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.1073003625 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-70.1381570992 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "28.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "11347.6266446 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L4_PC2", "Key-Value": [{"Key": "Cm", "Value": "1.0 * ufarad*cm**-2", "Comment": ""}, {"Key": "gL", "Value": "4.2e-05 * siemens*cm**-2", "Comment": ""}, {"Key": "EL", "Value": "-73.0276 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-73.0276 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.6253974878 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-66.277098338 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "107.0 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "10913.2817103 * um**2", "Comment": ""}, {"Key": "fract_areas", "Value": "{2: array([0.58, 0.052, 0.20, 0.15, 0.020])}", "Comment": ""}, {"Key": "Ra", "Value": "[100,100,150,150,150] * Mohm", "Comment": ""}, {"Key": "spine_factor", "Value": "2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L4_PC1", "Key-Value": [{"Key": "Cm", "Value": "1.0 * ufarad*cm**-2", "Comment": ""}, {"Key": "gL", "Value": "4.2e-05 * siemens*cm**-2", "Comment": ""}, {"Key": "EL", "Value": "-72.65804 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-72.65804 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.7511171965 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-63.6646781802 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "135.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "16310.8369861 * um**2", "Comment": ""}, {"Key": "fract_areas", "Value": "{2: array([0.56, 0.051, 0.17, 0.22, 0.011])}", "Comment": ""}, {"Key": "Ra", "Value": "[100,100,150,150,150] * Mohm", "Comment": ""}, {"Key": "spine_factor", "Value": "2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L4_SS", "Key-Value": [{"Key": "C", "Value": "175.241333903 * pF", "Comment": ""}, {"Key": "gL", "Value": "4.7680685778 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-73.66282 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-73.66282 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.6988618021 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-67.7168273122 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "76.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "10860.9984702 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L6_BC", "Key-Value": [{"Key": "C", "Value": "69.7638679751 * pF", "Comment": ""}, {"Key": "gL", "Value": "3.666579395 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-72.6989239835 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-72.6989239835 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-53.7725497811 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-74.4853540869 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "62.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "9239.5079968 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L6_PC1", "Key-Value": [{"Key": "Cm", "Value": "1.0 * ufarad*cm**-2", "Comment": ""}, {"Key": "gL", "Value": "4.2e-05 * siemens*cm**-2", "Comment": ""}, {"Key": "EL", "Value": "-72.40294 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-72.40294 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-51.511539264 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-60.1706182422 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "121.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "11585.1144925 * um**2", "Comment": ""}, {"Key": "fract_areas", "Value": "{0: array([0.60, 0.047, 0.35])}", "Comment": ""}, {"Key": "Ra", "Value": "[100,100,150,150,150] * Mohm", "Comment": ""}, {"Key": "spine_factor", "Value": "2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L6_PC2", "Key-Value": [{"Key": "Cm", "Value": "1.0 * ufarad*cm**-2", "Comment": ""}, {"Key": "gL", "Value": "4.2e-05 * siemens*cm**-2", "Comment": ""}, {"Key": "EL", "Value": "-72.2755067402 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-72.2755067402 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-50.7685580935 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-60.2322861714 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "124.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "14289.9605376 * um**2", "Comment": ""}, {"Key": "fract_areas", "Value": "{2: array([0.40, 0.041, 0.30, 0.24, 0.012])}", "Comment": ""}, {"Key": "Ra", "Value": "[100,100,150,150,150] * Mohm", "Comment": ""}, {"Key": "spine_factor", "Value": "2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L6_PC3", "Key-Value": [{"Key": "Cm", "Value": "1.0 * ufarad*cm**-2", "Comment": ""}, {"Key": "gL", "Value": "4.2e-05 * siemens*cm**-2", "Comment": ""}, {"Key": "EL", "Value": "-70.7511300104 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-70.7511300104 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-54.4458699574 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-68.6036961368 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "121.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "15735.3193332 * um**2", "Comment": ""}, {"Key": "fract_areas", "Value": "{3: array([0.47, 0.047, 0.32, 0.14, 0.024, 0.0035])}", "Comment": ""}, {"Key": "Ra", "Value": "[100,100,150,150,150] * Mohm", "Comment": ""}, {"Key": "spine_factor", "Value": "2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L5_BC", "Key-Value": [{"Key": "C", "Value": "68.4921519847 * pF", "Comment": ""}, {"Key": "gL", "Value": "3.3072636532 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-72.8885586697 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-72.8885586697 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-54.5030904381 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-74.8591276386 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "54.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "8784.51799962 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L1_L1I", "Key-Value": [{"Key": "C", "Value": "41.1882350123 * pF", "Comment": ""}, {"Key": "gL", "Value": "1.5592201786 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-70.3604900592 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-70.3604900592 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.091476905 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-76.644278754 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "21.0 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "4565.57789013 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L23_BC", "Key-Value": [{"Key": "C", "Value": "59.9761657023 * pF", "Comment": ""}, {"Key": "gL", "Value": "2.0718492861 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-71.924401784 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-71.924401784 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.2031201121 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-72.5850082416 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "31.0 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "7112.11406186 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L23_PC", "Key-Value": [{"Key": "Cm", "Value": "1.0 * ufarad*cm**-2", "Comment": ""}, {"Key": "gL", "Value": "4.2e-05 * siemens*cm**-2", "Comment": ""}, {"Key": "EL", "Value": "-73.02252 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-73.02252 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-56.0189075289 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-68.6706995855 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "101.0 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "13254.5309395 * um**2", "Comment": ""}, {"Key": "fract_areas", "Value": "{1: array([0.50, 0.044, 0.35, 0.11])}", "Comment": ""}, {"Key": "Ra", "Value": "[100,100,150,150,150] * Mohm", "Comment": ""}, {"Key": "spine_factor", "Value": "2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L5_PC", "Key-Value": [{"Key": "Cm", "Value": "1.0 * ufarad*cm**-2", "Comment": ""}, {"Key": "gL", "Value": "4.2e-05 * siemens*cm**-2", "Comment": ""}, {"Key": "EL", "Value": "-71.1029809545 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-71.1029809545 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-52.431733056 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-62.8103644961 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "222.0 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "43891.0070311 * um**2", "Comment": ""}, {"Key": "fract_areas", "Value": "{3: array([0.38, 0.038, 0.24, 0.078, 0.20, 0.065])}", "Comment": ""}, {"Key": "Ra", "Value": "[100,100,150,150,150] * Mohm", "Comment": ""}, {"Key": "spine_factor", "Value": "2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L5_MC", "Key-Value": [{"Key": "C", "Value": "83.7853591408 * pF", "Comment": ""}, {"Key": "gL", "Value": "2.9208898999 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-71.2777297215 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-71.2777297215 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.4470258148 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-71.8878932763 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "40.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "10848.9444704 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}, {"Key": "tonic_current", "Value": "tonic_depol_level * rheobase", "Comment": ""}]}, {"Variable": "L23_MC", "Key-Value": [{"Key": "C", "Value": "69.4580720522 * pF", "Comment": ""}, {"Key": "gL", "Value": "1.3562759911 * nS", "Comment": ""}, {"Key": "taum_soma", "Value": "C/gL", "Comment": ""}, {"Key": "EL", "Value": "-71.1819583183 * mV", "Comment": ""}, {"Key": "Vr", "Value": "-71.1819583183 * mV", "Comment": ""}, {"Key": "Vcut", "Value": "20 * mV", "Comment": ""}, {"Key": "VT", "Value": "-55.1193784476 * mV", "Comment": ""}, {"Key": "DeltaT", "Value": "2 * mV", "Comment": ""}, {"Key": "V_res", "Value": "-70.9958834491 * mV", "Comment": ""}, {"Key": "rheobase", "Value": "19.5 * pA", "Comment": ""}, {"Key": "Area_tot_pyram", "Value": "8122.02941909 * um**2", "Comment": ""}, {"Key": "Ee", "Value": "Ee_GLOBAL", "Comment": ""}, {"Key": "Ei", "Value": "Ei_GLOBAL", "Comment": ""}, {"Key": "tau_e", "Value": "tau_e_GLOBAL", "Comment": ""}, {"Key": "tau_i", "Value": "tau_i_GLOBAL", "Comment": ""}, {"Key": "tau_e_alpha", "Value": "tau_e_alpha_GLOBAL", "Comment": ""}, {"Key": "tau_i_alpha", "Value": "tau_i_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_alpha", "Value": "scaling_alpha_GLOBAL", "Comment": ""}, {"Key": "scaling_nmda", "Value": "scaling_nmda_GLOBAL", "Comment": ""}, {"Key": "scaling_gabab", "Value": "scaling_gabab_GLOBAL", "Comment": ""}, {"Key": "E_nmda", "Value": "E_nmda_GLOBAL", "Comment": ""}, {"Key": "E_gabab", "Value": "E_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_decay_nmda", "Value": "tau_decay_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_decay_gabab", "Value": "tau_decay_gabab_GLOBAL", "Comment": ""}, {"Key": "tau_rise_nmda", "Value": "tau_rise_nmda_GLOBAL", "Comment": ""}, {"Key": "tau_rise_gabab", "Value": "tau_rise_gabab_GLOBAL", "Comment": ""}]}]}
+{
+  "physio_data": [
+    {
+      "Variable": "model_variation",
+      "Value": 1,
+      "Comment": ""
+    },
+    {
+      "Variable": "neuron_model",
+      "Value": "'EIF'",
+      "Comment": ""
+    },
+    {
+      "Variable": "excitation_model",
+      "Value": "'SIMPLE_E'",
+      "Comment": ""
+    },
+    {
+      "Variable": "inhibition_model",
+      "Value": "'SIMPLE_I_GABAB'",
+      "Comment": ""
+    },
+    {
+      "Variable": "pc_neuron_model",
+      "Value": "'EIF'",
+      "Comment": ""
+    },
+    {
+      "Variable": "pc_excitation_model",
+      "Value": "'SIMPLE_E'",
+      "Comment": ""
+    },
+    {
+      "Variable": "pc_inhibition_model",
+      "Value": "'SIMPLE_I_GABAB'",
+      "Comment": ""
+    },
+    {
+      "Variable": "calcium_concentration",
+      "Value": 2,
+      "Comment": ""
+    },
+    {
+      "Variable": "U_E",
+      "Value": "0.5",
+      "Comment": ""
+    },
+    {
+      "Variable": "U_I",
+      "Value": "0.25",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_d",
+      "Value": "670*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_f",
+      "Value": "670*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_fd",
+      "Value": "140*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "U_f",
+      "Value": "0.09",
+      "Comment": ""
+    },
+    {
+      "Variable": "background_rate",
+      "Value": "0.3*Hz",
+      "Comment": ""
+    },
+    {
+      "Variable": "background_rate_inhibition",
+      "Value": "0*Hz",
+      "Comment": ""
+    },
+    {
+      "Variable": "tonic_depol_level",
+      "Value": "0.95",
+      "Comment": ""
+    },
+    {
+      "Variable": "J",
+      "Value": "0.72*nS",
+      "Comment": ""
+    },
+    {
+      "Variable": "J_I",
+      "Value": "0.43*nS",
+      "Comment": ""
+    },
+    {
+      "Variable": "k",
+      "Value": "0.55",
+      "Comment": ""
+    },
+    {
+      "Variable": "k_I",
+      "Value": "1.93",
+      "Comment": ""
+    },
+    {
+      "Variable": "flag_background_calcium_scaling",
+      "Value": 1,
+      "Comment": ""
+    },
+    {
+      "Variable": "background_E_E_weight",
+      "Value": "J",
+      "Comment": ""
+    },
+    {
+      "Variable": "background_E_I_weight",
+      "Value": "J_I",
+      "Comment": ""
+    },
+    {
+      "Variable": "background_I_E_weight",
+      "Value": "k*J",
+      "Comment": ""
+    },
+    {
+      "Variable": "background_I_I_weight",
+      "Value": "k_I*J_I",
+      "Comment": ""
+    },
+    {
+      "Variable": "_weights",
+      "Key-Value": [
+        {
+          "Key": "w_TC_E-E_connections",
+          "Value": "J",
+          "Comment": ""
+        },
+        {
+          "Key": "w_TC_E-I_connections",
+          "Value": "J_I",
+          "Comment": ""
+        },
+        {
+          "Key": "w_All_other_E-E_connections",
+          "Value": "J",
+          "Comment": ""
+        },
+        {
+          "Key": "w_All_other_E-I_connections",
+          "Value": "J_I",
+          "Comment": ""
+        },
+        {
+          "Key": "w_All_other_I-E_connections",
+          "Value": "k*J",
+          "Comment": ""
+        },
+        {
+          "Key": "w_All_I-I_connections",
+          "Value": "k_I*J_I",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "Ee_GLOBAL",
+      "Value": "0*mV",
+      "Comment": ""
+    },
+    {
+      "Variable": "Ei_GLOBAL",
+      "Value": "-75*mV",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_e_alpha_GLOBAL",
+      "Value": "0.0*ms",
+      "Comment": "# not used"
+    },
+    {
+      "Variable": "tau_i_alpha_GLOBAL",
+      "Value": "0.0* ms",
+      "Comment": "# not used"
+    },
+    {
+      "Variable": "tau_e_GLOBAL",
+      "Value": "3.0*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_i_GLOBAL",
+      "Value": "8.3*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "scaling_alpha_GLOBAL",
+      "Value": 9999,
+      "Comment": "# not used"
+    },
+    {
+      "Variable": "scaling_nmda_GLOBAL",
+      "Value": "0.4",
+      "Comment": "# change"
+    },
+    {
+      "Variable": "scaling_gabab_GLOBAL",
+      "Value": "0.2",
+      "Comment": "# change"
+    },
+    {
+      "Variable": "E_nmda_GLOBAL",
+      "Value": "0*mV",
+      "Comment": ""
+    },
+    {
+      "Variable": "E_gabab_GLOBAL",
+      "Value": "-93*mV",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_decay_nmda_GLOBAL",
+      "Value": "43*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_decay_gabab_GLOBAL",
+      "Value": "260*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_rise_nmda_GLOBAL",
+      "Value": "0.29*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "tau_rise_gabab_GLOBAL",
+      "Value": "3.5*ms",
+      "Comment": ""
+    },
+    {
+      "Variable": "cw",
+      "Key-Value": [
+        {
+          "Key": "cw_in_SS",
+          "Value": "_weights['w_TC_E-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_in_PC",
+          "Value": "_weights['w_TC_E-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_in_BC",
+          "Value": "_weights['w_TC_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_in_L1i",
+          "Value": "_weights['w_TC_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_SS_SS",
+          "Value": "_weights['w_All_other_E-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_SS_PC",
+          "Value": "_weights['w_All_other_E-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_SS_BC",
+          "Value": "_weights['w_All_other_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_SS_MC",
+          "Value": "_weights['w_All_other_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_SS_L1i",
+          "Value": "_weights['w_All_other_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_PC_SS",
+          "Value": "_weights['w_All_other_E-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_PC_PC",
+          "Value": "_weights['w_All_other_E-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_PC_BC",
+          "Value": "_weights['w_All_other_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_PC_MC",
+          "Value": "_weights['w_All_other_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_PC_L1i",
+          "Value": "_weights['w_All_other_E-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_BC_L1i",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_BC_SS",
+          "Value": "_weights['w_All_other_I-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_BC_PC",
+          "Value": "_weights['w_All_other_I-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_BC_BC",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_BC_MC",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_MC_SS",
+          "Value": "_weights['w_All_other_I-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_MC_PC",
+          "Value": "_weights['w_All_other_I-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_MC_BC",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_MC_MC",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_MC_L1i",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_L1i_SS",
+          "Value": "_weights['w_All_other_I-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_L1i_BC",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_L1i_MC",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_L1i_PC",
+          "Value": "_weights['w_All_other_I-E_connections']",
+          "Comment": ""
+        },
+        {
+          "Key": "cw_L1i_L1i",
+          "Value": "_weights['w_All_I-I_connections']",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "sp",
+      "Key-Value": [
+        {
+          "Key": "sp_in_SS",
+          "Value": "0.8",
+          "Comment": ""
+        },
+        {
+          "Key": "sp_in_PC",
+          "Value": "0.1125",
+          "Comment": ""
+        },
+        {
+          "Key": "sp_in_BC",
+          "Value": "0.1125",
+          "Comment": ""
+        },
+        {
+          "Key": "sp_in_L1i",
+          "Value": "0.1125",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "delay",
+      "Key-Value": [
+        {
+          "Key": "delay_in_SS",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_in_PC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_in_BC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_in_L1i",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_SS_SS",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_SS_PC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_SS_BC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_SS_MC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_SS_L1i",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_PC_SS",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_PC_PC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_PC_BC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_PC_MC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_PC_L1i",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_BC_SS",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_BC_PC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_BC_BC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_BC_MC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_BC_L1i",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_MC_SS",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_MC_PC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_MC_BC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_MC_MC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_MC_L1i",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_L1i_SS",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_L1i_PC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_L1i_BC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_L1i_MC",
+          "Value": "3.0*ms",
+          "Comment": ""
+        },
+        {
+          "Key": "delay_L1i_L1i",
+          "Value": "3.0*ms",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "VPM",
+      "Value": "",
+      "Comment": ""
+    },
+    {
+      "Variable": "L4_BC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "71.5221485275 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "3.0266169453 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-72.4306544604 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-72.4306544604 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-54.6357022266 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-71.8537273192 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "48.0 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "8715.05791061 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L6_MC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "77.0389082582 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "3.4302446812 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-72.1534795833 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-72.1534795833 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-53.8465513752 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-72.6656853122 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "56.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "10432.2087889 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L4_MC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "94.8071695368 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "2.0295906845 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-70.8507355932 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-70.8507355932 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.1073003625 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-70.1381570992 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "28.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "11347.6266446 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L4_PC2",
+      "Key-Value": [
+        {
+          "Key": "Cm",
+          "Value": "1.0 * ufarad*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.2e-05 * siemens*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-73.0276 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-73.0276 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.6253974878 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-66.277098338 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "107.0 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "10913.2817103 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "fract_areas",
+          "Value": "{2: array([0.58, 0.052, 0.20, 0.15, 0.020])}",
+          "Comment": ""
+        },
+        {
+          "Key": "Ra",
+          "Value": "[100,100,150,150,150] * Mohm",
+          "Comment": ""
+        },
+        {
+          "Key": "spine_factor",
+          "Value": "2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L4_PC1",
+      "Key-Value": [
+        {
+          "Key": "Cm",
+          "Value": "1.0 * ufarad*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.2e-05 * siemens*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-72.65804 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-72.65804 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.7511171965 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-63.6646781802 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "135.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "16310.8369861 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "fract_areas",
+          "Value": "{2: array([0.56, 0.051, 0.17, 0.22, 0.011])}",
+          "Comment": ""
+        },
+        {
+          "Key": "Ra",
+          "Value": "[100,100,150,150,150] * Mohm",
+          "Comment": ""
+        },
+        {
+          "Key": "spine_factor",
+          "Value": "2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L4_SS",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "175.241333903 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.7680685778 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-73.66282 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-73.66282 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.6988618021 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-67.7168273122 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "76.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "10860.9984702 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L6_BC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "69.7638679751 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "3.666579395 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-72.6989239835 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-72.6989239835 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-53.7725497811 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-74.4853540869 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "62.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "9239.5079968 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L6_PC1",
+      "Key-Value": [
+        {
+          "Key": "Cm",
+          "Value": "1.0 * ufarad*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.2e-05 * siemens*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-72.40294 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-72.40294 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-51.511539264 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-60.1706182422 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "121.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "11585.1144925 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "fract_areas",
+          "Value": "{0: array([0.60, 0.047, 0.35])}",
+          "Comment": ""
+        },
+        {
+          "Key": "Ra",
+          "Value": "[100,100,150,150,150] * Mohm",
+          "Comment": ""
+        },
+        {
+          "Key": "spine_factor",
+          "Value": "2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L6_PC2",
+      "Key-Value": [
+        {
+          "Key": "Cm",
+          "Value": "1.0 * ufarad*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.2e-05 * siemens*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-72.2755067402 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-72.2755067402 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-50.7685580935 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-60.2322861714 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "124.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "14289.9605376 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "fract_areas",
+          "Value": "{2: array([0.40, 0.041, 0.30, 0.24, 0.012])}",
+          "Comment": ""
+        },
+        {
+          "Key": "Ra",
+          "Value": "[100,100,150,150,150] * Mohm",
+          "Comment": ""
+        },
+        {
+          "Key": "spine_factor",
+          "Value": "2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L6_PC3",
+      "Key-Value": [
+        {
+          "Key": "Cm",
+          "Value": "1.0 * ufarad*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.2e-05 * siemens*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-70.7511300104 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-70.7511300104 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-54.4458699574 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-68.6036961368 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "121.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "15735.3193332 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "fract_areas",
+          "Value": "{3: array([0.47, 0.047, 0.32, 0.14, 0.024, 0.0035])}",
+          "Comment": ""
+        },
+        {
+          "Key": "Ra",
+          "Value": "[100,100,150,150,150] * Mohm",
+          "Comment": ""
+        },
+        {
+          "Key": "spine_factor",
+          "Value": "2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L5_BC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "68.4921519847 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "3.3072636532 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-72.8885586697 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-72.8885586697 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-54.5030904381 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-74.8591276386 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "54.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "8784.51799962 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L1_L1I",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "41.1882350123 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "1.5592201786 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-70.3604900592 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-70.3604900592 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.091476905 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-76.644278754 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "21.0 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "4565.57789013 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L23_BC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "59.9761657023 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "2.0718492861 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-71.924401784 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-71.924401784 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.2031201121 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-72.5850082416 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "31.0 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "7112.11406186 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L23_PC",
+      "Key-Value": [
+        {
+          "Key": "Cm",
+          "Value": "1.0 * ufarad*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.2e-05 * siemens*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-73.02252 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-73.02252 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-56.0189075289 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-68.6706995855 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "101.0 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "13254.5309395 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "fract_areas",
+          "Value": "{1: array([0.50, 0.044, 0.35, 0.11])}",
+          "Comment": ""
+        },
+        {
+          "Key": "Ra",
+          "Value": "[100,100,150,150,150] * Mohm",
+          "Comment": ""
+        },
+        {
+          "Key": "spine_factor",
+          "Value": "2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L5_PC",
+      "Key-Value": [
+        {
+          "Key": "Cm",
+          "Value": "1.0 * ufarad*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "4.2e-05 * siemens*cm**-2",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-71.1029809545 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-71.1029809545 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-52.431733056 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-62.8103644961 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "222.0 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "43891.0070311 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "fract_areas",
+          "Value": "{3: array([0.38, 0.038, 0.24, 0.078, 0.20, 0.065])}",
+          "Comment": ""
+        },
+        {
+          "Key": "Ra",
+          "Value": "[100,100,150,150,150] * Mohm",
+          "Comment": ""
+        },
+        {
+          "Key": "spine_factor",
+          "Value": "2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L5_MC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "83.7853591408 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "2.9208898999 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-71.2777297215 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-71.2777297215 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.4470258148 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-71.8878932763 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "40.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "10848.9444704 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
+        }
+      ]
+    },
+    {
+      "Variable": "L23_MC",
+      "Key-Value": [
+        {
+          "Key": "C",
+          "Value": "69.4580720522 * pF",
+          "Comment": ""
+        },
+        {
+          "Key": "gL",
+          "Value": "1.3562759911 * nS",
+          "Comment": ""
+        },
+        {
+          "Key": "taum_soma",
+          "Value": "C/gL",
+          "Comment": ""
+        },
+        {
+          "Key": "EL",
+          "Value": "-71.1819583183 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vr",
+          "Value": "-71.1819583183 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "Vcut",
+          "Value": "20 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "VT",
+          "Value": "-55.1193784476 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "DeltaT",
+          "Value": "2 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_res",
+          "Value": "-70.9958834491 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "rheobase",
+          "Value": "19.5 * pA",
+          "Comment": ""
+        },
+        {
+          "Key": "Area_tot_pyram",
+          "Value": "8122.02941909 * um**2",
+          "Comment": ""
+        },
+        {
+          "Key": "Ee",
+          "Value": "Ee_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "Ei",
+          "Value": "Ei_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e",
+          "Value": "tau_e_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i",
+          "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_nmda",
+          "Value": "scaling_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_gabab",
+          "Value": "scaling_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_nmda",
+          "Value": "E_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "E_gabab",
+          "Value": "E_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_nmda",
+          "Value": "tau_decay_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_decay_gabab",
+          "Value": "tau_decay_gabab_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_nmda",
+          "Value": "tau_rise_nmda_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_rise_gabab",
+          "Value": "tau_rise_gabab_GLOBAL",
+          "Comment": ""
+        }
+      ]
+    }
+  ]
+}
