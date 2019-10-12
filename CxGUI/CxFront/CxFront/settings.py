@@ -54,7 +54,9 @@ SECRET_KEY = 'w$2!yh7k3c_io1xs90+*lbogfny2oe%)w-w4gm)s(ttvgqcpe&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+        'bspg.pa.ibf.cnr.it'
+        ]
 
 # Application definition
 
