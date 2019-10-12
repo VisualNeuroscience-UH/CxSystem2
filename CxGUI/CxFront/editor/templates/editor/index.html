@@ -29,17 +29,17 @@
 <nav class="top-bar" data-topbar role="navigation">
     <ul class="title-area">
         <li class="name">
-            <h1><a href="#">
-                <img
-                        src="/static/images/cxsystem.svg"
-                        height="40px"
-                        width="40px"/>
+            <h1><a href="#" class="disable">
+                <img src="/static/images/cxsystem.svg" height="40px" width="40px"/>
                 CxSystem2</a></h1>
         </li>
     </ul>
     <section class="top-bar-section">
         <ul class="left">
-            <li class="active" data-step="1" data-intro="Use this button to import anatomy and physiology configuration files"><a href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import
+
+            <li class="active" ><a href="#" onclick="document.getElementById('home-button').click();">Home</a></li>
+
+            <li  class="active" data-step="1" data-intro="Use this button to import anatomy and physiology configuration files"><a href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import
                 Parameters/Physiology</a></li>
 <!--            <li class="active"><a href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import-->
 <!--                Physiology</a></li>-->
@@ -74,6 +74,7 @@
 
 <div class="tabsdiv">
     <div class="tabs__topbar">
+        <button id="home-button" class="tabs__button" data-for-tab="0" style="display: none;">Home</button>
         <button class="tabs__button" data-for-tab="1"
                 data-step="5"
                 data-intro="Use this tab to configure the simulation parameters">Simulation</button>
@@ -91,6 +92,48 @@
                 data-intro="Use this tab to configure the physiological parameters of the network ">Physiology</button>
     </div>
     <div class="main_tabs">
+        <!--  ##################################################      -->
+        <!--        This is the content of the home tab               -->
+        <!--  ##################################################      -->
+        <div class="tabs__content" data-tab="0">
+            <div id='home' style="height: 100vh;">
+                <h3> CxSystem Simulator</h3>
+
+                <div style="border: solid #e1e1e1 1px; padding: 5px; width: 60%;">
+                <p>
+                    CxSystem is a cerebral cortex simulation framework, which operates on personal computers.
+                    We have tested the simulation software with a simplified version of a comprehensive cortical microcircuit model [1],
+                    which is available as configuration file.  The CxSystem aims at easy testing and buildup of diverse
+                    models at single cell resolution. Implemented on the top of the Python-based Brian2 simulator, CxSystem
+                    supports the main goal of Brian, i.e. minimizing development time, by providing the user with a simplified interface.
+                    The preliminary version of this software has been developed at Aalto University 2012-2015 [2], and the
+                    full version at the University of Helsinki 2013-2017. The software is distributed under the terms of
+                    the GNU General Public License, Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
+                    To access the documentation of the CxSystem, please check out the readthedocs page of the project.
+                </p>
+                <br>
+                <br>
+                <br>
+                <hr>
+                <p style="font-size: 8pt;">
+                    [1] Markram, H., Muller, E., Ramaswamy, S., Reimann, M. W., Abdellah, M., Sanchez, C. A., … Schürmann, F. (2015). Reconstruction and Simulation of Neocortical Microcircuitry. Cell, 163(2), 456–492. http://doi.org/10.1016/j.cell.2015.09.029
+                    <br>
+                    [2]Heikkinen, H., Sharifian, F., Vigário, R., & Vanni, S. (2015). Feedback to distal dendrites links fMRI signals to neural receptive fields in a spiking network model of the visual cortex. Journal of Neurophysiology, 114(1), 57–69. http://doi.org/10.1152/jn.00169.2015
+                </p>
+                </div>
+
+                <br>
+                <h3> Examples </h3>
+                <div style="border: solid #e1e1e1 1px; padding: 5px;width: 60%;">
+                <p>
+                The following examples are currently available for simulation:
+
+                </p>
+                </div>
+
+            </div>
+        </div>
+
         <div class="tabs__content" data-tab="1">
             <div id='params_holder' class='medium-12 columns'></div>
         </div>
