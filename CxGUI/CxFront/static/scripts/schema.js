@@ -10,7 +10,7 @@ runtime_params_schema = {
         "device": {
             "type": "string",
             "description": "Device for Brian2 code generation",
-            "enum": ["Cpp", "Python", "GeNN"]
+            "enum": ["Python", "Cython", "Cpp", "GeNN"]
         },
         "sys_mode": {
             "type": "string",

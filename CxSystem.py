@@ -35,7 +35,6 @@ import threading
 import array_run
 import multiprocessing
 import equation_templates as eqt
-prefs.codegen.target = 'auto'
 import config_file_converter as fileconverter
 import pathlib as pth
 from CxGUI import gui
@@ -352,7 +351,15 @@ class CxSystem(object):
 
     def set_device(self,*args):
         self.device = args[0]
-        assert self.device.lower() in ['genn', 'cpp','python'], ' -  Device %s is not defined. ' % self.device
+        assert self.device.lower() in ['cython', 'genn', 'cpp','python'], ' -  Device %s is not defined. ' % self.device
+        if self.device.lower() == 'cython':
+            self.device = "python"
+            prefs.codegen.target = 'cython'
+            print(" -  Brian Code Generator set to Cython")
+        elif self.device.lower() == 'python':
+            self.device = "python"
+            prefs.codegen.target = 'numpy'
+            print(" -  Brian Code Generator set to Numpy")
         if self.device.lower() == 'genn':
             print(" -  System is going to be run using GeNN devices, " \
                   "Errors may rise if Brian2/Brian2GeNN/GeNN is not installed correctly or the limitations are not " \
