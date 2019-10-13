@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponse,HttpResponseRedirect, JsonResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -9,6 +9,7 @@ from pathlib import Path
 from CxSystem import CxSystem as Cx
 import multiprocessing
 from getpass import getpass
+import json
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -74,4 +75,20 @@ def simulate(request):
 
     return HttpResponse("simulation started successfully")
 
-    return HttpResponse("simulation started successfully")
+
+
+@csrf_exempt
+def load_example(request):
+    example_name = list(request._get_post().keys())[0]
+    config_type = list(request._get_post().values())[0]
+    if config_type == 'anatomy':
+        filename = example_name + '_anatomy_config.json'
+    else:
+        filename = example_name + '_physiology_config.json'
+    current_dir = Path.cwd()
+    examples_path = current_dir.joinpath('examples').joinpath(filename)
+    if (examples_path.is_file()):
+        with open(examples_path) as json_file :
+            data = json.load(json_file)
+
+    return HttpResponse(json.dumps(data), content_type="application/json")

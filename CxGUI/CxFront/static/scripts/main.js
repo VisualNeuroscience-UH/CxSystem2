@@ -41,6 +41,55 @@ $('.tabs__button').click(function () {
 
 var imported_data;
 
+
+
+function load_example(example_name) {
+     request_data = {};
+     request_data[example_name] = 'anatomy'
+     $.ajax({
+            type: 'POST',
+            url: 'load_example',
+            data: request_data,
+            dataType: "json",
+            success: function(anatomy){
+                for (var key in anatomy) {
+                    switch (key) {
+                        case "params":
+                            data = anatomy['params'];
+                            params_editor.setValue(data);
+                            break;
+                        case "IN":
+                            data = anatomy.IN;
+                            inputs_editor.setValue(data);
+                            break;
+                        case "G":
+                            data = anatomy.G;
+                            neurons_editor.setValue(data);
+                            break;
+                        case "S":
+                            data = anatomy['S'];
+                            connections_editor.setValue(data);
+                            break;
+                    }
+                }
+            }
+        });
+
+     request_data = {};
+     request_data[example_name] = 'physiology'
+     $.ajax({
+            type: 'POST',
+            url: 'load_example',
+            data: request_data,
+            dataType: "json",
+            success: function(physio){
+                physio_editor.setValue(physio['physio_data']);
+            }
+     });
+     $("button[data-for-tab='1']").click();
+}
+
+
 function readSingleFile(e) {
     var file = e.target.files[0];
     if (!file) {

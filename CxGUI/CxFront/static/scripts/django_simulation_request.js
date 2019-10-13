@@ -1,13 +1,10 @@
 $(function () {
-    $('form').submit(function () {
+    $('#simulation_form').submit(function () {
         Swal.fire(
           'Simulation Started',
           '',
           'success'
         );
-        // console.log(JSON.stringify( params_editor.getValue())
-        //                     .replace(/\+/g, encodeURIComponent('+'))
-        //                     .replace(/&/g, encodeURIComponent('&')));
         $.ajax({
             type: 'POST',
             url: 'simulate',
@@ -35,4 +32,4 @@ $(function () {
         });
         return false;
     });
-})
+});
