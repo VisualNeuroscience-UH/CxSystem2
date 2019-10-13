@@ -65,7 +65,7 @@ class CxSystem(object):
     _SpikeMonitor_prefix = 'SpMon'
     _StateMonitor_prefix = 'StMon'
 
-    def __init__(self, anatomy_and_system_config=None, physiology_config=None, output_file_suffix = "", instantiated_from_array_run = 0, cluster_run_start_idx=-1,cluster_run_step=-1, array_run_in_cluster =0, port=8000):
+    def __init__(self, anatomy_and_system_config=None, physiology_config=None, output_file_suffix = "", instantiated_from_array_run = 0, cluster_run_start_idx=-1,cluster_run_step=-1, array_run_in_cluster =0, gui_port=8000):
         '''
         Initialize the cortical system by parsing both of the configuration files.
 
@@ -85,7 +85,7 @@ class CxSystem(object):
         * save_data: The save_data() object for saving the final data.
 
         '''
-        self.port = port
+        self.port = gui_port
         if anatomy_and_system_config is None or physiology_config is None:
             self.runGUI()
             return
