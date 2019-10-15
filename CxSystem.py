@@ -784,7 +784,7 @@ class CxSystem(object):
         except ValueError:
             flag_bg_calcium_scaling = 0
 
-        bg_synapse = synapse_parser({'type': 'Fixed', 'pre_group_type': 'PC', 'post_group_type': neuron_type},
+        bg_synapse = synapse_parser({'type': 'Fixed', 'pre_group_type': 'SS', 'post_group_type': neuron_type},
                                     self.physio_config_df)
         bg_synapse_inh = synapse_parser({'type': 'Fixed', 'pre_group_type': 'BC', 'post_group_type': neuron_type},
                                         self.physio_config_df)

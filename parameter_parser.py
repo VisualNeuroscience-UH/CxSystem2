@@ -65,7 +65,10 @@ class synapse_parser(object):
         # Commented ilam out because not used in this branch /HH
         # self.ilam = self.value_extractor(self.physio_config_df,'ilam_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
 
-        self.calcium_concentration = self.value_extractor(self.physio_config_df, 'calcium_concentration' )
+        try:
+            self.calcium_concentration = self.value_extractor(self.physio_config_df, 'calcium_concentration' )
+        except:
+            self.calcium_concentration = 2.0  # default value that doesn't scale weights
         self._set_calcium_dependency()
 
         # Set (initial) weights for chosen synapse type
