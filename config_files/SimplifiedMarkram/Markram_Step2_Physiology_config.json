@@ -3012,6 +3012,11 @@
           "Key": "tau_rise_gabab",
           "Value": "tau_rise_gabab_GLOBAL",
           "Comment": ""
+        },
+        {
+          "Key": "tonic_current",
+          "Value": "tonic_depol_level * rheobase",
+          "Comment": ""
         }
       ]
     }

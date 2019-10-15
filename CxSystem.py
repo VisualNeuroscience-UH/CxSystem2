@@ -1182,7 +1182,7 @@ class CxSystem(object):
                 #  In case the target is from compartment 0 which has 3 compartments itself
                 if str(_post_com_idx)[0] == '0':
                     assert len(_post_com_idx) > 1, \
-                        ' -  A soma of a compartmental neuron is being targeted, but the exact compartment in the soma is not defined. After 0, use "b" for basal dendrites, "s" for soma and "a" for apical dendrites.'
+                        ' -  The soma layer of a compartmental neuron is being targeted, but the exact compartment in the layer is not defined. After 0, use "b" for basal dendrites, "s" for soma and "a" for apical dendrites.'
                     if _current_probs != '--':
                         assert len(_post_com_idx[1:]) == len(_current_probs) , \
                             " -  When targeting multiple compartments near soma, their probability, i.e. 'p', should be defined separately. Unless it's marked as '--'"
