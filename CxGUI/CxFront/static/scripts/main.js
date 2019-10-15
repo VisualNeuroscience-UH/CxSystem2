@@ -147,12 +147,12 @@ function downloadanatomy() {
     var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(editors_data));
     var a = document.createElement('a');
     a.href = 'data:' + data;
-    a.download = 'data.json';
+    a.download = 'exported_anatomy.json';
     a.innerHTML = 'download JSON';
     a.style = "display: none";
     a.id = "data_downloader";
 
-    var container = document.getElementById('container');
+    var container = document.getElementById('export_config_container');
     container.appendChild(a);
     document.getElementById('data_downloader').click();
 }
@@ -163,12 +163,12 @@ function downloadphysiology() {
     var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(editors_data));
     var a = document.createElement('a');
     a.href = 'data:' + data;
-    a.download = 'data.json';
+    a.download = 'exported_physiology.json';
     a.innerHTML = 'download JSON';
     a.style = "display: none";
     a.id = "physio_downloader";
 
-    var container = document.getElementById('container');
+    var container = document.getElementById('export_config_container');
     container.appendChild(a);
     document.getElementById('physio_downloader').click();
 }
