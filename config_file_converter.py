@@ -259,9 +259,10 @@ class filetype_converter():
                                                                    "Value": str(value).strip(" "),
                                                                    "Comment": comment})
                         else:
-                            counter = 0
+                            counter = -1
                             tmp_var = []
-                            while pd.isna(csv_data[csv_data.columns[0]][var_idx+counter+1]):
+                            while True:
+                                counter += 1
                                 key = csv_data[csv_data.columns[1]][var_idx+counter]
                                 value = csv_data[csv_data.columns[2]][var_idx+counter]
                                 comment = csv_data[csv_data.columns[3]][var_idx+counter] if not pd.isna(csv_data[csv_data.columns[3]][var_idx+counter]) else ""
@@ -275,9 +276,10 @@ class filetype_converter():
                                                    "Value": str(value).strip(" "),
                                                    "Comment": comment}
                                     tmp_var.append(key_val)
-                                counter+=1
-                                if var_idx+counter+1 > csv_data.index.to_list()[-1]:
+                                if (var_idx+counter+1 > csv_data.index.to_list()[-1]) or \
+                                   not pd.isna(csv_data[csv_data.columns[0]][var_idx+counter+1]):
                                     break
+
                             self.output['physio_data'].append({"Variable" : str(var).strip(" "), "Key-Value" : tmp_var})
                         json_idx_counter += 1
 
@@ -348,8 +350,11 @@ if __name__ == '__main__':
     # p = Path('./tests/config_files/pytest_Physiology_config.json')
     # p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Anatomy_config.csv')
     # p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Physiology_config.csv')
-    p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Anatomy_config.csv')
+    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Anatomy_config.csv')
     # p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Physiology_config.csv')
+    # p = Path('/Users/vafandal/gitrepos/CxSystem2/config_files/Rev2_Step1gamma_Physiology_config.csv')
+    p = Path('/Users/vafandal/gitrepos/CxSystem2/config_files/Rev2_Step1gamma_Anatomy_config_customweights.csv')
+
     converter = filetype_converter(p)
     converter.save_as_json()
     # converter.save_as_csv()
