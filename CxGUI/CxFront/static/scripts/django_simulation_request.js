@@ -27,7 +27,10 @@ $(function () {
                             .replace(/&/g, encodeURIComponent('&'))
                             .replace(/#/g, encodeURIComponent('#'))),
                 },
-                'physiology': physio_editor.getValue()
+                'physiology': JSON.parse(JSON.stringify(physio_editor.getValue())
+                            .replace(/\+/g, encodeURIComponent('+'))
+                            .replace(/&/g, encodeURIComponent('&'))
+                            .replace(/#/g, encodeURIComponent('#'))),
             })
         });
         return false;
