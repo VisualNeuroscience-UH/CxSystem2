@@ -138,7 +138,7 @@ neurons_schema = {
     format: "tabs",
     items: {
         title: "NeuronGroup",
-        headerTemplate: "[G{{i}}] {{self.neuron_type}} at L{{self.layer_idx}}",
+        headerTemplate: "[G{{self.idx}}] {{self.neuron_type}} at L{{self.layer_idx}}",
         properties: {
             "idx": {
                 "type": "integer",
@@ -217,7 +217,7 @@ inputs_schema = {
     format: "tabs",
     items: {
         title: "InputGroup",
-        headerTemplate: "Group{{i}} - {{self.type}}",
+        headerTemplate: "G{{self.idx}} - {{self.type}}",
         options: {
             "keep_oneof_values": false
         },
