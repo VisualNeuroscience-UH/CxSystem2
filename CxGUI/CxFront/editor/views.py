@@ -63,24 +63,27 @@ def simulate(request):
     # then the "false" statements that are from Javascript should be changed to False in python so that parsing using eval
     # does not raise error
 
-    received_data = list(request._get_post().keys())[0]
-    sanitized_receive_data = eval(sanitize_data(received_data))
+    try:
+        received_data = list(request._get_post().keys())[0]
+        sanitized_receive_data = eval(sanitize_data(received_data))
 
-    anatomy = sanitized_receive_data['anatomy']
-    physiology = { "physio_data": sanitized_receive_data['physiology']}
+        anatomy = sanitized_receive_data['anatomy']
+        physiology = { "physio_data": sanitized_receive_data['physiology']}
 
-    # we can either save the data temporarily as json and use those for simulating, or pass the data itself and config_file_converter will take care of the save_to_file part
-    # with open('.\\tmp_anatomy.json', 'w') as f:
-    #     json.dump(anatomy, f)
-    # with open('.\\tmp_physio.json', 'w') as f:
-    #     json.dump(physiology, f)
-    # CM = Cx.CxSystem('.\\tmp_anatomy.json', '.\\tmp_physio.json')
+        # we can either save the data temporarily as json and use those for simulating, or pass the data itself and config_file_converter will take care of the save_to_file part
+        # with open('.\\tmp_anatomy.json', 'w') as f:
+        #     json.dump(anatomy, f)
+        # with open('.\\tmp_physio.json', 'w') as f:
+        #     json.dump(physiology, f)
+        # CM = Cx.CxSystem('.\\tmp_anatomy.json', '.\\tmp_physio.json')
 
-    if anatomy['params']['run_in_cluster'] == 1:
-        anatomy['params']['password'] = getpass('Please enter your password for user {}: '.format(anatomy["params"]["username"]))
-    p = multiprocessing.Process(target=CxSpawner, args=(anatomy, physiology,Path.cwd().parent.parent))
-    p.name = "spawned_CxSystem"
-    p.start()
+        if anatomy['params']['run_in_cluster'] == 1:
+            anatomy['params']['password'] = getpass('Please enter your password for user {}: '.format(anatomy["params"]["username"]))
+        p = multiprocessing.Process(target=CxSpawner, args=(anatomy, physiology,Path.cwd().parent.parent))
+        p.name = "spawned_CxSystem"
+        p.start()
+    except Exception as e:
+        print(e)
 
     return HttpResponse("simulation started successfully")
 
