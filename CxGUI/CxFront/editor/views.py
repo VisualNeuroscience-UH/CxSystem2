@@ -37,6 +37,13 @@ def CxSpawner(anatomy, physiology,root_path):
     cm =  Cx(anatomy, physiology)
     cm.run()
 
+def sanitize_data(received_data):
+    received_data = received_data.replace('false', '0')
+    received_data = received_data.replace('true', '1')
+    received_data = received_data.replace(':null', ':"--"')
+    return received_data
+
+
 @csrf_exempt
 def simulate(request):
     # There request that we receive here is the following from django_simulation_request.js :
@@ -55,10 +62,12 @@ def simulate(request):
     # We wil need to get its first key using list(request._get_post().keys())[0]
     # then the "false" statements that are from Javascript should be changed to False in python so that parsing using eval
     # does not raise error
-    received_data = eval(list(request._get_post().keys())[0].replace('false','0').replace('true','1'))
 
-    anatomy = received_data['anatomy']
-    physiology = { "physio_data": received_data['physiology']}
+    received_data = list(request._get_post().keys())[0]
+    sanitized_receive_data = eval(sanitize_data(received_data))
+
+    anatomy = sanitized_receive_data['anatomy']
+    physiology = { "physio_data": sanitized_receive_data['physiology']}
 
     # we can either save the data temporarily as json and use those for simulating, or pass the data itself and config_file_converter will take care of the save_to_file part
     # with open('.\\tmp_anatomy.json', 'w') as f:
