@@ -39,7 +39,7 @@ class arrayrun_visualizer:
                         if idx_in_fig > figs_per_page :
                             all_axes = []
                             plt.tight_layout()
-                            plt.text(0.05, 0.95, file.as_posix(), transform=f.transFigure, size=24)
+                            plt.text(0.05, -0.05, file.as_posix(), transform=f.transFigure, size=24)
                             pdf.savefig(f)
                             f = plt.figure()
                             f.set_figheight(pdf_height)
@@ -53,7 +53,7 @@ class arrayrun_visualizer:
                         all_axes[-1].plot(spike_dat['t']/br2.units.ms, spike_dat['i'],'.k')
                     if idx_in_fig > 0:
                         plt.tight_layout()
-                        plt.text(0.05, 0.95, file.as_posix(), transform=f.transFigure, size=24)
+                        plt.text(0.05, 0.05, file.as_posix(), transform=f.transFigure, size=8)
                         pdf.savefig(f)
                 except KeyError:
                     print("The file '{}' is not a brian data file, skipping ...".format(file.name))
