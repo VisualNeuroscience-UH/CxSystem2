@@ -1,0 +1,326 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Advanced JSON Editor Example</title>
+  <link rel='stylesheet' href='css/foundation-5.5.3/css/foundation.min.css'>
+  <link rel='stylesheet' href='css/font-awesome-4.0.3/css/font-awesome.css'>
+  <script src="scripts/json-editor/dist/jsoneditor.min.js"></script>
+  <script src="../scripts/schema.js"></script>
+  <script>
+    // Set the default CSS theme and icon library globally
+    JSONEditor.defaults.theme = 'foundation5';
+    JSONEditor.defaults.iconlib = 'fontawesome4';
+    </script>
+</head>
+
+<body>
+  <h1>Advanced JSON Editor Example</h1>
+
+  <p>This example demonstrates the following:</p>
+  <ul>
+    <li>Loading external schemas via ajax (using $ref)</li>
+    <li>Setting the editor's value from javascript (try the Restore to Default button)</li>
+    <li>Validating the editor's contents (try setting name to an empty string)</li>
+    <li>Macro templates (try changing the city or state fields and watch the citystate field update automatically)</li>
+    <li>Enabling and disabling editor fields</li>
+  </ul>
+
+  <!-- <button id='submit'>Submit (console.log)</button>
+  <button id='restore'>Restore to Default</button>
+  <button id='enable_disable'>Disable/Enable Form</button>
+  <span id='valid_indicator'></span> -->
+
+  <div id='editor_holder'></div>
+
+  <script>
+    // This is the starting value for the editor
+    // We will use this to seed the initial editor 
+    // and to provide a "Restore to Default" button.
+    var starting_value = [
+      {
+        runtime: 1000,
+        device: "C++",
+        sys_mode: "Local",
+        scale: 1,
+        grid_radius: "1000*um",
+        min_distance: "1*um",
+        init_vms: true,
+        output_filename: "./results/output.gz",
+        export_simdata_filename: "/opt3/CX_Output/brian_data.gz",
+        import_simdata_filename: "/opt3/CX_Output/sivanni/brian_data_20161028_142108.gz",
+        load_positions_only: true,
+        benchmark: false,
+        save_generated_input_video: true,
+        multidimension_array_run: false,
+        number_of_process: 20,
+        default_clock: 10,
+        trials_per_config: 1
+      }
+    ];
+
+    // Initialize the editor
+    var editor = new JSONEditor(document.getElementById('editor_holder'), {
+      // Enable fetching schemas via ajax
+      ajax: true,
+
+      // The schema for the editor
+      schema: {
+        type: "array",
+        title: "Params",
+        format: "tabs",
+        items: {
+          title: "Person",
+          headerTemplate: "{{i}} - {{self.device}}",
+              "properties": {
+                "runtime": {
+                  "type": "integer",
+                  "description": "Duration of simulation in miliseconds",
+                  "default": 1000,
+                  "minimum": 10,
+                  "maximum": 30000,
+                },
+                "device": {
+                  "type": "string",
+                  "description": "Brian simulation device type",
+                  "enum": ["C++", "Python", "GeNN"]
+                },
+                "sys_mode": {
+                  "type": "string",
+                  "description": "System mode: local means ... , expanded means ... ",
+                  "enum": ["Local", "Expanded"]
+                },
+                "scale": {
+                  "type": "integer",
+                  "description": "Defines how much the network is scaled",
+                  "default": 1,
+                  "minimum": 1,
+                  "maximum": 10,
+                },
+                "grid_radius": {
+                  "type": "integer",
+                  "description": "Defines grid radius in micrometer (um)",
+                  "default": 1000,
+                  "minimum": 10,
+                  "maximum": 10000,
+                },
+                "min_distance": {
+                  "type": "integer",
+                  "description": "Defines minimum distance between the neurons in micrometer (um)",
+                  "default": 1,
+                  "minimum": 1,
+                  "maximum": 100,
+                },
+
+                "output_filename": {
+                  "type": "string",
+                  "description": "relative path to the output filename",
+                  "default": "./results/output.gz"
+                },
+                "export_simdata_filename": {
+                  "type": "string",
+                  "description": "relative path of the filename to save the output connection information ",
+                  "default": "./simdata/data.gz"
+                },
+                "import_simdata_filename": {
+                  "type": "string",
+                  "description": "relative path of the filename to load the output connection information from",
+                  "default": "./simdata/data.gz"
+                },
+                "number_of_process": {
+                  "type": "integer",
+                  "description": "Defines number of processes for array run",
+                  "default": 1,
+                  "minimum": 1,
+                  "maximum": 32,
+                },
+                "default_clock": {
+                  "type": "integer",
+                  "description": "Defines simulation clock in micro-seconds (us)",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 1000,
+                },
+                "trials_per_config": {
+                  "type": "integer",
+                  "description": "Defines how many times each simulation should be repeated",
+                  "default": 1,
+                  "minimum": 1,
+                  "maximum": 20,
+                },
+                "init_vms": {
+                  "type": "boolean",
+                  "description": "If checked, the initial membrane voltages will be randomized",
+                  "format": "checkbox"
+                },
+                "load_positions_only": {
+                  "type": "boolean",
+                  "description": "If checked, only the neuron positions will be loaded from the simulation data file (and connection info will not be loaded)",
+                  "format": "checkbox"
+                },
+
+                "benchmark": {
+                  "type": "boolean",
+                  "description": "If checked, the simulation will be benchamrked",
+                  "format": "checkbox"
+                },
+                "save_generated_input_video": {
+                  "type": "boolean",
+                  "description": "If checked, the generated video for input will be saved",
+                  "format": "checkbox"
+                },
+                "multidimension_array_run": {
+                  "type": "boolean",
+                  "description": "If checked, the array runs will be considered as a multi-dimentional simulations",
+                  "format": "checkbox"
+                }
+              }
+            }
+        
+        // type: "array",
+        // title: "People",
+        // format: "tabs",
+        // items: {
+        //   title: "Person",
+        //   headerTemplate: "{{i}} - {{self.name}}",
+        //   oneOf: [
+        //     {
+        //       title: "Basic Person",
+        //       "type": "object",
+        //       "id": "person",
+        //       "properties": {
+        //         "name": {
+        //           "type": "string",
+        //           "description": "First and Last name",
+        //           "minLength": 4
+        //         },
+        //         "age": {
+        //           "type": "integer",
+        //           "default": 21,
+        //           "minimum": 18,
+        //           "maximum": 99
+        //         },
+        //         "gender": {
+        //           "type": "string",
+        //           "enum": [
+        //             "male",
+        //             "female"
+        //           ]
+        //         }
+        //       }
+        //     },
+        //     {
+        //       title: "Complex Person",
+        //       "properties": {
+        //         "location": {
+        //           "type": "object",
+        //           "title": "Location",
+        //           "properties": {
+        //             "city": {
+        //               "type": "string"
+        //             },
+        //             "state": {
+        //               "type": "string"
+        //             },
+        //             "citystate": {
+        //               "type": "string",
+        //               "description": "This is generated automatically from the previous two fields",
+        //               "template": "{{city}}, {{state}}",
+        //               "watch": {
+        //                 "city": "person.location.city",
+        //                 "state": "person.location.state"
+        //               }
+        //             }
+        //           }
+        //         },
+        //         "pets": {
+        //           "type": "array",
+        //           "format": "table",
+        //           "title": "Pets",
+        //           "uniqueItems": true,
+        //           "items": {
+        //             "type": "object",
+        //             "properties": {
+        //               "type": {
+        //                 "type": "string",
+        //                 "enum": [
+        //                   "cat",
+        //                   "dog",
+        //                   "bird",
+        //                   "reptile",
+        //                   "other"
+        //                 ],
+        //                 "default": "dog"
+        //               },
+        //               "name": {
+        //                 "type": "string"
+        //               },
+        //               "fixed": {
+        //                 "type": "boolean",
+        //                 "title": "spayed / neutered"
+        //               }
+        //             }
+        //           }
+        //         }
+        //       }
+        //     }
+        //   ]
+        // }
+      },
+
+      // Seed the form with a starting value
+      startval: starting_value,
+
+      // Disable additional properties
+      no_additional_properties: true,
+
+      // Require all properties by default
+      required_by_default: true
+    });
+
+    // Hook up the submit button to log to the console
+    document.getElementById('submit').addEventListener('click', function () {
+      // Get the value from the editor
+      console.log(editor.getValue());
+    });
+
+    // Hook up the Restore to Default button
+    document.getElementById('restore').addEventListener('click', function () {
+      editor.setValue(starting_value);
+    });
+
+    // Hook up the enable/disable button
+    document.getElementById('enable_disable').addEventListener('click', function () {
+      // Enable form
+      if (!editor.isEnabled()) {
+        editor.enable();
+      }
+      // Disable form
+      else {
+        editor.disable();
+      }
+    });
+
+    // Hook up the validation indicator to update its 
+    // status whenever the editor changes
+    editor.on('change', function () {
+      // Get an array of errors from the validator
+      var errors = editor.validate();
+
+      var indicator = document.getElementById('valid_indicator');
+
+      // Not valid
+      if (errors.length) {
+        indicator.style.color = 'red';
+        indicator.textContent = "not valid";
+      }
+      // Valid
+      else {
+        indicator.style.color = 'green';
+        indicator.textContent = "valid";
+      }
+    });
+  </script>
+</body>
+
+</html>

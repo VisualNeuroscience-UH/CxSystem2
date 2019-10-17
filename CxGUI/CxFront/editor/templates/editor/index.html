@@ -1,0 +1,247 @@
+<title>CxSystem2 </title>
+<!-- <link rel="stylesheet" href="/assets/dcode.css">-->
+<!--<link rel="shortcut icon" href="/static/images/favicon.ico">-->
+<!--<link rel='icon' href="/static/images/favicon.ico" type='image/x-icon'/>-->
+<link rel="shortcut icon" type="image/png" href="/static/images/favicon.ico"/>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel='stylesheet' href='/static/css/foundation-5.5.3/css/foundation.min.css'>
+<link rel='stylesheet' href='/static/css/font-awesome-4.0.3/css/font-awesome.css'>
+<link rel='stylesheet' href='/static/css/introjs.min.css'>
+
+<script src="/static/scripts/jsoneditor.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>-->
+<script src="/static/scripts/jquery-3.4.1.min.js"></script>
+<script src="/static/scripts/schema.js"></script>
+<script src="/static/scripts/django_simulation_request.js"></script>
+<!--<script src="/static/css/foundation-5.5.3/js/foundation.min.js"></script>-->
+
+<script>
+    // Set the default CSS theme and icon library globally
+    JSONEditor.defaults.theme = 'foundation5';
+    JSONEditor.defaults.iconlib = 'fontawesome4';
+</script>
+
+<body>
+
+
+<nav class="top-bar" data-topbar role="navigation">
+    <ul class="title-area">
+        <li class="name">
+            <h1><a href="#" class="disable">
+                <img src="/static/images/cxsystem.svg" height="40px" width="40px"/>
+                CxSystem2</a></h1>
+        </li>
+    </ul>
+    <section class="top-bar-section">
+        <ul class="left">
+
+            <li class="active"><a href="#" onclick="document.getElementById('home-button').click();">Home</a></li>
+
+            <li class="active" data-step="1"
+                data-intro="Use this button to import anatomy and physiology configuration files"><a
+                    href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import
+                Parameters/Physiology</a></li>
+
+            <li class="active"><a href="javascript:void(0);" onclick="downloadanatomy()"
+                                  data-step="2"
+                                  data-intro="When you are done changing the anatomy configuration file, use this button to download your changed configuration file.">Export
+                Parameters</a></li>
+            <li class="active"><a href="javascript:void(0);" onclick="downloadphysiology()"
+                                  data-step="3"
+                                  data-intro="When you are done changing the physiology configuration file, use this button to download your changed configuration file.">Export
+                Physiology</a></li>
+            <li class="active"><a href="javascript:void(0);" onclick="javascript:introJs().start();">Help</a></li>
+        </ul>
+        <ul class="right">
+            <form id='simulation_form' action='simulate'>
+                {% csrf_token %}
+                <a class="button alert" href="javascript:void(0);"
+                   onclick="document.getElementById('simulator').click()"
+                   data-step="4"
+                   data-intro="Use this button to initiate a simulation on the server">Simulate</a>
+                <input id="simulator" type="submit" value="Simulate" style="display: none;"/>
+            </form>
+        </ul>
+    </section>
+</nav>
+
+
+<div>
+    <input type="file" id="file-input" style="display: none;"/>
+</div>
+
+
+<div class="tabsdiv">
+    <div class="tabs__topbar">
+        <button id="home-button" class="tabs__button" data-for-tab="0" style="display: none;">Home
+        </button>
+        <button class="tabs__button" data-for-tab="1"
+                data-step="5"
+                data-intro="Use this tab to configure the simulation parameters">Simulation
+        </button>
+        <button class="tabs__button" data-for-tab="2"
+                data-step="6"
+                data-intro="Use this tab to configure the parameters related to the input">Inputs
+        </button>
+        <button class="tabs__button" data-for-tab="3"
+                data-step="7"
+                data-intro="Use this tab to configure the parameters related to neuron groups in the simulation">
+            NeuronGroups
+        </button>
+        <button class="tabs__button" data-for-tab="4"
+                data-step="8"
+                data-intro="Use this tab to configure the parameters for synaptic connections">Connections
+        </button>
+        <button class="tabs__button" data-for-tab="5"
+                data-step="9"
+                data-intro="Use this tab to configure the physiological parameters of the network ">Physiology
+        </button>
+        <button class="tabs__button" data-for-tab="6" style="position: absolute; right: 0px;"
+                data-step="10"
+                data-intro="Description of configurations available for simulating sample networks.">Examples
+        </button>
+    </div>
+
+
+    <div class="main_tabs">
+        <!--  ##################################################      -->
+        <!--        This is the content of the home tab               -->
+        <!--  ##################################################      -->
+        <div class="tabs__content" data-tab="0">
+            <div id='home' style="height: 100vh;">
+                <h3> CxSystem Simulator</h3>
+
+                <div style="border: solid #e1e1e1 1px; padding: 5px; width: 70%;">
+                    <p>
+                        CxSystem is a cerebral cortex simulation framework, which operates on personal computers.
+                        We have tested the simulation software with a simplified version of a comprehensive cortical
+                        microcircuit model [1],
+                        which is available as configuration file. The CxSystem aims at easy testing and buildup of
+                        diverse
+                        models at single cell resolution. Implemented on the top of the Python-based Brian2 simulator,
+                        CxSystem
+                        supports the main goal of Brian, i.e. minimizing development time, by providing the user with a
+                        simplified interface.
+                        The preliminary version of this software has been developed at Aalto University 2012-2015 [2],
+                        and the
+                        full version at the University of Helsinki 2013-2017. The software is distributed under the
+                        terms of
+                        the GNU General Public License, Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
+                        To access the documentation of the CxSystem, please check out the readthedocs page of the
+                        project.
+                    </p>
+                    <br>
+                    <br>
+                    <br>
+                    <hr>
+                    <p style="font-size: 8pt;">
+                        [1] Markram, H., Muller, E., Ramaswamy, S., Reimann, M. W., Abdellah, M., Sanchez, C. A., …
+                        Schürmann, F. (2015). Reconstruction and Simulation of Neocortical Microcircuitry. Cell, 163(2),
+                        456–492. http://doi.org/10.1016/j.cell.2015.09.029
+                        <br>
+                        [2]Heikkinen, H., Sharifian, F., Vigário, R., & Vanni, S. (2015). Feedback to distal dendrites
+                        links fMRI signals to neural receptive fields in a spiking network model of the visual cortex.
+                        Journal of Neurophysiology, 114(1), 57–69. http://doi.org/10.1152/jn.00169.2015
+                    </p>
+                </div>
+
+                <br>
+                <h3> Examples </h3>
+                <div style="border: solid #e1e1e1 1px; padding: 5px;width: 70%;">
+                    <p>
+                        The following examples are currently available for simulation:
+
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="tabs__content" data-tab="1">
+            <div id='params_holder' class='medium-12 columns'></div>
+        </div>
+        <div class="tabs__content" data-tab="2">
+            <!--            <div class="medium-12 columns">-->
+            <!--                <span id='valid_indicator' style="margin-left: -15px; margin-down 5px; "> hi </span>-->
+            <!--            </div>-->
+            <div id='inputs_holder'></div>
+        </div>
+        <div class="tabs__content" data-tab="3">
+            <div class="medium-12 columns">
+                <span id='valid_indicator' style="margin-left: -15px; margin-down: 5px; "> hi </span>
+            </div>
+            <div id='neurons_holder'></div>
+        </div>
+
+        <div class="tabs__content" data-tab="4">
+            <div id='connections_holder'></div>
+        </div>
+        <div class="tabs__content" data-tab="5">
+            <div id='physio_holder'></div>
+        </div>
+
+        <div class="tabs__content" data-tab="6">
+            <div id='examples' style="height: 100vh;">
+                <!-- Examples are loaded here -->
+                <h3>Examples</h3>
+                <div style="border: solid #e1e1e1 1px; padding: 5px; width: 70%;">
+                    <p>
+                        We have prepared several configurations files for sample networks of different examples:
+                    <h4>Pytest</h4>
+                    <p>
+                        <a href="#" onclick="load_example('pytest')">Click here</a> to load the configuration for the pytest example which is basically a generic sample network.
+                    </p>
+
+                    <h4>COBA-EIF</h4>
+                    <p>
+                        <a href="#" onclick="load_example('cobaeif')">Click here</a> to load the configuration for the COBA-EIF example.
+                    </p>
+
+
+                    <h4>Simplified Markram Model (step 2)</h4>
+                    <p>
+                        This model is a simplification of the Markram et al. (2015) model of the rat somatosensory
+                        cortex containing ~31 000 neurons divided into 17 neuron groups.
+                        Details of the simplification are described in
+                        <a href="https://www.mitpressjournals.org/doi/10.1162/neco_a_01188" target="_blank">the article</a>.
+                        Running this model should take ~6 minutes per 1 second of simulation time (device=Python).
+                    </p>
+                    <p>
+                        <a href="#" onclick="load_example('markram_step2')">Click here</a> to load the configuration of the step 2 simplification.
+                    </p>
+                    <h4>Simplified Markram Model (step 1)</h4>
+                    <p>
+                        This model contains all the 55 neuron groups of the Markram et al. (2015) rat somatosensory
+                        cortex model. The neuron dynamics have been reduced to exponential integrate-and-fire.
+                        Running this model should take ~17 minutes per 1 second of simulation time (device=Python).
+                    </p>
+                    <p>
+                        <a href="#" onclick="load_example('markram_step1')">Click here</a> to load the configuration of the step 1 simplification.
+                        Your browser might become unresponsive while the configuration is being loaded. Be patient.
+                    </p>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="export_config_container" style="display:none;"></div>
+
+<!--    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>-->
+
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.5.11/split.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.2/ajv.bundle.js"></script>
+<script src="/static/scripts/main.js"></script>
+<script src="/static/scripts/intro.min.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+
+
+</body>

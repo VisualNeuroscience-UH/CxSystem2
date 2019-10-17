@@ -65,7 +65,10 @@ class synapse_parser(object):
         # Commented ilam out because not used in this branch /HH
         # self.ilam = self.value_extractor(self.physio_config_df,'ilam_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
 
-        self.calcium_concentration = self.value_extractor(self.physio_config_df, 'calcium_concentration' )
+        try:
+            self.calcium_concentration = self.value_extractor(self.physio_config_df, 'calcium_concentration' )
+        except:
+            self.calcium_concentration = 2.0  # default value that doesn't scale weights
         self._set_calcium_dependency()
 
         # Set (initial) weights for chosen synapse type
@@ -88,11 +91,12 @@ class synapse_parser(object):
                     cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
                 except IndexError:
                     cropped_df = df.loc[variable_start_idx:]
-                return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
+                return eval(next(iter(cropped_df['Value'][cropped_df['Key'] == key_name[1]]))) # next(iter()) is equivalent to item() which is depricated
             else:
-                return eval(df['Value'][df['Key'] == key_name].item())
+                return eval(next(iter(df['Value'][df['Key'] == key_name]))) # next(iter()) is equivalent to item() which is depricated
         except NameError:
-            new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
+            tmp_key = next(iter(df['Value'][df['Key'] == key_name]),'no match') # next(iter()) is equivalent to item() which is depricated
+            new_key = tmp_key.replace("']", "").split("['")
             return self.value_extractor(df,new_key)
         except ValueError:
             raise ValueError("Parameter %s not found in the configuration file."%key_name)
@@ -462,14 +466,14 @@ class neuron_parser (object):
                 return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
             else:
                 try:
-                    return eval(df['Value'][df['Key'] == key_name].item())
+                    return eval(next(iter(df['Value'][df['Key'] == key_name]))) # next(iter()) is equivalent to item() which is depricated
                 except NameError:
                     df_reset_index = df.reset_index(drop=True)
                     df_reset_index = df_reset_index[0:df_reset_index[df_reset_index['Key'] == key_name].index[0]]
                     for neural_parameter in df_reset_index['Key'].dropna():
-                        if neural_parameter  in df['Value'][df['Key'] == key_name].item():
+                        if neural_parameter  in next(iter(df['Value'][df['Key'] == key_name])):
                             exec("%s =self.value_extractor(df,neural_parameter)" % (neural_parameter))
-                    return eval(df['Value'][df['Key'] == key_name].item())
+                    return eval(next(iter(df['Value'][df['Key'] == key_name])))
                 except TypeError:
                     raise TypeError('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%df['Value'][df['Key'] == key_name].item())
 

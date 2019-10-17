@@ -1,6 +1,7 @@
 import pytest
 import os
 import sys
+[sys.path.append(i) for i in ['.', '..']]
 import CxSystem as cx
 import numpy as np
 import pdb

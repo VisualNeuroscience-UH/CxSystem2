@@ -20,6 +20,8 @@ import bz2
 import pickle as pickle
 import sys
 import itertools
+import json
+from pathlib import Path
 
 class array_run(object):
 
@@ -188,6 +190,16 @@ class array_run(object):
             self.total_configs = len(self.df_anat_final_array)* self.trials_per_config
             self.config_per_node = self.total_configs / self.cluster_number_of_nodes
             self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)[:int(self.total_configs / self.config_per_node)]
+            if type(anat_file_address) == dict:
+                anat_path = Path.home().joinpath('_tmp_anat.json')
+                with open(anat_path, 'w') as f:
+                    json.dump(anat_file_address, f)
+                anat_file_address = anat_path
+            if type(physio_file_address) == dict:
+                physio_path = Path.home().joinpath('_tmp_physio.json')
+                with open(physio_path, 'w') as f:
+                    json.dump(physio_file_address, f)
+                physio_file_address = physio_path
             cluster_run.cluster_run(self, anat_file_address, physio_file_address)
             return
         if cluster_start_idx != -1 and cluster_step != -1: # this runs in cluster

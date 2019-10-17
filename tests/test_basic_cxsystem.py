@@ -1,6 +1,7 @@
 import pytest
 import os
 import sys
+[sys.path.append(i) for i in ['.', '..']]
 import CxSystem as cx
 import numpy as np
 import pdb
@@ -48,17 +49,17 @@ def test_dataframe_delimiters():
 class TestInit:
 	# @pytest.mark.xfail()
 	def test_csv_shape(self):
-		assert CM.anat_and_sys_conf_df.shape[1] == 19
+		assert CM.anat_and_sys_conf_df.shape[1] == 27
 		
 
 	def test_number_of_input_arguments(self):
-		assert CM.__init__.__code__.co_argcount==8, "Number of arguments have changed"
+		assert CM.__init__.__code__.co_argcount == 9 , "Number of arguments have changed"
 		
 	def test_local_variable_names(self):
 		assert CM.__init__.__code__.co_varnames == \
 		('self', 'anatomy_and_system_config', 'physiology_config', 'output_file_suffix', 
 		'instantiated_from_array_run', 'cluster_run_start_idx', 'cluster_run_step', 'array_run_in_cluster', 
-		'params_indices', 'row_idx', 'number_of_new_columns', 'number_of_rows', 
+		'gui_port', 'params_indices', 'row_idx', 'number_of_new_columns', 'number_of_rows',
 		'existing_rows', 'new_columns', 'empty_dataframe', 'new_anat_and_sys_conf_df', 
 		'row', 'check_array_run_anatomy', 'check_array_run_physiology', 'trials_per_config'
 		)
@@ -77,7 +78,7 @@ class TestConfigurationExecutor:
 		'''Test that indeces are the same given the constant configuration file.
 			If you add/remove items in the conf file, this is expected to fail.'''
 		assert all(CM.anat_and_sys_conf_df.loc[:,0][CM.anat_and_sys_conf_df.loc[:,0]=='row_type'].index \
-				== np.array([0, 3, 7, 16]))
+				== np.array([0, 2, 5, 12]))
 	
 	def test_set_runtime_parameters(self):
 		'''Note, cpp and GeNN devices are not tested '''
