@@ -27,7 +27,7 @@ DESCRIPTION = "A cerebral cortex simulation framework"
 AUTHOR = "Vafa Andalibi, Henri Hokkanen, Simo Vanni"
 AUTHOR_EMAIL = "vafa.andalibi@gmail.com"
 URL = "https://github.com/VisualNeuroscience-UH/CxSystem2"
-VERSION = '0.0-a1'
+VERSION = '0.0-a2'
 
 setup(
     name=NAME,
@@ -64,6 +64,7 @@ setup(
         "Topic :: Utilities",
     ],
     install_requires=requiers,
+    include_package_data=True,
     zip_safe=False,
     entry_points={
         'console_scripts': [
