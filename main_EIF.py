@@ -1,5 +1,4 @@
-import CxSystem as cxs
-import os
+from cxsystem2.core import cxsystem as cxs
 from brian2  import *
 import datetime
 
