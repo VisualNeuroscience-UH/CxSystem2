@@ -1,0 +1,4 @@
+include requirements.txt
+recursive-include tests *
+recursive-include cxsystem2 *
+recursive-include config_files *
