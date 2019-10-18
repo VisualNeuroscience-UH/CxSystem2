@@ -3,7 +3,7 @@ from pathlib import Path
 import ctypes
 from sys import platform, exit
 import webbrowser
-
+import socket
 
 class disable_file_system_redirection:
     if platform == 'win32':
@@ -18,7 +18,7 @@ class disable_file_system_redirection:
             self._revert(self.old_value)
 
 class runserver:
-    def __init__(self, port = 8000):
+    def __init__(self, port = None):
         try:
             python_cmd_version = os.popen('python --version').read().strip().split(' ')[1]
             if int(python_cmd_version[0]) < 3 :
@@ -27,12 +27,21 @@ class runserver:
         except Exception as e:
             print ("something went wrong getting python version ... ")
             print (e)
+            exit(1)
 
         server_folder= Path(os.path.dirname(__file__)).joinpath('CxFront')
+        os.chdir(server_folder)
+
+        if port is None:
+            port = self.find_free_port()
+        a_website = "http://127.0.0.1:{}/".format(port)
+        webbrowser.open_new_tab(a_website)
         if platform == 'win32':
             disable_file_system_redirection().__enter__()
-            os.system("cd {} && start chrome http://127.0.0.1:{port}/ && python manage.py runserver {port}".format(server_folder.as_posix(), port = port))
-        else:
-            os.system('cd {}; python manage.py runserver'.format(server_folder))
-        chrome = webbrowser.get('chrome')
-        chrome.open_new('http://127.0.0.1:{}/'.format(port))
+        os.system("python manage.py runserver {port}".format(server_folder, port=port))
+
+
+    def find_free_port(self):
+        s = socket.socket()
+        s.bind(('', 0))  # Bind to a free port provided by the host.
+        return s.getsockname()[1]  # Return the port number assigned.
