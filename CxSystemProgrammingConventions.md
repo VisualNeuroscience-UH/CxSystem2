@@ -52,39 +52,29 @@ Explicit list of used imported global variables at the top of the file?
 
 ## Workflow in GitHub
 
-We adhere to the *GitFlow* workflow.
-<https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow>
-
 Repository access: single repository/shared maintenance (= everyone on the team considered a maintainer and is granted access to upload changes)
 
 ### Current stable release
 
-* GitHub repository: <https://github.com/VisualNeuroscience-UH/CxSystem>
-* Branch for current stable release: *master*
+* GitHub repository: <https://github.com/VisualNeuroscience-UH/CxSystem2>
+* Current stable release: the latest release under *master*
 * Documentation: <https://cxsystem.readthedocs.io/en/master/>
-* *Hotfix* = something that can’t wait for the next stable release
-* When starting on a hotfix in a stable release, branch from: *master* 
-  * git checkout master -> git checkout -b hotfix_branch
-* When merging a hotfix to master, use: 
-  * git checkout master -> git merge hotfix_branch
-  * git checkout develop -> git merge hotfix_branch (so that *develop* gets the hotfix, too)
 
 ### Development
 
-* Development branch: *develop*
-* When starting on a new feature, branch from: *develop*
+* Development branch: *master*
+* When starting on a new feature, branch from: *master*
 * When updating your feature branch with new developments others might have done, use:
-  * git pull develop
+  * git pull master
 * When merging your new feature (after others have reviewed it), use: 
-  * git checkout develop -> git merge feature_branch
+  * git checkout master -> git merge feature_branch
 
 ### New releases
 
-* Once develop has acquired enough new features for a release, fork a *release* branch:
-  * git checkout develop -> git checkout -b release/X.Y
+* Once *master* has acquired enough new features for a release, fork a *release* branch:
+  * git checkout master -> git checkout -b release/X.Y
     * where X.Y stands for the release version, e.g. “2.0”
 * “Feature freeze” = no new features can be added after this point to the release branch
 * Only bug fixes, documentation generation, and other release-oriented tasks should go in this branch
 * When the release branch is finished, use:
   * git checkout master -> git merge release/X.Y
-  * git checkout develop -> git merge release/X.Y* (so that *develop* gets all the bug fixes, too)
