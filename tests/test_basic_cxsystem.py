@@ -2,16 +2,15 @@ import pytest
 import os
 import sys
 [sys.path.append(i) for i in ['.', '..']]
-import CxSystem as cx
+from cxsystem2.core import cxsystem as cx, equation_templates as eqt
 import numpy as np
-import pdb
 from brian2.units import *
 import brian2
-import equation_templates as eqt
 import zlib
 import pickle
 import shutil
 from scipy.stats import ks_2samp, wasserstein_distance
+from pathlib import Path
 
 
 
@@ -26,13 +25,13 @@ Simo Vanni 2019
 '''
 
 cwd = os.getcwd()
-path, file = os.path.split(cx.__file__)
-anatomy_and_system_config = os.path.join(path, 'tests', 'config_files', 'pytest_Anatomy_config.csv')
-physiology_config = os.path.join(path, 'tests', 'config_files', 'pytest_Physiology_config.csv')
+path = Path(os.getcwd())
+anatomy_and_system_config = path.joinpath('tests', 'config_files', 'pytest_Anatomy_config.csv').as_posix()
+physiology_config = path.joinpath('tests', 'config_files', 'pytest_Physiology_config.csv').as_posix()
 CM = cx.CxSystem(anatomy_and_system_config, physiology_config, instantiated_from_array_run=0)
 
 def test_cwd():
-	assert "CxSystem.py" in os.listdir(os.getcwd()) 
+	assert "cxsystem2" in os.listdir(os.getcwd())
 
 def test_anatomy_and_system_config_file_exist():
 	assert os.path.isfile(anatomy_and_system_config)

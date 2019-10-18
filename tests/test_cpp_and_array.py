@@ -2,17 +2,14 @@ import pytest
 import os
 import sys
 [sys.path.append(i) for i in ['.', '..']]
-import CxSystem as cx
+from cxsystem2.core import cxsystem as cx
 import numpy as np
-import pdb
 from brian2.units import *
-import brian2
-import equation_templates as eqt
 import zlib
 import pickle
 import shutil
 from scipy.stats import ks_2samp, wasserstein_distance
-
+from pathlib import Path
 
 
 '''
@@ -28,11 +25,11 @@ Simo Vanni 2019
 '''
 
 cwd = os.getcwd()
-path, file = os.path.split(cx.__file__)
-anatomy_and_system_config = os.path.join(path, 'tests', 'config_files', 'pytest_Anatomy_config_cpp_array.csv')
-physiology_config = os.path.join(path, 'tests', 'config_files', 'pytest_Physiology_config_cpp_array.csv')
+path = Path(os.getcwd())
+anatomy_and_system_config = path.joinpath('tests', 'config_files', 'pytest_Anatomy_config_cpp_array.csv').as_posix()
+physiology_config = path.joinpath('tests', 'config_files', 'pytest_Physiology_config_cpp_array.csv').as_posix()
 CM = cx.CxSystem(anatomy_and_system_config, physiology_config, instantiated_from_array_run=0)
-new_output_path = os.path.join(path, 'tests','temp_output_files_cpp_array')
+new_output_path = path.joinpath('tests','temp_output_files_cpp_array')
 
 ###################
 # Integration tests
@@ -55,18 +52,11 @@ def cxsystem_run_fixture2():
 
 @pytest.fixture(scope='module')
 def get_spike_data():
-	output_fullpath = os.path.join(path, 'tests','output_files','output_20190524_06070215_python_200ms.gz')
-	with open(output_fullpath, 'rb') as fb:
+	output_fullpath = path.joinpath('tests','output_files','output_20190524_06070215_python_200ms.gz')
+	with open(output_fullpath.as_posix(), 'rb') as fb:
 		d_pickle = zlib.decompress(fb.read())
 		data = pickle.loads(d_pickle)
 		spikes_all = data['spikes_all']
-
-#	new_output_name = [item for item in os.listdir(CM.output_folder) if item.startswith('output')] #Assuming just one outputfile in this folder
-#	new_output_fullpath = os.path.join(path, CM.output_folder, new_output_name[0])
-#	with open(new_output_fullpath, 'rb') as fb:
-#		new_d_pickle = zlib.decompress(fb.read())
-#		new_data = pickle.loads(new_d_pickle)
-#		new_spikes_all = new_data['spikes_all']
 
 	new_output_name = [item for item in os.listdir(new_output_path) if 'tonic_depol_level1.55_cpp' in item] 	
 	new_output_fullpath = os.path.join(path, new_output_path, new_output_name[0])
