@@ -60,7 +60,8 @@
 }
 
 .tabs__content--active{
-    display: block; 
+    display: block;
+
 }
 
 .tabs__content > :first-child{
@@ -144,6 +145,11 @@ a.disable {
   pointer-events: none;
   cursor: default;
 }
-/* button[type="button"] {
-    margin-left: 100px !important;
-} */
+
+dd.active > a {
+    background: #333 !important;
+}
+
+button.tabs__button--active{
+    background: #008CBA !important;
+}
