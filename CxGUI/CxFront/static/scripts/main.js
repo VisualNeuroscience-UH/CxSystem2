@@ -292,7 +292,8 @@ var connections_editor = new JSONEditor(document.getElementById('connections_hol
     // Require all properties by default
     required_by_default: true,
     disable_properties: true,
-    disable_collapse: true
+    disable_collapse: true,
+
 });
 
 var starting_value4 = [

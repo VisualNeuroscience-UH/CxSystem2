@@ -139,75 +139,83 @@ neurons_schema = {
     items: {
         title: "NeuronGroup",
         headerTemplate: "[G{{self.idx}}] {{self.neuron_type}} at L{{self.layer_idx}}",
-        properties: {
-            "idx": {
-                "type": "integer",
-                "description": "Running index for the neuron group",
-                // "default": "{{i}}",
-            },
-            "number_of_neurons": {
-                "type": "integer",
-                "description": "Number of neurons in the neuron group ",
-                "default": 100,
-                "minimum": 1,
-                "maximum": 10000,
-            },
-            "neuron_type": {
-                "type": "string",
-                "description": "Neuron type",
-                "enum": ["PC", "BC", "MC", "L1i","SS"]
-            },
-            'neuron_subtype':{
-                  "type": "string",
-                "description": "Neuron subtype, i.e. reference to the concrete set of parameters",
-            },
-            "layer_idx": {
-                "type": "string",
-                "description": "Layer where the neuron population is located (2 = layer 2/3)",
-                "enum": ["1", "2", "4", "5", "6",
-                    "[2->1]", "[4->1]", "[5->1]", "[6->1]",
-                    "[2->2]", "[4->2]", "[5->2]", "[6->2]",
-                    "[4->4]", "[5->4]", "[6->4]",
-                    "[5->5]", "[6->5]", "[6->6]"]
-            },
-            "net_center": {
-                "type": "string",
-                "description": "Center point of the neuron population (e.g. 0+0j)",
-            },
-            "noise_sigma": {
-                "type": "string",
-                "description": "Membrane noise (e.g. 2*mV)",
-            },
-            "monitors": {
-                "type": "string",
-                "format": "text",
-                "description": "Monitors for recording spikes and state variables",
-            },
-            'n_background_inputs':{
-                "type": "integer",
-                "description": "Number of excitatory background synapses"
-            },
-            'n_background_inhibition':{
-                "type": "integer",
-                "description": "Number of inhibitory background synapses"
-            },
-            'gemean':{
-                "type": "string",
-                "description": "gemean"
-            },
-            'gestd':{
-                "type": "string",
-                "description": "gestd"
-            },
-            'gimean':{
-                "type": "string",
-                "description": "gimean"
-            },
-            'gistd':{
-                "type": "string",
-                "description": "gistd"
+        options: {
+            "keep_oneof_values": false
+        },
+        oneOf: [{
+            "title": "NeuronGroup",
+            "type": "object",
+            "id": "ng",
+            properties: {
+                "idx": {
+                    "type": "integer",
+                    "description": "Running index for the neuron group",
+                    // "default": "{{i}}",
+                },
+                "number_of_neurons": {
+                    "type": "integer",
+                    "description": "Number of neurons in the neuron group ",
+                    "default": 100,
+                    "minimum": 1,
+                    "maximum": 10000,
+                },
+                "neuron_type": {
+                    "type": "string",
+                    "description": "Neuron type",
+                    "enum": ["PC", "BC", "MC", "L1i", "SS"]
+                },
+                'neuron_subtype': {
+                    "type": "string",
+                    "description": "Neuron subtype, i.e. reference to the concrete set of parameters",
+                },
+                "layer_idx": {
+                    "type": "string",
+                    "description": "Layer where the neuron population is located (2 = layer 2/3)",
+                    "enum": ["1", "2", "4", "5", "6",
+                        "[2->1]", "[4->1]", "[5->1]", "[6->1]",
+                        "[2->2]", "[4->2]", "[5->2]", "[6->2]",
+                        "[4->4]", "[5->4]", "[6->4]",
+                        "[5->5]", "[6->5]", "[6->6]"]
+                },
+                "net_center": {
+                    "type": "string",
+                    "description": "Center point of the neuron population (e.g. 0+0j)",
+                },
+                "noise_sigma": {
+                    "type": "string",
+                    "description": "Membrane noise (e.g. 2*mV)",
+                },
+                "monitors": {
+                    "type": "string",
+                    "format": "text",
+                    "description": "Monitors for recording spikes and state variables",
+                },
+                'n_background_inputs': {
+                    "type": "integer",
+                    "description": "Number of excitatory background synapses"
+                },
+                'n_background_inhibition': {
+                    "type": "integer",
+                    "description": "Number of inhibitory background synapses"
+                },
+                'gemean': {
+                    "type": "string",
+                    "description": "gemean"
+                },
+                'gestd': {
+                    "type": "string",
+                    "description": "gestd"
+                },
+                'gimean': {
+                    "type": "string",
+                    "description": "gimean"
+                },
+                'gistd': {
+                    "type": "string",
+                    "description": "gistd"
+                }
             }
-        }
+        }]
     }
 };
 
@@ -295,7 +303,7 @@ inputs_schema = {
             }
         ]
     }
-}
+};
 
 connections_schema = {
     type: "array",
@@ -304,60 +312,68 @@ connections_schema = {
     items: {
         title: "Synapse",
         headerTemplate: "[S{{i}}] {{self.pre_syn_idx}}  ➤ {{self.post_syn_idx}}",
-        "properties": {
-            "receptor": {
-                "type": "string",
-                "description": "Sets whether the connection is excitatory or inhibitory",
-                "enum": ["ge", "gi"]
-            },
-            "pre_syn_idx": {
-                "type": "integer",
-                "description": "Presynaptic neuron group index",
-                "default": 0,
-                "minimum": 0,
-                "maximum": 100
-            },
-            "post_syn_idx": {
-                "type": "string",
-                "format": "text",
-                "description": "Postsynaptic neuron group index",
-            },
-            "syn_type": {
-                "type": "string",
-                "description": "Synapse model",
-                "default": "Fixed",
-                "enum": ["Fixed", "Depressing", "Facilitating"]
-            },
-            "p": {
-                "type": "string",
-                "description": "Connection probability",
-            },
-            "n": {
-                "type": "string",
-                "description": "Number of synapses per connection"
-            },
-            "monitors": {
-                "type": "string",
-                "format": "text",
-                "description": "Monitors for synaptic state variables",
-            },
-            "load_connection": {
-                "type": "string",
-                "format": "text",
-                "description": "Load connection",
-            },
-            "save_connection": {
-                "type": "string",
-                "format": "text",
-                "description": "Save connection",
-            },
-            "custom_weight": {
-                "type": "string",
-                "description": "Synaptic weight for this specific connection (overrides more general weight definitions)"
+        options: {
+            "keep_oneof_values": false
+        },
+        oneOf: [{
+            "title": "Synapse",
+            "type": "object",
+            "id": "syn",
+            "properties": {
+                "receptor": {
+                    "type": "string",
+                    "description": "Sets whether the connection is excitatory or inhibitory",
+                    "enum": ["ge", "gi"]
+                },
+                "pre_syn_idx": {
+                    "type": "integer",
+                    "description": "Presynaptic neuron group index",
+                    "default": 0,
+                    "minimum": 0,
+                    "maximum": 100
+                },
+                "post_syn_idx": {
+                    "type": "string",
+                    "format": "text",
+                    "description": "Postsynaptic neuron group index",
+                },
+                "syn_type": {
+                    "type": "string",
+                    "description": "Synapse model",
+                    "default": "Fixed",
+                    "enum": ["Fixed", "Depressing", "Facilitating"]
+                },
+                "p": {
+                    "type": "string",
+                    "description": "Connection probability",
+                },
+                "n": {
+                    "type": "string",
+                    "description": "Number of synapses per connection"
+                },
+                "monitors": {
+                    "type": "string",
+                    "format": "text",
+                    "description": "Monitors for synaptic state variables",
+                },
+                "load_connection": {
+                    "type": "string",
+                    "format": "text",
+                    "description": "Load connection",
+                },
+                "save_connection": {
+                    "type": "string",
+                    "format": "text",
+                    "description": "Save connection",
+                },
+                "custom_weight": {
+                    "type": "string",
+                    "description": "Synaptic weight for this specific connection (overrides more general weight definitions)"
+                }
             }
-        }
+        }]
     }
-}
+};
 
 
 physio_schema = {
@@ -416,4 +432,4 @@ physio_schema = {
             }
         ]
     }
-}
+};
