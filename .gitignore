@@ -53,6 +53,7 @@ tests/__pycache__
 tests/temp_output_files
 tests/temp_connection_files
 .hypothesis
+cxsystem2.egg-info
 # Output data files which may be big
 
 
