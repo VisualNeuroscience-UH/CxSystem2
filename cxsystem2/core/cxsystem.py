@@ -608,11 +608,12 @@ class CxSystem(object):
 
         #<editor-fold desc="...Parameter preprocessing">
         assert self.sys_mode != '', " -  System mode is not defined."
-        _all_columns = ['idx', 'number_of_neurons', 'neuron_type', 'layer_idx', 'threshold',
-                        'reset', 'refractory', 'net_center','monitors', 'tonic_current', 'n_background_inputs',
-                        'n_background_inhibition', 'noise_sigma', 'gemean', 'gestd', 'gimean', 'gistd', 'neuron_subtype']
+        _all_columns = ['idx', 'number_of_neurons', 'neuron_type', 'layer_idx',  'net_center', 'monitors',
+                        'n_background_inputs', 'n_background_inhibition', 'neuron_subtype']
+                        # 'threshold', 'reset', 'refractory',
+                        # 'tonic_current', 'noise_sigma', 'gemean', 'gestd', 'gimean', 'gistd']
         _obligatory_params = [0, 1, 2, 3]
-        assert len(self.current_values_list) <= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
+        assert len(self.current_values_list) >= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
         is missing. Following obligatory columns should be defined:\n%s\n ' \
                                                                 % str([_all_columns[ii] for ii in _obligatory_params])
         obligatory_columns = list(array(_all_columns)[_obligatory_params])
@@ -625,22 +626,21 @@ class CxSystem(object):
         local_namespace['idx'] = -1
         local_namespace['net_center'] = 0 + 0j
         local_namespace['number_of_neurons'] = 0
-        local_namespace['tonic_current'] = ''
         local_namespace['n_background_inputs'] = ''
         local_namespace['n_background_inhibition'] = ''
-        local_namespace['noise_sigma'] = ''
-        local_namespace['gemean'] = ''
-        local_namespace['gestd'] = ''
-        local_namespace['gimean'] = ''
-        local_namespace['gistd'] = ''
         local_namespace['neuron_subtype'] = ''
         local_namespace['neuron_type'] = ''
         local_namespace['layer_idx'] = 0
-        local_namespace['threshold'] = ''
-        local_namespace['reset'] = ''
-        local_namespace['refractory'] = ''
         local_namespace['monitors'] = ''
-
+        # local_namespace['threshold'] = ''
+        # local_namespace['reset'] = ''
+        # local_namespace['refractory'] = ''
+        # local_namespace['noise_sigma'] = ''
+        # local_namespace['gemean'] = ''
+        # local_namespace['gestd'] = ''
+        # local_namespace['gimean'] = ''
+        # local_namespace['gistd'] = ''
+        # local_namespace['tonic_current'] = ''
 
         for column in _all_columns:
             try:
@@ -653,20 +653,21 @@ class CxSystem(object):
         idx = local_namespace['idx']
         net_center = local_namespace['net_center']
         number_of_neurons = local_namespace['number_of_neurons']
-        tonic_current = local_namespace['tonic_current']
         n_background_inputs = local_namespace['n_background_inputs']
         n_background_inhibition = local_namespace['n_background_inhibition']
-        noise_sigma = local_namespace['noise_sigma']
-        gemean = local_namespace['gemean']
-        gestd = local_namespace['gestd']
-        gimean = local_namespace['gimean']
-        gistd = local_namespace['gistd']
+        monitors = local_namespace['monitors']
         neuron_type = local_namespace['neuron_type']
         neuron_subtype = local_namespace['neuron_subtype']
-        threshold = local_namespace['threshold']
-        reset = local_namespace['reset']
-        refractory = local_namespace['refractory']
-        monitors = local_namespace['monitors']
+        # noise_sigma = local_namespace['noise_sigma']
+        # gemean = local_namespace['gemean']
+        # gestd = local_namespace['gestd']
+        # gimean = local_namespace['gimean']
+        # gistd = local_namespace['gistd']
+        # threshold = local_namespace['threshold']
+        # reset = local_namespace['reset']
+        # refractory = local_namespace['refractory']
+        # tonic_current = local_namespace['tonic_current']
+
 
         assert idx not in self.NG_indices, \
             " -  Multiple indices with same values exist in the configuration file."
@@ -677,28 +678,28 @@ class CxSystem(object):
         net_center = complex(net_center)
         current_idx = len(self.customized_neurons_list)
 
-        if tonic_current == '--':
-            tonic_current = '0*pA'
-
-        if noise_sigma == '--':
-            noise_sigma = '0*mV'
-        noise_sigma = eval(noise_sigma)
-
-        if gemean == '--':
-            gemean = '0*nS'
-        if gestd == '--':
-            gestd = '0*nS'
-        if gimean == '--':
-            gimean = '0*nS'
-        if gistd == '--':
-            gistd = '0*nS'
+        # if tonic_current == '--':
+        #     tonic_current = '0*pA'
+        #
+        # if noise_sigma == '--':
+        #     noise_sigma = '0*mV'
+        # noise_sigma = eval(noise_sigma)
+        #
+        # if gemean == '--':
+        #     gemean = '0*nS'
+        # if gestd == '--':
+        #     gestd = '0*nS'
+        # if gimean == '--':
+        #     gimean = '0*nS'
+        # if gistd == '--':
+        #     gistd = '0*nS'
 
         if n_background_inputs == '--':
             n_background_inputs = '0'
         if n_background_inhibition == '--':
             n_background_inhibition = '0'
 
-        assert 'V' in str(noise_sigma.get_best_unit()), ' -  The unit of noise_sigma should be volt'
+        # assert 'V' in str(noise_sigma.get_best_unit()), ' -  The unit of noise_sigma should be volt'
         if neuron_type == 'PC':  # extract the layer index of PC neurons separately
             if local_namespace['layer_idx'].isdigit():
                 local_namespace['layer_idx'] = local_namespace['layer_idx']
@@ -718,12 +719,13 @@ class CxSystem(object):
         # neuron_reference() object and passing the positional arguments to it. The main member of the class called
         # output_neuron is then appended to customized_neurons_list.
         # in case of threshold/reset/refractory overwrite
-        if threshold != '--':
-            self.customized_neurons_list[-1]['threshold'] = threshold
-        if reset != '--':
-            self.customized_neurons_list[-1]['reset'] = reset
-        if refractory != '--':
-            self.customized_neurons_list[-1]['refractory'] = refractory
+        # if threshold != '--':
+        #     self.customized_neurons_list[-1]['threshold'] = threshold
+        # if reset != '--':
+        #     self.customized_neurons_list[-1]['reset'] = reset
+        # if refractory != '--':
+        #     self.customized_neurons_list[-1]['refractory'] = refractory
+
         # Generating variable names for Groups, NeuronNumbers, Equations, Threshold, Reset, Refractory and Namespace
         if neuron_subtype == '--':
             _dyn_neurongroup_name = self._NeuronGroup_prefix + str(current_idx) + '_' + neuron_type + '_L' + str(layer_idx).replace\
@@ -753,12 +755,12 @@ class CxSystem(object):
         # Adding tonic current to namespace
         #self.customized_neurons_list[current_idx]['namespace']['tonic_current'] = eval(tonic_current)
         # Adding the noise sigma to namespace
-        self.customized_neurons_list[current_idx]['namespace']['noise_sigma'] = noise_sigma
-        # Adding ge/gi mean/std to namespace
-        self.customized_neurons_list[current_idx]['namespace']['gemean'] = eval(gemean)
-        self.customized_neurons_list[current_idx]['namespace']['gestd'] = eval(gestd)
-        self.customized_neurons_list[current_idx]['namespace']['gimean'] = eval(gimean)
-        self.customized_neurons_list[current_idx]['namespace']['gistd'] = eval(gistd)
+        # self.customized_neurons_list[current_idx]['namespace']['noise_sigma'] = noise_sigma
+        # # Adding ge/gi mean/std to namespace
+        # self.customized_neurons_list[current_idx]['namespace']['gemean'] = eval(gemean)
+        # self.customized_neurons_list[current_idx]['namespace']['gestd'] = eval(gestd)
+        # self.customized_neurons_list[current_idx]['namespace']['gimean'] = eval(gimean)
+        # self.customized_neurons_list[current_idx]['namespace']['gistd'] = eval(gistd)
 
         # Creating the actual NeuronGroup() using the variables in the previous 6 lines
         exec("%s= NeuronGroup(%s, model=%s, method='%s', threshold=%s, reset=%s,refractory = %s, namespace = %s)" \
