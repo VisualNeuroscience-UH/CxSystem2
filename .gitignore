@@ -56,6 +56,11 @@ tests/temp_connection_files
 cxsystem2.egg-info
 dist
 build
+
+# Developer files
+test_notebooks/
+
+
 # Output data files which may be big
 
 

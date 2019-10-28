@@ -11,7 +11,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 from cxsystem2.core.parameter_parser import *
 import random as rnd
 from cxsystem2.core import equation_templates as eqt
-
+import cxsystem2.neurodynlib as nd
 
 class neuron_reference(object):
     '''
@@ -41,7 +41,7 @@ class neuron_reference(object):
 
         # <editor-fold desc="...General neuron model initialization">
         self.physio_config_df = physio_config_df
-        neuron_reference._celltypes = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_I','HH_E'])
+        neuron_reference._celltypes = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_I','HH_E', 'NDNEURON'])
         assert general_grid_radius > min_distance , ' -  The distance between cells should be less than the grid radius'
         assert cell_type in neuron_reference._celltypes, " -  Cell type '%s' is not defined" % cell_type  # check cell type
         assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"  # check layer index
@@ -173,6 +173,27 @@ class neuron_reference(object):
             # _positions =[tuple(map(operator.add,_itm, (float(real(_centre)),float(imag(_centre))))) for _itm in _positions]
             _positions = [complex(_itm[0],_itm[1]) + self.output_neuron['w_center'] for _itm in _positions]
         return _positions
+
+
+    def NDNEURON(self):
+        """
+        NDNEURON type, just for testing Neurodynlib
+
+        :return:
+        """
+
+        x = nd.neuron_factory(self.neuron_model)
+        x.set_excitatory_receptors(self.excitation_model)
+        x.set_inhibitory_receptors(self.inhibition_model)
+
+        self.output_neuron['equation'] = x.get_compartment_equations('soma')
+        self.output_neuron['threshold'] = x.get_threshold_condition()
+        self.output_neuron['reset'] = x.get_reset_statements()
+        self.output_neuron['refractory'] = x.get_refractory_period()
+
+        self.output_neuron['equation'] += Equations('''x : meter
+            y : meter''')
+
 
     def PC(self):
         '''

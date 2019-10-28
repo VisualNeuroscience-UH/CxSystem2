@@ -374,8 +374,8 @@ class neuron_parser (object):
     'This class embeds all parameter sets associated to all neuron types and will return it as a namespace in form of dictionary'
     def __init__(self, output_neuron,physio_config_df):
         self.physio_config_df = physio_config_df
-        neuron_parser.type_ref = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_E','HH_I'])
-        assert output_neuron['type'] in neuron_parser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['category']
+        neuron_parser.type_ref = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_E','HH_I', 'NDNEURON'])
+        assert output_neuron['type'] in neuron_parser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['type']
 
         # Handling of "neuron subtype" parameters; new since Aug 2018
         if output_neuron['subtype'] == '--':
@@ -402,6 +402,9 @@ class neuron_parser (object):
 
         getattr(self, '_'+ output_neuron['type'])(output_neuron)
 
+
+    def _NDNEURON(self, output_neuron):
+        pass
 
     def _PC(self,output_neuron):
         '''

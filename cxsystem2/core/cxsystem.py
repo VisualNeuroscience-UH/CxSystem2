@@ -930,7 +930,7 @@ class CxSystem(object):
             NG_init = 'Vr_offset = rand(len(%s))\n' % _dyn_neurongroup_name
             NG_init += "for _key in %s.variables.keys():\n" % _dyn_neurongroup_name
             NG_init += "\tif _key.find('vm')>=0:\n"
-            NG_init += "\t\tsetattr(%s,_key,%s['Vr']+Vr_offset * (%s['VT']-%s['Vr']))\n" % \
+            NG_init += "\t\tsetattr(%s,_key,%s['V_init_min']+Vr_offset * (%s['V_init_max']-%s['V_init_min']))\n" % \
                        (_dyn_neurongroup_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name)
 
             # Commented out (didn't work with receptors) /HH
@@ -940,7 +940,7 @@ class CxSystem(object):
         else:
             NG_init = "for _key in %s.variables.keys():\n" % _dyn_neurongroup_name
             NG_init += "\tif _key.find('vm')>=0:\n"
-            NG_init += "\t\tsetattr(%s,_key,%s['Vr'])\n" % (_dyn_neurongroup_name, _dyn_neuron_namespace_name)
+            NG_init += "\t\tsetattr(%s,_key,%s['V_init'])\n" % (_dyn_neurongroup_name, _dyn_neuron_namespace_name)
 
             # Commented out (didn't work with receptors) /HH
             # NG_init += "\telif ((_key.find('ge')>=0) or (_key.find('gi')>=0)):\n"
