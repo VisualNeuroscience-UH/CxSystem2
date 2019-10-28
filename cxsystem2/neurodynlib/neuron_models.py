@@ -397,17 +397,17 @@ class PointNeuron(object):
 
         self.neuron_parameters = imported_params
 
-    def add_tonic_current(self, I_tonic=50*pA, tau_rampup=None):
+    def add_tonic_current(self, tonic_current=50 * pA, tau_rampup=None):  # Used by CxSystem
 
-        assert 'I_tonic' not in self.neuron_parameters, \
+        assert 'tonic_current' not in self.neuron_parameters.keys(), \
             "Tonic current is already set, please modify neuron parameters instead of using this method"
 
-        self.set_neuron_parameters(I_tonic=I_tonic, tau_tonic_rampup=tau_rampup)
+        self.set_neuron_parameters(I_tonic=tonic_current, tau_tonic_rampup=tau_rampup)
 
         if tau_rampup is None:
-            ext_currents_string = '+ I_tonic $EXT_CURRENTS'
+            ext_currents_string = '+ tonic_current $EXT_CURRENTS'
         else:
-            ext_currents_string = '+ I_tonic*(1-exp(-t/(tau_tonic_rampup))) $EXT_CURRENTS'
+            ext_currents_string = '+ tonic_current*(1-exp(-t/(tau_tonic_rampup))) $EXT_CURRENTS'
 
         self.add_model_definition('EXT_CURRENTS', ext_currents_string)
 
@@ -418,14 +418,14 @@ class PointNeuron(object):
         else:
             self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_eqs)
 
-    def add_vm_noise(self, noise_sigma=2*mV):
-        self.set_model_definition('VM_NOISE', '+ noise_sigma*xi*taum_soma**-0.5')
+    def add_vm_noise(self, sigma_noise=2 * mV):  # Used by CxSystem
+        self.set_model_definition('VM_NOISE', '+ sigma_noise*xi*taum_soma**-0.5')
         C = self.neuron_parameters['C']
         g_leak = self.neuron_parameters['g_leak']
-        self.set_neuron_parameters(noise_sigma=noise_sigma, taum_soma=C/g_leak)
+        self.set_neuron_parameters(sigma_noise=sigma_noise, taum_soma=C / g_leak)
 
     # TODO - Setting receptors should also set default params
-    def set_excitatory_receptors(self, receptor_name):
+    def set_excitatory_receptors(self, receptor_name):  # Used by CxSystem
         assert receptor_name in ReceptorModel.ExcModelNames, \
             "Undefined excitation model!"
 
@@ -440,7 +440,7 @@ class PointNeuron(object):
         # self.comp_specific_vars = NeuronSuperclass.CompSpecificVariables[exc_model] + \
         #                           NeuronSuperclass.CompSpecificVariables[inh_model]
 
-    def set_inhibitory_receptors(self, receptor_name):
+    def set_inhibitory_receptors(self, receptor_name):  # Used by CxSystem
         assert receptor_name in ReceptorModel.InhModelNames, \
             "Undefined inhibition model!"
 
