@@ -100,6 +100,15 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
         for i in range(self.n_apical):
             self.apical_compartments[i].set_inhibitory_receptors(receptor_name)
 
+    def get_threshold_condition(self):
+        return self.soma_compartment.get_threshold_condition()
+
+    def get_reset_statements(self):
+        return self.soma_compartment.get_reset_statements()
+
+    def get_refractory_period(self):
+        return self.soma_compartment.get_refractory_period()
+
     def make_neuron_equations(self):
         # Topology here is: (POST) basal -> soma -> a0 -> a1 -> ... (PRE)
         # Multiple different indexes:
@@ -165,7 +174,8 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
 
         temp_eq = b2.Equations(I_dendr_last_apical,
                                I_dendr='I_dendr_a%d'%last_ix, vmself='vm_a%d' % last_ix,
-                               vmpost=vm_post, gapost=1 / (R_axial[last_ix + 1]))
+                               vmpost=vm_post, gapost=1 / (R_axial[-1]))
+        # R_axial[-1] can be wrong but we keep it in this legacy version
 
         self.apical_compartments[last_ix].add_external_current('I_dendr_a%d' % last_ix, str(temp_eq))
         eq_apical = self.apical_compartments[last_ix].get_compartment_equations('a%d' % last_ix)

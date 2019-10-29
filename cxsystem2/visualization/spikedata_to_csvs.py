@@ -55,13 +55,18 @@ class SpikeData(object):
 
         return spikelist
 
-    def _get_z_level(self, group):
+    def _get_z_level(self, group_name):
+        """
+
+        :param group_name: str, format NGi_NEURONTYPE_LAYER
+        :return:
+        """
         z_level = {'NG0_relay_vpm': 0, 'NG1_L1_L1I_L1': 0.01, 'NG2_L23_PC_L2toL1': 0.02, 'NG3_L23_BC_L2': 0.02,
                    'NG4_L23_MC_L2': 0.02, 'NG5_L4_PC1_L4toL1': 0.03, 'NG6_L4_PC2_L4toL1': 0.03, 'NG7_L4_SS_L4': 0.03,
                    'NG8_L4_BC_L4': 0.03, 'NG9_L4_MC_L4': 0.03, 'NG10_L5_PC_L5toL1': 0.04, 'NG11_L5_BC_L5': 0.04,
                    'NG12_L5_MC_L5': 0.04, 'NG13_L6_PC1_L6toL6': 0.05, 'NG14_L6_PC2_L6toL4': 0.05,
                    'NG15_L6_PC3_L6toL2': 0.05, 'NG16_L6_BC_L6': 0.05, 'NG17_L6_MC_L6': 0.05}
-        return z_level[group]
+        return z_level[group_name]
 
     def get_positions_list(self):
         start_ix = self._get_start_indices()
