@@ -6,6 +6,7 @@ import pandas as pd
 from brian2.units import *
 from pathlib import Path
 
+
 class SpikeData(object):
 
     def __init__(self, filename):
