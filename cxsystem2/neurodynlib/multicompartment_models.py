@@ -82,8 +82,8 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
 
     def add_vm_noise(self, sigma_noise=2 * mV):  # Used by CxSystem
         self.soma_compartment.set_model_definition('VM_NOISE', '+ sigma_noise*xi*taum_soma**-0.5')
-        C = np.sum(self.neuron_parameters['C'])  # Not sure if this is the right way
-        g_leak = np.sum(self.neuron_parameters['g_leak'][1])  # Not sure if this is the right way
+        C = self.neuron_parameters['C'][1]  # Not sure if this is the right way
+        g_leak = self.neuron_parameters['g_leak'][1]  # Not sure if this is the right way
         self.soma_compartment.set_neuron_parameters(sigma_noise=sigma_noise, taum_soma=C / g_leak)
 
     def set_excitatory_receptors(self, receptor_name):

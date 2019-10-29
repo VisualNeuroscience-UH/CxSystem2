@@ -353,9 +353,9 @@ if __name__ == '__main__':
     # p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Anatomy_config.csv')
     # p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Physiology_config.csv')
     # p = Path('/Users/vafandal/gitrepos/CxSystem2/config_files/Rev2_Step1gamma_Physiology_config.csv')
-    p = Path('/Users/vafandal/gitrepos/CxSystem2/config_files/Rev2_Step1gamma_Anatomy_config_customweights.csv')
+    p = Path('/home/henhok/PycharmProjects/CxSystem2/test_notebooks/new_physio.json')
 
     converter = filetype_converter(p)
-    converter.save_as_json()
-    # converter.save_as_csv()
+    # converter.save_as_json()
+    converter.save_as_csv()
     # pprint(converter.output)
