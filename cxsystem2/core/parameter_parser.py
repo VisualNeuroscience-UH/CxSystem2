@@ -421,8 +421,8 @@ class neuron_parser (object):
         # TODO - In this legacy version, only capacitance is corrected with spine_factor
         fract_areas = self.output_namespace['fract_areas'][output_neuron['dend_comp_num']]
         self.output_namespace['C'] = fract_areas * self.output_namespace['Cm'] * self.output_namespace['Area_tot_pyram'] * self.output_namespace['spine_factor']
-        self.output_namespace['g_leak'] = fract_areas * self.output_namespace['g_leak'] * self.output_namespace['Area_tot_pyram']
-        self.output_namespace['taum_soma'] = self.output_namespace['C'][1] / self.output_namespace['g_leak'][1]
+        self.output_namespace['gL'] = fract_areas * self.output_namespace['gL'] * self.output_namespace['Area_tot_pyram']
+        self.output_namespace['taum_soma'] = self.output_namespace['C'][1] / self.output_namespace['gL'][1]
 
     def _BC(self,output_neuron):
         pass

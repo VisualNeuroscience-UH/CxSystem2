@@ -103,22 +103,22 @@ class PointNeuron(object):
         self.neuron_parameters = self.default_neuron_parameters
 
         # Add default threshold condition, reset statements and integration method
-        self.threshold_condition = 'vm > V_threshold'
-        self.reset_statements = 'vm = V_reset'
+        self.threshold_condition = 'vm > VT'
+        self.reset_statements = 'vm = V_res'
         self.integration_method = 'euler'
 
         # Add other defaults
-        self.initial_values = {'vm': None}  # vm: None => E_leak will be used
+        self.initial_values = {'vm': None}  # vm: None => EL will be used
         self.states_to_monitor = ['vm']
         self.neuron_name = self.__class__.__name__ + '_' + datetime.now().strftime('%Y%m%d%H%M%S%f')
 
         self.parameter_units = {
-            'E_leak': mV, 'V_reset': mV, 'V_threshold': mV,
-            'g_leak': nS, 'C': pF, 'refractory_period': ms
+            'EL': mV, 'V_res': mV, 'VT': mV,
+            'gL': nS, 'C': pF, 'refractory_period': ms
         }
 
         # Will be useful for multicompartmental neurons using these same classes
-        # NB! C and g_leak not set compartment-specific by default due to the way
+        # NB! C and gL not set compartment-specific by default due to the way
         # multicompartmental neurons are set, see module multicompartment_models.py
         self.compartment_vars_and_consts = []
 
@@ -216,7 +216,7 @@ class PointNeuron(object):
     def get_initial_values(self):  # Model-specific
         init_vals = dict(self.initial_values)
         if init_vals['vm'] is None:
-            vm_dict = {'vm': self.neuron_parameters['E_leak']}
+            vm_dict = {'vm': self.neuron_parameters['EL']}
             init_vals.update(vm_dict)
 
         return init_vals
@@ -277,7 +277,7 @@ class PointNeuron(object):
 
         # plot the membrane voltage
         try:
-            firing_threshold = self.neuron_parameters['V_threshold']
+            firing_threshold = self.neuron_parameters['VT']
         except KeyError:
             firing_threshold = None
 
@@ -421,8 +421,8 @@ class PointNeuron(object):
     def add_vm_noise(self, sigma_noise=2 * mV):  # Used by CxSystem
         self.set_model_definition('VM_NOISE', '+ sigma_noise*xi*taum_soma**-0.5')
         C = self.neuron_parameters['C']
-        g_leak = self.neuron_parameters['g_leak']
-        self.set_neuron_parameters(sigma_noise=sigma_noise, taum_soma=C / g_leak)
+        gL = self.neuron_parameters['gL']
+        self.set_neuron_parameters(sigma_noise=sigma_noise, taum_soma=C / gL)
 
     # TODO - Setting receptors should also set default params
     def set_excitatory_receptors(self, receptor_name):  # Used by CxSystem
@@ -471,17 +471,17 @@ class LifNeuron(PointNeuron):
 
     __OBFUSCATION_FACTORS = [543, 622, 9307, 584, 2029, 211]
 
-    # The large g_leak and capacitance are from the original code
+    # The large gL and capacitance are from the original code
     default_neuron_parameters = {
-            'E_leak': -70 * mV,
-            'V_reset': -65 * mV,
-            'V_threshold': -50 * mV,
-            'g_leak': 100 * nS,
+            'EL': -70 * mV,
+            'V_res': -65 * mV,
+            'VT': -50 * mV,
+            'gL': 100 * nS,
             'C': 800 * pF,
             'refractory_period': 2.0 * ms
     }
 
-    neuron_model_defns = {'I_NEURON_MODEL': 'g_leak*(E_leak-vm)'}
+    neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm)'}
 
     def __init__(self):
         super().__init__()
@@ -552,7 +552,7 @@ class LifNeuron(PointNeuron):
         state_monitor, spike_monitor = self.simulate_LIF_neuron(
             input_current,
             simulation_time=50 * ms,
-            E_leak=vals[0],
+            EL=vals[0],
             v_reset=vals[1],
             firing_threshold=vals[2],
             R=vals[3],
@@ -567,19 +567,19 @@ class EifNeuron(PointNeuron):
     See Neuronal Dynamics, `Chapter 5 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch5.S2.html>`_
     """
 
-    # The large g_leak and capacitance come from the original code
+    # The large gL and capacitance come from the original code
     default_neuron_parameters = {
-            'E_leak': -65.0 * mV,
-            'V_reset': -60.0 * mV,
-            'V_threshold': -55.0 * mV,  # soft threshold
-            'g_leak': 50 * nS,
+            'EL': -65.0 * mV,
+            'V_res': -60.0 * mV,
+            'VT': -55.0 * mV,  # soft threshold
+            'gL': 50 * nS,
             'C': 600 * pF,
             'DeltaT': 2 * mV,  # spike sharpness
             'refractory_period': 2.0 * ms,
             'V_cut': -30.0 * mV  # technical threshold to tell the algorithm when to reset vm to v_reset
     }
 
-    neuron_model_defns = {'I_NEURON_MODEL': 'g_leak*(E_leak-vm) + g_leak * DeltaT * exp((vm-V_threshold) / DeltaT)'}
+    neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT)'}
 
     def __init__(self):
         super().__init__()
@@ -590,25 +590,25 @@ class EifNeuron(PointNeuron):
     def getting_started(self, step_amplitude=0.8*nA, sine_amplitude=1.6*nA, sine_freq=150*Hz, sine_dc=1.3*nA):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
-    def _min_curr_expl(self):
-
-        durations = [1, 2, 5, 10, 20, 50, 100, 200]
-        min_amp = [8.6, 4.45, 2., 1.15, .70, .48, 0.43, .4]
-        i = 1
-        t = durations[i]
-        I_amp = min_amp[i] * b2.namp
-
-        input_current = input_factory.get_step_current(
-            t_start=10, t_end=10 + t - 1, unit_time=ms, amplitude=I_amp)
-
-        state_monitor, spike_monitor = self.simulate_neuron(
-            I_stim=input_current, simulation_time=(t + 20) * ms)
-
-        plot_tools.plot_voltage_and_current_traces(
-            state_monitor, input_current, title="step current",
-            firing_threshold=EifNeuron.FIRING_THRESHOLD_v_spike, legend_location=2)
-        plt.show()
-        print("nr of spikes: {}".format(spike_monitor.count[0]))
+    # def _min_curr_expl(self):
+    #
+    #     durations = [1, 2, 5, 10, 20, 50, 100, 200]
+    #     min_amp = [8.6, 4.45, 2., 1.15, .70, .48, 0.43, .4]
+    #     i = 1
+    #     t = durations[i]
+    #     I_amp = min_amp[i] * b2.namp
+    #
+    #     input_current = input_factory.get_step_current(
+    #         t_start=10, t_end=10 + t - 1, unit_time=ms, amplitude=I_amp)
+    #
+    #     state_monitor, spike_monitor = self.simulate_neuron(
+    #         I_stim=input_current, simulation_time=(t + 20) * ms)
+    #
+    #     plot_tools.plot_voltage_and_current_traces(
+    #         state_monitor, input_current, title="step current",
+    #         firing_threshold=EifNeuron.FIRING_THRESHOLD_v_spike, legend_location=2)
+    #     plt.show()
+    #     print("nr of spikes: {}".format(spike_monitor.count[0]))
 
 
 class AdexNeuron(PointNeuron):
@@ -620,10 +620,10 @@ class AdexNeuron(PointNeuron):
     # Default values (see Table 6.1, Initial Burst)
     # http://neuronaldynamics.epfl.ch/online/Ch6.S2.html#Ch6.F3
     default_neuron_parameters = {
-            'E_leak': -70.0 * mV,
-            'V_reset': -51.0 * mV,
-            'V_threshold': -50.0 * mV,
-            'g_leak': 2 * nS,
+            'EL': -70.0 * mV,
+            'V_res': -51.0 * mV,
+            'VT': -50.0 * mV,
+            'gL': 2 * nS,
             'C': 10 * pF,
             'DeltaT': 2 * mV,
             'a': 0.5 * nS,
@@ -633,14 +633,14 @@ class AdexNeuron(PointNeuron):
             'V_cut': -30.0 * mV
     }
 
-    neuron_model_defns = {'I_NEURON_MODEL': 'g_leak*(E_leak-vm) - w + g_leak * DeltaT * exp((vm-V_threshold) / DeltaT)',
-                          'NEURON_MODEL_EQS': 'dw/dt = (a*(vm-E_leak) - w) / tau_w : amp'}
+    neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) - w + gL * DeltaT * exp((vm-VT) / DeltaT)',
+                          'NEURON_MODEL_EQS': 'dw/dt = (a*(vm-EL) - w) / tau_w : amp'}
 
     def __init__(self):
 
         super().__init__()
         self.threshold_condition = 'vm > V_cut'
-        self.reset_statements = 'vm = V_reset; w += b'
+        self.reset_statements = 'vm = V_res; w += b'
         self.initial_values = {'vm': None, 'w': 0*pA}
         self.states_to_monitor = ['vm', 'w']
         new_parameter_units = {'DeltaT': mV, 'V_cut': mV, 'a': nS, 'b': pA, 'tau_w': ms}
@@ -684,8 +684,8 @@ class HodgkinHuxleyNeuron(PointNeuron):
     """
 
     default_neuron_parameters = {
-            'E_leak': 10.6 * mV,
-            'g_leak': 0.3 * msiemens,
+            'EL': 10.6 * mV,
+            'gL': 0.3 * msiemens,
             'C': 1 * ufarad,
             'EK': -12 * mV,
             'ENa': 115 * mV,
@@ -696,7 +696,7 @@ class HodgkinHuxleyNeuron(PointNeuron):
     }
 
     neuron_model_defns = {
-        'I_NEURON_MODEL': 'g_leak*(E_leak-vm) + gNa*m**3*h*(ENa-vm) + gK*n**4*(EK-vm)',
+        'I_NEURON_MODEL': 'gL*(EL-vm) + gNa*m**3*h*(ENa-vm) + gK*n**4*(EK-vm)',
         'NEURON_MODEL_EQS':
         '''
         alphah = .07*exp(-.05*vm/mV)/ms : Hz
@@ -785,9 +785,9 @@ class IzhikevichNeuron(PointNeuron):
 
     # Default parameters give a chattering (CH) neuron
     default_neuron_parameters = {
-            'E_leak': -60.0*mV,            # equivalent to v_r in PNAS 2008
-            'V_reset': -40.0*mV,           # c
-            'V_threshold': -40.0*mV,       # v_t
+            'EL': -60.0*mV,            # equivalent to v_r in PNAS 2008
+            'V_res': -40.0*mV,           # c
+            'VT': -40.0*mV,       # v_t
             'C': 50*pF,
             'k': 1.5*nS/mV,
             'a': 0.03/ms,  # inverse of recovery time constant
@@ -798,13 +798,13 @@ class IzhikevichNeuron(PointNeuron):
     }
 
 
-    neuron_model_defns = {'I_NEURON_MODEL': 'k * (vm-E_leak) * (vm-V_threshold) - u',
-                          'NEURON_MODEL_EQS': 'du/dt = a*(b*(vm-E_leak) - u) : amp'}
+    neuron_model_defns = {'I_NEURON_MODEL': 'k * (vm-EL) * (vm-VT) - u',
+                          'NEURON_MODEL_EQS': 'du/dt = a*(b*(vm-EL) - u) : amp'}
 
     def __init__(self):
         super().__init__()
         self.threshold_condition = 'vm > V_cut'
-        self.reset_statements = 'vm = V_reset; u += d'
+        self.reset_statements = 'vm = V_res; u += d'
         self.initial_values = {'vm': None, 'u': 0}
         self.states_to_monitor = ['vm', 'u']
         new_parameter_units = {'V_cut': mV, 'k': nS/mV, 'a': (1/ms), 'b': nS, 'd': pA, 'tau_w': ms}
@@ -848,19 +848,19 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
     # The default parameters correspond to neuronal_model_id = 637925685 available at
     # https://celltypes.brain-map.org/experiment/electrophysiology/623893177
     default_neuron_parameters = {
-        'E_leak': -77.01623281 * mvolt,
+        'EL': -77.01623281 * mvolt,
         'C': 233.02310736 * pfarad,
-        'g_leak': 8.10525954 * nsiemens,
+        'gL': 8.10525954 * nsiemens,
         'A_asc1': -56.75679504 * pamp,
         'tau_asc1': 100. * msecond,
         'A_asc2': -0.60597377 * namp,
         'tau_asc2': 10. * msecond,
-        'V_reset': -77. * mvolt,
-        'V_threshold': -49.31118264 * mvolt,
+        'V_res': -77. * mvolt,
+        'VT': -49.31118264 * mvolt,
         'refractory_period': 2. * msecond
     }
 
-    neuron_model_defns = {'I_NEURON_MODEL': 'g_leak*(E_leak - vm) + I_asc1 + I_asc2',
+    neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL - vm) + I_asc1 + I_asc2',
                           'NEURON_MODEL_EQS': '''
                           dI_asc1/dt = -I_asc1/tau_asc1 : amp
                           dI_asc2/dt = -I_asc2/tau_asc2 : amp
@@ -868,8 +868,8 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
 
     def __init__(self):
         super().__init__()
-        self.threshold_condition = 'vm > V_threshold'
-        self.reset_statements = 'vm = V_reset; I_asc1 += A_asc1; I_asc2 += A_asc2'
+        self.threshold_condition = 'vm > VT'
+        self.reset_statements = 'vm = V_res; I_asc1 += A_asc1; I_asc2 += A_asc2'
         self.initial_values = {'vm': None, 'I_asc1': 0.0, 'I_asc2': 0.0}
         self.states_to_monitor = ['vm', 'I_asc1', 'I_asc2']
         new_parameter_units = {'A_asc1': pA, 'A_asc2': pA, 'tau_asc1': ms, 'tau_asc2': ms}
@@ -891,10 +891,10 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
             print('Warning! Model has more than 2 afterspike currents. Will take only the first two.')
 
         abi_parameters = {
-            'E_leak': neuron_config['El_reference'] * volt,
+            'EL': neuron_config['El_reference'] * volt,
             'C': neuron_config['C'] * farad,
-            'g_leak': (1 / neuron_config['R_input']) * siemens,
-            'V_threshold': (neuron_config['El_reference'] + neuron_config['th_inf']) * volt,
+            'gL': (1 / neuron_config['R_input']) * siemens,
+            'VT': (neuron_config['El_reference'] + neuron_config['th_inf']) * volt,
             'A_asc1': neuron_config['asc_amp_array'][0] * amp,
             'A_asc2': neuron_config['asc_amp_array'][1] * amp,
             'tau_asc1': neuron_config['asc_tau_array'][0] * second,
