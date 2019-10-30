@@ -20,6 +20,8 @@ from string import Template
 from datetime import datetime
 import json
 from cxsystem2.neurodynlib.receptor_models import ReceptorModel
+from IPython.core.display import display, HTML
+
 
 import sys
 # sys.path.append('/home/henhok/PycharmProjects/brian2modelfitting/')
@@ -69,6 +71,7 @@ class PointNeuron(object):
     }
 
     default_neuron_parameters = {}
+    model_info_url = 'http://neuronaldynamics.epfl.ch/online/'
 
     def __init__(self, is_pyramidal=False, compartment='soma'): #, custom_strings=None):
 
@@ -116,6 +119,8 @@ class PointNeuron(object):
             'EL': mV, 'V_res': mV, 'VT': mV,
             'gL': nS, 'C': pF, 'refractory_period': ms
         }
+
+        self.link_to_book = self.model_info_url
 
         # Will be useful for multicompartmental neurons using these same classes
         # NB! C and gL not set compartment-specific by default due to the way
@@ -168,6 +173,9 @@ class PointNeuron(object):
         compartment_eq = b2.Equations(membrane_eq, **substitutables)
 
         return compartment_eq
+
+    def what_is_this(self):
+        return self.link_to_book
 
     def get_neuron_equations(self):
         """
@@ -363,6 +371,12 @@ class PointNeuron(object):
         self.plot_vm(state_monitor)
 
     def get_json(self, include_neuron_name=True):
+        """
+        Creates a json string of parameter names and values (units are discarded)
+
+        :param include_neuron_name:
+        :return:
+        """
         neuron_parameters_wo_units = dict()
         neuron_parameters_wo_units[self.neuron_name] = dict()
         for key, value in self.neuron_parameters.items():
@@ -391,11 +405,19 @@ class PointNeuron(object):
         if neuron_name is None:
             neuron_name = list(params_dict.keys())[0]
 
+        self.neuron_name = neuron_name
+
         imported_params = dict()
         for key, value in params_dict[neuron_name].items():
-            imported_params[key] = b2.Quantity(value, self.parameter_units[key])
+            imported_params[key] = np.float(value) * self.parameter_units[key]
 
         self.neuron_parameters = imported_params
+
+    def list_neurons_in_json(self, filename):
+        with open(filename, 'r') as fi:
+            params_dict = json.load(fi)
+
+        return list(params_dict.keys())
 
     def add_tonic_current(self, tonic_current=50 * pA, tau_rampup=None):  # Used by CxSystem
 
@@ -482,9 +504,11 @@ class LifNeuron(PointNeuron):
     }
 
     neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm)'}
+    model_info_url = 'http://neuronaldynamics.epfl.ch/online/Ch1.S3.html'
 
     def __init__(self):
         super().__init__()
+
 
     def _obfuscate_params(self, param_set):
         """ A helper to _obfuscate_params a parameter vector.
@@ -580,6 +604,7 @@ class EifNeuron(PointNeuron):
     }
 
     neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT)'}
+    model_info_url = 'http://neuronaldynamics.epfl.ch/online/Ch5.S2.html'
 
     def __init__(self):
         super().__init__()
@@ -635,6 +660,7 @@ class AdexNeuron(PointNeuron):
 
     neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) - w + gL * DeltaT * exp((vm-VT) / DeltaT)',
                           'NEURON_MODEL_EQS': 'dw/dt = (a*(vm-EL) - w) / tau_w : amp'}
+    model_info_url = 'http://neuronaldynamics.epfl.ch/online/Ch6.S1.html'
 
     def __init__(self):
 
@@ -710,6 +736,7 @@ class HodgkinHuxleyNeuron(PointNeuron):
         dn/dt = alphan*(1-n)-betan*n : 1
         '''
     }
+    model_info_url = 'http://neuronaldynamics.epfl.ch/online/Ch2.S2.html'
 
     def __init__(self):
 
@@ -800,6 +827,7 @@ class IzhikevichNeuron(PointNeuron):
 
     neuron_model_defns = {'I_NEURON_MODEL': 'k * (vm-EL) * (vm-VT) - u',
                           'NEURON_MODEL_EQS': 'du/dt = a*(b*(vm-EL) - u) : amp'}
+    model_info_url = 'http://neuronaldynamics.epfl.ch/online/Ch6.S1.html'
 
     def __init__(self):
         super().__init__()
@@ -865,6 +893,7 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
                           dI_asc1/dt = -I_asc1/tau_asc1 : amp
                           dI_asc2/dt = -I_asc2/tau_asc2 : amp
                           '''}
+    model_info_url = 'https://www.nature.com/articles/s41467-017-02717-4'
 
     def __init__(self):
         super().__init__()
