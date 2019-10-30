@@ -34,7 +34,7 @@ class EquationHelper(object):
     # General strings will be added to all models
     default_soma_strings = {'I_TONIC': '+ tonic_current*(1-exp(-t/(50*msecond)))',
                             'TONIC_EQ': '',
-                            'VM_NOISE': '+ noise_sigma*xi*taum_soma**-0.5',
+                            'VM_NOISE': '',
                             'BRIAN2_FLAGS': '(unless refractory)'}
     default_dendrite_strings = {'I_TONIC': '',
                                 'TONIC_EQ': '',

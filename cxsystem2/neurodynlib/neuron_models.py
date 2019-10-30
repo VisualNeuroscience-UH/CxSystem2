@@ -418,11 +418,11 @@ class PointNeuron(object):
         else:
             self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_eqs)
 
-    def add_vm_noise(self, sigma_noise=2 * mV):  # Used by CxSystem
-        self.set_model_definition('VM_NOISE', '+ sigma_noise*xi*taum_soma**-0.5')
+    def add_vm_noise(self, noise_sigma=2 * mV):  # Used by CxSystem
+        self.set_model_definition('VM_NOISE', '+ noise_sigma*xi*taum_soma**-0.5')
         C = self.neuron_parameters['C']
         gL = self.neuron_parameters['gL']
-        self.set_neuron_parameters(sigma_noise=sigma_noise, taum_soma=C / gL)
+        self.set_neuron_parameters(noise_sigma=noise_sigma, taum_soma=C / gL)
 
     # TODO - Setting receptors should also set default params
     def set_excitatory_receptors(self, receptor_name):  # Used by CxSystem
@@ -576,15 +576,15 @@ class EifNeuron(PointNeuron):
             'C': 600 * pF,
             'DeltaT': 2 * mV,  # spike sharpness
             'refractory_period': 2.0 * ms,
-            'V_cut': -30.0 * mV  # technical threshold to tell the algorithm when to reset vm to v_reset
+            'Vcut': -30.0 * mV  # technical threshold to tell the algorithm when to reset vm to v_reset
     }
 
     neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT)'}
 
     def __init__(self):
         super().__init__()
-        self.threshold_condition = 'vm > V_cut'
-        new_parameter_units = {'DeltaT': mV, 'V_cut': mV}
+        self.threshold_condition = 'vm > Vcut'
+        new_parameter_units = {'DeltaT': mV, 'Vcut': mV}
         self.parameter_units.update(new_parameter_units)
 
     def getting_started(self, step_amplitude=0.8*nA, sine_amplitude=1.6*nA, sine_freq=150*Hz, sine_dc=1.3*nA):
@@ -630,7 +630,7 @@ class AdexNeuron(PointNeuron):
             'b': 7.0 * pA,
             'tau_w': 100.0 * ms,
             'refractory_period': 2.0 * ms,
-            'V_cut': -30.0 * mV
+            'Vcut': -30.0 * mV
     }
 
     neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) - w + gL * DeltaT * exp((vm-VT) / DeltaT)',
@@ -639,11 +639,11 @@ class AdexNeuron(PointNeuron):
     def __init__(self):
 
         super().__init__()
-        self.threshold_condition = 'vm > V_cut'
+        self.threshold_condition = 'vm > Vcut'
         self.reset_statements = 'vm = V_res; w += b'
         self.initial_values = {'vm': None, 'w': 0*pA}
         self.states_to_monitor = ['vm', 'w']
-        new_parameter_units = {'DeltaT': mV, 'V_cut': mV, 'a': nS, 'b': pA, 'tau_w': ms}
+        new_parameter_units = {'DeltaT': mV, 'Vcut': mV, 'a': nS, 'b': pA, 'tau_w': ms}
         self.parameter_units.update(new_parameter_units)
 
     # This function implement Adaptive Exponential Leaky Integrate-And-Fire neuron model
@@ -794,7 +794,7 @@ class IzhikevichNeuron(PointNeuron):
             'b': 5*nS,
             'd': 150* pA,
             'refractory_period': 2.0 * ms,
-            'V_cut': 35.0*mV               # v_peak
+            'Vcut': 35.0*mV               # v_peak
     }
 
 
@@ -803,11 +803,11 @@ class IzhikevichNeuron(PointNeuron):
 
     def __init__(self):
         super().__init__()
-        self.threshold_condition = 'vm > V_cut'
+        self.threshold_condition = 'vm > Vcut'
         self.reset_statements = 'vm = V_res; u += d'
         self.initial_values = {'vm': None, 'u': 0}
         self.states_to_monitor = ['vm', 'u']
-        new_parameter_units = {'V_cut': mV, 'k': nS/mV, 'a': (1/ms), 'b': nS, 'd': pA, 'tau_w': ms}
+        new_parameter_units = {'Vcut': mV, 'k': nS/mV, 'a': (1/ms), 'b': nS, 'd': pA, 'tau_w': ms}
         self.parameter_units.update(new_parameter_units)
 
     def plot_states(self, state_monitor):

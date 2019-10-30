@@ -189,9 +189,9 @@ class neuron_reference(object):
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
-        if 'sigma_noise' in self.output_neuron['namespace'].keys():
-            sigma_noise = self.output_neuron['namespace']['sigma_noise']
-            x.add_vm_noise(sigma_noise)
+        if 'noise_sigma' in self.output_neuron['namespace'].keys():
+            noise_sigma = self.output_neuron['namespace']['noise_sigma']
+            x.add_vm_noise(noise_sigma)
 
         if 'tonic_current' in self.output_neuron['namespace'].keys():
             tonic_current = self.output_neuron['namespace']['tonic_current']
@@ -322,9 +322,9 @@ class neuron_reference(object):
             # x.set_excitatory_receptors(self.pc_excitation_model)
             # x.set_inhibitory_receptors(self.pc_inhibition_model)
             #
-            # if 'sigma_noise' in self.output_neuron['namespace'].keys():
-            #     sigma_noise = self.output_neuron['namespace']['sigma_noise']
-            #     x.add_vm_noise(sigma_noise)
+            # if 'noise_sigma' in self.output_neuron['namespace'].keys():
+            #     noise_sigma = self.output_neuron['namespace']['noise_sigma']
+            #     x.add_vm_noise(noise_sigma)
             #
             # if 'tonic_current' in self.output_neuron['namespace'].keys():
             #     tonic_current = self.output_neuron['namespace']['tonic_current']
@@ -486,9 +486,9 @@ class neuron_reference(object):
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
-            if 'sigma_noise' in self.output_neuron['namespace'].keys():
-                sigma_noise = self.output_neuron['namespace']['sigma_noise']
-                x.add_vm_noise(sigma_noise)
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
 
             if 'tonic_current' in self.output_neuron['namespace'].keys():
                 tonic_current = self.output_neuron['namespace']['tonic_current']
@@ -534,9 +534,9 @@ class neuron_reference(object):
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
-            if 'sigma_noise' in self.output_neuron['namespace'].keys():
-                sigma_noise = self.output_neuron['namespace']['sigma_noise']
-                x.add_vm_noise(sigma_noise)
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
 
             if 'tonic_current' in self.output_neuron['namespace'].keys():
                 tonic_current = self.output_neuron['namespace']['tonic_current']
@@ -583,9 +583,9 @@ class neuron_reference(object):
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
-            if 'sigma_noise' in self.output_neuron['namespace'].keys():
-                sigma_noise = self.output_neuron['namespace']['sigma_noise']
-                x.add_vm_noise(sigma_noise)
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
 
             if 'tonic_current' in self.output_neuron['namespace'].keys():
                 tonic_current = self.output_neuron['namespace']['tonic_current']
@@ -631,9 +631,9 @@ class neuron_reference(object):
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
-            if 'sigma_noise' in self.output_neuron['namespace'].keys():
-                sigma_noise = self.output_neuron['namespace']['sigma_noise']
-                x.add_vm_noise(sigma_noise)
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
 
             if 'tonic_current' in self.output_neuron['namespace'].keys():
                 tonic_current = self.output_neuron['namespace']['tonic_current']
