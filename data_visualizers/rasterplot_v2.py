@@ -160,56 +160,56 @@ class SimulationData(object):
     def _flatten(self, l):
         return [item for sublist in l for item in sublist]
 
-    # def value_extractor(self, df, key_name):
-    #     """
-    #     Method for extracting simulation parameters from anatomy and physiology configurations inside data files.
-    #     This method coexists in several classes - a Configuration class is needed?
-    #
-    #     :param df: dataframe to go through (now either self.anatomy_df or self.physio_df)
-    #     :param key_name: simulation parameter to extract
-    #     :return: value of the specified simulation parameter
-    #     """
-    #     # TODO - separate class Configuration for anatomy/physiology configs
-    #
-    #     non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
-    #     for non_dict_idx in non_dict_indices:
-    #         exec "%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx])
-    #     try:
-    #         return eval(key_name)
-    #     except (NameError, TypeError):
-    #         pass
-    #     try:
-    #         if type(key_name) == list:
-    #             variable_start_idx = df['Variable'][df['Variable'] == key_name[0]].index[0]
-    #             try:
-    #                 variable_end_idx = df['Variable'].dropna().index.tolist()[
-    #                     df['Variable'].dropna().index.tolist().index(variable_start_idx) + 1]
-    #                 cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
-    #             except IndexError:
-    #                 cropped_df = df.loc[variable_start_idx:]
-    #             return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
-    #         else:
-    #             return eval(df['Value'][df['Key'] == key_name].item())
-    #     except NameError:
-    #         new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
-    #         return self.value_extractor(df,new_key)
-    #     except ValueError:
-    #         raise ValueError("Parameter %s not found in the configuration file."%key_name)
-    #
-    # def get_sim_parameter(self, param_name):
-    #     """
-    #     Get value of a given parameter from anatomy or physiology configuration (no need to specify which)
-    #
-    #     :param param_name: str, parameter name to search for
-    #     :return:
-    #     """
-    #     try:
-    #         return self.value_extractor(self.physio_df, param_name)
-    #     except:
-    #         try:
-    #             return self.value_extractor(self.anatomy_df, param_name)
-    #         except:
-    #             return '???'
+    def value_extractor(self, df, key_name):
+        """
+        Method for extracting simulation parameters from anatomy and physiology configurations inside data files.
+        This method coexists in several classes - a Configuration class is needed?
+
+        :param df: dataframe to go through (now either self.anatomy_df or self.physio_df)
+        :param key_name: simulation parameter to extract
+        :return: value of the specified simulation parameter
+        """
+        # TODO - separate class Configuration for anatomy/physiology configs
+
+        non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
+        for non_dict_idx in non_dict_indices:
+            exec ("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx]))
+        try:
+            return eval(key_name)
+        except (NameError, TypeError):
+            pass
+        try:
+            if type(key_name) == list:
+                variable_start_idx = df['Variable'][df['Variable'] == key_name[0]].index[0]
+                try:
+                    variable_end_idx = df['Variable'].dropna().index.tolist()[
+                        df['Variable'].dropna().index.tolist().index(variable_start_idx) + 1]
+                    cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
+                except IndexError:
+                    cropped_df = df.loc[variable_start_idx:]
+                return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
+            else:
+                return eval(df['Value'][df['Key'] == key_name].item())
+        except NameError:
+            new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
+            return self.value_extractor(df,new_key)
+        except ValueError:
+            raise ValueError("Parameter %s not found in the configuration file."%key_name)
+
+    def get_sim_parameter(self, param_name):
+        """
+        Get value of a given parameter from anatomy or physiology configuration (no need to specify which)
+
+        :param param_name: str, parameter name to search for
+        :return:
+        """
+        try:
+            return self.value_extractor(self.physio_df, param_name)
+        except:
+            try:
+                return self.value_extractor(self.anatomy_df, param_name)
+            except:
+                return '???'
 
     def _check_group_name(self, group):
         """
@@ -1375,7 +1375,7 @@ class ExperimentData(object):
         self.experiment_path = experiment_path
         self.experiment_name = experiment_name
         self.simulation_files = [sim_file for sim_file in os.listdir(experiment_path)
-                                 if experiment_name in sim_file and os.path.splitext(sim_file)[1] == '.bz2']
+                                 if experiment_name in sim_file and (os.path.splitext(sim_file)[1] == '.bz2' or os.path.splitext(sim_file)[1] == '.gz')]
         self.simulation_files.sort()
 
     def _computestats_single_sim(self, sim_file, settings=None, parameters_to_extract=[]):
@@ -1711,11 +1711,11 @@ if __name__ == '__main__':
 
 
     # a = SimulationData('/opt3/tmp/rev2_test/betaconfig_test_20180919_17183215_background_rate0.2H_k0.2_python_5000ms.bz2')
-    #a = SimulationData('/opt3/tmp/rev2_test/betaconfig_test2_20180919_19332474_background_rate0.6H_k1.4_python_5000ms.bz2')
-    #a.publicationplot()
+    a = SimulationData('/home/henhok/PycharmProjects/CxSystem2/test_notebooks/pikkuveli/markram_step2_20191029_16103088_background_rate0.4H_k0.8_python_5000ms.gz')
+    a.publicationplot()
 
-    # exp = ExperimentData('/opt3/tmp/rev2_gamma/', 'step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric')
-    # exp.computestats('stats_step2_lowcalcium2_dep100_eifstp_gabab_Jeigeneric.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
+    # exp = ExperimentData('/home/henhok/PycharmProjects/CxSystem2/test_notebooks/pikkuveli/', 'markram_step2')
+    # exp.computestats('stats_markram_step2.csv', ['calcium_concentration', 'J', 'k', 'background_rate'])
 
 
     ###### Depol x calcium plot ######
@@ -1777,4 +1777,4 @@ if __name__ == '__main__':
     # a.publicationplot(plot_type=1, sampling_factor=1, time_rounding=5)
 
 
-    SimulationData('/home/shohokka/PycharmProjects/CxSystem2/results/output_20190519_15003030_python_2000ms.gz').publicationplot()
+    # SimulationData('/home/shohokka/PycharmProjects/CxSystem2/results/output_20190519_15003030_python_2000ms.gz').publicationplot()
