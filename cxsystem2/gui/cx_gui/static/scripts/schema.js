@@ -29,6 +29,11 @@ runtime_params_schema = {
             "type": "string",
             "description": "Minimum distance between neurons (e.g. 1*um)",
         },
+        "workspace_folder": {
+            "type": "string",
+            "description": "This is the main working directory of CxSystem and other pathes would be relative to this path",
+            "default": "~/CxWorkspace"
+        },
         "output_path_and_filename": {
             "type": "string",
             "description": "Relative path and filename to where results are stored (e.g. ./results/output.gz)",

@@ -85,7 +85,6 @@ class CxSystem(object):
             return
 
         self.start_time = time.time()
-        self.prepare_workspace()
         self.main_module = sys.modules['__main__']
         try:  # try to find the Cxmodule in the sys.modules, to find if the __main__ is CxSystem.py or not
             self.Cxmodule = sys.modules['cxsystem2.core.cxsystem']
@@ -103,6 +102,7 @@ class CxSystem(object):
             'min_distance': [6,self._set_min_distance],
             'do_init_vms': [7,self.do_init_vms],
             'default_clock': [8, self.set_default_clock],
+            'workspace_folder': [8, self.set_workspace],
             'output_path_and_filename': [9,self._set_output_path],
             'connections_saving_path_and_filename': [10,self._set_save_brian_data_path],
             'connections_loading_path_and_filename': [11,self._set_load_brian_data_path],
@@ -241,11 +241,6 @@ class CxSystem(object):
     def runGUI(self):
         gui.runserver(port = self.port)
 
-    def prepare_workspace(self):
-        self.workspace_path = Path.home().joinpath('CxWorkspace')
-        if not self.workspace_path.is_dir():
-            os.makedirs(self.workspace_path.as_posix())
-
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:,0][self.anat_and_sys_conf_df.loc[:,0]=='row_type'].index
         order_of_lines = ['params','IN','G','S']
@@ -339,6 +334,11 @@ class CxSystem(object):
     def set_default_clock(self,*args):
         defaultclock.dt = eval(args[0])
         print(" -  Default clock is set to %s" %str(defaultclock.dt))
+
+    def set_workspace(self,*args):
+        self.workspace_path = Path(args[0]).expanduser()
+        if not self.workspace_path.is_dir():
+            os.makedirs(self.workspace_path.as_posix())
 
     def passer(self,*args):
         pass
