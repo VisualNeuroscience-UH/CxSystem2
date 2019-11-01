@@ -11,7 +11,8 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 from cxsystem2.core.physiology_reference import *
 from cxsystem2.core.parameter_parser import synapse_parser
-from cxsystem2.core.save_data import *
+from cxsystem2.core.workspace_manager import workspace
+from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.core.stimuli import *
 import ast
 import ntpath
@@ -102,10 +103,10 @@ class CxSystem(object):
             'min_distance': [6,self._set_min_distance],
             'do_init_vms': [7,self.do_init_vms],
             'default_clock': [8, self.set_default_clock],
-            'workspace_folder': [8, self.set_workspace],
-            'output_path_and_filename': [9,self._set_output_path],
-            'connections_saving_path_and_filename': [10,self._set_save_brian_data_path],
-            'connections_loading_path_and_filename': [11,self._set_load_brian_data_path],
+            'workspace_path': [8, self.set_workspace],
+            'compression_method': [9, self.set_compression_method],
+            'simulation_title': [10, self.create_simulation],
+            'import_connections_from': [11, self.set_import_connections_path],
             'load_positions_only': [12,self.load_positions_only],
             'do_benchmark': [13,self.set_do_benchmark],
             'profiling': [14, self.set_profiling],
@@ -118,7 +119,7 @@ class CxSystem(object):
             'cluster_address': [21,self.passer],
             'username':[22,self.passer],
             'remote_repo_path': [23,self.passer],
-            'remote_output_folder': [24,self.passer],
+            'remote_workspace': [24,self.passer],
             'integration': [25,self.integration],
             ####
             #### Line definitions:
@@ -127,9 +128,9 @@ class CxSystem(object):
             'IN': [nan,self.relay],
             'params': [nan,self.set_runtime_parameters],
         }
-        self.StartTime_str = '_' + str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')\
+        self.timestamp = '_' + str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')\
             [0:str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','') + output_file_suffix
-        print(" -  Current run filename suffix is: %s"%self.StartTime_str[1:])
+        print(" -  Current run filename suffix is: %s" % self.timestamp[1:])
         self.scale = 1
         self.do_benchmark = 0
         self.cluster_run_start_idx = cluster_run_start_idx
@@ -160,14 +161,9 @@ class CxSystem(object):
         self.array_run_in_cluster = array_run_in_cluster
         self.awaited_conf_lines = []
 
-
-
-        # self.physio_config_df = pandas.read_csv(physiology_config) if type(physiology_config) == str else physiology_config
-
         self.physio_config_df = self.read_config_file(physiology_config, header=True)
         self.physio_config_df = self.physio_config_df.applymap(lambda x: NaN if str(x)[0] == '#' else x)
 
-        # self.anat_and_sys_conf_df = pandas.read_csv(anatomy_and_system_config,header=None) if type(anatomy_and_system_config) == str else anatomy_and_system_config
         self.anat_and_sys_conf_df = self.read_config_file(anatomy_and_system_config)
         self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.applymap(lambda x: x.strip() if type(x) == str else x)
 
@@ -203,8 +199,7 @@ class CxSystem(object):
             self.numerical_integration_method = self.parameter_finder(self.anat_and_sys_conf_df, 'integration')
         except NameError:
             self.numerical_integration_method = 'euler'
-        print(" -  The system is running with %s integration "
-               "method"%self.numerical_integration_method)
+        print(" -  The system is running with %s integration method"%self.numerical_integration_method)
 
 
         check_array_run_anatomy = self.anat_and_sys_conf_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)
@@ -218,10 +213,10 @@ class CxSystem(object):
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1 : # this means CxSystem is running in cluster and is trying to spawn an array run on a node
                 print("spawning index: %d, step: %d" %(int(
                     cluster_run_start_idx),int(cluster_run_step)))
-                array_run.array_run(self.anat_and_sys_conf_df, self.physio_config_df, self.StartTime_str, int(cluster_run_start_idx),
+                array_run.array_run(self.anat_and_sys_conf_df, self.physio_config_df, self.timestamp, int(cluster_run_start_idx),
                                     int(cluster_run_step), anatomy_and_system_config, physiology_config, array_run_in_cluster=1)
             else: # CxSystem not in cluster
-                array_run.array_run(self.anat_and_sys_conf_df, self.physio_config_df, self.StartTime_str, int(cluster_run_start_idx),
+                array_run.array_run(self.anat_and_sys_conf_df, self.physio_config_df, self.timestamp, int(cluster_run_start_idx),
                                     int(cluster_run_step), anatomy_and_system_config, physiology_config, array_run_in_cluster=0)
             self.array_run = 1
             return
@@ -336,9 +331,32 @@ class CxSystem(object):
         print(" -  Default clock is set to %s" %str(defaultclock.dt))
 
     def set_workspace(self,*args):
-        self.workspace_path = Path(args[0]).expanduser()
-        if not self.workspace_path.is_dir():
-            os.makedirs(self.workspace_path.as_posix())
+        if self.cluster_run_start_idx == -1 and self.cluster_run_step == -1 and self.array_run_in_cluster == 0:
+            self.workspace = workspace(args[0],self.timestamp)
+        else: # this means cxsystem is running in cluster
+            print(" -  CxSystem is running in Cluster ... ")
+            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'remote_workspace'))
+            print(" -  CxSystem knows it's running in cluster and set the output folder to : {}".format(self.workspace.get_simulation_folder()))
+
+    def set_compression_method(self,*args):
+        self.workspace.set_compression_method(args[0])
+
+    def create_simulation(self,*args):
+        self.workspace.create_simulation(args[0])
+        self.workspace.create_results_key('positions_all')
+        self.workspace.create_results_key('Neuron_Groups_Parameters')
+        self.workspace.results['Anatomy_configuration'] = self.conf_df_to_save
+        self.workspace.results['Physiology_configuration'] = self.physio_df_to_save
+        self.workspace.results['time_vector'] = arange(0,self.runtime,defaultclock.dt)
+        self.workspace.results['positions_all']['w_coord'] = {}
+        self.workspace.results['positions_all']['z_coord'] = {}
+        self.workspace.results['number_of_neurons'] = {}
+        self.workspace.results['runtime'] = self.runtime / self.runtime.get_best_unit()
+        self.workspace.results['sys_mode'] = self.sys_mode
+        try:
+            self.workspace.results['scale'] = self.scale
+        except AttributeError:
+            pass
 
     def passer(self,*args):
         pass
@@ -374,7 +392,7 @@ class CxSystem(object):
                     print(profiling_summary(show=len(profiling_summary().names)))
                 else:
                     print(profiling_summary(show=20))
-                self.save_output_data.data['profiling_data'] =  profiling_summary()
+                self.workspace.results['profiling_data'] =  profiling_summary()
             if self.do_benchmark:
                 try:
                     self.benchmarking_data = {}
@@ -382,7 +400,7 @@ class CxSystem(object):
                              'Device-Specific Compilation','Run','Extract and Save Result','Total Time']
                     self.benchmarking_data['Simulation Time'] = str(self.runtime)
                     self.benchmarking_data['Device'] = self.device
-                    self.benchmarking_data['File Suffix'] = self.StartTime_str[1:]
+                    self.benchmarking_data['File Suffix'] = self.timestamp[1:]
                     if self.device.lower() != 'python':
                         self.benchmarking_data['Python Compilation'] = builtins.code_generation_start - self.start_time
                         self.benchmarking_data['Brian Code generation'] = builtins.compile_start - builtins.code_generation_start
@@ -413,19 +431,26 @@ class CxSystem(object):
             print(" -  Simulating %s took in total %f s" % (str(
                 self.runtime),self.end_time-self.start_time))
             if self.device.lower() == 'genn':
-                shutil.rmtree(os.path.join(self.output_folder, self.StartTime_str[1:]))
+                shutil.rmtree(os.path.join(self.output_folder, self.timestamp[1:]))
             elif self.device.lower() == 'cpp':
-                shutil.rmtree(os.path.join(self.output_folder, self.StartTime_str[1:]))
+                shutil.rmtree(os.path.join(self.output_folder, self.timestamp[1:]))
 
     def set_runtime_parameters(self):
         if not any(self.current_parameters_list.str.contains('runtime')):
-            print(" -  Runtime duration is not defined in the configuration "
-                   "file. The default runtime duratoin is 500*ms")
+            print(" -  The parameter 'workspace_path' is not defined in the configuration file. The default workspace is ~/CxSystem")
+            self.set_workspace('~/CxSystem')
+
+        if not any(self.current_parameters_list.str.contains('runtime')):
+            print(" -  Runtime duration is not defined in the configuration file. The default runtime duratoin is 500*ms")
             self.runtime = 500*ms
+
         if not any(self.current_parameters_list.str.contains('device')):
-            print(" -  Device is not defined in the configuration file. The "
-                   "default device is Python.")
+            print(" -  Device is not defined in the configuration file. The default device is Python.")
             self.device = 'Python'
+
+        if not any(self.current_parameters_list.str.contains('compression_method')):
+            print(" -  compresison_method is not defined in the configuration file. Default compression method is gzip") # gzip is default of workspace manager
+
         for ParamIdx, parameter in self.current_parameters_list.items():
             if parameter not in list(self.parameter_to_method_mapping.keys()):
                 print(" -  System parameter %s not defined." % parameter)
@@ -445,10 +470,10 @@ class CxSystem(object):
             print(" -  CxSystem is performing benchmarking. The Brian2 "
                    "should be configured to use benchmarking.")
         if self.device.lower() == 'genn':
-            set_device('genn', directory=os.path.join(self.output_folder, self.StartTime_str[1:]))
+            set_device('genn', directory=os.path.join(self.output_folder, self.timestamp[1:]))
             prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
-            set_device('cpp_standalone', directory=os.path.join(self.output_folder, self.StartTime_str[1:]))
+            set_device('cpp_standalone', directory=os.path.join(self.output_folder, self.timestamp[1:]))
 #            if 'linux' in sys.platform and self.device.lower() == 'cpp':
 #                print(" -  parallel compile flag set")
 #                prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j']
@@ -485,74 +510,15 @@ class CxSystem(object):
         assert '*' in args[0], ' -  Please specify the unit for the minimum distance parameter, e.g. um , mm '
         self.min_distance = eval(args[0])
 
-    def _set_output_path(self, *args):
-        print(" -  setting output path ...")
-        self.output_path = args[0]
-        output_filename = ntpath.basename(self.output_path)
-        assert os.path.splitext(self.output_path)[1], " -  The output_path_and_filename should contain file extension (.gz, .bz2 or .pickle)"
-        if self.cluster_run_start_idx == -1 and self.cluster_run_step == -1 and self.array_run_in_cluster==0 :
-            self.output_folder = os.path.dirname(self.output_path)
-        else: # this means CxSystem is in running in cluster so the output path should be changed to remote_output_path
-            print(" -  CxSystem is running in Cluster ... ")
-            self.output_folder = self.parameter_finder(self.anat_and_sys_conf_df, 'remote_output_folder')
-            self.output_path = os.path.join(self.output_folder,output_filename)
-            print(" -  CxSystem knows it's running in cluster and set the "
-                   "output folder to : %s"%self.output_path)
-        self.output_file_extension = '.'+self.output_path.split('.')[-1]
-        self.StartTime_str += '_' + self.device.lower() + '_' + str(int((self.runtime / second) * 1000)) + 'ms'
-        self.save_output_data = save_data(self.output_path,self.StartTime_str)  # This is for saving the output
-        self.save_output_data.create_key('positions_all')
-        self.save_output_data.create_key('Neuron_Groups_Parameters')
-        self.save_output_data.data['Anatomy_configuration'] = self.conf_df_to_save
-        self.save_output_data.data['Physiology_configuration'] = self.physio_df_to_save
-        self.save_output_data.data['time_vector'] = arange(0,self.runtime,defaultclock.dt)
-        self.save_output_data.data['positions_all']['w_coord'] = {}
-        self.save_output_data.data['positions_all']['z_coord'] = {}
-        self.save_output_data.data['number_of_neurons'] = {}
-        self.save_output_data.data['runtime'] = self.runtime / self.runtime.get_best_unit()
-        self.save_output_data.data['sys_mode'] = self.sys_mode
-        try:
-            self.save_output_data.data['scale'] = self.scale
-        except AttributeError:
-            pass
-
-    def _set_load_brian_data_path(self, *args):
+    def set_import_connections_path(self, *args):
         if len(args) > 0 : # arguments exists if the path is to be set, but the loading won't happen until on of the connections needs it
-            self.load_brian_data_path = args[0]
+            self.workspace.set_imported_connection_path(args[0])
             return
-        assert os.path.splitext(self.load_brian_data_path)[1], " -  The connections_loading_path_and_filename should contain file extension (.gz, .bz2 or .pickle)"
-        self.load_brian_data_filename = ntpath.basename(self.load_brian_data_path)
-        self.load_brian_data_folder = ntpath.dirname(self.load_brian_data_path)
-        self.load_brian_data_extension = os.path.splitext(self.load_brian_data_path)[1]
-        assert any(extension in self.load_brian_data_extension for extension in ['gz','bz2','pickle']), ' -  The extension of the brian_data input/output ' \
-                                                         'should be gz, bz2 or pickle but it is %s'%self.load_brian_data_extension
-        assert os.path.isfile(os.path.abspath(self.load_brian_data_path)),\
-            ' -  The brian_data file cannot be found for loading: {}'.format(os.path.abspath(self.load_brian_data_path))
-        if 'gz' in self.load_brian_data_extension:
-            with open(self.load_brian_data_path, 'rb') as fb:
-                data = zlib.decompress(fb.read())
-                self.loaded_brian_data = pickle.loads(data)
-        elif 'bz2' in self.load_brian_data_extension:
-            with bz2.BZ2File(self.load_brian_data_path, 'rb') as fb:
-                self.loaded_brian_data = pickle.load(fb)
-        elif 'pickle' in self.load_brian_data_extension:
-            with open(self.load_brian_data_path, 'rb') as fb:
-                self.loaded_brian_data = pickle.load(fb)
-        print(' -  Brian data file loaded from %s'%os.path.abspath(
-            self.load_brian_data_path))
-        if 'scale' in list(self.loaded_brian_data.keys()):
-            self.scale = self.loaded_brian_data['scale']
+        self.imported_connections = self.workspace.import_connections()
+        print(' -  Connection file loaded from {}'.format(self.workspace.imported_connections_path.as_posix()))
+        if 'scale' in list(self.imported_connections.keys()):
+            self.scale = self.imported_connections['scale']
             print(" -   scale of the system loaded from brian file")
-
-    def _set_save_brian_data_path(self, *args):
-        self.save_brian_data_path = args[0]
-        assert os.path.splitext(self.save_brian_data_path)[1], " -  The connections_saving_path_and_filename should contain file extension (.gz, .bz2 or .pickle)"
-        self.save_brian_data_filename = ntpath.basename(self.save_brian_data_path)
-        self.save_brian_data_folder = ntpath.dirname(self.save_brian_data_path)
-        self.save_brian_data_extension = os.path.splitext(self.save_brian_data_path)[1]
-        assert any(extension in self.save_brian_data_extension for extension in ['gz','bz2','pickle']), ' -  The extension of the brian_data input/output ' \
-                                                         'should be gz,bz2 or pickle, but it is %s'%self.save_brian_data_extension
-        self.save_brian_data = save_data(self.save_brian_data_path,self.StartTime_str)
 
     def do_init_vms(self,*args):
         assert int(args[0]) == 0 or int(args[0]) == 1, \
@@ -573,7 +539,7 @@ class CxSystem(object):
         assert int(args[0]) == 0 or int(args[0]) == 1, ' -  The load_positions_only flag should be either 0 or 1 but it is %s .' % args[0]
         self.load_positions_only = int(args[0])
         if self.load_positions_only:
-            self._set_load_brian_data_path()
+            self.set_import_connections_path()
             print(" -  only positions are being loaded from the brian_data_file")
 
     def set_do_benchmark(self,*args):
@@ -740,7 +706,7 @@ class CxSystem(object):
         _dyn_neuron_namespace_name = self._NeuronNS_prefix + str(current_idx)
 
         # next  6 line create the variable that are needed for current target line NeuronGroup().
-        self.save_output_data.data['Neuron_Groups_Parameters'][_dyn_neurongroup_name] = self.customized_neurons_list[-1]
+        self.workspace.results['Neuron_Groups_Parameters'][_dyn_neurongroup_name] = self.customized_neurons_list[-1]
         self.customized_neurons_list[current_idx]['object_name'] = _dyn_neurongroup_name
         exec("%s=self.customized_neurons_list[%d]['number_of_neurons']" % (_dyn_neuronnumber_name, current_idx))
         exec("%s=self.customized_neurons_list[%d]['equation']" % (_dyn_neuron_eq_name, current_idx))
@@ -899,13 +865,13 @@ class CxSystem(object):
         # </editor-fold>
 
         #<editor-fold desc="...Loading neuron positions">
-        if hasattr(self,'loaded_brian_data'):
+        if hasattr(self,'imported_connections'):
             # in case the NG index are different.
             # for example a MC_L2 neuron might have had index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
             Group_type = _dyn_neurongroup_name[_dyn_neurongroup_name.index('_')+1:]
-            GroupKeyName =[kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if Group_type in kk][0]
-            self.customized_neurons_list[current_idx]['w_positions'] = self.loaded_brian_data['positions_all']['w_coord'][GroupKeyName]
-            self.customized_neurons_list[current_idx]['z_positions'] = self.loaded_brian_data['positions_all']['z_coord'][GroupKeyName]
+            GroupKeyName =[kk for kk in list(self.imported_connections['positions_all']['w_coord'].keys()) if Group_type in kk][0]
+            self.customized_neurons_list[current_idx]['w_positions'] = self.imported_connections['positions_all']['w_coord'][GroupKeyName]
+            self.customized_neurons_list[current_idx]['z_positions'] = self.imported_connections['positions_all']['z_coord'][GroupKeyName]
             print(" -  Position for the group %s loaded"
                    %_dyn_neurongroup_name)
         # Setting the position of the neurons in the current NeuronGroup.
@@ -915,11 +881,11 @@ class CxSystem(object):
         except ValueError as e:
             raise ValueError(e.message + ' -  You are probably trying to load the positions from a file that does not contain the same number of cells.')
         # Saving the neurons' positions both in visual field and cortical coordinates in save_data() object.
-        self.save_output_data.data['positions_all']['z_coord'][_dyn_neurongroup_name] = \
+        self.workspace.results['positions_all']['z_coord'][_dyn_neurongroup_name] = \
             self.customized_neurons_list[current_idx]['z_positions']
-        self.save_output_data.data['positions_all']['w_coord'][_dyn_neurongroup_name] = \
+        self.workspace.results['positions_all']['w_coord'][_dyn_neurongroup_name] = \
             self.customized_neurons_list[current_idx]['w_positions']
-        self.save_output_data.data['number_of_neurons'][_dyn_neurongroup_name] = eval(_dyn_neuronnumber_name)
+        self.workspace.results['number_of_neurons'][_dyn_neurongroup_name] = eval(_dyn_neuronnumber_name)
         # </editor-fold>
 
         # <editor-fold desc="Initialization of neuron group compartment potentials and conductances">
@@ -1043,24 +1009,23 @@ class CxSystem(object):
                     assert len(sub_mon_arg) == len(sub_mon_tags) + 1, ' -  Error in monitor tag definition.'
                 if sub_mon_arg[0] == '':
                     assert mon_tag == '[Sp]', ' -  The monitor state variable is not defined properly'
-                    self.save_output_data.create_key('spikes_all')  # Create a key in save_data() object
+                    self.workspace.create_results_key('spikes_all')  # Create a key in save_data() object
                     # for that specific StateMonitor variable.
                     Mon_name = monitor_options[mon_tag][0] + str(self.monitor_idx) + '_' + object_name
-                    # self.save_output_data.syntax_bank.append(
-                    #     "self.save_output_data.data['spikes_all']['%s'] = asarray(%s.it)" % (object_name, Mon_name))
-                    self.save_output_data.syntax_bank.append(
-                        "self.save_output_data.data['spikes_all']['%s'] = %s.get_states()" % (object_name, Mon_name))
+
+                    self.workspace.syntax_bank.append(
+                        "self.workspace.results['spikes_all']['%s'] = %s.get_states()" % (object_name, Mon_name))
                     Mon_str = Mon_name + Mon_str
                 else:
-                    self.save_output_data.create_key('%s_all' % sub_mon_arg[0])  # Create a key in save_data()
+                    self.workspace.create_results_key('%s_all' % sub_mon_arg[0])  # Create a key in save_data()
                     # object for that specific StateMonitor variable.
                     Mon_name = monitor_options[mon_tag][0] + \
                         str(self.monitor_idx) + '_' + object_name + '__' + sub_mon_arg[0]
                     # After simulation, the following syntax will be used to save this specific monitor's result:
-                    # self.save_output_data.syntax_bank.append("self.save_output_data.data['%s_all']"
+                    # self.workspace.syntax_bank.append("self.workspace.data['%s_all']"
                     #                                          "['%s'] = %s.%s"
                     #                                          %(sub_mon_arg[0], object_name, Mon_name, sub_mon_arg[0]))
-                    self.save_output_data.syntax_bank.append("self.save_output_data.data['%s_all']"
+                    self.workspace.syntax_bank.append("self.workspace.results['%s_all']"
                                                              "['%s'] = %s.get_states()"
                                                              %(sub_mon_arg[0], object_name, Mon_name))
                     Mon_str = Mon_name + Mon_str + ",'" + sub_mon_arg[0] + "'"
@@ -1312,7 +1277,7 @@ class CxSystem(object):
                     self.default_load_flag = -1
                     _do_load = int(syn[index_of_load_connection].replace('<--', ''))
                     if _do_load ==1:
-                        assert hasattr(self,'loaded_brian_data'), " -  Synaptic connection in the following line is set to be loaded, however the load_brian_data_path is not defined in the parameters. The connection is being created:\n%s"%str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
+                        assert hasattr(self,'imported_connections'), " -  Synaptic connection in the following line is set to be loaded, however the import_connection_from is not defined in the parameters. The connection is being created:\n%s"%str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
                 else:
                     load_connection_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='load_connection'].index), 'no match')
                     _do_load = int(syn[load_connection_idx])
@@ -1320,9 +1285,9 @@ class CxSystem(object):
                 _do_load = 0
                 pass
 
-            if (self.default_load_flag==1 or (self.default_load_flag==-1 and _do_load == 1 )) and not hasattr(self,'loaded_brian_data'):
+            if (self.default_load_flag==1 or (self.default_load_flag==-1 and _do_load == 1 )) and not hasattr(self,'imported_connections'):
                 ## only load the file if it's not loaded already, and if the connections are supposed to tbe loaded frmo the file
-                self._set_load_brian_data_path()
+                self.set_import_connections_path()
 
             try:
                 index_of_save_connection = int(where(self.current_parameters_list.values=='save_connection')[0])
@@ -1339,32 +1304,32 @@ class CxSystem(object):
 
             # Loading connections from file
             if (self.default_load_flag==1 or (self.default_load_flag==-1 and _do_load == 1 )) and \
-                    hasattr(self,'loaded_brian_data') and not self.load_positions_only:
-                assert _syn_ref_name in list(self.loaded_brian_data.keys()), \
+                    hasattr(self,'imported_connections') and not self.load_positions_only:
+                assert _syn_ref_name in list(self.imported_connections.keys()), \
                     " -  The data for the following connection was not found in the loaded brian data: %s" % _syn_ref_name
 
                 # 1) Try-except necessary; run fails if no connections exist from 1 group to another
                 # 2) Indexing changed in pandas >0.19.1 and thus ...['data'][0][0].tocoo() --> ...['data'].tocoo()
                 #    Unfortunately pandas doesn't warn about this change in indexing
                 try:
-                    eval(_dyn_syn_name).connect(i=self.loaded_brian_data[_syn_ref_name]['data'].tocoo().row, \
-                                         j=self.loaded_brian_data[_syn_ref_name]['data'].tocoo().col,\
-                                         n = int(self.loaded_brian_data[_syn_ref_name]['n']))
+                    eval(_dyn_syn_name).connect(i=self.imported_connections[_syn_ref_name]['data'].tocoo().row, \
+                                         j=self.imported_connections[_syn_ref_name]['data'].tocoo().col,\
+                                         n = int(self.imported_connections[_syn_ref_name]['n']))
                     # Weight is redeclared later, see line ~1200.
                     # Also, 1) "loading connections" leaves the impression of loading anatomical connections, not synaptic weights
                     #       2) we do not have need for saving/loading synaptic weights at this point
                     #       3) it doesn't work in pandas >0.19.1
                     # Therefore I commented:
-                    # eval(_dyn_syn_name).wght = repeat(self.loaded_brian_data[_syn_ref_name]['data'][0][0].data/int(self.\
-                    #     loaded_brian_data[_syn_ref_name]['n']),int(self.loaded_brian_data[_syn_ref_name]['n'])) * siemens
+                    # eval(_dyn_syn_name).wght = repeat(self.imported_connections[_syn_ref_name]['data'][0][0].data/int(self.\
+                    #     imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
                     _load_str = 'Connection loaded from '
                 except ValueError:
                     _load_str = ' ! No connections from '
 
             elif (self.default_load_flag==1 or (self.default_load_flag==-1 and _do_load == 1 )) and not \
-                    hasattr(self,'loaded_brian_data') :
+                    hasattr(self,'imported_connections') :
                 print(" -  Synaptic connection is set to be loaded, however "
-                       "the load_brian_data_path is not defined in the "
+                       "the import_connections_from is not defined in the "
                        "parameters. The connection is being created.")
 
             # Generating new connections using
@@ -1469,18 +1434,16 @@ class CxSystem(object):
                 except UnboundLocalError:
                     print(" -  Connection created from %s to %s" % (
                         _pre_group_idx, _post_group_idx))
-            if (self.default_save_flag == 1 or (self.default_save_flag == -1 and _do_save )) and \
-                    hasattr(self, 'save_brian_data_path') :
+            if (self.default_save_flag == 1 or (self.default_save_flag == -1 and _do_save )):
                 self.do_save_connections = 1
-                self.save_brian_data.create_key(_syn_ref_name)
-                self.save_brian_data.syntax_bank.append('self.save_brian_data.data["%s"]["data"] = \
-                csr_matrix((%s.wght[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))' \
+                self.workspace.create_connections_key(_syn_ref_name)
+                self.workspace.syntax_bank.append('self.workspace.connections["%s"]["data"] = csr_matrix((%s.wght[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))' \
                                                         %(_syn_ref_name,_dyn_syn_name,_dyn_syn_name,_dyn_syn_name,_dyn_syn_name,_dyn_syn_name))
-                self.save_brian_data.syntax_bank.append('self.save_brian_data.data["%s"]["n"] = %d' \
+                self.workspace.syntax_bank.append('self.workspace.connections["%s"]["n"] = %d' \
                                                         %(_syn_ref_name,int(n_arg)))
-            elif (self.default_save_flag==1 or (self.default_save_flag==-1 and _do_save )) and \
-                    not hasattr(self,'save_brian_data_path') :
-                raise ValueError(" -  Synaptic connection is set to be saved, however the save_brian_data_path parameter is not defined.")
+            # elif (self.default_save_flag==1 or (self.default_save_flag==-1 and _do_save )) and \
+            #         not hasattr(self,'workspace') :
+            #     raise ValueError(" -  Synaptic connection is set to be saved, however the save_brian_data_path parameter is not defined.")
 
     def relay(self, *args):
         '''
@@ -1522,12 +1485,14 @@ class CxSystem(object):
         * number_of_neurons: The number of neurons that exist in the input .mat file.
         '''
         _dyn_neurongroup_name = ''
+        if not hasattr(self.workspace,'simulation_name'):
+            raise ParameterNotFoundError("The parameter 'simulation_title' is not defined in the configuration file ")
         def video(self):
             print(" -  Creating an input based on the video input ...")
             input_mat_path = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='path'].index.item()]
             freq = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='freq'].index.item()]
             inp = stimuli(duration=self.runtime,input_mat_path=input_mat_path,output_folder=self.output_folder, \
-                          output_file_suffix = self.StartTime_str ,output_file_extension = self.output_file_extension)
+                          output_file_suffix = self.StartTime_str ,output_file_extension = self.workspace.get_output_extension())
             proc = multiprocessing.Process(target=inp.generate_inputs, args=(freq,))
             proc.start()
             self.video_input_idx =len(self.neurongroups_list)
@@ -1540,7 +1505,7 @@ class CxSystem(object):
                 SPK_GENERATOR_SP, SPK_GENERATOR_TI, thread_number_of_neurons = inp.load_input_seq(self.output_folder)
                 if not self.save_generated_video_input_flag:
                     print(" - :  generated video output is NOT saved.")
-                    os.remove(os.path.join(self.output_folder,'input'+self.StartTime_str+self.output_file_extension))
+                    os.remove(os.path.join(self.output_folder,'input'+self.StartTime_str+self.workspace.get_output_extension()))
                 SPK_GENERATOR = SpikeGeneratorGroup(thread_number_of_neurons , SPK_GENERATOR_SP, SPK_GENERATOR_TI)
                 setattr(self.main_module, 'SPK_GENERATOR', SPK_GENERATOR)
                 try:
@@ -1572,16 +1537,16 @@ class CxSystem(object):
                      % (thread_NG_name, thread_NN_name, thread_NE_name,
                         self.numerical_integration_method,thread_NT_name,
                         thread_NRes_name) , globals(), locals())
-                if hasattr(self, 'loaded_brian_data'):
+                if hasattr(self, 'imported_connections'):
                     # in case the NG index are different. for example a MC_L2 neuron might have had
                     # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
                     thread_Group_type = thread_NG_name[thread_NG_name.index('_') + 1:]
                     thread_GroupKeyName = \
-                    [kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if thread_Group_type in kk][0]
+                    [kk for kk in list(self.imported_connections['positions_all']['w_coord'].keys()) if thread_Group_type in kk][0]
                     self.customized_neurons_list[self.video_input_idx]['w_positions'] = \
-                    self.loaded_brian_data['positions_all']['w_coord'][thread_GroupKeyName]
+                    self.imported_connections['positions_all']['w_coord'][thread_GroupKeyName]
                     self.customized_neurons_list[self.video_input_idx]['z_positions'] = \
-                    self.loaded_brian_data['positions_all']['z_coord'][thread_GroupKeyName]
+                    self.imported_connections['positions_all']['z_coord'][thread_GroupKeyName]
                     print(" -  Position for the group %s loaded" %
                           thread_NG_name)
                 else: # load the positions:
@@ -1594,11 +1559,11 @@ class CxSystem(object):
                      "%s.y=imag(self.customized_neurons_list[%d]['w_positions'])*mm" % \
                      (thread_NG_name, self.video_input_idx, thread_NG_name,
                       self.video_input_idx) , globals(), locals())
-                self.save_output_data.data['positions_all']['z_coord'][thread_NG_name] = \
+                self.workspace.results['positions_all']['z_coord'][thread_NG_name] = \
                     self.customized_neurons_list[self.video_input_idx]['z_positions']
-                self.save_output_data.data['positions_all']['w_coord'][thread_NG_name] = \
+                self.workspace.results['positions_all']['w_coord'][thread_NG_name] = \
                     self.customized_neurons_list[self.video_input_idx]['w_positions']
-                self.save_output_data.data['number_of_neurons'][thread_NG_name] = eval(thread_NN_name)
+                self.workspace.results['number_of_neurons'][thread_NG_name] = eval(thread_NN_name)
                 thread_SGsyn_name = 'SGEN_Syn' # variable name for the Synapses() object
                 # that connects SpikeGeneratorGroup() and relay neurons.
                 exec("%s = Synapses(SPK_GENERATOR, %s, "
@@ -1708,14 +1673,14 @@ class CxSystem(object):
                  % (_dyn_neurongroup_name, _dyn_neuronnumber_name,
                     _dyn_neuron_eq_name, self.numerical_integration_method,
                     _dyn_neuron_thres_name, _dyn_neuron_reset_name) , globals(), locals())
-            if hasattr(self, 'loaded_brian_data'): # load the positions if available
+            if hasattr(self, 'imported_connections'): # load the positions if available
                 # in case the NG index are different. for example a MC_L2 neuron might have had
                 # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
                 Group_type = _dyn_neurongroup_name[_dyn_neurongroup_name.index('_') + 1:]
                 GroupKeyName = \
-                [kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if Group_type in kk][0]
-                self.customized_neurons_list[current_idx]['w_positions'] = self.loaded_brian_data['positions_all']['w_coord'][GroupKeyName]
-                self.customized_neurons_list[current_idx]['z_positions'] = self.loaded_brian_data['positions_all']['z_coord'][GroupKeyName]
+                [kk for kk in list(self.imported_connections['positions_all']['w_coord'].keys()) if Group_type in kk][0]
+                self.customized_neurons_list[current_idx]['w_positions'] = self.imported_connections['positions_all']['w_coord'][GroupKeyName]
+                self.customized_neurons_list[current_idx]['z_positions'] = self.imported_connections['positions_all']['z_coord'][GroupKeyName]
                 print(" -  Positions for the group %s loaded" %
                       _dyn_neurongroup_name)
             else: # generating the positions:
@@ -1732,11 +1697,9 @@ class CxSystem(object):
                  %(_dyn_neurongroup_name, current_idx, _dyn_neurongroup_name,
                    current_idx) , globals(), locals())
             # saving the positions :
-            self.save_output_data.data['positions_all']['z_coord'][_dyn_neurongroup_name] = \
-                self.customized_neurons_list[current_idx]['z_positions']
-            self.save_output_data.data['positions_all']['w_coord'][_dyn_neurongroup_name] = \
-                self.customized_neurons_list[current_idx]['w_positions']
-            self.save_output_data.data['number_of_neurons'][_dyn_neurongroup_name] = eval(_dyn_neuronnumber_name)
+            self.workspace.results['positions_all']['z_coord'][_dyn_neurongroup_name] = self.customized_neurons_list[current_idx]['z_positions']
+            self.workspace.results['positions_all']['w_coord'][_dyn_neurongroup_name] = self.customized_neurons_list[current_idx]['w_positions']
+            self.workspace.results['number_of_neurons'][_dyn_neurongroup_name] = eval(_dyn_neuronnumber_name)
             SGsyn_name = 'SGEN_Syn'  # variable name for the Synapses() object
             # that connects SpikeGeneratorGroup() and relay neurons.
             exec("%s = Synapses(GEN, %s, on_pre='emit_spike+=1')" \
@@ -1790,17 +1753,17 @@ class CxSystem(object):
                   "reset=%s)" \
                  % (NG_name, NN_name, NE_name, self.numerical_integration_method, NT_name,
                     NRes_name) , globals(), locals())
-            if hasattr(self, 'loaded_brian_data'):
+            if hasattr(self, 'imported_connections'):
                 # in case the NG index are different. for example a MC_L2 neuron might have had
                 # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
                 Group_type = NG_name[NG_name.index('_') + 1:]
                 GroupKeyName = \
-                    [kk for kk in list(self.loaded_brian_data['positions_all']['w_coord'].keys()) if Group_type in kk][
+                    [kk for kk in list(self.imported_connections['positions_all']['w_coord'].keys()) if Group_type in kk][
                         0]
                 self.customized_neurons_list[self.spike_input_group_idx]['w_positions'] = \
-                    self.loaded_brian_data['positions_all']['w_coord'][GroupKeyName]
+                    self.imported_connections['positions_all']['w_coord'][GroupKeyName]
                 self.customized_neurons_list[self.spike_input_group_idx]['z_positions'] = \
-                    self.loaded_brian_data['positions_all']['z_coord'][GroupKeyName]
+                    self.imported_connections['positions_all']['z_coord'][GroupKeyName]
                 print(" -  Position for the group %s loaded" % NG_name)
             else:  # load the positions:
                 self.customized_neurons_list[self.spike_input_group_idx]['z_positions'] = squeeze(spikes_data['z_coord'])
@@ -1812,11 +1775,11 @@ class CxSystem(object):
                  "%s.y=imag(self.customized_neurons_list[%d]['w_positions'])*mm" % \
                  (NG_name, self.spike_input_group_idx, NG_name,
                   self.spike_input_group_idx) , globals(), locals())
-            self.save_output_data.data['positions_all']['z_coord'][NG_name] = \
+            self.workspace.results['positions_all']['z_coord'][NG_name] = \
                 self.customized_neurons_list[self.spike_input_group_idx]['z_positions']
-            self.save_output_data.data['positions_all']['w_coord'][NG_name] = \
+            self.workspace.results['positions_all']['w_coord'][NG_name] = \
                 self.customized_neurons_list[self.spike_input_group_idx]['w_positions']
-            self.save_output_data.data['number_of_neurons'][NG_name] = eval(NN_name)
+            self.workspace.results['number_of_neurons'][NG_name] = eval(NN_name)
             SGsyn_name = 'SGEN_Syn'  # variable name for the Synapses() object
             # that connects SpikeGeneratorGroup() and relay neurons.
             exec("%s = Synapses(SPK_GENERATOR, %s, on_pre='emit_spike+=1')" % \
@@ -1903,19 +1866,21 @@ class CxSystem(object):
 
         '''
         print(" -  Generating the syntaxes for saving CX output:")
-        for syntax in self.save_output_data.syntax_bank:
-            tmp_monitor = syntax.split(' ')[-1]
-            print("     -> Gathering data for " + tmp_monitor.split('.')[0])
-            exec(syntax)
-        self.save_output_data.save_to_file()
-        if hasattr(self,'save_brian_data') and self.do_save_connections:
-            print(" -  Generating the syntaxes for saving connection data ...")
-            for syntax in self.save_brian_data.syntax_bank:
+        for syntax in self.workspace.syntax_bank:
+            if 'get_states' in syntax:
+                tmp_monitor = syntax.split(' ')[-1]
+                print(tmp_monitor)
+                print("     -> Gathering data for " + tmp_monitor.split('.')[0])
                 exec(syntax)
-            self.save_brian_data.create_key('positions_all')
-            self.save_brian_data.data['positions_all']['w_coord'] = self.save_output_data.data['positions_all']['w_coord']
-            self.save_brian_data.data['positions_all']['z_coord'] = self.save_output_data.data['positions_all']['z_coord']
-            self.save_brian_data.save_to_file()
+        self.workspace.save_results_to_file()
+        if self.do_save_connections:
+            print(" -  Generating the syntaxes for saving connection data ...")
+            for syntax in self.workspace.syntax_bank:
+                exec(syntax)
+            self.workspace.create_connections_key('positions_all')
+            self.workspace.connections['positions_all']['w_coord'] = self.workspace.results['positions_all']['w_coord']
+            self.workspace.connections['positions_all']['z_coord'] = self.workspace.results['positions_all']['z_coord']
+            self.workspace.save_connections_to_file()
 
     def visualise_connectivity(self,S):
         Ns = len(S.source)

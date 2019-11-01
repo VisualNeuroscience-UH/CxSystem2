@@ -31,13 +31,13 @@ class cluster_run(object):
 
         self.output_path_and_filename = self.parameter_finder(array_run_obj.anatomy_df, 'output_path_and_filename')
         try:
-            self.remote_output_folder = self.parameter_finder(array_run_obj.anatomy_df, 'remote_output_folder')
+            self.remote_workspace = self.parameter_finder(array_run_obj.anatomy_df, 'remote_workspace')
         except NameError:
-            # print(" -    remote_output_folder is not defined in the
+            # print(" -    remote_workspace is not defined in the
             # configuration file, the default path is ./results [in cluster]")
-            raise Exception("remote_output_folder is not defined for running CxSystem on cluster")
-            # self.remote_output_folder = "./results"
-        assert not str.startswith(self.remote_output_folder,'.') and not str.startswith(self.remote_output_folder,'~'),"remote_output_folder must be an absolute path with explicit home directory path"
+            raise Exception("remote_workspace is not defined for running CxSystem on cluster")
+            # self.remote_workspace = "./results"
+        assert not str.startswith(self.remote_workspace,'.') and not str.startswith(self.remote_workspace,'~'),"remote_workspace must be an absolute path with explicit home directory path"
         try:
             self.remote_repo_path = self.parameter_finder(array_run_obj.anatomy_df, 'remote_repo_path')
         except NameError:
@@ -136,7 +136,7 @@ class cluster_run(object):
         checker_data['username'] = self.username
         checker_data['local_folder'] = os.path.dirname(self.output_path_and_filename)
         checker_data['remote_repo_path'] = self.remote_repo_path
-        checker_data['remote_output_folder'] = self.remote_output_folder
+        checker_data['remote_workspace'] = self.remote_workspace
         checker_data['remote_repo_path'] = self.remote_repo_path
         with open ('./_cluster_tmp/_tmp_checker_data.pkl'.replace('/',os.sep),'wb') as ff:
             pickle.dump(checker_data,ff)
@@ -187,8 +187,8 @@ if __name__ == '__main__':
     time.sleep(1)
     if not os.path.isdir(checker_data['local_folder']):
         os.mkdir(checker_data['local_folder'])
-   # remote_result_abs_path = ssh_commander(client,'cd %s;cd %s; pwd' % (checker_data['remote_repo_path'],checker_data['remote_output_folder']), 0).rstrip('\r\n')
-    remote_result_abs_path = checker_data['remote_output_folder']
+   # remote_result_abs_path = ssh_commander(client,'cd %s;cd %s; pwd' % (checker_data['remote_repo_path'],checker_data['remote_workspace']), 0).rstrip('\r\n')
+    remote_result_abs_path = checker_data['remote_workspace']
 
     waiting_flag = True
     print(" -  Waiting for the results ...")
