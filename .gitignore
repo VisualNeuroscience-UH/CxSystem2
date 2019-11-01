@@ -58,4 +58,6 @@ dist
 build
 # Output data files which may be big
 
-
+# SSL certificates
+**/server_cert.key
+**/server_cert.crt
