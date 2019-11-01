@@ -28,8 +28,8 @@ cwd = os.getcwd()
 path = Path(os.getcwd())
 anatomy_and_system_config = path.joinpath('tests', 'config_files', 'pytest_Anatomy_config_cpp_array.csv').as_posix()
 physiology_config = path.joinpath('tests', 'config_files', 'pytest_Physiology_config_cpp_array.csv').as_posix()
-CM = cx.CxSystem(anatomy_and_system_config, physiology_config, instantiated_from_array_run=0)
-new_output_path = path.joinpath('tests','temp_output_files_cpp_array')
+CM = cx.CxSystem(anatomy_and_system_config, physiology_config)
+workspace_path = CM.workspace.get_workspace_folder()
 
 ###################
 # Integration tests
@@ -44,11 +44,8 @@ def cxsystem_run_fixture2():
 	yield  # Run the tests here
 	
 	#Executing teardown code. Connections are already gone if run with basic test
-	shutil.rmtree('./tests/temp_output_files_cpp_array') 	
-	try:	
-		shutil.rmtree('./tests/temp_connection_files') 
-	except:
-		pass
+	shutil.rmtree(workspace_path.joinpath(workspace_path).as_posix())
+
 
 @pytest.fixture(scope='module')
 def get_spike_data():
@@ -58,8 +55,9 @@ def get_spike_data():
 		data = pickle.loads(d_pickle)
 		spikes_all = data['spikes_all']
 
-	new_output_name = [item for item in os.listdir(new_output_path) if 'tonic_depol_level1.55_cpp' in item] 	
-	new_output_fullpath = os.path.join(path, new_output_path, new_output_name[0])
+	new_output_name = [item for item in os.listdir(workspace_path.as_posix()) if 'tonic_depol_level1.55' in item]
+	new_output_fullpath = workspace_path.joinpath(new_output_name[0])
+	new_output_fullpath = new_output_fullpath.joinpath('results.gz')
 	with open(new_output_fullpath, 'rb') as fb:
 		new_d_pickle = zlib.decompress(fb.read())
 		new_data = pickle.loads(new_d_pickle)
@@ -70,8 +68,8 @@ def get_spike_data():
 # @pytest.mark.skip(reason="too slow")
 def test_outputfile(cxsystem_run_fixture2):
 	'''Test for 5 existing outputfiles'''
-	outputfilelist = [item for item in os.listdir(new_output_path) if 'tonic_depol_level' in item]
-	assert len([item for item in outputfilelist if os.access(os.path.join(new_output_path,item), os.W_OK)]) == 5
+	outputfilelist = [item for item in os.listdir(workspace_path) if 'tonic_depol_level' in item]
+	assert len([item for item in outputfilelist if os.access(os.path.join(workspace_path, item), os.W_OK)]) == 5
 	
 # @pytest.mark.xfail(reason='not identical spikes')		
 def test_spikecount_10percent_tolerance(cxsystem_run_fixture2, capsys, get_spike_data):
@@ -101,7 +99,6 @@ def test_spiketiming_strict(cxsystem_run_fixture2, get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
-
 		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
 		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
 		
