@@ -235,7 +235,7 @@ class array_run(object):
         cm = CX.CxSystem(self.df_anat_final_array[idx], self.df_phys_final_array[idx], output_file_suffix = self.final_messages[idx],
                          instantiated_from_array_run=1,array_run_in_cluster=self.array_run_in_cluster)
         cm.run()
-        paths[orig_idx] = cm.save_output_data.data['Full path']
+        paths[orig_idx] = cm.workspace.results['Full path']
         working.value -= 1
 
     def spawner(self,start_idx,steps_from_start):

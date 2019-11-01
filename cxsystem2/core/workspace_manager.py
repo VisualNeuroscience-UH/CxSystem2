@@ -79,7 +79,6 @@ class workspace(object):
     def set_imported_connection_path(self, path):
         self.imported_connections_path = Path(path)
 
-
     def import_connections(self):
         assert self.imported_connections_path.suffix in self.compression_to_extension.values(), \
             ' -  Compression method {} is not supported. Supported methods are gz, bz2 or pickle'.format(self.imported_connections_path.suffix)

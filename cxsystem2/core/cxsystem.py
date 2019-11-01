@@ -473,7 +473,7 @@ class CxSystem(object):
             set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
             prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
-            set_device('cpp_standalone', self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
+            set_device('cpp_standalone', directory=self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
 #            if 'linux' in sys.platform and self.device.lower() == 'cpp':
 #                print(" -  parallel compile flag set")
 #                prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j']
