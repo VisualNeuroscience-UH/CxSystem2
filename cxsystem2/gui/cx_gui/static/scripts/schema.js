@@ -29,22 +29,22 @@ runtime_params_schema = {
             "type": "string",
             "description": "Minimum distance between neurons (e.g. 1*um)",
         },
-        "workspace_folder": {
+        "workspace_path": {
             "type": "string",
             "description": "This is the main working directory of CxSystem and other pathes would be relative to this path",
             "default": "~/CxWorkspace"
         },
-        "output_path_and_filename": {
+        "simulation_title": {
             "type": "string",
-            "description": "Relative path and filename to where results are stored (e.g. ./results/output.gz)",
-            "default": "./results/output.gz"
+            "description": "Title of the simulation using which CxSystem will create a folder",
+            "default": "CxSim"
         },
-        "connections_saving_path_and_filename": {
+        "compression_method": {
             "type": "string",
-            "description": "Relative path and filename to where the network configuration with synaptic weights are stored (export)",
-            "default": "./simdata/data.gz"
+            "description": "Simulation output data compression method",
+            "enum": ["gzip", "bzip2", "pickle"]
         },
-        "connections_loading_path_and_filename": {
+        "import_connections_from": {
             "type": "string",
             "description": "Relative path and filename from where the network configuration with synaptic weights are retrieved (import)",
             "default": "./simdata/data.gz"
@@ -126,7 +126,7 @@ runtime_params_schema = {
             "type": "string",
             "description": "Absolute path to CxSystem2 on the HPC server",
         },
-        "remote_output_folder": {
+        "remote_workspace": {
             "type": "string",
             "description": "Absolute path for storing results on the HPC server",
         },
