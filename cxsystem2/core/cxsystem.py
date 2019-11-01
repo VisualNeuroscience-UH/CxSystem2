@@ -421,8 +421,8 @@ class CxSystem(object):
                 self.benchmarking_data['Total Time'] = self.end_time - self.start_time
                 import platform
                 self.benchmarking_data['Computer Name'] = platform.node()
-                write_titles = 1 if not os.path.isfile(os.path.join(self.output_folder,'benchmark.csv')) else 0
-                with open(os.path.join(self.output_folder,'benchmark.csv'), 'ab') as f:
+                write_titles = 1 if not self.workspace.get_simulation_folder().joinpath('benchmark.csv').is_file() else 0
+                with open(self.workspace.get_simulation_folder().joinpath('benchmark.csv').as_posix(), 'ab') as f:
                     w = csv.DictWriter(f, titles)
                     if write_titles:
                         w.writeheader()
@@ -431,9 +431,9 @@ class CxSystem(object):
             print(" -  Simulating %s took in total %f s" % (str(
                 self.runtime),self.end_time-self.start_time))
             if self.device.lower() == 'genn':
-                shutil.rmtree(os.path.join(self.output_folder, self.timestamp[1:]))
+                shutil.rmtree(self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
             elif self.device.lower() == 'cpp':
-                shutil.rmtree(os.path.join(self.output_folder, self.timestamp[1:]))
+                shutil.rmtree(self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
 
     def set_runtime_parameters(self):
         if not any(self.current_parameters_list.str.contains('runtime')):
@@ -470,10 +470,10 @@ class CxSystem(object):
             print(" -  CxSystem is performing benchmarking. The Brian2 "
                    "should be configured to use benchmarking.")
         if self.device.lower() == 'genn':
-            set_device('genn', directory=os.path.join(self.output_folder, self.timestamp[1:]))
+            set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
             prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
-            set_device('cpp_standalone', directory=os.path.join(self.output_folder, self.timestamp[1:]))
+            set_device('cpp_standalone', self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
 #            if 'linux' in sys.platform and self.device.lower() == 'cpp':
 #                print(" -  parallel compile flag set")
 #                prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j']
@@ -1491,7 +1491,7 @@ class CxSystem(object):
             print(" -  Creating an input based on the video input ...")
             input_mat_path = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='path'].index.item()]
             freq = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='freq'].index.item()]
-            inp = stimuli(duration=self.runtime,input_mat_path=input_mat_path,output_folder=self.output_folder, \
+            inp = stimuli(duration=self.runtime,input_mat_path=input_mat_path,output_folder=self.workspace.get_simulation_folder_as_posix(), \
                           output_file_suffix = self.StartTime_str ,output_file_extension = self.workspace.get_output_extension())
             proc = multiprocessing.Process(target=inp.generate_inputs, args=(freq,))
             proc.start()
@@ -1502,10 +1502,10 @@ class CxSystem(object):
                 time.sleep(3)
                 while proc.is_alive():
                     time.sleep(1)
-                SPK_GENERATOR_SP, SPK_GENERATOR_TI, thread_number_of_neurons = inp.load_input_seq(self.output_folder)
+                SPK_GENERATOR_SP, SPK_GENERATOR_TI, thread_number_of_neurons = inp.load_input_seq(self.workspace.get_simulation_folder_as_posix())
                 if not self.save_generated_video_input_flag:
                     print(" - :  generated video output is NOT saved.")
-                    os.remove(os.path.join(self.output_folder,'input'+self.StartTime_str+self.workspace.get_output_extension()))
+                    os.remove(self.workspace.get_simulation_folder().joinpath('input'+self.StartTime_str+self.workspace.get_output_extension()).as_posix())
                 SPK_GENERATOR = SpikeGeneratorGroup(thread_number_of_neurons , SPK_GENERATOR_SP, SPK_GENERATOR_TI)
                 setattr(self.main_module, 'SPK_GENERATOR', SPK_GENERATOR)
                 try:
@@ -1718,9 +1718,8 @@ class CxSystem(object):
 
         def spikes(self):
             input_spikes_filename = self.current_values_list[self.current_parameters_list[self.current_parameters_list == 'input_spikes_filename'].index.item()]
-            spikes_data = self.data_loader(os.path.join(self.output_folder, input_spikes_filename))
-            print(" -   Spike file loaded from: %s" %os.path.join(
-                self.output_folder, input_spikes_filename))
+            spikes_data = self.data_loader(self.workspace.get_simulation_folder().joinpath(input_spikes_filename))
+            print(" -   Spike file loaded from: %s" %self.workspace.get_simulation_folder().joinpath(input_spikes_filename))
             SPK_GENERATOR_SP = spikes_data['spikes_0'][0]
             SPK_GENERATOR_TI = spikes_data['spikes_0'][1]
             number_of_neurons =  len(spikes_data['w_coord'])

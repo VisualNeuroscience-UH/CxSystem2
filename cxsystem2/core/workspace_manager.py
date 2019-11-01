@@ -61,11 +61,20 @@ class workspace(object):
         print(" -  The output of the simulation is saved at: {}".format(self.results_export_path))
         self.connections_export_path = self.simulation_folder.joinpath('connections').with_suffix((self.output_extension))
 
+    def get_workspace_as_posix(self):
+        return self.workspace_path.as_posix()
+
     def get_simulation_folder(self):
         return self.simulation_folder
 
+    def get_simulation_folder_as_posix(self):
+        return self.simulation_folder.as_posix()
+
     def get_output_extension(self):
         return self.output_extension
+
+    def get_imported_connection_path(self):
+        return self.imported_connections_path.as_posix()
 
     def set_imported_connection_path(self, path):
         self.imported_connections_path = Path(path)
