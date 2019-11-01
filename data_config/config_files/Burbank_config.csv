@@ -1,8 +1,8 @@
-row_type,runtime,device,sys_mode,scale,grid_radius, min_distance, do_init_vms,output_path_and_filename,
-params,1000*ms,Cpp,local,1,1000*um, 1*um,1,./results/output.gz,
+row_type,runtime,device,sys_mode,scale,grid_radius, min_distance, do_init_vms,compression_method, workspace_path,simulation_title,
+params,1000*ms,Cpp,local,1,1000*um, 1*um,1,gzip,~/CxWorkspace,burbank,
 ,,,,,,,,,
-row_type,#save_brian_data_path , #load_brian_data_path, #load_positions_only, do_benchmark,save_generated_video_input_flag,multidimension_array_run,number_of_process,default_clock,trials_per_config
-params,/opt3/CX_Output/brian_data.gz,/opt3/CX_Output/sivanni/brian_data_20161028_142108.gz,1,0,1,0,20,0.01 * ms,1
+row_type , import_connections_from, #load_positions_only, do_benchmark,save_generated_video_input_flag,multidimension_array_run,number_of_process,default_clock,trials_per_config
+params,#/opt3/CX_Output/sivanni/brian_data_20161028_142108.gz,1,0,1,0,20,0.01 * ms,1
 ,,,,,,,,,
 row_type,idx,path,type,freq,monitors,,,,
 IN,0,./video_input_files/V1_input_layer_.mat,video,190*Hz,[Sp],,,,
