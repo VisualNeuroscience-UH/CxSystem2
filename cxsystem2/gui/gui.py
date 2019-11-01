@@ -29,7 +29,10 @@ class runserver:
             print (e)
             exit(1)
 
-        server_folder= Path(os.path.dirname(__file__)).joinpath('cx_gui')
+        crr_file_folder= Path(os.path.dirname(__file__))
+        server_folder= crr_file_folder.joinpath('cx_gui')
+
+        # server_folder= Path(os.path.dirname(__file__)).joinpath('cx_gui')
         os.chdir(server_folder)
 
         if port is None:
@@ -38,7 +41,7 @@ class runserver:
         webbrowser.open_new_tab(a_website)
         if platform == 'win32':
             disable_file_system_redirection().__enter__()
-        os.system("python manage.py runserver {port}".format(server_folder, port=port))
+        os.system("python manage.py runserver_plus {port} --cert server_cert".format(server_folder, port=port))
 
 
     def find_free_port(self):

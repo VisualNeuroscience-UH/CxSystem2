@@ -54,11 +54,16 @@ SECRET_KEY = 'w$2!yh7k3c_io1xs90+*lbogfny2oe%)w-w4gm)s(ttvgqcpe&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'bspg.pa.ibf.cnr.it',
+    '127.0.0.1'
+    ]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'django_extensions',
+    'sslserver',
     'editor',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -75,7 +80,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'cx_gui.urls'
