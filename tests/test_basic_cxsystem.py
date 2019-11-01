@@ -48,7 +48,7 @@ def test_dataframe_delimiters():
 class TestInit:
 	# @pytest.mark.xfail()
 	def test_csv_shape(self):
-		assert CM.anat_and_sys_conf_df.shape[1] == 27
+		assert CM.anat_and_sys_conf_df.shape[1] == 28
 		
 
 	def test_number_of_input_arguments(self):
@@ -64,7 +64,7 @@ class TestInit:
 		)
 		
 	def test_input_argument_types(self):
-		assert isinstance(CM.StartTime_str, str) 
+		assert isinstance(CM.timestamp, str) 
 		assert isinstance(CM.array_run, int), "Indirect test for input arg instantiated_from_array_run"
 		assert isinstance(CM.cluster_run_start_idx, int) 
 		assert isinstance(CM.cluster_run_step, int) 
@@ -111,12 +111,12 @@ class TestConfigurationExecutor:
 		assert CM.do_init_vms in (0,1)
 	
 	# @pytest.mark.xfail()
-	def test__set_save_brian_data_path(self):
-		assert isinstance(CM.save_brian_data_path, str) 
+	def test__set_simulation_folder(self):
+		assert isinstance(CM.workspace.get_simulation_folder_as_posix(), str)
 
 	# @pytest.mark.xfail()	
-	def test__set_load_brian_data_path(self):
-		assert isinstance(CM.load_brian_data_path, str) 
+	def test_set_import_connections_path(self):
+		assert isinstance(CM.workspace.get_imported_connection_path(), str)
 
 	def test_load_positions_only(self):
 		assert CM.load_positions_only in (0,1)
@@ -240,8 +240,7 @@ def cxsystem_run_fixture():
 	yield # Run the tests here
 	
 	#Executing teardown code
-	shutil.rmtree(CM.output_folder) 		
-	shutil.rmtree(CM.save_brian_data_folder) 
+	shutil.rmtree(CM.workspace.get_simulation_folder_as_posix())
 
 @pytest.fixture(scope='module')
 def get_spike_data():
@@ -250,8 +249,8 @@ def get_spike_data():
 		d_pickle = zlib.decompress(fb.read())
 		data = pickle.loads(d_pickle)
 		spikes_all = data['spikes_all']
-	new_output_name = [item for item in os.listdir(CM.output_folder) if item.startswith('output')] #Assuming just one outputfile in this folder
-	new_output_fullpath = os.path.join(path, CM.output_folder, new_output_name[0])
+	new_output_name = [item for item in os.listdir(CM.workspace.get_simulation_folder_as_posix()) if item.startswith('results')] #Assuming just one outputfile in this folder
+	new_output_fullpath = os.path.join(path, CM.workspace.get_simulation_folder_as_posix(), new_output_name[0])
 	with open(new_output_fullpath, 'rb') as fb:
 		new_d_pickle = zlib.decompress(fb.read())
 		new_data = pickle.loads(new_d_pickle)
@@ -262,8 +261,8 @@ def get_spike_data():
 # @pytest.mark.skip(reason="too slow")
 def test_outputfile(cxsystem_run_fixture):
 	'''Test for existing outputfile'''
-	outputfilelist = [item for item in os.listdir(CM.output_folder) if item.startswith('output')]
-	assert os.access(os.path.join(CM.output_folder,outputfilelist[0]), os.W_OK)
+	outputfilelist = [item for item in os.listdir(CM.workspace.get_simulation_folder_as_posix()) if item.startswith('results')]
+	assert os.access(os.path.join(CM.workspace.get_simulation_folder_as_posix(),outputfilelist[0]), os.W_OK)
 	
 # @pytest.mark.xfail(reason='not identical spikes')		
 def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_data):
@@ -278,6 +277,7 @@ def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
+		print("%%%%%%%%%%%%%%%%%%% ",new_spikes_all[key]['N'] , spikes_all[key]['N'])
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
 		assert spike_count_proportion == 1.0
 
