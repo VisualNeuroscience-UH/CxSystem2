@@ -66,11 +66,7 @@ This is the list of configurable run-time variables implemented in the system:
 
 		:code:`do_init_vms{0,1}`: defines whether the membrane voltages are randomly initialized.
 
-		:code:`output_path_and_filename`: sets the path for saving the output data.
-
-		:code:`connections_saving_path_and_filename`: sets the path for saving the synaptic connection file.
-
-		:code:`connections_loading_path_and_filename`: sets the path for the file from which the synaptic connection and positions are to be loaded.
+		:code:`import_connections_from`: sets the path for the file from which the synaptic connection and positions are to be loaded.
 
 		:code:`load_positions_only{1,0}`: Defines whether the positions are only to be loaded from the data file, i.e. flag set to 1, or both positions and synaptic connections, i.e. flag is set to 0.
 

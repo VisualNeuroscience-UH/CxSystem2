@@ -28,8 +28,8 @@ Both excitatory and inhibitory cell sub-groups were fully connected to all the o
      
      row_type,runtime,profiling,default_clock,do_init_vms,min_distance,scale
      params,1000 \*ms,1,0.1 \* ms,1,1\*um,1
-     row_type,sys_mode,grid_radius,output_path_and_filename,device,number_of_processes,
-     params,local,210*um,./output.gz,cpp,1,
+     row_type,sys_mode,grid_radius,device,number_of_processes,
+     params,local,210*um,cpp,1,
      row_type,idx,number_of_neurons,neuron_type,layer_idx,net_center,monitors
      G,0,3200,HH_E,4,--,[Sp]
      G,1,800,HH_I,4,--,[Sp]

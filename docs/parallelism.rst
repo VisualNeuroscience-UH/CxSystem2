@@ -101,10 +101,10 @@ Defines the path of the CxSystem in the connection node of the cluster. In this 
 
   .. csv-table:: 
 
-   remote_output_folder
+   remote_workspace
    /Users/cxuser/results
 
-Defines the folder in which the results will be copied. In this example, a new folder :code:`results` will be created in the :code:`/Users/cxuser/` folder and the results will be saved there. Note that :code:`remote_output_folder` must be an absolute path and home folder path must as well be explicitly defined in it. 
+Defines the folder in which the results will be copied. In this example, a new folder :code:`results` will be created in the :code:`/Users/cxuser/` folder and the results will be saved there. Note that :code:`remote_workspace` must be an absolute path and home folder path must as well be explicitly defined in it.
 
 Transferring the Results
 .........................
