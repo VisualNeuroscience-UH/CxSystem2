@@ -210,6 +210,7 @@ class CxSystem(object):
             trials_per_config = 0
         # check for array_run and return
         if any(check_array_run_anatomy) or any(check_array_run_physiology) or (trials_per_config > 1 and not instantiated_from_array_run):
+            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'),self.timestamp)
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1 : # this means CxSystem is running in cluster and is trying to spawn an array run on a node
                 print("spawning index: %d, step: %d" %(int(
                     cluster_run_start_idx),int(cluster_run_step)))
