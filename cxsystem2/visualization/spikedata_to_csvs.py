@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from brian2.units import *
 from pathlib import Path
+import re
 
 class SpikeData(object):
 
@@ -54,15 +55,28 @@ class SpikeData(object):
 
         return spikelist
 
-    def _get_z_level(self, group):
-        z_level = {'NG0_relay_vpm': 0, 'NG1_L1_L1I_L1': 0.01, 'NG2_L23_PC_L2toL1': 0.02, 'NG3_L23_BC_L2': 0.02,
-                   'NG4_L23_MC_L2': 0.02, 'NG5_L4_PC1_L4toL1': 0.03, 'NG6_L4_PC2_L4toL1': 0.03, 'NG7_L4_SS_L4': 0.03,
-                   'NG8_L4_BC_L4': 0.03, 'NG9_L4_MC_L4': 0.03, 'NG10_L5_PC_L5toL1': 0.04, 'NG11_L5_BC_L5': 0.04,
-                   'NG12_L5_MC_L5': 0.04, 'NG13_L6_PC1_L6toL6': 0.05, 'NG14_L6_PC2_L6toL4': 0.05,
-                   'NG15_L6_PC3_L6toL2': 0.05, 'NG16_L6_BC_L6': 0.05, 'NG17_L6_MC_L6': 0.05}
-        return z_level[group]
+    def _get_z_level(self, group_name):
+        """
 
-    def get_positions_list(self):
+        :param group_name: str, format NGi_NEURONTYPE_LAYER
+        :return:
+        """
+        # z_level = {'NG0_relay_vpm': 0, 'NG1_L1_L1I_L1': 0.01, 'NG2_L23_PC_L2toL1': 0.02, 'NG3_L23_BC_L2': 0.02,
+        #            'NG4_L23_MC_L2': 0.02, 'NG5_L4_PC1_L4toL1': 0.03, 'NG6_L4_PC2_L4toL1': 0.03, 'NG7_L4_SS_L4': 0.03,
+        #            'NG8_L4_BC_L4': 0.03, 'NG9_L4_MC_L4': 0.03, 'NG10_L5_PC_L5toL1': 0.04, 'NG11_L5_BC_L5': 0.04,
+        #            'NG12_L5_MC_L5': 0.04, 'NG13_L6_PC1_L6toL6': 0.05, 'NG14_L6_PC2_L6toL4': 0.05,
+        #            'NG15_L6_PC3_L6toL2': 0.05, 'NG16_L6_BC_L6': 0.05, 'NG17_L6_MC_L6': 0.05}
+        try:
+            layer_number = int(re.findall('^.*_L(\d)\w*$', group_name)[0])  # by convention, L2/3 is "L2"
+        except IndexError:
+            layer_number = 0
+
+        z_level = {0: 0, 1: 1, 2: 2,
+                   4: 3, 5: 4, 6: 5}
+
+        return z_level[layer_number]
+
+    def get_positions_list(self, xy_multiplier=1e6):
         start_ix = self._get_start_indices()
         N_neurons = start_ix[-1]
         coords = self.data['positions_all']['z_coord']
@@ -74,7 +88,10 @@ class SpikeData(object):
             group_pos = np.array(coords[group])
             group_z = self._get_z_level(group)
 
-            x = np.array([(neuron_pos.real, neuron_pos.imag, group_z) for neuron_pos in group_pos])
+
+            x = np.array([(xy_multiplier * neuron_pos.real, xy_multiplier * neuron_pos.imag, group_z)
+                          for neuron_pos in group_pos])
+
             all_positions[start_ix[group_ix]:start_ix[group_ix+1], :] = x
 
             group_ix += 1
@@ -99,6 +116,6 @@ class SpikeData(object):
 
 
 if __name__ == '__main__':
-    x = SpikeData('/home/henhok/visimpl/markram_step2_data.gz')
+
+    x = SpikeData('/home/henhok/sim_results/step1_output.gz')
     x.save_as_csvs()
-    

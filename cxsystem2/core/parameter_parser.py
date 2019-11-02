@@ -374,8 +374,8 @@ class neuron_parser (object):
     'This class embeds all parameter sets associated to all neuron types and will return it as a namespace in form of dictionary'
     def __init__(self, output_neuron,physio_config_df):
         self.physio_config_df = physio_config_df
-        neuron_parser.type_ref = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_E','HH_I'])
-        assert output_neuron['type'] in neuron_parser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['category']
+        neuron_parser.type_ref = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_E','HH_I', 'NDNEURON'])
+        assert output_neuron['type'] in neuron_parser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['type']
 
         # Handling of "neuron subtype" parameters; new since Aug 2018
         if output_neuron['subtype'] == '--':
@@ -403,6 +403,9 @@ class neuron_parser (object):
         getattr(self, '_'+ output_neuron['type'])(output_neuron)
 
 
+    def _NDNEURON(self, output_neuron):
+        pass
+
     def _PC(self,output_neuron):
         '''
         :param parameters_type: The type of parameters associated to compartmental neurons. 'Generic' is the common type. Other types could be defined when discovered in literature.
@@ -411,20 +414,15 @@ class neuron_parser (object):
         :rtype:
         '''
 
-        # total capacitance in compartments. The *2 comes from Markram et al Cell 2015: corrects for the dendritic spine area
         if 'spine_factor' not in self.output_namespace:
             self.output_namespace['spine_factor'] = 2
-            # Should print something
+            print(' ! Parameter spine_factor missing, using 2')
 
-        self.output_namespace['C']= self.output_namespace['fract_areas'][output_neuron['dend_comp_num']] * self.output_namespace['Cm'] * self.output_namespace['Area_tot_pyram'] * self.output_namespace['spine_factor']
-        # if output_neuron['soma_layer'] in [6]: # neuroelectro portal layer5/6 capacitance ??????
-        #     self.output_namespace['C'] = self.output_namespace['fract_areas'][output_neuron['dend_comp_num']] * self.output_namespace['Cm'] * self.output_namespace['Area_tot_pyram']
-        # total g_leak in compartments
-        self.output_namespace['gL']= self.output_namespace['fract_areas'][output_neuron['dend_comp_num']] * self.output_namespace['gL'] * self.output_namespace['Area_tot_pyram']
+        # TODO - In this legacy version, only capacitance is corrected with spine_factor
+        fract_areas = self.output_namespace['fract_areas'][output_neuron['dend_comp_num']]
+        self.output_namespace['C'] = fract_areas * self.output_namespace['Cm'] * self.output_namespace['Area_tot_pyram'] * self.output_namespace['spine_factor']
+        self.output_namespace['gL'] = fract_areas * self.output_namespace['gL'] * self.output_namespace['Area_tot_pyram']
         self.output_namespace['taum_soma'] = self.output_namespace['C'][1] / self.output_namespace['gL'][1]
-
-        # self.output_namespace['tonic_current'] = self.output_namespace['tonic_current'][output_neuron['dend_comp_num'] -1]
-        self.output_namespace['tonic_current'] = self.output_namespace['tonic_current']
 
     def _BC(self,output_neuron):
         pass

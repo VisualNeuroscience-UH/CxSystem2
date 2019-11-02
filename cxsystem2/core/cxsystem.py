@@ -608,11 +608,12 @@ class CxSystem(object):
 
         #<editor-fold desc="...Parameter preprocessing">
         assert self.sys_mode != '', " -  System mode is not defined."
-        _all_columns = ['idx', 'number_of_neurons', 'neuron_type', 'layer_idx', 'threshold',
-                        'reset', 'refractory', 'net_center','monitors', 'tonic_current', 'n_background_inputs',
-                        'n_background_inhibition', 'noise_sigma', 'gemean', 'gestd', 'gimean', 'gistd', 'neuron_subtype']
+        _all_columns = ['idx', 'number_of_neurons', 'neuron_type', 'layer_idx',  'net_center', 'monitors',
+                        'n_background_inputs', 'n_background_inhibition', 'neuron_subtype']
+                        # 'threshold', 'reset', 'refractory',
+                        # 'tonic_current', 'noise_sigma', 'gemean', 'gestd', 'gimean', 'gistd']
         _obligatory_params = [0, 1, 2, 3]
-        assert len(self.current_values_list) <= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
+        assert len(self.current_values_list) >= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
         is missing. Following obligatory columns should be defined:\n%s\n ' \
                                                                 % str([_all_columns[ii] for ii in _obligatory_params])
         obligatory_columns = list(array(_all_columns)[_obligatory_params])
@@ -625,22 +626,21 @@ class CxSystem(object):
         local_namespace['idx'] = -1
         local_namespace['net_center'] = 0 + 0j
         local_namespace['number_of_neurons'] = 0
-        local_namespace['tonic_current'] = ''
         local_namespace['n_background_inputs'] = ''
         local_namespace['n_background_inhibition'] = ''
-        local_namespace['noise_sigma'] = ''
-        local_namespace['gemean'] = ''
-        local_namespace['gestd'] = ''
-        local_namespace['gimean'] = ''
-        local_namespace['gistd'] = ''
         local_namespace['neuron_subtype'] = ''
         local_namespace['neuron_type'] = ''
         local_namespace['layer_idx'] = 0
-        local_namespace['threshold'] = ''
-        local_namespace['reset'] = ''
-        local_namespace['refractory'] = ''
         local_namespace['monitors'] = ''
-
+        # local_namespace['threshold'] = ''
+        # local_namespace['reset'] = ''
+        # local_namespace['refractory'] = ''
+        # local_namespace['noise_sigma'] = ''
+        # local_namespace['gemean'] = ''
+        # local_namespace['gestd'] = ''
+        # local_namespace['gimean'] = ''
+        # local_namespace['gistd'] = ''
+        # local_namespace['tonic_current'] = ''
 
         for column in _all_columns:
             try:
@@ -653,20 +653,21 @@ class CxSystem(object):
         idx = local_namespace['idx']
         net_center = local_namespace['net_center']
         number_of_neurons = local_namespace['number_of_neurons']
-        tonic_current = local_namespace['tonic_current']
         n_background_inputs = local_namespace['n_background_inputs']
         n_background_inhibition = local_namespace['n_background_inhibition']
-        noise_sigma = local_namespace['noise_sigma']
-        gemean = local_namespace['gemean']
-        gestd = local_namespace['gestd']
-        gimean = local_namespace['gimean']
-        gistd = local_namespace['gistd']
+        monitors = local_namespace['monitors']
         neuron_type = local_namespace['neuron_type']
         neuron_subtype = local_namespace['neuron_subtype']
-        threshold = local_namespace['threshold']
-        reset = local_namespace['reset']
-        refractory = local_namespace['refractory']
-        monitors = local_namespace['monitors']
+        # noise_sigma = local_namespace['noise_sigma']
+        # gemean = local_namespace['gemean']
+        # gestd = local_namespace['gestd']
+        # gimean = local_namespace['gimean']
+        # gistd = local_namespace['gistd']
+        # threshold = local_namespace['threshold']
+        # reset = local_namespace['reset']
+        # refractory = local_namespace['refractory']
+        # tonic_current = local_namespace['tonic_current']
+
 
         assert idx not in self.NG_indices, \
             " -  Multiple indices with same values exist in the configuration file."
@@ -677,28 +678,28 @@ class CxSystem(object):
         net_center = complex(net_center)
         current_idx = len(self.customized_neurons_list)
 
-        if tonic_current == '--':
-            tonic_current = '0*pA'
-
-        if noise_sigma == '--':
-            noise_sigma = '0*mV'
-        noise_sigma = eval(noise_sigma)
-
-        if gemean == '--':
-            gemean = '0*nS'
-        if gestd == '--':
-            gestd = '0*nS'
-        if gimean == '--':
-            gimean = '0*nS'
-        if gistd == '--':
-            gistd = '0*nS'
+        # if tonic_current == '--':
+        #     tonic_current = '0*pA'
+        #
+        # if noise_sigma == '--':
+        #     noise_sigma = '0*mV'
+        # noise_sigma = eval(noise_sigma)
+        #
+        # if gemean == '--':
+        #     gemean = '0*nS'
+        # if gestd == '--':
+        #     gestd = '0*nS'
+        # if gimean == '--':
+        #     gimean = '0*nS'
+        # if gistd == '--':
+        #     gistd = '0*nS'
 
         if n_background_inputs == '--':
             n_background_inputs = '0'
         if n_background_inhibition == '--':
             n_background_inhibition = '0'
 
-        assert 'V' in str(noise_sigma.get_best_unit()), ' -  The unit of noise_sigma should be volt'
+        # assert 'V' in str(noise_sigma.get_best_unit()), ' -  The unit of noise_sigma should be volt'
         if neuron_type == 'PC':  # extract the layer index of PC neurons separately
             if local_namespace['layer_idx'].isdigit():
                 local_namespace['layer_idx'] = local_namespace['layer_idx']
@@ -718,12 +719,13 @@ class CxSystem(object):
         # neuron_reference() object and passing the positional arguments to it. The main member of the class called
         # output_neuron is then appended to customized_neurons_list.
         # in case of threshold/reset/refractory overwrite
-        if threshold != '--':
-            self.customized_neurons_list[-1]['threshold'] = threshold
-        if reset != '--':
-            self.customized_neurons_list[-1]['reset'] = reset
-        if refractory != '--':
-            self.customized_neurons_list[-1]['refractory'] = refractory
+        # if threshold != '--':
+        #     self.customized_neurons_list[-1]['threshold'] = threshold
+        # if reset != '--':
+        #     self.customized_neurons_list[-1]['reset'] = reset
+        # if refractory != '--':
+        #     self.customized_neurons_list[-1]['refractory'] = refractory
+
         # Generating variable names for Groups, NeuronNumbers, Equations, Threshold, Reset, Refractory and Namespace
         if neuron_subtype == '--':
             _dyn_neurongroup_name = self._NeuronGroup_prefix + str(current_idx) + '_' + neuron_type + '_L' + str(layer_idx).replace\
@@ -753,12 +755,12 @@ class CxSystem(object):
         # Adding tonic current to namespace
         #self.customized_neurons_list[current_idx]['namespace']['tonic_current'] = eval(tonic_current)
         # Adding the noise sigma to namespace
-        self.customized_neurons_list[current_idx]['namespace']['noise_sigma'] = noise_sigma
-        # Adding ge/gi mean/std to namespace
-        self.customized_neurons_list[current_idx]['namespace']['gemean'] = eval(gemean)
-        self.customized_neurons_list[current_idx]['namespace']['gestd'] = eval(gestd)
-        self.customized_neurons_list[current_idx]['namespace']['gimean'] = eval(gimean)
-        self.customized_neurons_list[current_idx]['namespace']['gistd'] = eval(gistd)
+        # self.customized_neurons_list[current_idx]['namespace']['noise_sigma'] = noise_sigma
+        # # Adding ge/gi mean/std to namespace
+        # self.customized_neurons_list[current_idx]['namespace']['gemean'] = eval(gemean)
+        # self.customized_neurons_list[current_idx]['namespace']['gestd'] = eval(gestd)
+        # self.customized_neurons_list[current_idx]['namespace']['gimean'] = eval(gimean)
+        # self.customized_neurons_list[current_idx]['namespace']['gistd'] = eval(gistd)
 
         # Creating the actual NeuronGroup() using the variables in the previous 6 lines
         exec("%s= NeuronGroup(%s, model=%s, method='%s', threshold=%s, reset=%s,refractory = %s, namespace = %s)" \
@@ -767,134 +769,139 @@ class CxSystem(object):
         # </editor-fold>
 
         # <editor-fold desc="...Poisson-distributed background input">
-        # Add Poisson-distributed background input
-
-        background_rate = next(iter(self.physio_config_df.loc[where(self.physio_config_df.values == 'background_rate')[0]]['Value']))
-        background_rate_inhibition = next(iter(self.physio_config_df.loc[where(self.physio_config_df.values =='background_rate_inhibition')[0]]['Value']))
-
-        # For changing connection weight of background input according to calcium level
-        try:
-            ca = self.value_extractor(self.physio_config_df, 'calcium_concentration')
-        except ValueError:
-            ca = 2.0  # default value that doesn't scale connection weights
+        # TODO - Move this out of cxsystem.py & clean up
 
         try:
-            flag_bg_calcium_scaling = self.value_extractor(self.physio_config_df, 'flag_background_calcium_scaling')
-        except ValueError:
-            flag_bg_calcium_scaling = 0
+            background_rate = next(iter(self.physio_config_df.loc[where(self.physio_config_df.values == 'background_rate')[0]]['Value']))
+            background_rate_inhibition = next(iter(self.physio_config_df.loc[where(self.physio_config_df.values =='background_rate_inhibition')[0]]['Value']))
+        except:
+            background_rate = None
+            background_rate_inhibition = None
 
-        bg_synapse = synapse_parser({'type': 'Fixed', 'pre_group_type': 'SS', 'post_group_type': neuron_type},
-                                    self.physio_config_df)
-        bg_synapse_inh = synapse_parser({'type': 'Fixed', 'pre_group_type': 'BC', 'post_group_type': neuron_type},
+        if (background_rate is not None) or (background_rate_inhibition is not None):
+            # For changing connection weight of background input according to calcium level
+            try:
+                ca = self.value_extractor(self.physio_config_df, 'calcium_concentration')
+            except ValueError:
+                ca = 2.0  # default value that doesn't scale connection weights
+
+            try:
+                flag_bg_calcium_scaling = self.value_extractor(self.physio_config_df, 'flag_background_calcium_scaling')
+            except ValueError:
+                flag_bg_calcium_scaling = 0
+
+            bg_synapse = synapse_parser({'type': 'Fixed', 'pre_group_type': 'SS', 'post_group_type': neuron_type},
                                         self.physio_config_df)
+            bg_synapse_inh = synapse_parser({'type': 'Fixed', 'pre_group_type': 'BC', 'post_group_type': neuron_type},
+                                            self.physio_config_df)
 
-        if neuron_type in ['L1i', 'BC', 'MC']:
-            background_weight = self.value_extractor(self.physio_config_df, 'background_E_I_weight')
-            background_weight_inhibition = self.value_extractor(self.physio_config_df, 'background_E_I_weight')
+            if neuron_type in ['L1i', 'BC', 'MC']:
+                background_weight = self.value_extractor(self.physio_config_df, 'background_E_I_weight')
+                background_weight_inhibition = self.value_extractor(self.physio_config_df, 'background_E_I_weight')
 
-            if flag_bg_calcium_scaling == 1:
-                background_weight = \
-                repr(bg_synapse._scale_by_calcium(ca, background_weight))
+                if flag_bg_calcium_scaling == 1:
+                    background_weight = \
+                    repr(bg_synapse._scale_by_calcium(ca, background_weight))
 
-                background_weight_inhibition = \
-                repr(bg_synapse_inh._scale_by_calcium(ca, background_weight_inhibition))
+                    background_weight_inhibition = \
+                    repr(bg_synapse_inh._scale_by_calcium(ca, background_weight_inhibition))
+                else:
+                    background_weight = repr(background_weight)
+                    background_weight_inhibition = repr(background_weight_inhibition)
+
             else:
-                background_weight = repr(background_weight)
-                background_weight_inhibition = repr(background_weight_inhibition)
+                background_weight = self.value_extractor(self.physio_config_df, 'background_E_E_weight')
+                background_weight_inhibition = self.value_extractor(self.physio_config_df, 'background_I_E_weight')
 
-        else:
-            background_weight = self.value_extractor(self.physio_config_df, 'background_E_E_weight')
-            background_weight_inhibition = self.value_extractor(self.physio_config_df, 'background_I_E_weight')
+                if flag_bg_calcium_scaling == 1:
+                    background_weight = \
+                    repr(bg_synapse._scale_by_calcium(ca, background_weight))
 
-            if flag_bg_calcium_scaling == 1:
-                background_weight = \
-                repr(bg_synapse._scale_by_calcium(ca, background_weight))
+                    background_weight_inhibition = \
+                    repr(bg_synapse_inh._scale_by_calcium(ca, background_weight_inhibition))
+                else:
+                    background_weight = repr(background_weight)
+                    background_weight_inhibition = repr(background_weight_inhibition)
 
-                background_weight_inhibition = \
-                repr(bg_synapse_inh._scale_by_calcium(ca, background_weight_inhibition))
-            else:
-                background_weight = repr(background_weight)
-                background_weight_inhibition = repr(background_weight_inhibition)
-
-        if neuron_type != 'PC':
-            try:
-                excitation_model = self.value_extractor(self.physio_config_df, 'excitation_model')
-            except ValueError:
-                excitation_model = 'SIMPLE_E'
-
-            try:
-                inhibition_model = self.value_extractor(self.physio_config_df, 'inhibition_model')
-            except ValueError:
-                inhibition_model = 'SIMPLE_I'
-
-            exc_receptors = eqt.EquationHelper.BackgroundReceptors[excitation_model]
-            inh_receptors = eqt.EquationHelper.BackgroundReceptors[inhibition_model]
-
-            # Background excitation for non-PC neurons
-            # Go through all excitatory receptors (unfortunately different binomial distrib for every receptor)
-            for receptor in exc_receptors:
-                poisson_target = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
-                exec ("%s = PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
-                     % (poisson_target, _dyn_neurongroup_name, receptor, n_background_inputs,
-                        background_rate, background_weight))
+            if neuron_type != 'PC':
+                try:
+                    excitation_model = self.value_extractor(self.physio_config_df, 'excitation_model')
+                except ValueError:
+                    excitation_model = 'SIMPLE_E'
 
                 try:
-                    setattr(self.Cxmodule, poisson_target, eval(poisson_target))
-                except AttributeError:
-                    print('Error in generating PoissonInput')
+                    inhibition_model = self.value_extractor(self.physio_config_df, 'inhibition_model')
+                except ValueError:
+                    inhibition_model = 'SIMPLE_I'
 
-            # Background inhibition for non-PC neurons
-            # Go through all inhibitory receptors
-            for receptor in inh_receptors:
-                poisson_target_inh = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
-                exec ("%s = PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
-                     % (poisson_target_inh, _dyn_neurongroup_name, receptor, n_background_inhibition,
-                        background_rate_inhibition, background_weight_inhibition))
-                try:
-                    setattr(self.Cxmodule, poisson_target_inh, eval(poisson_target_inh))
-                except AttributeError:
-                    print('Error in generating PoissonInput')
+                exc_receptors = eqt.EquationHelper.BackgroundReceptors[excitation_model]
+                inh_receptors = eqt.EquationHelper.BackgroundReceptors[inhibition_model]
 
-        else:
-            try:
-                pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model')
-            except ValueError:
-                pc_excitation_model = 'SIMPLE_E'
-            try:
-                pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model')
-            except ValueError:
-                pc_inhibition_model = 'SIMPLE_I'
+                # Background excitation for non-PC neurons
+                # Go through all excitatory receptors (unfortunately different binomial distrib for every receptor)
+                for receptor in exc_receptors:
+                    poisson_target = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
+                    exec ("%s = PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
+                         % (poisson_target, _dyn_neurongroup_name, receptor, n_background_inputs,
+                            background_rate, background_weight))
 
-            exc_receptors = eqt.EquationHelper.BackgroundReceptors[pc_excitation_model]
-            inh_receptors = eqt.EquationHelper.BackgroundReceptors[pc_inhibition_model]
-
-            # Background excitation for PC neurons (targeting all dendrite compartments equally)
-            n_target_compartments = int(self.customized_neurons_list[-1]['total_comp_num']) -1  # No excitatory input to soma
-            n_inputs_to_each_comp = int(int(n_background_inputs) / n_target_compartments)
-            target_comp_list = ['basal', 'a0']
-            target_comp_list.extend(['a'+str(i) for i in range(1, n_target_compartments-2+1)])
-
-            for receptor in exc_receptors:
-                for target_comp in target_comp_list:
-                    poisson_target = 'bg_%s_%s_%s' % (receptor, _dyn_neurongroup_name, target_comp)
-                    exec ("%s = PoissonInput(target=%s, target_var='%s_%s', N=%s, rate=%s, weight=%s)" \
-                     % (poisson_target, _dyn_neurongroup_name, receptor, target_comp, n_inputs_to_each_comp,
-                        background_rate, background_weight))
                     try:
                         setattr(self.Cxmodule, poisson_target, eval(poisson_target))
                     except AttributeError:
                         print('Error in generating PoissonInput')
 
-            # Background inhibition for PC neurons (targeting soma)
-            for receptor in inh_receptors:
-                poisson_target_inh = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
-                exec ("%s = PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
-                     % (poisson_target_inh, _dyn_neurongroup_name, receptor, n_background_inhibition,
-                        background_rate_inhibition, background_weight_inhibition))
+                # Background inhibition for non-PC neurons
+                # Go through all inhibitory receptors
+                for receptor in inh_receptors:
+                    poisson_target_inh = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
+                    exec ("%s = PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
+                         % (poisson_target_inh, _dyn_neurongroup_name, receptor, n_background_inhibition,
+                            background_rate_inhibition, background_weight_inhibition))
+                    try:
+                        setattr(self.Cxmodule, poisson_target_inh, eval(poisson_target_inh))
+                    except AttributeError:
+                        print('Error in generating PoissonInput')
+
+            else:
                 try:
-                    setattr(self.Cxmodule, poisson_target_inh, eval(poisson_target_inh))
-                except AttributeError:
-                    print('Error in generating PoissonInput')
+                    pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model')
+                except ValueError:
+                    pc_excitation_model = 'SIMPLE_E'
+                try:
+                    pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model')
+                except ValueError:
+                    pc_inhibition_model = 'SIMPLE_I'
+
+                exc_receptors = eqt.EquationHelper.BackgroundReceptors[pc_excitation_model]
+                inh_receptors = eqt.EquationHelper.BackgroundReceptors[pc_inhibition_model]
+
+                # Background excitation for PC neurons (targeting all dendrite compartments equally)
+                n_target_compartments = int(self.customized_neurons_list[-1]['total_comp_num']) -1  # No excitatory input to soma
+                n_inputs_to_each_comp = int(int(n_background_inputs) / n_target_compartments)
+                target_comp_list = ['basal', 'a0']
+                target_comp_list.extend(['a'+str(i) for i in range(1, n_target_compartments-2+1)])
+
+                for receptor in exc_receptors:
+                    for target_comp in target_comp_list:
+                        poisson_target = 'bg_%s_%s_%s' % (receptor, _dyn_neurongroup_name, target_comp)
+                        exec ("%s = PoissonInput(target=%s, target_var='%s_%s', N=%s, rate=%s, weight=%s)" \
+                         % (poisson_target, _dyn_neurongroup_name, receptor, target_comp, n_inputs_to_each_comp,
+                            background_rate, background_weight))
+                        try:
+                            setattr(self.Cxmodule, poisson_target, eval(poisson_target))
+                        except AttributeError:
+                            print('Error in generating PoissonInput')
+
+                # Background inhibition for PC neurons (targeting soma)
+                for receptor in inh_receptors:
+                    poisson_target_inh = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
+                    exec ("%s = PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
+                         % (poisson_target_inh, _dyn_neurongroup_name, receptor, n_background_inhibition,
+                            background_rate_inhibition, background_weight_inhibition))
+                    try:
+                        setattr(self.Cxmodule, poisson_target_inh, eval(poisson_target_inh))
+                    except AttributeError:
+                        print('Error in generating PoissonInput')
 
         # </editor-fold>
 
@@ -930,7 +937,7 @@ class CxSystem(object):
             NG_init = 'Vr_offset = rand(len(%s))\n' % _dyn_neurongroup_name
             NG_init += "for _key in %s.variables.keys():\n" % _dyn_neurongroup_name
             NG_init += "\tif _key.find('vm')>=0:\n"
-            NG_init += "\t\tsetattr(%s,_key,%s['Vr']+Vr_offset * (%s['VT']-%s['Vr']))\n" % \
+            NG_init += "\t\tsetattr(%s,_key,%s['V_init_min']+Vr_offset * (%s['V_init_max']-%s['V_init_min']))\n" % \
                        (_dyn_neurongroup_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name)
 
             # Commented out (didn't work with receptors) /HH
@@ -940,7 +947,7 @@ class CxSystem(object):
         else:
             NG_init = "for _key in %s.variables.keys():\n" % _dyn_neurongroup_name
             NG_init += "\tif _key.find('vm')>=0:\n"
-            NG_init += "\t\tsetattr(%s,_key,%s['Vr'])\n" % (_dyn_neurongroup_name, _dyn_neuron_namespace_name)
+            NG_init += "\t\tsetattr(%s,_key,%s['V_init'])\n" % (_dyn_neurongroup_name, _dyn_neuron_namespace_name)
 
             # Commented out (didn't work with receptors) /HH
             # NG_init += "\telif ((_key.find('ge')>=0) or (_key.find('gi')>=0)):\n"
