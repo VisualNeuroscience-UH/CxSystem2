@@ -7,7 +7,6 @@ from brian2.units import *
 from pathlib import Path
 import re
 
-
 class SpikeData(object):
 
     def __init__(self, filename):
@@ -89,8 +88,10 @@ class SpikeData(object):
             group_pos = np.array(coords[group])
             group_z = self._get_z_level(group)
 
+
             x = np.array([(xy_multiplier * neuron_pos.real, xy_multiplier * neuron_pos.imag, group_z)
                           for neuron_pos in group_pos])
+
             all_positions[start_ix[group_ix]:start_ix[group_ix+1], :] = x
 
             group_ix += 1
@@ -115,5 +116,6 @@ class SpikeData(object):
 
 
 if __name__ == '__main__':
+
     x = SpikeData('/home/henhok/sim_results/step1_output.gz')
     x.save_as_csvs()
