@@ -9,6 +9,7 @@ Cython
 Django
 django-extensions
 django-sslserver
+IPython
 Jinja2
 kiwisolver
 MarkupSafe
