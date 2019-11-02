@@ -18,7 +18,7 @@ class disable_file_system_redirection:
             self._revert(self.old_value)
 
 class runserver:
-    def __init__(self, port = None):
+    def __init__(self, ssl=False, port = None ):
         try:
             python_cmd_version = os.popen('python --version').read().strip().split(' ')[1]
             if int(python_cmd_version[0]) < 3 :
@@ -37,12 +37,18 @@ class runserver:
 
         if port is None:
             port = self.find_free_port()
-        a_website = "http://127.0.0.1:{}/".format(port)
-        webbrowser.open_new_tab(a_website)
-        if platform == 'win32':
-            disable_file_system_redirection().__enter__()
-        os.system("python manage.py runserver_plus {port} --cert server_cert".format(server_folder, port=port))
-
+        if ssl:
+            a_website = "https://127.0.0.1:{}/".format(port)
+            webbrowser.open_new_tab(a_website)
+            if platform == 'win32':
+                disable_file_system_redirection().__enter__()
+            os.system("python manage.py runserver_plus {port} --cert server_cert".format(port=port))
+        else:
+            a_website = "http://127.0.0.1:{}/".format(port)
+            webbrowser.open_new_tab(a_website)
+            if platform == 'win32':
+                disable_file_system_redirection().__enter__()
+            os.system("python manage.py runserver {port}".format(port=port))
 
     def find_free_port(self):
         s = socket.socket()

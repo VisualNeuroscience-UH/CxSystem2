@@ -60,7 +60,7 @@ class CxSystem(object):
     _SpikeMonitor_prefix = 'SpMon'
     _StateMonitor_prefix = 'StMon'
 
-    def __init__(self, anatomy_and_system_config=None, physiology_config=None, output_file_suffix = "", instantiated_from_array_run = 0, cluster_run_start_idx=-1,cluster_run_step=-1, array_run_in_cluster =0, gui_port=None):
+    def __init__(self, anatomy_and_system_config=None, physiology_config=None, output_file_suffix = "", instantiated_from_array_run = 0, cluster_run_start_idx=-1,cluster_run_step=-1, array_run_in_cluster =0):
         '''
         Initialize the cortical system by parsing both of the configuration files.
 
@@ -80,9 +80,8 @@ class CxSystem(object):
         * save_data: The save_data() object for saving the final data.
 
         '''
-        self.port = gui_port
+
         if anatomy_and_system_config is None or physiology_config is None:
-            self.runGUI()
             return
 
         self.start_time = time.time()
@@ -234,8 +233,8 @@ class CxSystem(object):
            self.configuration_executor()
         print(" -  Cortical Module initialization Done.")
 
-    def runGUI(self):
-        gui.runserver(port = self.port)
+    def runGUI(self, ssl=False, port=None):
+        gui.runserver(ssl = ssl, port = port)
 
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:,0][self.anat_and_sys_conf_df.loc[:,0]=='row_type'].index

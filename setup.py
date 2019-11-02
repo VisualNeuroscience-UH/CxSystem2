@@ -7,16 +7,39 @@ from setuptools import find_packages, setup
 
 
 requiers = """
-brian2
-brian2genn
-django
+asn1crypto
+bcrypt
+Brian2
+Brian2GeNN
+cffi
+cryptography
+cycler
+Cython
+Django
+django-extensions
+django-sslserver
+docopt
+IPython
+Jinja2
+kiwisolver
+MarkupSafe
 matplotlib
-pandas
-pytest
-paramiko
+mpmath
 numpy
+pandas
+paramiko
+pycparser
+PyNaCl
+pyOpenSSL
+pyparsing
+python-dateutil
+pytz
 scipy
 scp
+six
+sqlparse
+sympy
+Werkzeug
 """.split("\n")
 
 
@@ -68,7 +91,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'cxsystem2 = cxsystem2.core.cxsystem:CxSystem',
+            'cxsystem2 = cxsystem2.cmd.cxsystem_cmd:main',
         ],
     }
 )
