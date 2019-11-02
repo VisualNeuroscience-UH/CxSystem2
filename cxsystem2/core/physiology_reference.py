@@ -11,7 +11,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 from cxsystem2.core.parameter_parser import *
 import random as rnd
 from cxsystem2.core import equation_templates as eqt
-
+import cxsystem2.neurodynlib as nd
 
 class neuron_reference(object):
     '''
@@ -41,7 +41,7 @@ class neuron_reference(object):
 
         # <editor-fold desc="...General neuron model initialization">
         self.physio_config_df = physio_config_df
-        neuron_reference._celltypes = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_I','HH_E'])
+        neuron_reference._celltypes = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_I','HH_E', 'NDNEURON'])
         assert general_grid_radius > min_distance , ' -  The distance between cells should be less than the grid radius'
         assert cell_type in neuron_reference._celltypes, " -  Cell type '%s' is not defined" % cell_type  # check cell type
         assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"  # check layer index
@@ -83,49 +83,52 @@ class neuron_reference(object):
             self.model_variation = self.value_extractor(self.physio_config_df, 'model_variation')
 
             if self.model_variation == 1:
-                print(' -  Model variation is set ON')
+                # print(' -  Model variation is set ON')
+
                 # For non-pyramidal groups
-                try:
-                    self.neuron_model = self.value_extractor(self.physio_config_df, 'neuron_model').upper()
-                    print(' -  Neuron model is %s ' % self.neuron_model)
-                    if self.neuron_model == 'ADEX':
-                        self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
-                except:
-                    self.neuron_model = 'EIF'
-                    print(' !  No point neuron model defined, using EIF')
+                if cell_type != 'PC':
+                    try:
+                        self.neuron_model = self.value_extractor(self.physio_config_df, 'neuron_model').upper()
+                        print(' -  Neuron model is %s ' % self.neuron_model)
+                        # if self.neuron_model == 'ADEX':
+                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
+                    except:
+                        self.neuron_model = 'EIF'
+                        print(' !  No point neuron model defined, using EIF')
 
-                try:
-                    self.excitation_model = self.value_extractor(self.physio_config_df, 'excitation_model').upper()
-                except:
-                    self.excitation_model = 'SIMPLE_E'
-                    print(' !  No point neuron excitation model defined, using simple')
+                    try:
+                        self.excitation_model = self.value_extractor(self.physio_config_df, 'excitation_model').upper()
+                    except:
+                        self.excitation_model = 'SIMPLE_E'
+                        print(' !  No point neuron excitation model defined, using simple')
 
-                try:
-                    self.inhibition_model = self.value_extractor(self.physio_config_df, 'inhibition_model').upper()
-                except:
-                    self.inhibition_model = 'SIMPLE_I'
-                    print(' !  No point neuron inhibition model defined, using simple')
+                    try:
+                        self.inhibition_model = self.value_extractor(self.physio_config_df, 'inhibition_model').upper()
+                    except:
+                        self.inhibition_model = 'SIMPLE_I'
+                        print(' !  No point neuron inhibition model defined, using simple')
 
                 # For pyramidal groups
-                try:
-                    self.pc_neuron_model = self.value_extractor(self.physio_config_df, 'pc_neuron_model').upper()
-                    if self.pc_neuron_model == 'ADEX':
-                        self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
-                except:
-                    self.pc_neuron_model = self.neuron_model
-                    print(' !  No pyramidal cell neuron model defined, using %s' % self.neuron_model)
+                else:
+                    try:
+                        self.pc_neuron_model = self.value_extractor(self.physio_config_df, 'pc_neuron_model').upper()
+                        # if self.pc_neuron_model == 'ADEX':
+                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
+                    except:
+                        self.pc_neuron_model = self.neuron_model
+                        print(' !  No pyramidal cell neuron model defined, using %s' % self.neuron_model)
 
-                try:
-                    self.pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model').upper()
-                except:
-                    self.pc_excitation_model = self.excitation_model
-                    print(' !  No pyramidal cell excitation model defined, using %s' % self.excitation_model)
+                    try:
+                        self.pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model').upper()
+                    except:
+                        self.pc_excitation_model = self.excitation_model
+                        print(' !  No pyramidal cell excitation model defined, using %s' % self.excitation_model)
 
-                try:
-                    self.pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model').upper()
-                except:
-                    self.pc_inhibition_model = self.inhibition_model
-                    print(' !  No pyramidal cell inhibition model defined, using %s' % self.inhibition_model)
+                    try:
+                        self.pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model').upper()
+                    except:
+                        self.pc_inhibition_model = self.inhibition_model
+                        print(' !  No pyramidal cell inhibition model defined, using %s' % self.inhibition_model)
 
             else:
                 self.model_variation = False
@@ -173,6 +176,35 @@ class neuron_reference(object):
             # _positions =[tuple(map(operator.add,_itm, (float(real(_centre)),float(imag(_centre))))) for _itm in _positions]
             _positions = [complex(_itm[0],_itm[1]) + self.output_neuron['w_center'] for _itm in _positions]
         return _positions
+
+
+    def NDNEURON(self):
+        """
+        NDNEURON type, just for testing Neurodynlib
+
+        :return:
+        """
+
+        x = nd.neuron_factory(self.neuron_model)
+        x.set_excitatory_receptors(self.excitation_model)
+        x.set_inhibitory_receptors(self.inhibition_model)
+
+        if 'noise_sigma' in self.output_neuron['namespace'].keys():
+            noise_sigma = self.output_neuron['namespace']['noise_sigma']
+            x.add_vm_noise(noise_sigma)
+
+        if 'tonic_current' in self.output_neuron['namespace'].keys():
+            tonic_current = self.output_neuron['namespace']['tonic_current']
+            tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+            x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+        self.output_neuron['equation'] = x.get_compartment_equations('soma')
+        self.output_neuron['threshold'] = x.get_threshold_condition()
+        self.output_neuron['reset'] = x.get_reset_statements()
+        self.output_neuron['refractory'] = x.get_refractory_period()
+
+        self.output_neuron['equation'] += Equations('''x : meter
+            y : meter''')
 
     def PC(self):
         '''
@@ -284,8 +316,36 @@ class neuron_reference(object):
         else:
 
             # <editor-fold desc="...Model variation equations">
-            # TODO - Incorporate into equation_templates
-            # Last modified 3 Nov 2018
+            # TODO - Figure out why this is different from old eqs
+            # n_apical = self.output_neuron['dend_comp_num'] + 1
+            # x = nd.LegacyPyramidalCell(n_apical)
+            # x.set_excitatory_receptors(self.pc_excitation_model)
+            # x.set_inhibitory_receptors(self.pc_inhibition_model)
+            #
+            # if 'noise_sigma' in self.output_neuron['namespace'].keys():
+            #     noise_sigma = self.output_neuron['namespace']['noise_sigma']
+            #     x.add_vm_noise(noise_sigma)
+            #
+            # if 'tonic_current' in self.output_neuron['namespace'].keys():
+            #     tonic_current = self.output_neuron['namespace']['tonic_current']
+            #     tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+            #     x.add_tonic_current(tonic_current, tau_tonic_rampup)
+            #
+            # # Set parameters that are required to compile the equations
+            # C_array = self.output_neuron['namespace']['C']
+            # g_leak_array = self.output_neuron['namespace']['g_leak']
+            # Ra_array = self.output_neuron['namespace']['Ra']
+            # x.set_neuron_parameters(C=C_array, g_leak=g_leak_array, Ra=Ra_array)
+            #
+            # # Finally, get everything
+            # self.output_neuron['equation'] = x.get_neuron_equations()
+            # self.output_neuron['threshold'] = x.get_threshold_condition()
+            # self.output_neuron['reset'] = x.get_reset_statements()
+            # self.output_neuron['refractory'] = x.get_refractory_period()
+            # </editor-fold>
+
+            # <editor-fold desc="...Old model variation equations">
+            # Old model variation equations using equation_templates (from November 2018)
             eq_template_soma = eqt.EquationHelper(neuron_model=self.pc_neuron_model, is_pyramidal=True,
                                                   compartment='soma', exc_model=self.pc_excitation_model,
                                                   inh_model=self.pc_inhibition_model).getMembraneEquation(return_string=True)
@@ -325,14 +385,6 @@ class neuron_reference(object):
                                                         g_gabaa_alpha1="g_gabaa_alpha1_soma",
                                                         g_gabab="g_gabab_soma", g_gabab_alpha="g_gabab_alpha_soma",
                                                         g_gabab_alpha1="g_gabab_alpha1_soma", B="B_soma")
-
-            # TODO - Build PC equations dynamically (under construction)
-            # basal_dict = eq_template_dend.getDict(base_dict={'C': self.output_neuron['namespace']['C'][0],
-            #                                                  'gL': self.output_neuron['namespace']['gL'][0]},
-            #                                       specific_compartment='basal')
-            # basal_dict = eq_template_soma.getDict(base_dict={'C': self.output_neuron['namespace']['C'][1],
-            #                                                  'gL': self.output_neuron['namespace']['gL'][1]},
-            #                                       specific_compartment='soma')
 
             for _ii in range(
                     self.output_neuron['dend_comp_num'] + 1):  # extra dendritic compartment in the same level of soma
@@ -399,13 +451,10 @@ class neuron_reference(object):
                                                             gapre=1 / (self.output_neuron['namespace']['Ra'][1]),
                                                             I_dendr="Idendr_a0", vmself="vm_a0", vmpre="vm")
 
-
             #</editor-fold>
 
         self.output_neuron['equation'] += Equations('''x : meter
                             y : meter''')
-
-
 
     def BC(self):
         '''
@@ -430,9 +479,26 @@ class neuron_reference(object):
                 ''', ge='ge_soma', gi='gi_soma')
 
         else:
-            self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-                                                                exc_model=self.excitation_model,
-                                                                inh_model=self.inhibition_model).getMembraneEquation()
+            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
+            #                                                     exc_model=self.excitation_model,
+            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            x = nd.neuron_factory(self.neuron_model)
+            x.set_excitatory_receptors(self.excitation_model)
+            x.set_inhibitory_receptors(self.inhibition_model)
+
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
+
+            if 'tonic_current' in self.output_neuron['namespace'].keys():
+                tonic_current = self.output_neuron['namespace']['tonic_current']
+                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            self.output_neuron['equation'] = x.get_compartment_equations('soma')
+            self.output_neuron['threshold'] = x.get_threshold_condition()
+            self.output_neuron['reset'] = x.get_reset_statements()
+            self.output_neuron['refractory'] = x.get_refractory_period()
 
         self.output_neuron['equation'] += Equations('''x : meter
             y : meter''')
@@ -461,13 +527,29 @@ class neuron_reference(object):
                 dgi/dt = -gi/tau_i : siemens
                 ''', ge='ge_soma', gi='gi_soma')
         else:
-            self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-                                                                exc_model=self.excitation_model,
-                                                                inh_model=self.inhibition_model).getMembraneEquation()
+            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
+            #                                                     exc_model=self.excitation_model,
+            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            x = nd.neuron_factory(self.neuron_model)
+            x.set_excitatory_receptors(self.excitation_model)
+            x.set_inhibitory_receptors(self.inhibition_model)
+
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
+
+            if 'tonic_current' in self.output_neuron['namespace'].keys():
+                tonic_current = self.output_neuron['namespace']['tonic_current']
+                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            self.output_neuron['equation'] = x.get_compartment_equations('soma')
+            self.output_neuron['threshold'] = x.get_threshold_condition()
+            self.output_neuron['reset'] = x.get_reset_statements()
+            self.output_neuron['refractory'] = x.get_refractory_period()
 
         self.output_neuron['equation'] += Equations('''x : meter
             y : meter''')
-
 
     def MC(self):
         '''
@@ -494,9 +576,26 @@ class neuron_reference(object):
                 ''', ge='ge_soma', gi='gi_soma')
 
         else:
-            self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-                                                                exc_model=self.excitation_model,
-                                                                inh_model=self.inhibition_model).getMembraneEquation()
+            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
+            #                                                     exc_model=self.excitation_model,
+            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            x = nd.neuron_factory(self.neuron_model)
+            x.set_excitatory_receptors(self.excitation_model)
+            x.set_inhibitory_receptors(self.inhibition_model)
+
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
+
+            if 'tonic_current' in self.output_neuron['namespace'].keys():
+                tonic_current = self.output_neuron['namespace']['tonic_current']
+                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            self.output_neuron['equation'] = x.get_compartment_equations('soma')
+            self.output_neuron['threshold'] = x.get_threshold_condition()
+            self.output_neuron['reset'] = x.get_reset_statements()
+            self.output_neuron['refractory'] = x.get_refractory_period()
 
 
         self.output_neuron['equation'] += Equations('''x : meter
@@ -525,9 +624,26 @@ class neuron_reference(object):
                 ''', ge='ge_soma', gi='gi_soma')
 
         else:
-            self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-                                                                exc_model=self.excitation_model,
-                                                                inh_model=self.inhibition_model).getMembraneEquation()
+            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
+            #                                                     exc_model=self.excitation_model,
+            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            x = nd.neuron_factory(self.neuron_model)
+            x.set_excitatory_receptors(self.excitation_model)
+            x.set_inhibitory_receptors(self.inhibition_model)
+
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
+
+            if 'tonic_current' in self.output_neuron['namespace'].keys():
+                tonic_current = self.output_neuron['namespace']['tonic_current']
+                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            self.output_neuron['equation'] = x.get_compartment_equations('soma')
+            self.output_neuron['threshold'] = x.get_threshold_condition()
+            self.output_neuron['reset'] = x.get_reset_statements()
+            self.output_neuron['refractory'] = x.get_refractory_period()
 
         self.output_neuron['equation'] += Equations('''x : meter
             y : meter''')
