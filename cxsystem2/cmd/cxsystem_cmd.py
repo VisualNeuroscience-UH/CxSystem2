@@ -34,7 +34,7 @@ import sys
 
 def main():
     arguments = docopt(__doc__)
-    print(arguments)
+    # print(arguments)
 
     if arguments['--runserver']:
         if arguments['--https']:
