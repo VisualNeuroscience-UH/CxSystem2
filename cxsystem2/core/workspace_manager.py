@@ -53,13 +53,13 @@ class workspace(object):
         self.output_extension = self.compression_to_extension[compression_method]
 
     def create_simulation(self,sim_name):
-        self.simulation_name = sim_name + self.suffix
+        self.simulation_name = sim_name
         self.simulation_folder = self.workspace_path.joinpath(self.simulation_name)
-        assert not self.simulation_folder.is_dir() , "simulation folder {} already exists, please run the simulation again, the suffix will change automatically".format(self.simulation_folder)
-        os.makedirs(self.simulation_folder.as_posix())
-        self.results_export_path = self.simulation_folder.joinpath('results').with_suffix(self.output_extension)
+        if not self.simulation_folder.is_dir():
+            os.makedirs(self.simulation_folder.as_posix())
+        self.results_export_path = self.simulation_folder.joinpath('results' + self.suffix).with_suffix(self.output_extension)
         print(" -  The output of the simulation is saved at: {}".format(self.results_export_path))
-        self.connections_export_path = self.simulation_folder.joinpath('connections').with_suffix((self.output_extension))
+        self.connections_export_path = self.simulation_folder.joinpath('connections' + self.suffix).with_suffix((self.output_extension))
 
     def get_workspace_folder(self):
         return self.workspace_path
