@@ -92,6 +92,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cxsystem2 = cxsystem2.cmd.cxsystem_cmd:main',
+            'cxconfig = cxsystem2.cmd.cxconfig_cmd:main',
         ],
     }
 )

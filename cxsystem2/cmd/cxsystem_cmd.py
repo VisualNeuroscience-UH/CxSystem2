@@ -8,7 +8,7 @@ Usage:
 A cortex simulation framework called `CxSystem`.
 
 Arguments:
-  Port    port number on which the GUI server runs
+  PORT    port number on which the GUI server runs
 
 Options:
   -h --help     Show this screen
