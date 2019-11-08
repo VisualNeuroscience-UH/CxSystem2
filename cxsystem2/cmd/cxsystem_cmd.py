@@ -3,7 +3,7 @@
 Usage:
   cxsystem2 (-h | --help)
   cxsystem2 --runserver [--https] [--port=PORT]
-
+  cxsystem2 -a ANATOMY_FILE -p PHYSIOLOGY_FILE
 
 A cortex simulation framework called `CxSystem`.
 
@@ -15,22 +15,30 @@ Options:
   --runserver   runs http[s] server for GUI
   --https       run server with ssl certificate
   --port=PORT   runs the server on port PORT
-
+  -a ANATOMY_FILE --anatomy=ANATOMY_FILE    sets the anatomy file path
+  -p PHYSIOLOGY_FILE --physiology=PHYSIOLOGY_FILE   sets the physiology file path
 
 Description:
 
   cxsystem2 --runserver --https
-
     spawns a secure web server to run the GUI on
 
   cxsystem2 --runserver --port=PORT
+    runs the server on a specific port number PORT, otherwise random port would be used
 
-    runs the server on a specific port number PORT, otherwise random port would be used 
+  cxsystem2 -a ./anatomy.csv -p ./physiology.csv
+    runs the cxsystem using the anatomy file called anatomy.csv and physiology file called physiology.csv
+
+  cxsystem2 --anatomy ./anatomy.csv --physiology ./physiology.csv
+    runs the cxsystem using the anatomy file called anatomy.csv and physiology file called physiology.csv
+
 """
 
 from docopt import docopt
 from cxsystem2.core.cxsystem import CxSystem
 import sys
+from pathlib import Path
+
 
 def main():
     arguments = docopt(__doc__)
@@ -43,6 +51,18 @@ def main():
         else:
             cx = CxSystem()
             cx.runGUI(ssl=False, port=arguments['--port'])
+
+    if arguments['--anatomy'] and arguments['--physiology']:
+        anat_path = Path(arguments['--anatomy'])
+        if not anat_path.is_file():
+            print("Anatomy file not found")
+            return
+        physio_path = Path(arguments['--physiology'])
+        if not physio_path.is_file():
+            print("Physiology file not found")
+            return
+        cx = CxSystem(anat_path.as_posix(), physio_path.as_posix())
+        cx.run()
 
 
 if __name__=='__main__':
