@@ -11,7 +11,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 from cxsystem2.core.parameter_parser import *
 import random as rnd
 from cxsystem2.core import equation_templates as eqt
-import cxsystem2.neurodynlib as nd
+from cxsystem2.neurodynlib import neuron_factory
 
 class neuron_reference(object):
     '''
@@ -185,7 +185,7 @@ class neuron_reference(object):
         :return:
         """
 
-        x = nd.neuron_factory(self.neuron_model)
+        x = neuron_factory().get_class(self.neuron_model)
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -486,7 +486,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -537,7 +537,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -589,7 +589,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -641,7 +641,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
