@@ -77,7 +77,7 @@ def simulate(request):
         # CM = Cx.CxSystem('.\\tmp_anatomy.json', '.\\tmp_physio.json')
 
         if anatomy['params']['run_in_cluster'] == 1:
-            anatomy['params']['password'] = getpass('Please enter your password for user {}: '.format(anatomy["params"]["username"]))
+            anatomy['params']['password'] = getpass('Please enter your password for user {}: '.format(anatomy["params"]["cluster_username"]))
         p = multiprocessing.Process(target=CxSpawner, args=(anatomy, physiology,Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()

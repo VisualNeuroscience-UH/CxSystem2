@@ -116,10 +116,9 @@ class CxSystem(object):
             'cluster_job_file_path':[19,self.passer],
             'cluster_number_of_nodes':[20,self.passer],
             'cluster_address': [21,self.passer],
-            'username':[22,self.passer],
-            'remote_repo_path': [23,self.passer],
-            'remote_workspace': [24,self.passer],
-            'integration': [25,self.integration],
+            'cluster_username':[22,self.passer],
+            'cluster_workspace': [23,self.passer],
+            'integration': [24,self.integration],
             ####
             #### Line definitions:
             'G': [nan,self.neuron_group],
@@ -223,7 +222,9 @@ class CxSystem(object):
         try:
             self.conn_prob_gain = int(next(iter(self.physio_config_df.loc[where(self.physio_config_df.values=='conn_prob_gain')[0]]['Value']) , 'no match'))
         except ValueError:
-            self.conn_prob_gain =1
+            self.conn_prob_gain = 1
+        if self.array_run == 0 and self.parameter_finder(self.anat_and_sys_conf_df, 'run_in_cluster') == '1' :
+            print(" -  Warning: Config file is set to run in cluster but it does not contain an array run; run_in_cluster will be ignored ")
         self.configuration_executor()
         if type(self.awaited_conf_lines) != list :
            if self.thr.is_alive()==True:
@@ -335,8 +336,8 @@ class CxSystem(object):
             self.workspace = workspace(args[0],self.timestamp)
         else: # this means cxsystem is running in cluster
             print(" -  CxSystem is running in Cluster ... ")
-            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'remote_workspace'))
-            print(" -  CxSystem knows it's running in cluster and set the output folder to : {}".format(self.workspace.get_simulation_folder()))
+            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'cluster_workspace'),self.timestamp)
+            print(" -  CxSystem knows it's running in cluster and set the output folder to : {}".format(self.workspace.get_workspace_folder()))
 
     def set_compression_method(self,*args):
         self.workspace.set_compression_method(args[0])

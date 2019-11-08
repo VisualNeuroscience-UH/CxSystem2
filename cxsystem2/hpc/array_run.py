@@ -200,7 +200,7 @@ class array_run(object):
                 with open(physio_path, 'w') as f:
                     json.dump(physio_file_address, f)
                 physio_file_address = physio_path
-            cluster_run.cluster_run(self, anat_file_address, physio_file_address)
+            cluster_run.cluster_run(self, Path(anat_file_address), Path(physio_file_address))
             return
         if cluster_start_idx != -1 and cluster_step != -1: # this runs in cluster
             self.spawner(self.cluster_start_idx,self.cluster_step)

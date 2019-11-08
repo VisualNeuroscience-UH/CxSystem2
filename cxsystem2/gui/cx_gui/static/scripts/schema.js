@@ -118,21 +118,13 @@ runtime_params_schema = {
             "type": "string",
             "description": "Address of the HPC server (e.g. taito.csc.fi)",
         },
-        "username": {
+        "cluster_username": {
             "type": "string",
             "description": "Username on the HPC server",
         },
-        "remote_repo_path": {
-            "type": "string",
-            "description": "Absolute path to CxSystem2 on the HPC server",
-        },
-        "remote_workspace": {
+        "cluster_workspace": {
             "type": "string",
             "description": "Absolute path for storing results on the HPC server",
-        },
-        "remote_branch": {
-            "type": "string",
-            "description": "GitHub branch of CxSystem2 to use for HPC simulations",
         },
     }
 };
