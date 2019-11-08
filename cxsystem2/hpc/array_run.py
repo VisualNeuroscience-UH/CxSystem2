@@ -359,7 +359,7 @@ class array_run(object):
         :param df_type: type of dataframe.
         '''
         idx = idx[0]
-        whitelist = set('abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._-')
+        whitelist = set('abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-')
         try:
             if any(df[0].str.contains('row_type')):
                 definition_rows_indices = array(df[0][df[0] == 'row_type'].index.tolist())
