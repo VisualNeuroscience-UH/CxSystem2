@@ -148,13 +148,13 @@ class workspace(object):
 
     def load_from_file(self, file_path):
         if file_path.suffix == '.gz':
-            with open(file_path, 'rb') as fb:
+            with open(file_path.as_posix(), 'rb') as fb:
                 data = zlib.decompress(fb.read())
                 loaded_data = pickle.loads(data)
         elif file_path.suffix == '.bz2':
-            with bz2.BZ2File(file_path, 'rb') as fb:
+            with bz2.BZ2File(file_path.as_posix(), 'rb') as fb:
                 loaded_data = pickle.load(fb)
         elif file_path.suffix == '.pickle':
-            with open(file_path, 'rb') as fb:
+            with open(file_path.as_posix(), 'rb') as fb:
                 loaded_data= pickle.load(fb)
         return loaded_data

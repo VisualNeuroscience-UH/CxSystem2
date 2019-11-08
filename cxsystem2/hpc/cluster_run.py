@@ -119,9 +119,9 @@ class cluster_run(object):
                         # sl2.write('python CxSystem.py _tmp_anat_config%s.csv _tmp_physio_config%s.csv %d %d\n'%(
                         #     self.suffix,self.suffix,item,array_run_obj.clipping_indices[item_idx+1]-array_run_obj.clipping_indices[item_idx]))
                         sl2.write("python -c "
-                                  "'from cxsystem2.core.cxsystem import cxsystem as cxs; "
+                                  "\"from cxsystem2.core.cxsystem import CxSystem as cxs; "
                                   " cx = cxs('{anatomy}','{physio}', cluster_run_start_idx={cluster_start},cluster_run_step={cluster_step}); "
-                                  "cx.run()'".format(anatomy=self.remote_phys_filename,
+                                  "cx.run()\"".format(anatomy=self.remote_anat_filename,
                                                      physio=self.remote_phys_filename,
                                                      cluster_start=item,
                                                      cluster_step=array_run_obj.clipping_indices[item_idx+1]-array_run_obj.clipping_indices[item_idx]))
@@ -129,9 +129,9 @@ class cluster_run(object):
                         # sl2.write('python CxSystem.py _tmp_anat_config%s.csv _tmp_physio_config%s.csv %d %d\n' % (
                         # self.suffix,self.suffix,item, array_run_obj.total_configs - array_run_obj.clipping_indices[item_idx]))
                         sl2.write("python -c "
-                                  "'from cxsystem2.core.cxsystem import cxsystem as cxs; "
+                                  "\"from cxsystem2.core.cxsystem import CxSystem as cxs; "
                                   " cx = cxs('{anatomy}','{physio}', cluster_run_start_idx={cluster_start},cluster_run_step={cluster_step}); "
-                                  "cx.run()'".format(anatomy=self.remote_phys_filename,
+                                  "cx.run()\"".format(anatomy=self.remote_anat_filename,
                                                      physio=self.remote_phys_filename,
                                                      cluster_start=item,
                                                      cluster_step=array_run_obj.total_configs - array_run_obj.clipping_indices[item_idx]))
@@ -197,7 +197,7 @@ class cluster_run(object):
         location = where(df.values == parameter)
         if location[0].size == 1:
             df.at[int(location[0] + 1), int(location[1])] = new_value
-            df.to_csv(save_path)
+            df.to_csv(save_path,header=False,index=False)
         elif location[0].size == 1:
             raise ParameterNotFoundError('Parameter {} not found in the configuration file.'.format(parameter))
         else:
