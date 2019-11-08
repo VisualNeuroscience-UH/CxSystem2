@@ -11,7 +11,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 from cxsystem2.core.parameter_parser import *
 import random as rnd
 from cxsystem2.core import equation_templates as eqt
-from cxsystem2.neurodynlib import neuron_factory
+from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 class neuron_reference(object):
     '''
