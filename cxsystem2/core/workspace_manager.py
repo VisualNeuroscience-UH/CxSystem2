@@ -125,13 +125,13 @@ class workspace(object):
 
     def save_connections_to_file(self):
         print(" -  Saving connections to file ...")
-        self.connections['Full path'] = self.connections_export_path
-        while os.path.isfile(self.connections_export_path):
+        self.connections['Full path'] = self.connections_export_path.as_posix()
+        while self.connections_export_path.is_file():
             idx = 1
             self.connections_export_path = self.connections_export_path.parent.joinpath(
                 self.connections_export_path.stem +  '_{}'.format(idx) + self.connections_export_path.suffix)
             idx +=1
-        self.save_to_file(self.connections, self.connections_export_path)
+        self.save_to_file(self.connections, self.connections_export_path.as_posix())
 
     def save_to_file(self, data, filepath):
         if 'gz' in self.get_output_extension():
