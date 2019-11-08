@@ -102,10 +102,11 @@ class SpikeData(object):
         except IndexError:
             layer_number = 0
 
+        # z_level = {0: 0, 1: 1, 2: 2,
+        #            4: 3, 5: 4, 6: 5}
         # Layer thicknesses from Markram et al 2015 Cell:
         # L1 165um, L2/3 502um, L4 190um, L5 525um, L6 700um => total 2082um
-        z_level = {0: 0, 1: 1, 2: 2,
-                   4: 3, 5: 4, 6: 5}
+        z_level = {6: 0, 5: 700e-6, 4: 1225e-6, 2: 1415e-6, 1: 1917e-6, 0: 2082e-6}
 
         return z_level[layer_number]
 
