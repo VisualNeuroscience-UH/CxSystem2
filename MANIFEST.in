@@ -1,5 +1,5 @@
-include requirements.txt
 include slurm.job
+include VERSION
 recursive-include tests *.py *.csv *.json *.gz
 recursive-include cxsystem2 *
 recursive-include cxsystem2/gui/cx_gui *.css *.js *.html *.json
