@@ -367,7 +367,7 @@ class array_run(object):
                 target_row = max(where(definition_rows_indices < idx[0])[0])
                 title = str(df.loc[target_row][idx[1]])
                 value = str(df.loc[idx[0]][idx[1]])
-                message = '_' + title + ''.join(filter(whitelist.__contains__, value))
+                message = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
         except KeyError:
             if 'Variable' in df.columns:
                 try:
@@ -380,7 +380,7 @@ class array_run(object):
                 except TypeError:
                     title = str(df['Key'][idx[0]])
                     value = str(df.loc[idx[0]][idx[1]])
-                message = '_' + self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+                message = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
         finally: # for metadata
             if df_type == 'anatomy':
                 if title not in self.anat_titles :
