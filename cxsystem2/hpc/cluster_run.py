@@ -81,16 +81,16 @@ class cluster_run(object):
         self.remote_anat_filename = '_tmp_anat_config{}.csv'.format(self.suffix)
         self.remote_phys_filename = '_tmp_physio_config{}.csv'.format(self.suffix)
         self.local_workspace = Path(self.parameter_finder(array_run_obj.anatomy_df, 'workspace_path')).expanduser()
-        self.local_cluster_meta_folder = self.local_workspace.joinpath('cluster_run_metadata' + self.suffix)
-        if not self.local_cluster_meta_folder.is_dir():
-            os.mkdir(self.local_cluster_meta_folder.as_posix())
+        self.local_cluster_folder = self.local_workspace.joinpath('cluster_run' + self.suffix)
+        if not self.local_cluster_folder.is_dir():
+            os.mkdir(self.local_cluster_folder.as_posix())
 
         imported_connections_file = Path(self.parameter_finder(array_run_obj.anatomy_df, 'import_connections_from'))
         if imported_connections_file.is_file():
             scp.put(imported_connections_file.as_posix(), self.cluster_workspace.as_posix())
             new_path = Path('./').joinpath(imported_connections_file.name).as_posix()
-            self.change_parameter_value_in_file(anat_file_path.as_posix(), self.local_cluster_meta_folder.joinpath(anat_file_path.name) ,'import_connections_from', new_path)
-            anat_file_path = self.local_cluster_meta_folder.joinpath(anat_file_path.name)
+            self.change_parameter_value_in_file(anat_file_path.as_posix(), self.local_cluster_folder.joinpath(anat_file_path.name), 'import_connections_from', new_path)
+            anat_file_path = self.local_cluster_folder.joinpath(anat_file_path.name)
         scp.put(anat_file_path.as_posix(), self.cluster_workspace.joinpath(self.remote_anat_filename).as_posix())
         scp.put(physio_file_path.as_posix(), self.cluster_workspace.joinpath(self.remote_phys_filename).as_posix())
 
@@ -112,7 +112,7 @@ class cluster_run(object):
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
             with open(self.slurm_file_path.as_posix(),'r') as sl1:
                 remote_slurm_filename =  "_tmp_slurm{}_part{}.job".format(self.suffix , item_idx)
-                with open (self.local_cluster_meta_folder.joinpath(remote_slurm_filename).as_posix(),'w') as sl2:  # wb -> w
+                with open (self.local_cluster_folder.joinpath(remote_slurm_filename).as_posix(), 'w') as sl2:  # wb -> w
                     for line in sl1:
                         sl2.write(line)
                     # for item_idx,item in enumerate(array_run_obj.clipping_indices):
@@ -138,12 +138,12 @@ class cluster_run(object):
                                                      cluster_step=array_run_obj.total_configs - array_run_obj.clipping_indices[item_idx]))
 
                     # sl2.write('wait\n')
-            scp.put(self.local_cluster_meta_folder.joinpath(remote_slurm_filename).as_posix(), self.cluster_workspace.joinpath(remote_slurm_filename).as_posix())
+            scp.put(self.local_cluster_folder.joinpath(remote_slurm_filename).as_posix(), self.cluster_workspace.joinpath(remote_slurm_filename).as_posix())
         print(" -  Slurm file generated and copied to cluster")
         self.channel = self.client.invoke_shell()
         self.channel.send('cd %s\n' % self.cluster_workspace.as_posix())
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
-            remote_slurm_filename = "_tmp_slurm_{}_part{}.job".format(self.suffix, item_idx)
+            remote_slurm_filename = "_tmp_slurm{}_part{}.job".format(self.suffix, item_idx)
             if platform == 'win32':
                 print(" -  Converting the file using dos2unix")
                 self.channel.send('dos2unix {}\n'.format(remote_slurm_filename))
@@ -154,11 +154,13 @@ class cluster_run(object):
         cluster_metadata = {}
         cluster_metadata['cluster_address'] = self.cluster_address
         cluster_metadata['cluster_username'] = self.cluster_username
-        cluster_metadata['local_workspace'] = self.local_workspace
+        cluster_metadata['local_workspace'] = self.local_workspace.as_posix()
+        cluster_metadata['local_cluster_run_folder'] = self.local_cluster_folder.as_posix()
+        cluster_metadata['local_cluster_run_download_folder'] = self.local_cluster_folder.joinpath('downloads')
         cluster_metadata['cluster_workspace'] = self.cluster_workspace.as_posix()
         cluster_metadata['cluster_simulation_folder'] = self.cluster_workspace.joinpath(self.parameter_finder(array_run_obj.anatomy_df, 'simulation_title')).as_posix()
         cluster_metadata['suffix'] = self.suffix
-        with open (self.local_cluster_meta_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)),'wb') as ff:
+        with open (self.local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)), 'wb') as ff:
             pickle.dump(cluster_metadata,ff)
         print(" -  Cluster metadata saved. To download the result and clean the environments after getting the email, run 'python cluster_run.py'\n" \
               "Alternatively you can run it in another terminal and it will "
@@ -216,8 +218,8 @@ class cluster_downlaod(object):
         self.connect_ssh_client()
 
         time.sleep(1)
-        if not Path(self.metadata['local_folder']).is_dir():
-            os.mkdir(self.metadata['local_folder'])
+        if not Path(self.metadata['local_workspace']).is_dir():
+            os.mkdir(self.metadata['local_workspace'])
         self.retrieve()
 
     def ssh_commander(self, client, command, print_flag):
@@ -243,6 +245,8 @@ class cluster_downlaod(object):
     def retrieve(self):
         waiting_flag = True
         print(" -  Waiting for the results ...")
+        if not self.metadata['local_cluster_run_download_folder'].is_dir():
+            os.mkdir(self.metadata['local_cluster_run_download_folder'].as_posix())
         while waiting_flag:
             # if not ssh_commander(client,'cd %s; ls -d */' % (remote_result_abs_path), 0) and 'metadata' in ssh_commander(client,'cd %s; ls' % (remote_result_abs_path), 0):
             # just a better check:
@@ -250,20 +254,20 @@ class cluster_downlaod(object):
                 # here it means there is no folder in result folder and therefore all simulations are done
                 # so we copy back the result and remove the files on cluster
                 print(" -  Copying the results from cluster...")
-                for item in self.ssh_commander(self.client, 'cd {}; ls'.format(self.metadata['cluster_workspace']), 0).decode('utf-8').split('\n'):
-                    if item != '':
-                        self.scpclient.get(Path(self.metadata['cluster_workspace']).joinpath(item).as_posix(), Path(self.metadata['local_folder']).joinpath(item).as_posix())
+                for item in self.ssh_commander(self.client, 'cd {}; ls'.format(self.metadata['cluster_simulation_folder']), 0).decode('utf-8').split('\n'):
+                    if item != '' and self.metadata['suffix'] in item:
+                        self.scpclient.get(Path(self.metadata['cluster_simulation_folder']).joinpath(item).as_posix(), Path(self.metadata['local_cluster_run_download_folder']).joinpath(item).as_posix())
                 # cleaning
-                self.ssh_commander(self.client, 'rm -rf {}'.format(self.metadata['cluster_workspace']), 0)
+                # self.ssh_commander(self.client, 'rm -rf {}'.format(self.metadata['cluster_workspace']), 0)
                 waiting_flag = False
             time.sleep(1)
         self.client.close()
-        print(" -  Results are downloaded and remote is cleaned.")
+        # print(" -  Results are downloaded and remote is cleaned.")
         # print(" -  Local environment cleaned.")
-        print(" -  Results available in: {}".format(self.metadata['local_folder']))
+        print(" -  Downloads are available in: {}".format(self.metadata['local_cluster_run_download_folder']))
 
 if __name__ == '__main__':
-    d = cluster_downlaod()
+    d = cluster_downlaod("C:\\Users\\vafaa\\CxPytestWorkspace\\cluster_run_20191108_21451786\\cluster_metadata_20191108_21451786.pkl")
    #  def ssh_commander(client, command, print_flag):
    #      stdin, stdout, stderr = client.exec_command(command)
    #      out = stdout.read(),

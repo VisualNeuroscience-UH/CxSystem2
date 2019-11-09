@@ -40,7 +40,7 @@ class array_run(object):
         if self.cluster_start_idx == -1 and self.cluster_step == -1:
             from cxsystem2.hpc import cluster_run
         if self.cluster_start_idx != -1 and self.cluster_step != -1 :
-            self.metadata_filename = 'metadata_' + 'part_' + str((self.cluster_start_idx/self.cluster_step)+1) +'_' + suffx + '.gz'
+            self.metadata_filename = 'metadata_part_' + str((self.cluster_start_idx/self.cluster_step)+1) +  suffx + '.gz'
         else:
             self.metadata_filename = 'metadata_' + suffx + '.gz'
         self.array_run_metadata = pd.DataFrame
