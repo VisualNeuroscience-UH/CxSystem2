@@ -125,17 +125,17 @@ class array_run(object):
                     for physio_idx, physio_df in enumerate(physio_variations):
                         self.df_anat_final_array.append(anat_df)
                         self.df_phys_final_array.append(physio_df)
-                        self.final_messages.append( '_' + self.suffix + '_'+ anat_messages[anat_idx]+physio_messages[physio_idx])
+                        self.final_messages.append(anat_messages[anat_idx]+physio_messages[physio_idx])
             elif arrays_idx_anatomy:
                 for anat_idx, anat_df in enumerate(anat_variations):
                     self.df_anat_final_array.append(anat_df)
                     self.df_phys_final_array.append(physio_default)
-                    self.final_messages.append('_' + self.suffix + '_'+ anat_messages[anat_idx])
+                    self.final_messages.append(anat_messages[anat_idx])
             elif arrays_idx_physio:
                 for physio_idx, physio_df in enumerate(physio_variations):
                     self.df_phys_final_array.append(physio_df)
                     self.df_anat_final_array.append(anatomy_default)
-                    self.final_messages.append('_' + self.suffix + '_'+ physio_messages[physio_idx])
+                    self.final_messages.append(physio_messages[physio_idx])
 
         else:
             ## initializing the metadata :
@@ -380,7 +380,7 @@ class array_run(object):
                 except TypeError:
                     title = str(df['Key'][idx[0]])
                     value = str(df.loc[idx[0]][idx[1]])
-                message = '_' + title + ''.join(filter(whitelist.__contains__, value))
+                message = '_' + self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
         finally: # for metadata
             if df_type == 'anatomy':
                 if title not in self.anat_titles :
