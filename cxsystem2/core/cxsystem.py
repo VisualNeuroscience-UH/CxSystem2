@@ -26,7 +26,7 @@ import csv
 import shutil
 import pandas
 import threading
-from cxsystem2.hpc import array_run
+from cxsystem2.hpc.array_run import array_run
 import multiprocessing
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.configuration import config_file_converter as fileconverter
@@ -127,8 +127,12 @@ class CxSystem(object):
             'params': [nan,self.set_runtime_parameters],
         }
         self.timestamp = '_' + str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')\
-            [0:str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','') + output_file_suffix
-        print(" -  Current run filename suffix is: %s" % self.timestamp[1:])
+            [0:str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
+        if output_file_suffix == "":
+            self.suffix = self.timestamp + output_file_suffix
+        else:
+            self.suffix = output_file_suffix
+        print(" -  Current run filename suffix is: %s" % self.suffix[1:])
         self.scale = 1
         self.do_benchmark = 0
         self.cluster_run_start_idx = cluster_run_start_idx
@@ -208,15 +212,27 @@ class CxSystem(object):
             trials_per_config = 0
         # check for array_run and return
         if any(check_array_run_anatomy) or any(check_array_run_physiology) or (trials_per_config > 1 and not instantiated_from_array_run):
-            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'),self.timestamp)
+            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'),self.suffix)
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1 : # this means CxSystem is running in cluster and is trying to spawn an array run on a node
                 print("spawning index: %d, step: %d" %(int(
                     cluster_run_start_idx),int(cluster_run_step)))
-                array_run.array_run(self.anat_and_sys_conf_df, self.physio_config_df, self.timestamp, int(cluster_run_start_idx),
-                                    int(cluster_run_step), anatomy_and_system_config, physiology_config, array_run_in_cluster=1)
+                array_run(anatomy_df=self.anat_and_sys_conf_df,
+                          physiology_df=self.physio_config_df,
+                          suffx=self.suffix,
+                          cluster_start_idx=int(cluster_run_start_idx),
+                          cluster_step=int(cluster_run_step),
+                          anat_file_address=anatomy_and_system_config,
+                          physio_file_address=physiology_config,
+                          array_run_in_cluster=1)
             else: # CxSystem not in cluster
-                array_run.array_run(self.anat_and_sys_conf_df, self.physio_config_df, self.timestamp, int(cluster_run_start_idx),
-                                    int(cluster_run_step), anatomy_and_system_config, physiology_config, array_run_in_cluster=0)
+                array_run(anatomy_df=self.anat_and_sys_conf_df,
+                          physiology_df=self.physio_config_df,
+                          suffx=self.suffix,
+                          cluster_start_idx=int(cluster_run_start_idx),
+                          cluster_step=int(cluster_run_step),
+                          anat_file_address=anatomy_and_system_config,
+                          physio_file_address=physiology_config,
+                          array_run_in_cluster=0)
             self.array_run = 1
             return
         try:
@@ -333,10 +349,10 @@ class CxSystem(object):
 
     def set_workspace(self,*args):
         if self.cluster_run_start_idx == -1 and self.cluster_run_step == -1 and self.array_run_in_cluster == 0:
-            self.workspace = workspace(args[0],self.timestamp)
+            self.workspace = workspace(args[0],self.suffix)
         else: # this means cxsystem is running in cluster
             print(" -  CxSystem is running in Cluster ... ")
-            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'cluster_workspace'),self.timestamp)
+            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'cluster_workspace'),self.suffix)
             print(" -  CxSystem knows it's running in cluster and set the output folder to : {}".format(self.workspace.get_workspace_folder()))
 
     def set_compression_method(self,*args):
@@ -401,7 +417,7 @@ class CxSystem(object):
                              'Device-Specific Compilation','Run','Extract and Save Result','Total Time']
                     self.benchmarking_data['Simulation Time'] = str(self.runtime)
                     self.benchmarking_data['Device'] = self.device
-                    self.benchmarking_data['File Suffix'] = self.timestamp[1:]
+                    self.benchmarking_data['File Suffix'] = self.suffix[1:]
                     if self.device.lower() != 'python':
                         self.benchmarking_data['Python Compilation'] = builtins.code_generation_start - self.start_time
                         self.benchmarking_data['Brian Code generation'] = builtins.compile_start - builtins.code_generation_start
@@ -432,9 +448,9 @@ class CxSystem(object):
             print(" -  Simulating %s took in total %f s" % (str(
                 self.runtime),self.end_time-self.start_time))
             if self.device.lower() == 'genn':
-                shutil.rmtree(self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
+                shutil.rmtree(self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
             elif self.device.lower() == 'cpp':
-                shutil.rmtree(self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
+                shutil.rmtree(self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
 
     def set_runtime_parameters(self):
         if not any(self.current_parameters_list.str.contains('runtime')):
@@ -471,10 +487,10 @@ class CxSystem(object):
             print(" -  CxSystem is performing benchmarking. The Brian2 "
                    "should be configured to use benchmarking.")
         if self.device.lower() == 'genn':
-            set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
+            set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
             prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
-            set_device('cpp_standalone', directory=self.workspace.get_simulation_folder().joinpath(self.timestamp[1:]).as_posix())
+            set_device('cpp_standalone', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
 #            if 'linux' in sys.platform and self.device.lower() == 'cpp':
 #                print(" -  parallel compile flag set")
 #                prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j']

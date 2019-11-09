@@ -25,25 +25,26 @@ from pathlib import Path
 
 class array_run(object):
 
-    def __init__(self, anatomy_system_df, physiology_df, metadata_file_suffx,cluster_start_idx,cluster_step,anat_file_address,physio_file_address,array_run_in_cluster=0):
+    def __init__(self, anatomy_df, physiology_df, suffx, cluster_start_idx, cluster_step, anat_file_address, physio_file_address, array_run_in_cluster=0):
         '''
         Initialize the array_run for running several instances of CxSystem in parallel.
 
-        :param anatomy_system_df: The dataframe containing the anatomical and system configurations that has an instance for array_run in it.
+        :param anatomy_df: The dataframe containing the anatomical and system configurations that has an instance for array_run in it.
         :param physiology_df: The dataframe containing the physiology configurations that has an instance for array_run in it.
-        :param metadata_file_suffx: The suffix for the metadata file containing the filename and changing parameters in each of the simulations.
+        :param suffx: The suffix for the metadata file containing the filename and changing parameters in each of the simulations.
         '''
+        self.suffix = suffx
         self.cluster_start_idx = cluster_start_idx
         self.cluster_step = cluster_step
         self.array_run_in_cluster = array_run_in_cluster
         if self.cluster_start_idx == -1 and self.cluster_step == -1:
             from cxsystem2.hpc import cluster_run
         if self.cluster_start_idx != -1 and self.cluster_step != -1 :
-            self.metadata_filename = 'metadata_' + 'part_'+ str((self.cluster_start_idx/self.cluster_step)+1) +'_' +metadata_file_suffx + '.gz'
+            self.metadata_filename = 'metadata_' + 'part_' + str((self.cluster_start_idx/self.cluster_step)+1) +'_' + suffx + '.gz'
         else:
-            self.metadata_filename = 'metadata_' + metadata_file_suffx + '.gz'
+            self.metadata_filename = 'metadata_' + suffx + '.gz'
         self.array_run_metadata = pd.DataFrame
-        self.anatomy_df = anatomy_system_df
+        self.anatomy_df = anatomy_df
         self.physiology_df =physiology_df
         try :
             self.multidimension_array_run = int(self.parameter_finder(self.anatomy_df,'multidimension_array_run'))
@@ -86,7 +87,7 @@ class array_run(object):
         if self.cluster_number_of_nodes > 50:
             raise Exception(' -  Number of nodes cannot be higher than 20.')
 
-        anatomy_array_search_result = anatomy_system_df[anatomy_system_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
+        anatomy_array_search_result = anatomy_df[anatomy_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         physio_array_search_result = physiology_df[physiology_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         arrays_idx_anatomy = where(anatomy_array_search_result.isnull().values != True)
         arrays_idx_anatomy = [(arrays_idx_anatomy[0][i],arrays_idx_anatomy[1][i]) for i in range(len(arrays_idx_anatomy[0]))]
@@ -98,10 +99,10 @@ class array_run(object):
 
         self.sum_of_array_runs = len(arrays_idx_anatomy) + len(arrays_idx_physio)
         if self.sum_of_array_runs > 1 and not self.multidimension_array_run:
-            anatomy_default = self.df_default_finder(anatomy_system_df)
+            anatomy_default = self.df_default_finder(anatomy_df)
             physio_default = self.df_default_finder(physiology_df)
         else:
-            anatomy_default = anatomy_system_df
+            anatomy_default = anatomy_df
             physio_default = physiology_df
         ## creating the array of dataframes for array run
         self.anat_titles = []
@@ -116,7 +117,7 @@ class array_run(object):
             meta_columns.extend(['Full path'])
             self.final_metadata_df = pd.DataFrame(index=[0],columns=meta_columns)
             if arrays_idx_anatomy:
-                anat_variations, anat_messages = self.df_builder_for_array_run(anatomy_system_df, arrays_idx_anatomy, df_type='anatomy')
+                anat_variations, anat_messages = self.df_builder_for_array_run(anatomy_df, arrays_idx_anatomy, df_type='anatomy')
             if arrays_idx_physio:
                 physio_variations, physio_messages = self.df_builder_for_array_run( physiology_df, arrays_idx_physio,df_type='physiology')
             if arrays_idx_anatomy and arrays_idx_physio:
@@ -124,17 +125,17 @@ class array_run(object):
                     for physio_idx, physio_df in enumerate(physio_variations):
                         self.df_anat_final_array.append(anat_df)
                         self.df_phys_final_array.append(physio_df)
-                        self.final_messages.append(anat_messages[anat_idx]+physio_messages[physio_idx])
+                        self.final_messages.append( '_' + self.suffix + '_'+ anat_messages[anat_idx]+physio_messages[physio_idx])
             elif arrays_idx_anatomy:
                 for anat_idx, anat_df in enumerate(anat_variations):
                     self.df_anat_final_array.append(anat_df)
                     self.df_phys_final_array.append(physio_default)
-                    self.final_messages.append(anat_messages[anat_idx])
+                    self.final_messages.append('_' + self.suffix + '_'+ anat_messages[anat_idx])
             elif arrays_idx_physio:
                 for physio_idx, physio_df in enumerate(physio_variations):
                     self.df_phys_final_array.append(physio_df)
                     self.df_anat_final_array.append(anatomy_default)
-                    self.final_messages.append(physio_messages[physio_idx])
+                    self.final_messages.append('_' + self.suffix + '_'+ physio_messages[physio_idx])
 
         else:
             ## initializing the metadata :
@@ -142,7 +143,7 @@ class array_run(object):
             meta_columns.extend(['Dimension-1 Parameter','Dimension-1 Value','Full path'])
             self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
             if arrays_idx_anatomy:
-                df_anat_array, anat_messages = self.df_builder_for_array_run(anatomy_system_df, arrays_idx_anatomy, df_type='anatomy')
+                df_anat_array, anat_messages = self.df_builder_for_array_run(anatomy_df, arrays_idx_anatomy, df_type='anatomy')
                 self.df_anat_final_array.extend(df_anat_array)
                 self.df_phys_final_array.extend([physio_default for _ in range(len(self.df_anat_final_array))])
                 self.final_messages.extend(anat_messages)
@@ -200,7 +201,7 @@ class array_run(object):
                 with open(physio_path, 'w') as f:
                     json.dump(physio_file_address, f)
                 physio_file_address = physio_path
-            cluster_run.cluster_run(self, Path(anat_file_address), Path(physio_file_address))
+            cluster_run.cluster_run(self, Path(anat_file_address), Path(physio_file_address),self.suffix)
             return
         if cluster_start_idx != -1 and cluster_step != -1: # this runs in cluster
             self.spawner(self.cluster_start_idx,self.cluster_step)
