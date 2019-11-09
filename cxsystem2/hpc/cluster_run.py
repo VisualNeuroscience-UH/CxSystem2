@@ -154,8 +154,10 @@ class cluster_run(object):
         cluster_metadata = {}
         cluster_metadata['cluster_address'] = self.cluster_address
         cluster_metadata['cluster_username'] = self.cluster_username
-        cluster_metadata['local_workspace'] = self.cluster_workspace
-        cluster_metadata['cluster_workspace'] = self.cluster_workspace
+        cluster_metadata['local_workspace'] = self.parameter_finder(array_run_obj.anatomy_df, 'workspace_path')
+        cluster_metadata['cluster_workspace'] = self.cluster_workspace.as_posix()
+        cluster_metadata['cluster_simulation_folder'] = self.cluster_workspace.joinpath(self.parameter_finder(array_run_obj.anatomy_df, 'simulation_title')).as_posix()
+        cluster_metadata['suffix'] = self.suffix
         with open (self.cluster_workspace.joinpath('cluster_metadata_{}.pkl'.format(self.suffix)),'wb') as ff:
             pickle.dump(cluster_metadata,ff)
         print(" -  Cluster metadata saved. To download the result and clean the environments after getting the email, run 'python cluster_run.py'\n" \
