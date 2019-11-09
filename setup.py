@@ -50,8 +50,8 @@ DESCRIPTION = "A cerebral cortex simulation framework"
 AUTHOR = "Vafa Andalibi, Henri Hokkanen, Simo Vanni"
 AUTHOR_EMAIL = "vafa.andalibi@gmail.com"
 URL = "https://github.com/VisualNeuroscience-UH/CxSystem2"
-with open("cxsystem2/VERSION",'r') as f :
-    VERSION = f.readline().strip()
+with open("cxsystem2/__init__.py",'r') as f :
+    VERSION = f.readline().split('=')[1].strip()
 
 setup(
     name=NAME,
