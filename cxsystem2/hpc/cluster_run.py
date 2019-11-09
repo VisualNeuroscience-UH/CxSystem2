@@ -57,7 +57,7 @@ class cluster_run(object):
 
 
         # self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
-        self.suffix = '_' + suffix
+        self.suffix = suffix
         print (" -  temp file suffix is %s" %self.suffix)
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
@@ -111,7 +111,7 @@ class cluster_run(object):
         # building slurm :
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
             with open(self.slurm_file_path.as_posix(),'r') as sl1:
-                remote_slurm_filename =  "_tmp_slurm_{}_part{}.job".format(self.suffix , item_idx)
+                remote_slurm_filename =  "_tmp_slurm{}_part{}.job".format(self.suffix , item_idx)
                 with open (self.local_cluster_meta_folder.joinpath(remote_slurm_filename).as_posix(),'w') as sl2:  # wb -> w
                     for line in sl1:
                         sl2.write(line)
@@ -154,11 +154,11 @@ class cluster_run(object):
         cluster_metadata = {}
         cluster_metadata['cluster_address'] = self.cluster_address
         cluster_metadata['cluster_username'] = self.cluster_username
-        cluster_metadata['local_workspace'] = self.parameter_finder(array_run_obj.anatomy_df, 'workspace_path')
+        cluster_metadata['local_workspace'] = self.local_workspace
         cluster_metadata['cluster_workspace'] = self.cluster_workspace.as_posix()
         cluster_metadata['cluster_simulation_folder'] = self.cluster_workspace.joinpath(self.parameter_finder(array_run_obj.anatomy_df, 'simulation_title')).as_posix()
         cluster_metadata['suffix'] = self.suffix
-        with open (self.cluster_workspace.joinpath('cluster_metadata_{}.pkl'.format(self.suffix)),'wb') as ff:
+        with open (self.local_cluster_meta_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)),'wb') as ff:
             pickle.dump(cluster_metadata,ff)
         print(" -  Cluster metadata saved. To download the result and clean the environments after getting the email, run 'python cluster_run.py'\n" \
               "Alternatively you can run it in another terminal and it will "
