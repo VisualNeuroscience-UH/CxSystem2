@@ -1,6 +1,13 @@
 <a href="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/README.md"><img src="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/data_config/icon/cxsystem_logo.png?sanitize=true" width="60%"></a>
 
 # CxSystem2, A Flexible Cortical Simulation Framework
+> Warning: CxSystem2 GUI is developed for using in a local environment and should not be installed on a publicly accessible server unless extra security measures are added on top of it  
+
+[![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/LICENSE) 
+[![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/bug.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+[![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/enhancement.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
+[![Github Issues](http://img.shields.io/github/issues-pr/VisualNeuroscience-UH/CxSystem2.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/pulls)
+
 
 CxSystem is a cerebral cortex simulation framework, which operates on personal computers. We have tested the simulation software with a simplified version of a comprehensive cortical microcircuit model [1], which is available as configuration file. 
 
