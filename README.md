@@ -16,6 +16,9 @@
     * [Windows](#windows)
     * [Linux/Mac](#linuxmac)
     * [Development](#development)
+- [Interfaces]
+    * [Browser User Interface (BUI)](#bui)
+    * [Terminal Commands](#commands)
 - [Citation](#Citation)
 - [Support](#support)
 - [Team](#team)
@@ -73,6 +76,34 @@ To develop `CxSystem2`, after creating the repository install it with the follow
 
 With this method any change to the code will be reflected on the package immediately. 
 
+## Interfaces
+
+`CxSystem2` comes with two interfaces:
+
+### Browser User Interface (BUI)
+
+CxSystem's BUI is built to provide users with an interactive environment for changing the parameters for simulations. 
+
+### Terminal Commands
+
+Beside the BUI, Some of the main functionalities of the `CxSystem2` are available as terminal Commands, including the BUI itself. All of the following commands have built-in documentations available with `-h` or `--help` flags:  
+
+#### cxsystem2 
+
+This command (all in lower letters and case sensitive) is the main command of the `CxSystem2` and can be used to run the django server for BUI or run simulations by passing the anatomy and physiology configuration files. 
+
+#### cxconfig 
+
+CxSystem2 supports `csv` and `json` for importing/exporting configuration files. To convert the configuration files, use the `cxconfig` and pass the path to the configuration file path as its argument. This command recognizes the file type and convert it to the alternative extension. 
+
+#### cxcluster 
+
+TBD
+
+#### cxviz 
+
+TBD
+
 ## Citation
 
 If you use CxSystem2 for your work, we kindly ask you to cite any of our related articles: 
@@ -88,7 +119,7 @@ Hokkanen, H., Andalibi, V., Vanni, S., Controlling complexity of cerebral cortex
 
 ## Support
 
-You are encouraged to use <a href="github.com/VisualNeuroscience-UH/CxSystem2/issues" target="_blank">Github's Issues</a> to report bugs, or request enhancements or new features.
+You are encouraged to use <a href="https://github.com/VisualNeuroscience-UH/CxSystem2/issues" target="_blank">Github's Issues</a> to report bugs, or request enhancements or new features.
 
 ## Team 
 
