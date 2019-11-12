@@ -7,6 +7,7 @@
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/bug.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/enhancement.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
 [![Github Issues](http://img.shields.io/github/issues-pr/VisualNeuroscience-UH/CxSystem2.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/pulls)
+[![Documentation Status](https://readthedocs.org/projects/cxsystem/badge/?version=master)](http://cxsystem.readthedocs.io/en/master/?badge=master)
 
 ## Table of Contents 
 
@@ -14,11 +15,10 @@
 - [Installation](#installation)
     * [Windows](#windows)
     * [Linux/Mac](#linuxmac)
-- [Supported MUD Abstractions](#features)
-- [Contributing](#contributing)
-- [Team](#team)
-- [FAQ](#faq)
+    * [Development](#development)
+- [Citation](#Citation)
 - [Support](#support)
+- [Team](#team)
 - [License](#license)
 
 ## Synopsis
@@ -32,10 +32,6 @@ The preliminary version of this software has been developed at Aalto University 
 To access the documentation of the CxSystem, please check out the [readthedocs page](http://cxsystem.readthedocs.io/en/master/) of the project.
 <br></br>
 <br></br>
-
-<sub>[1] Markram, H., Muller, E., Ramaswamy, S., Reimann, M. W., Abdellah, M., Sanchez, C. A., … Schürmann, F. (2015). Reconstruction and Simulation of Neocortical Microcircuitry. Cell, 163(2), 456–492. http://doi.org/10.1016/j.cell.2015.09.029</sub>
-
-<sub>[2]Heikkinen, H., Sharifian, F., Vigário, R., & Vanni, S. (2015). Feedback to distal dendrites links fMRI signals to neural receptive fields in a spiking network model of the visual cortex. Journal of Neurophysiology, 114(1), 57–69. http://doi.org/10.1152/jn.00169.2015</sub>
 
 ## Installation
 
@@ -52,8 +48,6 @@ C:\> python3 -m venv %userprofile%\CX2
 C:\> %userprofile%\CX2\Scripts\activate
 (CX2) C:\> pip install cxsystem2
 ```
-
-
 
 ### Linux/Mac
 
@@ -81,8 +75,36 @@ To develop `CxSystem2`, after creating the repository install it with the follow
 
 With this method any change to the code will be reflected on the package immediately. 
 
+## Citation
 
-# Documentation Status
+If you use CxSystem2 for your work, we kindly ask you to cite any of our related articles: 
 
-[![Documentation Status](https://readthedocs.org/projects/cxsystem/badge/?version=master)](http://cxsystem.readthedocs.io/en/master/?badge=master)
+```
+Andalibi, V., Hokkanen, H., Vanni, S., Controlling complexity of cerebral cortex simulations—I: CxSystem, a flexible cortical simulation framework, 2019, Neural computation 
+```
+<br>
+```
+Hokkanen, H., Andalibi, V., Vanni, S., Controlling complexity of cerebral cortex simulations—II: Streamlined microcircuits, 2019, Neural computation 
+```
 
+## Support
+
+You are encouraged to use <a href="github.com/VisualNeuroscience-UH/CxSystem2/issues" target="_blank">Github's Issues</a> to report bugs, or request enhancements or new features.
+
+## Team 
+
+- [Vafa Andalibi](https://www.andalibi.me)
+- Henri Hokkanen
+- [Simo Vanni](https://scholar.google.fi/citations?user=nRiUf30AAAAJ&hl=en)
+
+## License
+
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) 
+
+- **[GPL-3-Clause](https://www.gnu.org/licenses/gpl-3.0.en.html)**
+- Copyright 2019 © <a href="http://www.helsinki.fi/visualneuroscience/" target="_blank">University of Helsinki</a>.
+
+***
+<sub>[1] Markram, H., Muller, E., Ramaswamy, S., Reimann, M. W., Abdellah, M., Sanchez, C. A., … Schürmann, F. (2015). Reconstruction and Simulation of Neocortical Microcircuitry. Cell, 163(2), 456–492. http://doi.org/10.1016/j.cell.2015.09.029</sub>
+
+<sub>[2]Heikkinen, H., Sharifian, F., Vigário, R., & Vanni, S. (2015). Feedback to distal dendrites links fMRI signals to neural receptive fields in a spiking network model of the visual cortex. Journal of Neurophysiology, 114(1), 57–69. http://doi.org/10.1152/jn.00169.2015</sub>
