@@ -16,7 +16,7 @@
     * [Windows](#windows)
     * [Linux/Mac](#linuxmac)
     * [Development](#development)
-- [Interfaces]
+- [Interfaces](#interfaces)
     * [Browser User Interface (BUI)](#bui)
     * [Terminal Commands](#commands)
 - [Citation](#Citation)
