@@ -27,6 +27,7 @@ matplotlib
 mpmath
 numpy
 pandas
+ping3
 paramiko
 pycparser
 PyNaCl
