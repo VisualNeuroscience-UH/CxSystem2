@@ -53,7 +53,7 @@ class cluster_run(object):
         try:
             self.password = self.parameter_finder(array_run_obj.anatomy_df, 'password')
         except NameError:
-            self.password = getpass.getpass('password: ')
+            self.password = getpass.getpass('Enter password for user {}: '.format(self.cluster_username))
 
 
         # self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
@@ -237,7 +237,7 @@ class cluster_downlaod(object):
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
         self.client.set_missing_host_key_policy(paramiko.WarningPolicy)
-        self.password = getpass.getpass('password: ')
+        self.password = getpass.getpass('Enter password for user {}: '.format(self.metadata['cluster_username']))
         self.client.connect(self.metadata['cluster_address'], port=22, username=self.metadata['cluster_username'],
                        password=self.password)
         self.scpclient = SCPClient(self.client.get_transport())
@@ -267,4 +267,4 @@ class cluster_downlaod(object):
         print(" -  Downloads are available in: {}".format(self.metadata['local_cluster_run_download_folder']))
 
 if __name__ == '__main__':
-    d = cluster_downlaod("C:\\Users\\vafaa\\CxPytestWorkspace\\cluster_run_20191108_21451786\\cluster_metadata_20191108_21451786.pkl")
+    d = cluster_downlaod("C:\\Users\\vafaa\\CxPytestWorkspace\\cluster_run_20191111_14530639\\cluster_metadata_20191111_14530639.pkl")

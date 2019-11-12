@@ -23,10 +23,10 @@ import bz2
 import time
 import builtins
 import csv
+import json
 import shutil
 import pandas
 import threading
-from cxsystem2.hpc.array_run import array_run
 import multiprocessing
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.configuration import config_file_converter as fileconverter
@@ -94,20 +94,20 @@ class CxSystem(object):
             ### system parameter definitions:
             #Parameter_name : [set priority (0 is highest),function_to_run]
             'device': [0,self.set_device],
-            'save_generated_video_input_flag': [1,self.save_generated_video_input_flag],
+            'save_input_video': [1,self.save_input_video],
             'runtime': [2,self._set_runtime],
             'sys_mode': [3,self._set_sys_mode],  # either "local" or "expanded"
             'scale': [4,self._set_scale],
             'grid_radius': [5,self._set_grid_radius],
             'min_distance': [6,self._set_min_distance],
-            'do_init_vms': [7,self.do_init_vms],
+            'init_vms': [7,self.init_vms],
             'default_clock': [8, self.set_default_clock],
             'workspace_path': [8, self.set_workspace],
             'compression_method': [9, self.set_compression_method],
             'simulation_title': [10, self.create_simulation],
             'import_connections_from': [11, self.set_import_connections_path],
             'load_positions_only': [12,self.load_positions_only],
-            'do_benchmark': [13,self.set_do_benchmark],
+            'benchmark': [13,self.set_benchmark],
             'profiling': [14, self.set_profiling],
             'multidimension_array_run': [15,self.passer],  # this parameter is used by array_run module, so here we just pass
             'number_of_process': [16,self.passer],  # this parameter is used by array_run module, so here we just pass
@@ -134,7 +134,7 @@ class CxSystem(object):
             self.suffix = output_file_suffix
         print(" -  Current run filename suffix is: %s" % self.suffix[1:])
         self.scale = 1
-        self.do_benchmark = 0
+        self.benchmark = 0
         self.cluster_run_start_idx = cluster_run_start_idx
         self.cluster_run_step = cluster_run_step
         self.current_parameters_list = []
@@ -156,7 +156,7 @@ class CxSystem(object):
         self.total_number_of_connections = 0
         self.general_grid_radius = 0
         self.min_distance = 0
-        self.do_init_vms = 0
+        self.init_vms = 0
         self.do_save_connections = 0 # if there is at least one connection to save, this flag will be set to 1
         self.load_positions_only = 0
         self.profiling = 0
@@ -213,35 +213,61 @@ class CxSystem(object):
         # check for array_run and return
         if any(check_array_run_anatomy) or any(check_array_run_physiology) or (trials_per_config > 1 and not instantiated_from_array_run):
             self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'),self.suffix)
+            self.workspace.create_simulation(self.parameter_finder(self.anat_and_sys_conf_df, 'simulation_title'))
+            suffix = self.suffix
+            tmp_folder_path = self.workspace.get_workspace_folder().joinpath('.tmp'+suffix)
+            if not tmp_folder_path.is_dir():
+                os.mkdir(tmp_folder_path.as_posix())
+            tmp_anat_path = tmp_folder_path.joinpath('tmp_anat' + self.suffix + '.csv').as_posix()
+            tmp_physio_path = tmp_folder_path.joinpath('tmp_phys' + self.suffix + '.csv').as_posix()
+            self.anat_and_sys_conf_df.to_csv(tmp_anat_path, index=False, header=False)
+            self.physio_config_df.to_csv(tmp_physio_path, index=False, header=True)
+            array_run_path = Path(Path(Path(__file__).parent).parent).joinpath('hpc').joinpath('array_run.py').as_posix()
+            cluster_flag = 0
+
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1 : # this means CxSystem is running in cluster and is trying to spawn an array run on a node
                 array_run_suffix = '_' + Path(anatomy_and_system_config).name.split('_')[-2] + '_' + Path(anatomy_and_system_config).name.split('_')[-1]
-                print("spawning index: %d, step: %d" %(int(
-                    cluster_run_start_idx),int(cluster_run_step)))
-                array_run(anatomy_df=self.anat_and_sys_conf_df,
-                          physiology_df=self.physio_config_df,
-                          suffx=array_run_suffix,
-                          cluster_start_idx=int(cluster_run_start_idx),
-                          cluster_step=int(cluster_run_step),
-                          anat_file_address=anatomy_and_system_config,
-                          physio_file_address=physiology_config,
-                          array_run_in_cluster=1)
-            else: # CxSystem not in cluster
-                array_run(anatomy_df=self.anat_and_sys_conf_df,
-                          physiology_df=self.physio_config_df,
-                          suffx=self.suffix,
-                          cluster_start_idx=int(cluster_run_start_idx),
-                          cluster_step=int(cluster_run_step),
-                          anat_file_address=anatomy_and_system_config,
-                          physio_file_address=physiology_config,
-                          array_run_in_cluster=0)
+                print("spawning index: %d, step: %d" %(int(cluster_run_start_idx),int(cluster_run_step)))
+                cluster_flag = 1
+                suffix = array_run_suffix
+
+            if type(anatomy_and_system_config) == dict:
+                tmp_anat_path2 = tmp_folder_path.joinpath('tmp_anat_2_' + self.suffix + '.json').as_posix()
+                with open(tmp_anat_path2, 'w') as f:
+                    json.dump(anatomy_and_system_config, f)
+                anatomy_and_system_config = tmp_anat_path2
+            if type(physiology_config) == dict:
+                tmp_physio_path2 = tmp_folder_path.joinpath('tmp_phys_2_' + self.suffix + '.json').as_posix()
+                with open(tmp_physio_path2, 'w') as f:
+                    json.dump(physiology_config, f)
+                physiology_config = tmp_physio_path2
+            # this is vulnerable to code injection
+            command = 'python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster}'.format(
+                array_run = array_run_path,
+                anat_df = tmp_anat_path,
+                physio_df =tmp_physio_path,
+                suffix = suffix,
+                start = int(cluster_run_start_idx),
+                step = int(cluster_run_step),
+                anat_path = anatomy_and_system_config,
+                physio_path = physiology_config,
+                cluster = cluster_flag
+            )
+            os.system(command)
             self.array_run = 1
             return
         try:
             self.conn_prob_gain = int(next(iter(self.physio_config_df.loc[where(self.physio_config_df.values=='conn_prob_gain')[0]]['Value']) , 'no match'))
         except ValueError:
             self.conn_prob_gain = 1
-        if self.array_run == 0 and self.parameter_finder(self.anat_and_sys_conf_df, 'run_in_cluster') == '1' :
-            print(" -  Warning: Config file is set to run in cluster but it does not contain an array run; run_in_cluster will be ignored ")
+
+        if self.array_run == 0:
+            try:
+                tmp_cluster = self.parameter_finder(self.anat_and_sys_conf_df, 'run_in_cluster')
+                if tmp_cluster == '1':
+                    print(" -  Warning: Config file is set to run in cluster but it does not contain an array run; run_in_cluster will be ignored ")
+            except NameError:
+                pass
         self.configuration_executor()
         if type(self.awaited_conf_lines) != list :
            if self.thr.is_alive()==True:
@@ -411,7 +437,7 @@ class CxSystem(object):
                 else:
                     print(profiling_summary(show=20))
                 self.workspace.results['profiling_data'] =  profiling_summary()
-            if self.do_benchmark:
+            if self.benchmark:
                 try:
                     self.benchmarking_data = {}
                     titles= ['Computer Name','Device','File Suffix','Simulation Time','Python Compilation','Brian Code generation',\
@@ -431,10 +457,10 @@ class CxSystem(object):
                     self.benchmarking_data['Run'] = self.saving_start_time -  builtins.run_start
                 except AttributeError:
                     print(" -  The system could not perform the benchmarking since the brian2/brian2genn libraries are not modified to do so.")
-                    self.do_benchmark = 0
+                    self.benchmark = 0
             self.gather_result()
             self.end_time = time.time()
-            if self.do_benchmark:
+            if self.benchmark:
                 self.benchmarking_data['Extract and Save Result'] = self.end_time - self.saving_start_time
                 self.benchmarking_data['Total Time'] = self.end_time - self.start_time
                 import platform
@@ -484,7 +510,7 @@ class CxSystem(object):
             raise NameError(" -  System mode is not defined.")
         else:
             print(" -  CxSystem is running in %s mode" %self.sys_mode)
-        if self.do_benchmark:
+        if self.benchmark:
             print(" -  CxSystem is performing benchmarking. The Brian2 "
                    "should be configured to use benchmarking.")
         if self.device.lower() == 'genn':
@@ -505,10 +531,10 @@ class CxSystem(object):
         assert args[0] in ['local','expanded'], " -  System mode should be either local or expanded. "
         self.sys_mode = args[0]
 
-    def save_generated_video_input_flag(self, *args):
+    def save_input_video(self, *args):
         assert int(args[0]) == 0 or int(args[0]) == 1, \
             ' -  The do_init_vm flag should be either 0 or 1 but it is %s .' % args[0]
-        self.save_generated_video_input_flag = int(args[0])
+        self.save_input_video = int(args[0])
 
     def _set_grid_radius(self, *args):
         assert '*' in args[0], ' -  Please specify the unit for the grid radius parameter, e.g. um , mm '
@@ -538,13 +564,13 @@ class CxSystem(object):
             self.scale = self.imported_connections['scale']
             print(" -   scale of the system loaded from brian file")
 
-    def do_init_vms(self,*args):
+    def init_vms(self,*args):
         assert int(args[0]) == 0 or int(args[0]) == 1, \
             ' -  The do_init_vm flag should be either 0 or 1 but it is %s .'%args[0]
-        self.do_init_vms = int(args[0])
-        if self.do_init_vms:
+        self.init_vms = int(args[0])
+        if self.init_vms:
             print(' -  Membrane voltages are being randomly initialized.')
-        if not self.do_init_vms:
+        if not self.init_vms:
             print(' -  Membrane voltages are not initialized.')
 
     def _set_scale(self,*args):
@@ -560,9 +586,9 @@ class CxSystem(object):
             self.set_import_connections_path()
             print(" -  only positions are being loaded from the brian_data_file")
 
-    def set_do_benchmark(self,*args):
+    def set_benchmark(self,*args):
         assert int(args[0]) in [0,1] , " -  Do benchmark flag should be either 0 or 1"
-        self.do_benchmark = int(args[0])
+        self.benchmark = int(args[0])
 
     def set_profiling(self,*args):
         assert int(args[0]) in [0,1] , " -  Profiling flag should be either 0 or 1"
@@ -605,7 +631,11 @@ class CxSystem(object):
         assert not any(self.current_values_list.loc[obligatory_indices] == '--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_values_list) == self.current_parameters_list_orig_len,\
-            " -  One or more of of the columns for NeuronGroup definition is missing in the following line:\n %s " % str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
+            " -  One or more of of the columns for NeuronGroup definition is missing in the following line (lengths not equal: {} and {}):\n {} \n {}  ".format(
+                len(self.current_values_list),
+                self.current_parameters_list_orig_len,
+                self.current_parameters_list,
+                self.current_values_list)
         local_namespace = {}
         local_namespace['idx'] = -1
         local_namespace['net_center'] = 0 + 0j
@@ -917,7 +947,7 @@ class CxSystem(object):
         # NeuronGroups() should be initialized with a random vm, ge and gi values.
         # To address this, a 6-line code is generated and put in NG_init variable,
         # the running of which will lead to initialization of current NeuronGroup().
-        if self.do_init_vms:
+        if self.init_vms:
             NG_init = 'Vr_offset = rand(len(%s))\n' % _dyn_neurongroup_name
             NG_init += "for _key in %s.variables.keys():\n" % _dyn_neurongroup_name
             NG_init += "\tif _key.find('vm')>=0:\n"
@@ -1528,7 +1558,7 @@ class CxSystem(object):
                 while proc.is_alive():
                     time.sleep(1)
                 SPK_GENERATOR_SP, SPK_GENERATOR_TI, thread_number_of_neurons = inp.load_input_seq(self.workspace.get_simulation_folder_as_posix())
-                if not self.save_generated_video_input_flag:
+                if not self.save_input_video:
                     print(" - :  generated video output is NOT saved.")
                     os.remove(self.workspace.get_simulation_folder().joinpath('input'+self.StartTime_str+self.workspace.get_output_extension()).as_posix())
                 SPK_GENERATOR = SpikeGeneratorGroup(thread_number_of_neurons , SPK_GENERATOR_SP, SPK_GENERATOR_TI)
@@ -1831,7 +1861,7 @@ class CxSystem(object):
             'VPM': [['idx', 'type', 'number_of_neurons', 'radius', 'spike_times', 'net_center', 'monitors'],[0, 1, 2, 3, 4], VPM],
             'spikes': [ ['idx','type','input_spikes_filename','monitors'] , [0,1,2] ,  spikes ]
         }
-        param_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='type'].index)) # this is equivalent to item() which is depricated
+        param_idx = next(iter(self.current_parameters_list[self.current_parameters_list=='type'].index)) # this is equivalent to item() which is deprecated
         _input_type = self.current_values_list[param_idx]
         _all_columns = input_type_to_method_mapping[_input_type][0] # all possible columns of parameters for the current type of input in configuration fil
         assert _input_type in list(input_type_to_method_mapping.keys()), ' -  The input type %s of the configuration file is ' \
@@ -1844,18 +1874,18 @@ class CxSystem(object):
         assert len (self.current_parameters_list) <= len(input_type_to_method_mapping[_input_type][0]), ' -  Too many parameters for the\
          current %s input. The parameters should be consist of:\n %s'%(_input_type,input_type_to_method_mapping[_input_type][0])
         obligatory_columns = list(array(input_type_to_method_mapping[_input_type][0])[input_type_to_method_mapping[_input_type][1]])
-        # next(iter()) is equivalent to item() which is depricated
+        # next(iter()) is equivalent to item() which is deprecated
         obligatory_indices = [next(iter(self.current_parameters_list[self.current_parameters_list==ii].index)) for ii in obligatory_columns]
         assert not any(self.current_values_list.loc[obligatory_indices]=='--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_parameters_list) == len(self.current_values_list), \
             ' -  The number of columns for the input are not equal to number of values in the configuration file.'
         try:
-            # next(iter()) is equivalent to item() which is depricated
+            # next(iter()) is equivalent to item() which is deprecated
             mons = self.current_values_list[next(iter(self.current_parameters_list[self.current_parameters_list=='monitors'].index), 'no match')]
         except ValueError:
             mons = '--'
-        # next(iter()) is equivalent to item() which is depricated
+        # next(iter()) is equivalent to item() which is deprecated
         group_idx = self.current_values_list[next(iter(self.current_parameters_list[self.current_parameters_list=='idx'].index))]
 
         assert group_idx not in self.NG_indices, \

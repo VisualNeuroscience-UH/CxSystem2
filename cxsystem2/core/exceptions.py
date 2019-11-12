@@ -11,3 +11,6 @@ class ClusterNotReachableError(Exception):
 class RelativePathError(Exception):
     pass
 
+class InvalidConfigurationError(Exception):
+    pass
+
