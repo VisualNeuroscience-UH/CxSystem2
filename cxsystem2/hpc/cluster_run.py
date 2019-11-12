@@ -36,14 +36,15 @@ class cluster_run(object):
             self.cluster_workspace = Path(self.parameter_finder(array_run_obj.anatomy_df, 'cluster_workspace'))
         except NameError:
             raise ParameterNotFoundError("cluster_workspace is not defined for running CxSystem on cluster")
-        assert not self.cluster_workspace.is_absolute() , "cluster_workspace must be an absolute path with explicit [remote] home directory path"
+        assert self.cluster_workspace.is_absolute() , "cluster_workspace {} must be an absolute path with explicit [remote] home directory path".format(self.cluster_workspace.as_posix())
 
         try:
             self.cluster_address = self.parameter_finder(array_run_obj.anatomy_df, 'cluster_address')
         except NameError:
             raise ParameterNotFoundError("cluster_address is not defined for running CxSystem on cluster")
 
-        self.ping_cluster()
+        # # the following call will check if the cluster is available or not, but it needs root access
+        # self.ping_cluster()
 
         try:
             self.cluster_username = self.parameter_finder(array_run_obj.anatomy_df, 'cluster_username')
@@ -253,10 +254,11 @@ class cluster_downlaoder(object):
             if not self.metadata['cluster_username'] in self.ssh_commander(self.client, 'squeue -l -u {}'.format(self.metadata['cluster_username']), 0).decode('utf-8'):
                 # here it means there is no folder in result folder and therefore all simulations are done
                 # so we copy back the result and remove the files on cluster
-                print(" -  Copying the results from cluster...")
+                print(" -  Downloading the results from cluster...")
                 for item in self.ssh_commander(self.client, 'cd {}; ls'.format(self.metadata['cluster_simulation_folder']), 0).decode('utf-8').split('\n'):
                     if item != '' and self.metadata['suffix'] in item:
                         self.scpclient.get(Path(self.metadata['cluster_simulation_folder']).joinpath(item).as_posix(), Path(self.metadata['local_cluster_run_download_folder']).joinpath(item).as_posix())
+                        print('\t',item)
                 # cleaning
                 # self.ssh_commander(self.client, 'rm -rf {}'.format(self.metadata['cluster_workspace']), 0)
                 waiting_flag = False
