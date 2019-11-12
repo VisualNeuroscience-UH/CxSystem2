@@ -935,13 +935,14 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
 
         self.set_neuron_parameters(**abi_parameters)
 
+class neuron_factory:
+    def __init__(self):
+        self.name_to_class = {'LIF': LifNeuron, 'EIF': EifNeuron, 'Adex': AdexNeuron,
+                         'HH': HodgkinHuxleyNeuron, 'HodgkinHuxley': HodgkinHuxleyNeuron,
+                         'Izhikevich': IzhikevichNeuron, 'LIFASC': LifAscNeuron}
 
-def neuron_factory(neuron_model_name):
-    name_to_class = {'LIF': LifNeuron, 'EIF': EifNeuron, 'Adex': AdexNeuron,
-                     'HH': HodgkinHuxleyNeuron, 'HodgkinHuxley': HodgkinHuxleyNeuron,
-                     'Izhikevich': IzhikevichNeuron, 'LIFASC': LifAscNeuron}
-
-    return name_to_class[neuron_model_name]()
+    def get_class(self,neuron_model_name):
+        return self.name_to_class[neuron_model_name]()
 
 
 # class FitzhughNagumo(object):

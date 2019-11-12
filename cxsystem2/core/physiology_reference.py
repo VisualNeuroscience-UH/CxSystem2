@@ -11,7 +11,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 from cxsystem2.core.parameter_parser import *
 import random as rnd
 from cxsystem2.core import equation_templates as eqt
-import cxsystem2.neurodynlib as nd
+from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 class neuron_reference(object):
     '''
@@ -185,7 +185,7 @@ class neuron_reference(object):
         :return:
         """
 
-        x = nd.neuron_factory(self.neuron_model)
+        x = neuron_factory().get_class(self.neuron_model)
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -243,7 +243,7 @@ class neuron_reference(object):
         if self.model_variation is False:  # For backwards compatibility
 
             assert 'noise_sigma' in self.output_neuron[
-                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file."
+                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1? "
             # <editor-fold desc="...Fixed equations">
             eq_template_soma = '''
             dvm/dt = ((gL*(EL-vm) + gealpha * (Ee-vm) + gialpha * (Ei-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) +I_dendr +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5 : volt (unless refractory)
@@ -475,7 +475,7 @@ class neuron_reference(object):
 
         if self.model_variation is False:
             assert 'noise_sigma' in self.output_neuron[
-                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file."
+                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
             self.output_neuron['equation'] = Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
                 dge/dt = -ge/tau_e : siemens
@@ -486,7 +486,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -526,7 +526,7 @@ class neuron_reference(object):
 
         if self.model_variation is False:
             assert 'noise_sigma' in self.output_neuron[
-                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file."
+                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
 
             self.output_neuron['equation'] = Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
@@ -537,7 +537,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -577,7 +577,7 @@ class neuron_reference(object):
 
         if self.model_variation is False:
             assert 'noise_sigma' in self.output_neuron[
-                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file."
+                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
 
             self.output_neuron['equation'] = Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
@@ -589,7 +589,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -628,9 +628,9 @@ class neuron_reference(object):
 
         if self.model_variation is False:
             assert 'noise_sigma' in self.output_neuron[
-                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file."
+                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
 
-            assert 'noise_sigma' in self.output_neuron['namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file."
+            assert 'noise_sigma' in self.output_neuron['namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
             self.output_neuron['equation'] = Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
                 dge/dt = -ge/tau_e : siemens
@@ -641,7 +641,7 @@ class neuron_reference(object):
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).getMembraneEquation()
-            x = nd.neuron_factory(self.neuron_model)
+            x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
 
@@ -686,7 +686,7 @@ class neuron_reference(object):
                     cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
                 except IndexError:
                     cropped_df = df.loc[variable_start_idx:]
-                return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
+                return eval(next(iter(cropped_df['Value'][cropped_df['Key'] == key_name[1]])))
             else:
                 try:
                     return eval(next(iter(df['Value'][df['Key'] == key_name])))
@@ -696,12 +696,12 @@ class neuron_reference(object):
                     for neural_parameter in df_reset_index['Key'].dropna():
                         if neural_parameter  in df['Value'][df['Key'] == key_name].item():
                             exec("%s =self.value_extractor(df,neural_parameter)" % (neural_parameter))
-                    return eval(df['Value'][df['Key'] == key_name].item())
+                    return eval(next(iter(df['Value'][df['Key'] == key_name])))
                 else:
-                    raise('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%df['Value'][df['Key'] == key_name].item())
+                    raise('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%next(iter(df['Value'][df['Key'] == key_name])))
 
         except NameError:
-            new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
+            new_key = next(iter(df['Value'][df['Key'] == key_name])).replace("']", "").split("['")
             return self.value_extractor(df,new_key)
 
 #################
@@ -1022,20 +1022,20 @@ class synapse_reference(object):
                     cropped_df = df.loc[variable_start_idx:variable_end_idx-1]
                 except IndexError:
                     cropped_df = df.loc[variable_start_idx:]
-                return eval(cropped_df['Value'][cropped_df['Key'] == key_name[1]].item())
+                return eval(next(iter(cropped_df['Value'][cropped_df['Key'] == key_name[1]])))
             else:
                 try:
-                    return eval(df['Value'][df['Key'] == key_name].item())
+                    return eval(next(iter(df['Value'][df['Key'] == key_name])))
                 except NameError:
                     df_reset_index = df.reset_index(drop=True)
                     df_reset_index = df_reset_index[0:df_reset_index[df_reset_index['Key'] == key_name].index[0]]
                     for neural_parameter in df_reset_index['Key'].dropna():
                         if neural_parameter  in df['Value'][df['Key'] == key_name].item():
                             exec("%s =self.value_extractor(df,neural_parameter)" % (neural_parameter))
-                    return eval(df['Value'][df['Key'] == key_name].item())
+                    return eval(next(iter(df['Value'][df['Key'] == key_name])))
                 else:
-                    raise('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%df['Value'][df['Key'] == key_name].item())
+                    raise('The syntax %s is not a valid syntax for physiological configuration file or the elements that comprise this syntax are not defined.'%next(iter(df['Value'][df['Key'] == key_name])))
 
         except NameError:
-            new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
+            new_key = next(iter(df['Value'][df['Key'] == key_name])).replace("']", "").split("['")
             return self.value_extractor(df,new_key)

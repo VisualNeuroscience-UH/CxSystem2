@@ -19,6 +19,7 @@ mpmath
 numpy
 pandas
 paramiko
+ping3
 pycparser
 PyNaCl
 pyOpenSSL

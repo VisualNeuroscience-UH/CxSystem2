@@ -27,6 +27,7 @@ matplotlib
 mpmath
 numpy
 pandas
+ping3
 paramiko
 pycparser
 PyNaCl
@@ -50,7 +51,8 @@ DESCRIPTION = "A cerebral cortex simulation framework"
 AUTHOR = "Vafa Andalibi, Henri Hokkanen, Simo Vanni"
 AUTHOR_EMAIL = "vafa.andalibi@gmail.com"
 URL = "https://github.com/VisualNeuroscience-UH/CxSystem2"
-VERSION = '0.0-a2'
+with open("cxsystem2/__init__.py",'r') as f :
+    VERSION = f.readline().split('=')[1].strip(' ').strip('"')
 
 setup(
     name=NAME,
@@ -93,6 +95,7 @@ setup(
         'console_scripts': [
             'cxsystem2 = cxsystem2.cmd.cxsystem_cmd:main',
             'cxconfig = cxsystem2.cmd.cxconfig_cmd:main',
+            'cxcluster = cxsystem2.cmd.cxcluster_cmd:main'
         ],
     }
 )

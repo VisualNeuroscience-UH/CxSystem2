@@ -1,8 +1,6 @@
-include requirements.txt
-include slurm.job
+include **/slurm.job
 recursive-include tests *.py *.csv *.json *.gz
 recursive-include cxsystem2 *
-recursive-include cxsystem2/gui/cx_gui *.css *.js *.html
-recursive-include config_files *.json *.csv
+recursive-include cxsystem2/gui/cx_gui *.css *.js *.html *.json
 global-exclude __pycache__
 global-exclude *.py[co]

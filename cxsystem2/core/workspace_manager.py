@@ -55,10 +55,10 @@ class workspace(object):
     def create_simulation(self,sim_name):
         self.simulation_name = sim_name
         self.simulation_folder = self.workspace_path.joinpath(self.simulation_name)
+        print(" -  simulation folder {}".format(self.simulation_folder))
         if not self.simulation_folder.is_dir():
             os.makedirs(self.simulation_folder.as_posix())
         self.results_export_path = self.simulation_folder.joinpath(self.simulation_name + '_results' + self.suffix).with_suffix(self.output_extension)
-        print(" -  The output of the simulation is saved at: {}".format(self.results_export_path))
         self.connections_export_path = self.simulation_folder.joinpath(self.simulation_name + '_connections' + self.suffix).with_suffix((self.output_extension))
 
     def get_workspace_folder(self):
@@ -116,23 +116,23 @@ class workspace(object):
 
     def save_results_to_file(self):
         print(" -  Saving results to file ...")
-        self.results['Full path'] = self.results_export_path
-        while os.path.isfile(self.results_export_path):
+        self.results['Full path'] = self.results_export_path.as_posix()
+        while self.results_export_path.is_file():
             idx = 1
-            self.results_export_path = self.results_export_path.parent.joinpath(
-                self.results_export_path.stem + '_{}'.format(idx) + self.results_export_path.suffix)
+            self.results_export_path = self.results_export_path.parent.joinpath(self.results_export_path.stem + '_{}'.format(idx) + self.results_export_path.suffix)
             idx +=1
-        self.save_to_file(self.results, self.results_export_path)
+        self.save_to_file(self.results, self.results_export_path.as_posix())
+        print(" -  The output of the simulation is saved at: {}".format(self.results_export_path))
 
     def save_connections_to_file(self):
         print(" -  Saving connections to file ...")
-        self.connections['Full path'] = self.connections_export_path
-        while os.path.isfile(self.connections_export_path):
+        self.connections['Full path'] = self.connections_export_path.as_posix()
+        while self.connections_export_path.is_file():
             idx = 1
             self.connections_export_path = self.connections_export_path.parent.joinpath(
                 self.connections_export_path.stem +  '_{}'.format(idx) + self.connections_export_path.suffix)
             idx +=1
-        self.save_to_file(self.connections, self.connections_export_path)
+        self.save_to_file(self.connections, self.connections_export_path.as_posix())
 
     def save_to_file(self, data, filepath):
         if 'gz' in self.get_output_extension():
@@ -148,13 +148,13 @@ class workspace(object):
 
     def load_from_file(self, file_path):
         if file_path.suffix == '.gz':
-            with open(file_path, 'rb') as fb:
+            with open(file_path.as_posix(), 'rb') as fb:
                 data = zlib.decompress(fb.read())
                 loaded_data = pickle.loads(data)
         elif file_path.suffix == '.bz2':
-            with bz2.BZ2File(file_path, 'rb') as fb:
+            with bz2.BZ2File(file_path.as_posix(), 'rb') as fb:
                 loaded_data = pickle.load(fb)
         elif file_path.suffix == '.pickle':
-            with open(file_path, 'rb') as fb:
+            with open(file_path.as_posix(), 'rb') as fb:
                 loaded_data= pickle.load(fb)
         return loaded_data

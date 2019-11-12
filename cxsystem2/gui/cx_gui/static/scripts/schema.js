@@ -67,7 +67,7 @@ runtime_params_schema = {
             "minimum": 1,
             "maximum": 20,
         },
-        "do_init_vms": {
+        "init_vms": {
             "type": "boolean",
             "description": "Randomize initial membrane voltages (between leak reversal and threshold potential)",
             "format": "checkbox"
@@ -77,13 +77,12 @@ runtime_params_schema = {
             "description": "Import neuron positions from connectivity file but randomize connections",
             "format": "checkbox"
         },
-
-        "do_benchmark": {
+        "benchmark": {
             "type": "boolean",
             "description": "Do a benchmark (?)",
             "format": "checkbox"
         },
-        "save_generated_video_input_flag": {
+        "save_input_video": {
             "type": "boolean",
             "description": "If checked, the generated video for input will be saved (?)",
             "format": "checkbox"
@@ -106,6 +105,7 @@ runtime_params_schema = {
         "cluster_job_file_path": {
             "type": "string",
             "description": "Relative path and filename of the Slurm batch file",
+            "default" : "--"
         },
         "cluster_number_of_nodes": {
             "type": "integer",
@@ -117,22 +117,17 @@ runtime_params_schema = {
         "cluster_address": {
             "type": "string",
             "description": "Address of the HPC server (e.g. taito.csc.fi)",
+            "default" : "--"
         },
-        "username": {
+        "cluster_username": {
             "type": "string",
             "description": "Username on the HPC server",
+            "default" : "--"
         },
-        "remote_repo_path": {
-            "type": "string",
-            "description": "Absolute path to CxSystem2 on the HPC server",
-        },
-        "remote_workspace": {
+        "cluster_workspace": {
             "type": "string",
             "description": "Absolute path for storing results on the HPC server",
-        },
-        "remote_branch": {
-            "type": "string",
-            "description": "GitHub branch of CxSystem2 to use for HPC simulations",
+            "default" : "--"
         },
     }
 };
@@ -154,8 +149,7 @@ neurons_schema = {
             properties: {
                 "idx": {
                     "type": "integer",
-                    "description": "Running index for the neuron group",
-                    // "default": "{{i}}",
+                    "description": "Running index for the neuron group"
                 },
                 "number_of_neurons": {
                     "type": "integer",
@@ -189,11 +183,13 @@ neurons_schema = {
                 "noise_sigma": {
                     "type": "string",
                     "description": "Membrane noise (e.g. 2*mV)",
+                    "default" : "--"
                 },
                 "monitors": {
                     "type": "string",
                     "format": "text",
                     "description": "Monitors for recording spikes and state variables",
+                    "default" : "--"
                 },
                 'n_background_inputs': {
                     "type": "integer",
@@ -205,19 +201,23 @@ neurons_schema = {
                 },
                 'gemean': {
                     "type": "string",
-                    "description": "gemean"
+                    "description": "gemean",
+                    "default" : "--"
                 },
                 'gestd': {
                     "type": "string",
-                    "description": "gestd"
+                    "description": "gestd",
+                    "default" : "--"
                 },
                 'gimean': {
                     "type": "string",
-                    "description": "gimean"
+                    "description": "gimean",
+                    "default" : "--"
                 },
                 'gistd': {
                     "type": "string",
-                    "description": "gistd"
+                    "description": "gistd",
+                    "default" : "--"
                 }
             }
         }]

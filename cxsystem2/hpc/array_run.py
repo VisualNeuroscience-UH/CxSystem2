@@ -9,6 +9,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
 from cxsystem2.core import cxsystem as CX
+from cxsystem2.core.exceptions import InvalidConfigurationError
 from brian2 import *
 import multiprocessing
 import time
@@ -25,25 +26,26 @@ from pathlib import Path
 
 class array_run(object):
 
-    def __init__(self, anatomy_system_df, physiology_df, metadata_file_suffx,cluster_start_idx,cluster_step,anat_file_address,physio_file_address,array_run_in_cluster=0):
+    def __init__(self, anatomy_df, physiology_df, suffix, cluster_start_idx, cluster_step, anat_file_address, physio_file_address, array_run_in_cluster=0):
         '''
         Initialize the array_run for running several instances of CxSystem in parallel.
 
-        :param anatomy_system_df: The dataframe containing the anatomical and system configurations that has an instance for array_run in it.
+        :param anatomy_df: The dataframe containing the anatomical and system configurations that has an instance for array_run in it.
         :param physiology_df: The dataframe containing the physiology configurations that has an instance for array_run in it.
-        :param metadata_file_suffx: The suffix for the metadata file containing the filename and changing parameters in each of the simulations.
+        :param suffix: The suffix for the metadata file containing the filename and changing parameters in each of the simulations.
         '''
+        self.suffix = suffix
         self.cluster_start_idx = cluster_start_idx
         self.cluster_step = cluster_step
         self.array_run_in_cluster = array_run_in_cluster
-        if self.cluster_start_idx == -1 and self.cluster_step == -1:
+        if self.cluster_start_idx == -1 and self.cluster_step == -1: # this means this instance of array run is actually trying to run a bunch of instances in the cluster
             from cxsystem2.hpc import cluster_run
         if self.cluster_start_idx != -1 and self.cluster_step != -1 :
-            self.metadata_filename = 'metadata_' + 'part_'+ str((self.cluster_start_idx/self.cluster_step)+1) +'_' +metadata_file_suffx + '.gz'
+            self.metadata_filename = 'metadata_part_' + str((self.cluster_start_idx/self.cluster_step)+1) +  suffix + '.gz'
         else:
-            self.metadata_filename = 'metadata_' + metadata_file_suffx + '.gz'
+            self.metadata_filename = 'metadata_' + suffix + '.gz'
         self.array_run_metadata = pd.DataFrame
-        self.anatomy_df = anatomy_system_df
+        self.anatomy_df = anatomy_df
         self.physiology_df =physiology_df
         try :
             self.multidimension_array_run = int(self.parameter_finder(self.anatomy_df,'multidimension_array_run'))
@@ -55,9 +57,9 @@ class array_run(object):
             self.number_of_process = int(multiprocessing.cpu_count() * 3 / 4)
             print(" -  number_of_process is not defined in the configuration file, the default number of processes are 3/4*number of CPU cores: %d processes" % self.number_of_process)
         try:
-            self.do_benchmark = int(self.parameter_finder(self.anatomy_df,'do_benchmark'))
+            self.benchmark = int(self.parameter_finder(self.anatomy_df,'benchmark'))
         except (TypeError,NameError) as e:
-            self.do_benchmark = 0
+            self.benchmark = 0
         try:
             self.trials_per_config = int(self.parameter_finder(self.anatomy_df,'trials_per_config'))
         except TypeError:
@@ -86,7 +88,7 @@ class array_run(object):
         if self.cluster_number_of_nodes > 50:
             raise Exception(' -  Number of nodes cannot be higher than 20.')
 
-        anatomy_array_search_result = anatomy_system_df[anatomy_system_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
+        anatomy_array_search_result = anatomy_df[anatomy_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         physio_array_search_result = physiology_df[physiology_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         arrays_idx_anatomy = where(anatomy_array_search_result.isnull().values != True)
         arrays_idx_anatomy = [(arrays_idx_anatomy[0][i],arrays_idx_anatomy[1][i]) for i in range(len(arrays_idx_anatomy[0]))]
@@ -98,10 +100,10 @@ class array_run(object):
 
         self.sum_of_array_runs = len(arrays_idx_anatomy) + len(arrays_idx_physio)
         if self.sum_of_array_runs > 1 and not self.multidimension_array_run:
-            anatomy_default = self.df_default_finder(anatomy_system_df)
+            anatomy_default = self.df_default_finder(anatomy_df)
             physio_default = self.df_default_finder(physiology_df)
         else:
-            anatomy_default = anatomy_system_df
+            anatomy_default = anatomy_df
             physio_default = physiology_df
         ## creating the array of dataframes for array run
         self.anat_titles = []
@@ -116,7 +118,7 @@ class array_run(object):
             meta_columns.extend(['Full path'])
             self.final_metadata_df = pd.DataFrame(index=[0],columns=meta_columns)
             if arrays_idx_anatomy:
-                anat_variations, anat_messages = self.df_builder_for_array_run(anatomy_system_df, arrays_idx_anatomy, df_type='anatomy')
+                anat_variations, anat_messages = self.df_builder_for_array_run(anatomy_df, arrays_idx_anatomy, df_type='anatomy')
             if arrays_idx_physio:
                 physio_variations, physio_messages = self.df_builder_for_array_run( physiology_df, arrays_idx_physio,df_type='physiology')
             if arrays_idx_anatomy and arrays_idx_physio:
@@ -142,7 +144,7 @@ class array_run(object):
             meta_columns.extend(['Dimension-1 Parameter','Dimension-1 Value','Full path'])
             self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
             if arrays_idx_anatomy:
-                df_anat_array, anat_messages = self.df_builder_for_array_run(anatomy_system_df, arrays_idx_anatomy, df_type='anatomy')
+                df_anat_array, anat_messages = self.df_builder_for_array_run(anatomy_df, arrays_idx_anatomy, df_type='anatomy')
                 self.df_anat_final_array.extend(df_anat_array)
                 self.df_phys_final_array.extend([physio_default for _ in range(len(self.df_anat_final_array))])
                 self.final_messages.extend(anat_messages)
@@ -190,17 +192,8 @@ class array_run(object):
             self.total_configs = len(self.df_anat_final_array)* self.trials_per_config
             self.config_per_node = self.total_configs / self.cluster_number_of_nodes
             self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)[:int(self.total_configs / self.config_per_node)]
-            if type(anat_file_address) == dict:
-                anat_path = Path.home().joinpath('_tmp_anat.json')
-                with open(anat_path, 'w') as f:
-                    json.dump(anat_file_address, f)
-                anat_file_address = anat_path
-            if type(physio_file_address) == dict:
-                physio_path = Path.home().joinpath('_tmp_physio.json')
-                with open(physio_path, 'w') as f:
-                    json.dump(physio_file_address, f)
-                physio_file_address = physio_path
-            cluster_run.cluster_run(self, anat_file_address, physio_file_address)
+
+            cluster_run.cluster_run(self, Path(anat_file_address), Path(physio_file_address),self.suffix)
             return
         if cluster_start_idx != -1 and cluster_step != -1: # this runs in cluster
             self.spawner(self.cluster_start_idx,self.cluster_step)
@@ -222,7 +215,7 @@ class array_run(object):
         tr = idx % self.trials_per_config
         idx = int(idx/self.trials_per_config)
         device = self.parameter_finder(self.df_anat_final_array[idx], 'device')
-        if self.number_of_process == 1 and self.do_benchmark == 1 and device == 'Python':
+        if self.number_of_process == 1 and self.benchmark == 1 and device == 'Python':
             # this should be used to clear the cache of weave for benchmarking. otherwise weave will mess it up
             if sys.platform == 'win32':
                 shutil.rmtree(os.path.join(os.environ['USERPROFILE'],'AppData','Local','Temp',os.environ['USERNAME'],'python27_compiled'))
@@ -270,6 +263,10 @@ class array_run(object):
         print(" -  Array run metadata saved at: %s"%os.path.join(
             os.path.dirname(paths[list(paths.keys())[0]]),self.metadata_filename))
 
+        tmp_folder_path = Path(self.parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp'+ suffix).as_posix()
+        print("cleaning tmp folders " + tmp_folder_path)
+        shutil.rmtree(tmp_folder_path)
+        
     def parameter_finder(self,df,keyword):
         location = where(df.values == keyword)
         if location[0].size:
@@ -359,39 +356,40 @@ class array_run(object):
         :param df_type: type of dataframe.
         '''
         idx = idx[0]
-        whitelist = set('abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._-')
-        try:
-            if any(df[0].str.contains('row_type')):
-                definition_rows_indices = array(df[0][df[0] == 'row_type'].index.tolist())
-                target_row = max(where(definition_rows_indices < idx[0])[0])
-                title = str(df.loc[target_row][idx[1]])
-                value = str(df.loc[idx[0]][idx[1]])
-                message = '_' + title + ''.join(filter(whitelist.__contains__, value))
-        except KeyError:
-            if 'Variable' in df.columns:
-                try:
-                    if not math.isnan(df['Key'][idx[0]]):
-                        title = str(df['Key'][idx[0]])
-                        value = str(df[idx[0]][idx[1]])
-                    else:
-                        title = str(df['Variable'][idx[0]])
-                        value = str(df.loc[idx[0]][idx[1]])
-                except TypeError:
+        whitelist = set('abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-')
+
+        if any(df.iloc[:,0].str.contains('row_type')):
+            definition_rows_indices = array(df[0][df[0] == 'row_type'].index.tolist())
+            target_row = max(where(definition_rows_indices < idx[0])[0])
+            title = str(df.loc[target_row][idx[1]])
+            value = str(df.loc[idx[0]][idx[1]])
+            message = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+        elif 'Variable' in df.columns:
+            try:
+                if not math.isnan(df['Key'][idx[0]]):
                     title = str(df['Key'][idx[0]])
+                    value = str(df[idx[0]][idx[1]])
+                else:
+                    title = str(df['Variable'][idx[0]])
                     value = str(df.loc[idx[0]][idx[1]])
-                message = '_' + title + ''.join(filter(whitelist.__contains__, value))
-        finally: # for metadata
-            if df_type == 'anatomy':
-                if title not in self.anat_titles :
-                    self.anat_titles.append(title)
-            elif df_type == 'physiology':
-                if title not in self.physio_titles:
-                    self.physio_titles.append(title)
-            if title in list(self.metadata_dict.keys()):
-                if value not in self.metadata_dict[title]:
-                    self.metadata_dict[title].append(value)
-            else:
-                self.metadata_dict[title] = [value]
+            except TypeError:
+                title = str(df['Key'][idx[0]])
+                value = str(df.loc[idx[0]][idx[1]])
+            message = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+        else:
+            raise InvalidConfigurationError("Configuration file format is not valid")
+        # for metadata
+        if df_type == 'anatomy':
+            if title not in self.anat_titles :
+                self.anat_titles.append(title)
+        elif df_type == 'physiology':
+            if title not in self.physio_titles:
+                self.physio_titles.append(title)
+        if title in list(self.metadata_dict.keys()):
+            if value not in self.metadata_dict[title]:
+                self.metadata_dict[title].append(value)
+        else:
+            self.metadata_dict[title] = [value]
         return title,value, message
 
     def data_saver(self, save_path, data):
@@ -404,4 +402,18 @@ class array_run(object):
         elif '.pickle' in save_path:
             with open(save_path, 'wb') as fb:
                 pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
+
+if __name__ == '__main__':
+    if len(sys.argv) != 9:
+        print("Array run needs 8 arguments and is not built to be called separately")
+        sys.exit(1)
+    anatomy_df = pd.read_csv(sys.argv[1], header=None)
+    physiology_df = pd.read_csv(sys.argv[2])
+    suffix = sys.argv[3]
+    cluster_start_idx = int(sys.argv[4])
+    cluster_step = int(sys.argv[5])
+    anat_file_address = sys.argv[6]
+    physio_file_address = sys.argv[7]
+    array_run_in_cluster = int(sys.argv[8])
+    array_run(anatomy_df, physiology_df, suffix, cluster_start_idx, cluster_step, anat_file_address, physio_file_address, array_run_in_cluster)
 

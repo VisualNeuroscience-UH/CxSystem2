@@ -30,6 +30,7 @@ anatomy_and_system_config = path.joinpath('tests', 'config_files', 'pytest_Anato
 physiology_config = path.joinpath('tests', 'config_files', 'pytest_Physiology_config_cpp_array.csv').as_posix()
 CM = cx.CxSystem(anatomy_and_system_config, physiology_config)
 workspace_path = CM.workspace.get_workspace_folder()
+simulation_path = CM.workspace.get_simulation_folder()
 
 ###################
 # Integration tests
@@ -44,20 +45,19 @@ def cxsystem_run_fixture2():
 	yield  # Run the tests here
 	
 	#Executing teardown code. Connections are already gone if run with basic test
-	shutil.rmtree(workspace_path.joinpath(workspace_path).as_posix())
+	# shutil.rmtree(simulation_path.as_posix())
 
 
 @pytest.fixture(scope='module')
 def get_spike_data():
-	output_fullpath = path.joinpath('tests','output_files','output_20190524_06070215_python_200ms.gz')
+	output_fullpath = path.joinpath('tests','output_files','pytest_spike_reference_data_200ms.gz')
 	with open(output_fullpath.as_posix(), 'rb') as fb:
 		d_pickle = zlib.decompress(fb.read())
 		data = pickle.loads(d_pickle)
 		spikes_all = data['spikes_all']
 
-	new_output_name = [item for item in os.listdir(workspace_path.as_posix()) if 'tonic_depol_level1.55' in item]
-	new_output_fullpath = workspace_path.joinpath(new_output_name[0])
-	new_output_fullpath = new_output_fullpath.joinpath('results.gz')
+	new_output_name = [item for item in os.listdir(simulation_path.as_posix()) if 'tonic_depol_level155' in item and '_results_' in item]
+	new_output_fullpath = simulation_path.joinpath(new_output_name[0])
 	with open(new_output_fullpath, 'rb') as fb:
 		new_d_pickle = zlib.decompress(fb.read())
 		new_data = pickle.loads(new_d_pickle)
@@ -68,8 +68,8 @@ def get_spike_data():
 # @pytest.mark.skip(reason="too slow")
 def test_outputfile(cxsystem_run_fixture2):
 	'''Test for 5 existing outputfiles'''
-	outputfilelist = [item for item in os.listdir(workspace_path) if 'tonic_depol_level' in item]
-	assert len([item for item in outputfilelist if os.access(os.path.join(workspace_path, item), os.W_OK)]) == 5
+	outputfilelist = [item for item in os.listdir(simulation_path.as_posix()) if 'tonic_depol_level' in item]
+	assert len([item for item in outputfilelist if os.access(simulation_path.joinpath(item), os.W_OK)]) == 10
 	
 # @pytest.mark.xfail(reason='not identical spikes')		
 def test_spikecount_10percent_tolerance(cxsystem_run_fixture2, capsys, get_spike_data):
@@ -165,4 +165,3 @@ def test_spiketiming_report(cxsystem_run_fixture2, capsys, get_spike_data):
 		with capsys.disabled():
 			# print('Mean KS statistics for {0} is {1:.2f}'.format(key,mean_ks)) # Quantified spiketiming similarity
 			print('Mean Wasserstein Distance (spike shift) for {0} is {1:.2f} ms'.format(key,mean_wd)) # Quantified spiketiming similarity
-
