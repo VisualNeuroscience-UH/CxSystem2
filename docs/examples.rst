@@ -26,7 +26,7 @@ Both excitatory and inhibitory cell sub-groups were fully connected to all the o
 
   .. csv-table::
      
-     row_type,runtime,profiling,default_clock,do_init_vms,min_distance,scale
+     row_type,runtime,profiling,default_clock,init_vms,min_distance,scale
      params,1000 \*ms,1,0.1 \* ms,1,1\*um,1
      row_type,sys_mode,grid_radius,device,number_of_processes,
      params,local,210*um,cpp,1,

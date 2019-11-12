@@ -37,11 +37,11 @@ Where :code:`n` is the priority value in setting the parameter. The priority val
 
 	    self.parameter_to_method_mapping = {
 	    'device': [0,self.set_device],
-            'save_generated_video_input_flag': [1,self.save_generated_video_input_flag],
+            'save_input_video': [1,self.save_input_video],
 	    }
 
 	    
-Here, :code:`save_generated_Video_input_flag` will be set using :code:`self.save_generated_video_input_flag` after :code:`device`, that is set using :code:`self.set_device`. 
+Here, :code:`save_input_video` will be set using :code:`self.save_input_video` after :code:`device`, that is set using :code:`self.set_device`.
 	    
 
 Adding Neuron Model

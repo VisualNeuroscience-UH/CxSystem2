@@ -64,15 +64,15 @@ This is the list of configurable run-time variables implemented in the system:
 
 		:code:`minimum_distance{int*unit}`: Sets the minimum distance between neurons, e.g. 1*um.
 
-		:code:`do_init_vms{0,1}`: defines whether the membrane voltages are randomly initialized.
+		:code:`init_vms{0,1}`: defines whether the membrane voltages are randomly initialized.
 
 		:code:`import_connections_from`: sets the path for the file from which the synaptic connection and positions are to be loaded.
 
 		:code:`load_positions_only{1,0}`: Defines whether the positions are only to be loaded from the data file, i.e. flag set to 1, or both positions and synaptic connections, i.e. flag is set to 0.
 
-		:code:`do_benchmark{1,0}`: Defines whether the full benchmark is to be performed during the simulation. This benchmark, that was used for preparing the data for the CxSystem paper, is high probably not useful for non-developer users since it needs modified copy of brian2 library. 
+		:code:`benchmark{1,0}`: Defines whether the full benchmark is to be performed during the simulation. This benchmark, that was used for preparing the data for the CxSystem paper, is high probably not useful for non-developer users since it needs modified copy of brian2 library.
 
-		:code:`save_generated_video_input_flag{1,0}`: Defines whether the generated video input is to be saved or not. This is essential in case the users wants to use the identical input on different runs, so the input can be saved by setting this to 1 and used later. 
+		:code:`save_input_video{1,0}`: Defines whether the generated video input is to be saved or not. This is essential in case the users wants to use the identical input on different runs, so the input can be saved by setting this to 1 and used later.
 
 		:code:`number_of_process{int}`: Defines the number of processes to be spawned for array run.
 
