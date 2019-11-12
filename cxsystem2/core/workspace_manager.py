@@ -59,7 +59,6 @@ class workspace(object):
         if not self.simulation_folder.is_dir():
             os.makedirs(self.simulation_folder.as_posix())
         self.results_export_path = self.simulation_folder.joinpath(self.simulation_name + '_results' + self.suffix).with_suffix(self.output_extension)
-        print(" -  The output of the simulation is saved at: {}".format(self.results_export_path))
         self.connections_export_path = self.simulation_folder.joinpath(self.simulation_name + '_connections' + self.suffix).with_suffix((self.output_extension))
 
     def get_workspace_folder(self):
@@ -123,6 +122,7 @@ class workspace(object):
             self.results_export_path = self.results_export_path.parent.joinpath(self.results_export_path.stem + '_{}'.format(idx) + self.results_export_path.suffix)
             idx +=1
         self.save_to_file(self.results, self.results_export_path.as_posix())
+        print(" -  The output of the simulation is saved at: {}".format(self.results_export_path))
 
     def save_connections_to_file(self):
         print(" -  Saving connections to file ...")
