@@ -1,4 +1,8 @@
-# CxSystem, A Flexible Cortical Simulation Framework
+```
+<a href="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/README.md"><img src="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/data_config/icon/cxsystem_logo.png?sanitize=true" width="60%"></a>
+```
+
+# CxSystem2, A Flexible Cortical Simulation Framework
 
 CxSystem is a cerebral cortex simulation framework, which operates on personal computers. We have tested the simulation software with a simplified version of a comprehensive cortical microcircuit model [1], which is available as configuration file. 
 
