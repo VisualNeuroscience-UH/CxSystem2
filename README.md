@@ -1,6 +1,4 @@
-```
 <a href="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/README.md"><img src="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/data_config/icon/cxsystem_logo.png?sanitize=true" width="60%"></a>
-```
 
 # CxSystem2, A Flexible Cortical Simulation Framework
 
