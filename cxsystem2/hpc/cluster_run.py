@@ -47,7 +47,8 @@ class cluster_run(object):
 
         try:
             self.cluster_username = self.parameter_finder(array_run_obj.anatomy_df, 'cluster_username')
-            print ("Loggin in with user %s"%self.cluster_username)
+            assert self.cluster_username != 'username', "Cluster username must be changed in the configuration file, currently it is the default value 'username'"
+            print ("Loggin in with user '%s'"%self.cluster_username)
         except NameError:
             self.cluster_username = input('cluster_username: ')
         try:
@@ -162,9 +163,8 @@ class cluster_run(object):
         cluster_metadata['suffix'] = self.suffix
         with open (self.local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)), 'wb') as ff:
             pickle.dump(cluster_metadata,ff)
-        print(" -  Cluster metadata saved. To download the result and clean the environments after getting the email, run 'python cluster_run.py'\n" \
-              "Alternatively you can run it in another terminal and it will "
-               "do its job when the results are ready.")
+        print(" -  Cluster metadata saved. To download the result and clean the environments after getting the email, run the following command in the terminal:\n")
+        print("cxcluster "+ self.local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)).as_posix())
 
     def ping_cluster(self):
         try: # check if the cluster address is ip or hostname
@@ -209,7 +209,7 @@ class cluster_run(object):
             raise ParameterNotFoundError('More than one instance of parameter {} found, cannot chagne the value'.format(parameter))
 
 
-class cluster_downlaod(object):
+class cluster_downlaoder(object):
     def __init__(self, metapath):
         self.metadata_path = Path(metapath)
         if not self.metadata_path.is_file():
@@ -265,6 +265,3 @@ class cluster_downlaod(object):
         # print(" -  Results are downloaded and remote is cleaned.")
         # print(" -  Local environment cleaned.")
         print(" -  Downloads are available in: {}".format(self.metadata['local_cluster_run_download_folder']))
-
-if __name__ == '__main__':
-    d = cluster_downlaod("C:\\Users\\vafaa\\CxPytestWorkspace\\cluster_run_20191111_14530639\\cluster_metadata_20191111_14530639.pkl")

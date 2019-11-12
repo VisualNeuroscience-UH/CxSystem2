@@ -8,7 +8,7 @@ Usage:
 A configuration file converter for `CxSystem`.
 
 Arguments:
-  FILENAME    PATH to convertee configuration file
+  FILENAME    Path to convertee configuration file
 
 Options:
   -h --help     Show this screen

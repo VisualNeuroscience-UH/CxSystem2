@@ -98,7 +98,7 @@ CxSystem2 supports `csv` and `json` for importing/exporting configuration files.
 
 #### cxcluster 
 
-TBD
+Use `cxcluster` to download the results from the cluster. `cxcluster` takes in one argument which is the path to the metadata file saved as a result of cluster-run submission. For convenience, at the end of a cluster-run job submission, `CxSystem2` prints the command that should be run to retrieve the result. 
 
 #### cxviz 
 
