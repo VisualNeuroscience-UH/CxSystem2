@@ -30,8 +30,6 @@ The CxSystem aims at easy testing and buildup of diverse models at single cell r
 The preliminary version of this software has been developed at Aalto University 2012-2015 [2], and the full version at the University of Helsinki 2013-2017. The software is distributed under the terms of the GNU General Public License, Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 To access the documentation of the CxSystem, please check out the [readthedocs page](http://cxsystem.readthedocs.io/en/master/) of the project.
-<br></br>
-<br></br>
 
 ## Installation
 
@@ -83,6 +81,7 @@ If you use CxSystem2 for your work, we kindly ask you to cite any of our related
 Andalibi, V., Hokkanen, H., Vanni, S., Controlling complexity of cerebral cortex simulations—I: CxSystem, a flexible cortical simulation framework, 2019, Neural computation 
 ```
 <br>
+
 ```
 Hokkanen, H., Andalibi, V., Vanni, S., Controlling complexity of cerebral cortex simulations—II: Streamlined microcircuits, 2019, Neural computation 
 ```
@@ -94,7 +93,7 @@ You are encouraged to use <a href="github.com/VisualNeuroscience-UH/CxSystem2/is
 ## Team 
 
 - [Vafa Andalibi](https://www.andalibi.me)
-- Henri Hokkanen
+- [Henri Hokkanen](https://github.com/henhok)
 - [Simo Vanni](https://scholar.google.fi/citations?user=nRiUf30AAAAJ&hl=en)
 
 ## License
