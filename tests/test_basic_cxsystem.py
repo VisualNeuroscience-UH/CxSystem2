@@ -28,7 +28,9 @@ cwd = os.getcwd()
 path = Path(os.getcwd())
 anatomy_and_system_config = path.joinpath('tests', 'config_files', 'pytest_Anatomy_config.csv').as_posix()
 physiology_config = path.joinpath('tests', 'config_files', 'pytest_Physiology_config.csv').as_posix()
-CM = cx.CxSystem(anatomy_and_system_config, physiology_config, instantiated_from_array_run=0)
+CM = cx.CxSystem(anatomy_and_system_config, physiology_config)
+workspace_folder = CM.workspace.get_workspace_folder()
+simulation_folder = CM.workspace.get_simulation_folder()
 
 def test_cwd():
 	assert "cxsystem2" in os.listdir(os.getcwd())
@@ -48,20 +50,19 @@ def test_dataframe_delimiters():
 class TestInit:
 	# @pytest.mark.xfail()
 	def test_csv_shape(self):
-		assert CM.anat_and_sys_conf_df.shape[1] == 28
-		
+		assert CM.anat_and_sys_conf_df.shape[1] == 26
 
 	def test_number_of_input_arguments(self):
-		assert CM.__init__.__code__.co_argcount == 9 , "Number of arguments have changed"
+		assert CM.__init__.__code__.co_argcount == 8 , "Number of arguments have changed"
 		
 	def test_local_variable_names(self):
 		assert CM.__init__.__code__.co_varnames == \
-		('self', 'anatomy_and_system_config', 'physiology_config', 'output_file_suffix', 
-		'instantiated_from_array_run', 'cluster_run_start_idx', 'cluster_run_step', 'array_run_in_cluster', 
-		'gui_port', 'params_indices', 'row_idx', 'number_of_new_columns', 'number_of_rows',
-		'existing_rows', 'new_columns', 'empty_dataframe', 'new_anat_and_sys_conf_df', 
-		'row', 'check_array_run_anatomy', 'check_array_run_physiology', 'trials_per_config'
-		)
+		('self', 'anatomy_and_system_config', 'physiology_config', 'output_file_suffix', 'instantiated_from_array_run',
+		 'cluster_run_start_idx', 'cluster_run_step', 'array_run_in_cluster', 'params_indices', 'row_idx',
+		 'number_of_new_columns', 'number_of_rows', 'existing_rows', 'new_columns', 'empty_dataframe',
+		 'new_anat_and_sys_conf_df', 'row', 'check_array_run_anatomy', 'check_array_run_physiology',
+		 'trials_per_config', 'suffix', 'tmp_folder_path', 'tmp_anat_path', 'tmp_physio_path', 'array_run_path',
+		 'cluster_flag', 'array_run_suffix', 'tmp_anat_path2', 'f', 'tmp_physio_path2', 'command', 'tmp_cluster')
 		
 	def test_input_argument_types(self):
 		assert isinstance(CM.timestamp, str) 
@@ -107,8 +108,8 @@ class TestConfigurationExecutor:
 	def test__set_min_distance(self):
 		assert CM.min_distance.dim.__str__() == 'm'
 
-	def test_do_init_vms(self):
-		assert CM.do_init_vms in (0,1)
+	def test_init_vms(self):
+		assert CM.init_vms in (0,1)
 	
 	# @pytest.mark.xfail()
 	def test__set_simulation_folder(self):
@@ -244,13 +245,13 @@ def cxsystem_run_fixture():
 
 @pytest.fixture(scope='module')
 def get_spike_data():
-	output_fullpath = os.path.join(path, 'tests','output_files','output_20190524_06070215_python_200ms.gz')
+	output_fullpath = path.joinpath('tests','output_files','pytest_spike_reference_data_200ms.gz')
 	with open(output_fullpath, 'rb') as fb:
 		d_pickle = zlib.decompress(fb.read())
 		data = pickle.loads(d_pickle)
 		spikes_all = data['spikes_all']
-	new_output_name = [item for item in os.listdir(CM.workspace.get_simulation_folder_as_posix()) if item.startswith('results')] #Assuming just one outputfile in this folder
-	new_output_fullpath = os.path.join(path, CM.workspace.get_simulation_folder_as_posix(), new_output_name[0])
+	new_output_name = [item for item in os.listdir(CM.workspace.get_simulation_folder_as_posix()) if '_results_' in item] #Assuming just one outputfile in this folder
+	new_output_fullpath = path.joinpath(CM.workspace.get_simulation_folder_as_posix(), new_output_name[0])
 	with open(new_output_fullpath, 'rb') as fb:
 		new_d_pickle = zlib.decompress(fb.read())
 		new_data = pickle.loads(new_d_pickle)
@@ -261,8 +262,8 @@ def get_spike_data():
 # @pytest.mark.skip(reason="too slow")
 def test_outputfile(cxsystem_run_fixture):
 	'''Test for existing outputfile'''
-	outputfilelist = [item for item in os.listdir(CM.workspace.get_simulation_folder_as_posix()) if item.startswith('results')]
-	assert os.access(os.path.join(CM.workspace.get_simulation_folder_as_posix(),outputfilelist[0]), os.W_OK)
+	outputfilelist = [item for item in os.listdir(CM.workspace.get_simulation_folder_as_posix()) if "_results_" in item]
+	assert os.access(CM.workspace.get_simulation_folder().joinpath(outputfilelist[0]), os.W_OK)
 	
 # @pytest.mark.xfail(reason='not identical spikes')		
 def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_data):
@@ -277,7 +278,6 @@ def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
-		print("%%%%%%%%%%%%%%%%%%% ",new_spikes_all[key]['N'] , spikes_all[key]['N'])
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
 		assert spike_count_proportion == 1.0
 
