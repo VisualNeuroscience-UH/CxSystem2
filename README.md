@@ -90,19 +90,19 @@ CxSystem's BUI is built to provide users with an interactive environment for cha
 
 Beside the BUI, Some of the main functionalities of the `CxSystem2` are available as terminal Commands, including the BUI itself. All of the following commands have built-in documentations available with `-h` or `--help` flags:  
 
-#### cxsystem2 
+#### `cxsystem2`
 
 This command (all in lower letters and case sensitive) is the main command of the `CxSystem2` and can be used to run the django server for BUI or run simulations by passing the anatomy and physiology configuration files. 
 
-#### cxconfig 
+#### `cxconfig` 
 
 CxSystem2 supports `csv` and `json` for importing/exporting configuration files. To convert the configuration files, use the `cxconfig` and pass the path to the configuration file path as its argument. This command recognizes the file type and convert it to the alternative extension. 
 
-#### cxcluster 
+#### `cxcluster`
 
 Use `cxcluster` to download the results from the cluster. `cxcluster` takes in one argument which is the path to the metadata file saved as a result of cluster-run submission. For convenience, at the end of a cluster-run job submission, `CxSystem2` prints the command that should be run to retrieve the result. 
 
-#### cxviz 
+#### `cxviz`
 
 TBD
 
