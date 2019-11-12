@@ -1,4 +1,4 @@
-<a href="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/README.md"><img src="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/data_config/icon/cxsystem_logo.png?sanitize=true" width="60%"></a>
+<a href="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/README.md"><img src="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/data_config/icon/cxsystem_logo.png?sanitize=true" width="50%"></a>
 
 # CxSystem2, A Flexible Cortical Simulation Framework
 > Warning: CxSystem2 GUI is developed for using in a local environment and should not be installed on a publicly accessible server unless extra security measures are added on top of it  
@@ -49,6 +49,8 @@ C:\> python3 -m venv %userprofile%\CX2
 C:\> %userprofile%\CX2\Scripts\activate
 (CX2) C:\> pip install cxsystem2
 ```
+
+Moreover, to use the C++ standalone device on Windows, install the [Visual C++ Build Tools 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159).
 
 ### Linux/Mac
 
