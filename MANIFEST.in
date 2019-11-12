@@ -1,4 +1,4 @@
-include slurm.job
+include **/slurm.job
 recursive-include tests *.py *.csv *.json *.gz
 recursive-include cxsystem2 *
 recursive-include cxsystem2/gui/cx_gui *.css *.js *.html *.json
