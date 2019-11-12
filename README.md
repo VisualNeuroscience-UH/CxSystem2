@@ -61,13 +61,12 @@ $ python --version
 Python 3.7.4
 $ python3 -m venv ~/CX2
 $ source ~/CX2/bin/activate
-$ pip install cxsystem2 
-(CX2) user@DESKTOP:~$ pip install cxsystem2
+(CX2) $ pip install cxsystem2
 ```
 
 ### Development
 
-To develop `CxSystem2`, after creating the repository install it with the following commands: 
+To develop `CxSystem2`, after cloning the repository install it with the following commands: 
 
 ```shell
 (CX2) $ git clone https://github.com/VisualNeuroscience-UH/CxSystem2
