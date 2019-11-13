@@ -8,6 +8,7 @@
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/enhancement.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
 [![Github Issues](http://img.shields.io/github/issues-pr/VisualNeuroscience-UH/CxSystem2.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/pulls)
 [![Documentation Status](https://readthedocs.org/projects/cxsystem/badge/?version=master)](http://cxsystem.readthedocs.io/en/master/?badge=master)
+[![PyPI version](https://badge.fury.io/py/cxsystem2.svg)](https://badge.fury.io/py/cxsystem2)
 
 ## Table of Contents 
 
