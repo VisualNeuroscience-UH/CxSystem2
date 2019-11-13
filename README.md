@@ -47,7 +47,8 @@ C:\> python --version
 Python 3.7.4
 C:\> python3 -m venv %userprofile%\CX2
 C:\> %userprofile%\CX2\Scripts\activate
-(CX2) C:\> pip install cxsystem2
+(CX2) C:\> pip install --upgrade setuptools
+(CX2) C:\> pip install -U cxsystem2
 ```
 
 Moreover, to use the C++ standalone device on Windows, install the [Visual C++ Build Tools 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159).
@@ -61,7 +62,8 @@ $ python --version
 Python 3.7.4
 $ python3 -m venv ~/CX2
 $ source ~/CX2/bin/activate
-(CX2) $ pip install cxsystem2
+(CX2) $ pip install --upgrade setuptools
+(CX2) $ pip install -U cxsystem2
 ```
 
 ### Development
@@ -71,8 +73,9 @@ To develop `CxSystem2`, after cloning the repository install it with the followi
 ```shell
 (CX2) $ git clone https://github.com/VisualNeuroscience-UH/CxSystem2
 (CX2) $ cd CxSystem2
+(CX2) $ pip install --upgrade setuptools
 (CX2) $ pip install -r requirements.txt
-(CX2) $ pip install -e . 
+(CX2) $ pip install -U -e . 
 ```
 
 With this method any change to the code will be reflected on the package immediately. 
