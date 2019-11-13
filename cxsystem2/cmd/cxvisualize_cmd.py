@@ -41,7 +41,9 @@ import os
 from shutil import which
 
 if which("visimpl.AppImage") is None:
-    VISIMPL_BINARY = '~/visimpl/visimpl.AppImage'  # TODO - This is probably not the right place for this
+    VISIMPL_BINARY = Path('~/visimpl/visimpl.AppImage')  # TODO - This is probably not the right place for this
+    if not VISIMPL_BINARY.is_file():
+        raise FileNotFoundError ("visimple binary not found ")
 else:
     VISIMPL_BINARY = 'visimpl.AppImage' # visimple is alerady in path
 
