@@ -1,7 +1,7 @@
 <a href="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/README.md"><img src="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/data_config/icon/cxsystem_logo.png?sanitize=true" width="50%"></a>
 
 # CxSystem2, A Flexible Cortical Simulation Framework
-> Warning: CxSystem2 GUI is developed for using in a local environment and should not be installed on a publicly accessible server unless extra security measures are added on top of it  
+> Warning: CxSystem2 BUI is developed for using in a local environment and should not be installed on a publicly accessible server unless extra security measures are added on top of it  
 
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/LICENSE) 
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/bug.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
@@ -47,7 +47,8 @@ C:\> python --version
 Python 3.7.4
 C:\> python3 -m venv %userprofile%\CX2
 C:\> %userprofile%\CX2\Scripts\activate
-(CX2) C:\> pip install cxsystem2
+(CX2) C:\> pip install --upgrade setuptools
+(CX2) C:\> pip install -U cxsystem2
 ```
 
 Moreover, to use the C++ standalone device on Windows, install the [Visual C++ Build Tools 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48159).
@@ -61,7 +62,8 @@ $ python --version
 Python 3.7.4
 $ python3 -m venv ~/CX2
 $ source ~/CX2/bin/activate
-(CX2) $ pip install cxsystem2
+(CX2) $ pip install --upgrade setuptools
+(CX2) $ pip install -U cxsystem2
 ```
 
 ### Development
@@ -71,8 +73,9 @@ To develop `CxSystem2`, after cloning the repository install it with the followi
 ```shell
 (CX2) $ git clone https://github.com/VisualNeuroscience-UH/CxSystem2
 (CX2) $ cd CxSystem2
+(CX2) $ pip install --upgrade setuptools
 (CX2) $ pip install -r requirements.txt
-(CX2) $ pip install -e . 
+(CX2) $ pip install -U -e . 
 ```
 
 With this method any change to the code will be reflected on the package immediately. 
@@ -133,7 +136,7 @@ You are encouraged to use <a href="https://github.com/VisualNeuroscience-UH/CxSy
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) 
 
 - **[GPL-3-Clause](https://www.gnu.org/licenses/gpl-3.0.en.html)**
-- Copyright 2019 © <a href="http://www.helsinki.fi/visualneuroscience/" target="_blank">University of Helsinki</a>.
+- Copyright 2019 © <a href="http://www.helsinki.fi/visualneuroscience/" target="_blank">HUS Helsinki University Hospital</a>.
 
 ***
 <sub>[1] Markram, H., Muller, E., Ramaswamy, S., Reimann, M. W., Abdellah, M., Sanchez, C. A., … Schürmann, F. (2015). Reconstruction and Simulation of Neocortical Microcircuitry. Cell, 163(2), 456–492. http://doi.org/10.1016/j.cell.2015.09.029</sub>

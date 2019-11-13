@@ -7,6 +7,7 @@ from setuptools import find_packages, setup
 
 
 requiers = """
+wheel
 asn1crypto
 bcrypt
 Brian2
