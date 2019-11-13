@@ -96,7 +96,8 @@ setup(
         'console_scripts': [
             'cxsystem2 = cxsystem2.cmd.cxsystem_cmd:main',
             'cxconfig = cxsystem2.cmd.cxconfig_cmd:main',
-            'cxcluster = cxsystem2.cmd.cxcluster_cmd:main'
+            'cxcluster = cxsystem2.cmd.cxcluster_cmd:main',
+            'cxvisualize = cxsystem2.cmd.cxvisualize_cmd:main'
         ],
     }
 )

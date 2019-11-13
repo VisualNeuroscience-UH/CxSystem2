@@ -15,7 +15,7 @@ Options:
 
 Description:
 
-  cxsystem2 ./sample_meta.pkl
+  cxcluster ./sample_meta.pkl
 
     Uses the information in the metadata file to download the results if ready, and otherwise wait for the results. 
     User will be prompted for the remote password. 

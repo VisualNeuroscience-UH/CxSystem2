@@ -15,6 +15,7 @@ class SpikeData(object):
 
         self.data_filename = filename
         self.filename_stem = Path(filename).stem
+        self.file_dir = Path(filename).parent
         self.data = self.get_spike_data()
 
     def get_spike_data(self):
@@ -54,7 +55,8 @@ class SpikeData(object):
     def get_spike_list(self):
         """
         Creates an N_spikes x 2 matrix of spikes, where N_spikes = number of spikes, column 0 = neuron index,
-        and column 1 = spike time
+        and column 1 = spike time.
+        Spike times saved in seconds since this is the default unit in ViSimpl.
 
         :return: numpy array
         """
@@ -75,7 +77,7 @@ class SpikeData(object):
             N_spikes_in_group = self.data['spikes_all'][group]['N']
 
             spikelist[list_ix:list_ix + N_spikes_in_group, 0] = self.data['spikes_all'][group]['i'] + abs_start_index[group_ix]
-            spikelist[list_ix:list_ix + N_spikes_in_group, 1] = self.data['spikes_all'][group]['t'] / ms
+            spikelist[list_ix:list_ix + N_spikes_in_group, 1] = self.data['spikes_all'][group]['t'] / second
 
             list_ix += N_spikes_in_group
             group_ix += 1
@@ -102,27 +104,28 @@ class SpikeData(object):
         except IndexError:
             layer_number = 0
 
-        # z_level = {0: 0, 1: 1, 2: 2,
-        #            4: 3, 5: 4, 6: 5}
         # Layer thicknesses from Markram et al 2015 Cell:
         # L1 165um, L2/3 502um, L4 190um, L5 525um, L6 700um => total 2082um
-        z_level = {6: 0, 5: 700e-6, 4: 1225e-6, 2: 1415e-6, 1: 1917e-6, 0: 2082e-6}
+        z_level = {6: 0, 5: 700e-3, 4: 1225e-3, 2: 1415e-3, 1: 1917e-3, 0: 2082e-3}
 
         return z_level[layer_number]
 
-    def get_positions_list(self, xy_multiplier=1, return_subsets=True):
+    def get_positions_list(self, xy_multiplier=(1500.0/50000), z_multiplier=(1500.0/50000), return_subsets=True):
         """
         Creates a N_neurons x 3 matrix of neurons, where N_neurons = number of neurons,
         column 0 = x position, column 1 = y position, and column 2 = z position.
         Neuron index implicitly encoded by row number (as expected by ViSimpl/StackViz).
+        XY-multipliers set here for visually pleasing results in ViSimpl.
 
-        :param xy_multiplier: scalar (default 1e6), how much to scale x-y coordinates
+        :param xy_multiplier: scalar, how much to scale x-y coordinates
+        :param xy_multiplier: scalar, how much to scale z coordinate
         :param return_subsets: True/False (default x),
         :return:
         """
         start_ix, group_names = self._get_start_indices(return_names=True)
         N_neurons = start_ix[-1]
-        coords = self.data['positions_all']['z_coord']
+        # In CxSystem, w = position in cortex, in millimeters (and z = position in retina)
+        coords = self.data['positions_all']['w_coord']
 
         all_positions = np.zeros((N_neurons, 3))
 
@@ -131,8 +134,7 @@ class SpikeData(object):
             group_pos = np.array(coords[group])
             group_z = self._get_z_level(group)
 
-
-            x = np.array([(xy_multiplier * neuron_pos.real, xy_multiplier * neuron_pos.imag, group_z)
+            x = np.array([(xy_multiplier * neuron_pos.real, xy_multiplier * neuron_pos.imag, z_multiplier * group_z)
                           for neuron_pos in group_pos])
 
             all_positions[start_ix[group_ix]:start_ix[group_ix+1], :] = x
@@ -171,17 +173,17 @@ class SpikeData(object):
 
     def save_for_visimpl(self, structure_csv=None, spikes_csv=None, subsets_json=None):
         if structure_csv is None:
-            structure_csv = self.filename_stem + '_structure.csv'
+            structure_csv = self.file_dir.joinpath(Path(self.filename_stem + '_structure.csv'))
         if spikes_csv is None:
-            spikes_csv = self.filename_stem + '_spikes.csv'
+            spikes_csv = self.file_dir.joinpath(Path(self.filename_stem + '_spikes.csv'))
         if subsets_json is None:
-            subsets_json = self.filename_stem + '_subsets.json'
+            subsets_json = self.file_dir.joinpath(Path(self.filename_stem + '_subsets.json'))
 
         positions_list, subsets_dict = self.get_positions_list()
         np.savetxt(structure_csv, positions_list, delimiter=',', fmt='%.9f')
 
         spike_list = self.get_spike_list()
-        np.savetxt(spikes_csv, spike_list, delimiter=',', fmt=['%d', '%.1f'])
+        np.savetxt(spikes_csv, spike_list, delimiter=',', fmt=['%d', '%.9f'])
 
         subsets_json_data = self._convert_subsets_dict_to_visimpl_json(subsets_dict)
         with open(subsets_json, 'w') as fi:
