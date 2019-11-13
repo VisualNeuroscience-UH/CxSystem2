@@ -2,7 +2,7 @@
 
 Usage:
   cxvisualize (-h | --help)
-  cxvisualize  FILEPATH
+  cxvisualize  [ -d | -c ] FILEPATH
 
 
 A tool for visualizing `CxSystem` spike data in ViSimpl.
@@ -12,15 +12,23 @@ Arguments:
 
 Options:
   -h --help     Show this screen
-  --convert     Convert results for use in ViSimpl TODO
-  --delete      Delete ViSimpl-related files after visualization TODO
+  -c --convert     Convert results for use in ViSimpl
+  -d --delete      Delete ViSimpl-related files after visualization
 
 Description:
 
   cxvisualize ./results.gz
 
-    converts the results file into two CSVs and one JSON for ViSimpl
+    converts the results file into two CSVs and one JSON for ViSimpl, visualizes the result and does not remove the temp files
     (actual visualization: ./visimpl -csv results_structure.csv results_spikes.csv -se results_subsets.json)
+
+  cxvisualize -d ./results.gz
+
+    converts the results file into two CSVs and one JSON for ViSimpl, visualizes the result and remove the temp files
+
+  cxvisualize -c ./results.gz
+
+    converts the results file into two CSVs and one JSON for ViSimpl (no visualization)
 
 """
 
@@ -30,8 +38,13 @@ from cxsystem2.visualization.spikedata_to_csvs import SpikeData
 import sys
 from pathlib import Path
 import os
+from shutil import which
 
-VISIMPL_BINARY = '~/visimpl/visimpl.AppImage'  # TODO - This is probably not the right place for this
+if which("visimpl.AppImage") is None:
+    VISIMPL_BINARY = '~/visimpl/visimpl.AppImage'  # TODO - This is probably not the right place for this
+else:
+    VISIMPL_BINARY = 'visimpl.AppImage' # visimple is alerady in path
+
 
 def _convert(filepath):
     x = SpikeData(filepath)
@@ -44,7 +57,6 @@ def _run_visimpl(structure_csv, spikes_csv, subsets_json):
 
 def main():
     arguments = docopt(__doc__)
-    # print(arguments)
 
     filepath = Path(arguments['FILEPATH'])
     if not filepath.is_file():
@@ -52,11 +64,12 @@ def main():
 
     else:
         structure_csv, spikes_csv, subsets_json = _convert(filepath)
-        _run_visimpl(structure_csv, spikes_csv, subsets_json)
-        os.remove(structure_csv)
-        os.remove(spikes_csv)
-        os.remove(subsets_json)
-
+        if not arguments['--convert']:
+            _run_visimpl(structure_csv, spikes_csv, subsets_json)
+        if  arguments['--delete']:
+            os.remove(structure_csv)
+            os.remove(spikes_csv)
+            os.remove(subsets_json)
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
