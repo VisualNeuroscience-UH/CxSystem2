@@ -19,7 +19,8 @@
 - [Interfaces](#interfaces)
     * [Browser User Interface (BUI)](#browser-user-interface-bui)
     * [Command Line Interface (CLI)](#command-line-interface-cli)
-- [Citation](#Citation)
+- [Documentation](#documentation)
+- [Citation](#citation)
 - [Support](#support)
 - [Team](#team)
 - [License](#license)
@@ -32,7 +33,6 @@ The CxSystem aims at easy testing and buildup of diverse models at single cell r
 
 The preliminary version of this software has been developed at Aalto University 2012-2015 [2], and the full version at the University of Helsinki 2013-2017. The software is distributed under the terms of the GNU General Public License, Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
-To access the documentation of the CxSystem, please check out the [readthedocs page](http://cxsystem.readthedocs.io/en/master/) of the project.
 
 ## Installation
 
@@ -107,6 +107,10 @@ Use `cxcluster` to download the results from the cluster. `cxcluster` takes in o
 #### `cxvisualize`
 
 This command can be used to visualize the result of the simulation using `visimpl` visualizer. 
+
+## Documentation
+
+To be updated: To access the documentation of the CxSystem, please check out the [readthedocs page](http://cxsystem.readthedocs.io/en/master/) of the project.
 
 ## Citation
 
