@@ -189,6 +189,8 @@ class SpikeData(object):
         with open(subsets_json, 'w') as fi:
             fi.write(subsets_json_data)
 
+        return structure_csv, spikes_csv, subsets_json
+
 
 if __name__ == '__main__':
 
