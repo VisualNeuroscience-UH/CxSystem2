@@ -28,26 +28,27 @@ runtime_params_schema = {
         "min_distance": {
             "type": "string",
             "description": "Minimum distance between neurons (e.g. 1*um)",
+            "default": "1*um"
         },
         "workspace_path": {
             "type": "string",
-            "description": "This is the main working directory of CxSystem and other pathes would be relative to this path",
+            "description": "The main working directory of CxSystem; other paths are given relative to this path",
             "default": "~/CxWorkspace"
         },
         "simulation_title": {
             "type": "string",
-            "description": "Title of the simulation using which CxSystem will create a folder",
-            "default": "CxSim"
+            "description": "Title for the current batch of simulations",
+            "default": "my_simulations"
         },
         "compression_method": {
             "type": "string",
-            "description": "Simulation output data compression method",
+            "description": "Data compression method",
             "enum": ["gzip", "bzip2", "pickle"]
         },
         "import_connections_from": {
             "type": "string",
-            "description": "Relative path and filename from where the network configuration with synaptic weights are retrieved (import)",
-            "default": "./simdata/data.gz"
+            "description": "Path and filename from where connections with synaptic weights are imported (relative to workspace path)",
+            "default": "--"
         },
         "number_of_process": {
             "type": "integer",
@@ -59,6 +60,7 @@ runtime_params_schema = {
         "default_clock": {
             "type": "string",
             "description": "Simulation time step (e.g. 0.1*ms)",
+            "default": "0.1*ms"
         },
         "trials_per_config": {
             "type": "integer",
@@ -69,7 +71,7 @@ runtime_params_schema = {
         },
         "init_vms": {
             "type": "boolean",
-            "description": "Randomize initial membrane voltages (between leak reversal and threshold potential)",
+            "description": "Randomize initial membrane voltages (between V_init_min and V_init_max)",
             "format": "checkbox"
         },
         "load_positions_only": {
@@ -79,7 +81,7 @@ runtime_params_schema = {
         },
         "benchmark": {
             "type": "boolean",
-            "description": "Do a benchmark (?)",
+            "description": "Benchmark the simulation using CxSystem's own profiler",
             "format": "checkbox"
         },
         "save_input_video": {
@@ -89,7 +91,7 @@ runtime_params_schema = {
         },
         "multidimension_array_run": {
             "type": "boolean",
-            "description": "Run all possible parameter combinations in array run (instead of 1D sweeps)",
+            "description": "Run all possible parameter combinations in an array run (instead of 1D sweeps)",
             "format": "checkbox"
         },
         "profiling": {
@@ -104,7 +106,7 @@ runtime_params_schema = {
         },
         "cluster_job_file_path": {
             "type": "string",
-            "description": "Relative path and filename of the Slurm batch file",
+            "description": "Absolute path and filename of the Slurm batch file (slurm.job)",
             "default" : "--"
         },
         "cluster_number_of_nodes": {
@@ -126,7 +128,7 @@ runtime_params_schema = {
         },
         "cluster_workspace": {
             "type": "string",
-            "description": "Absolute path for storing results on the HPC server",
+            "description": "Workspace path on the HPC server",
             "default" : "--"
         },
     }
@@ -165,7 +167,7 @@ neurons_schema = {
                 },
                 'neuron_subtype': {
                     "type": "string",
-                    "description": "Neuron subtype, i.e. reference to the concrete set of parameters",
+                    "description": "Neuron subtype, i.e. reference to the concrete set of parameters in the physiology config",
                 },
                 "layer_idx": {
                     "type": "string",
@@ -180,11 +182,6 @@ neurons_schema = {
                     "type": "string",
                     "description": "Center point of the neuron population (e.g. 0+0j)",
                 },
-                "noise_sigma": {
-                    "type": "string",
-                    "description": "Membrane noise (e.g. 2*mV)",
-                    "default" : "--"
-                },
                 "monitors": {
                     "type": "string",
                     "format": "text",
@@ -198,26 +195,6 @@ neurons_schema = {
                 'n_background_inhibition': {
                     "type": "integer",
                     "description": "Number of inhibitory background synapses"
-                },
-                'gemean': {
-                    "type": "string",
-                    "description": "gemean",
-                    "default" : "--"
-                },
-                'gestd': {
-                    "type": "string",
-                    "description": "gestd",
-                    "default" : "--"
-                },
-                'gimean': {
-                    "type": "string",
-                    "description": "gimean",
-                    "default" : "--"
-                },
-                'gistd': {
-                    "type": "string",
-                    "description": "gistd",
-                    "default" : "--"
                 }
             }
         }]
