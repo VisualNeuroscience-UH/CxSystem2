@@ -136,7 +136,7 @@ You are encouraged to use <a href="https://github.com/VisualNeuroscience-UH/CxSy
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) 
 
 - **[GPL-3-Clause](https://www.gnu.org/licenses/gpl-3.0.en.html)**
-- Copyright 2019 © <a href="http://www.helsinki.fi/visualneuroscience/" target="_blank">University of Helsinki</a>.
+- Copyright 2019 © <a href="http://www.helsinki.fi/visualneuroscience/" target="_blank">HUS Helsinki University Hospital</a>.
 
 ***
 <sub>[1] Markram, H., Muller, E., Ramaswamy, S., Reimann, M. W., Abdellah, M., Sanchez, C. A., … Schürmann, F. (2015). Reconstruction and Simulation of Neocortical Microcircuitry. Cell, 163(2), 456–492. http://doi.org/10.1016/j.cell.2015.09.029</sub>
