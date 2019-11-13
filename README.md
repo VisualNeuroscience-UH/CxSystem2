@@ -104,9 +104,9 @@ CxSystem2 supports `csv` and `json` for importing/exporting configuration files.
 
 Use `cxcluster` to download the results from the cluster. `cxcluster` takes in one argument which is the path to the metadata file saved as a result of cluster-run submission. For convenience, at the end of a cluster-run job submission, `CxSystem2` prints the command that should be run to retrieve the result. 
 
-#### `cxviz`
+#### `cxvisualize`
 
-TBD
+This command can be used to visualize the result of the simulation using `visimpl` visualizer. 
 
 ## Citation
 
