@@ -18,7 +18,7 @@
     * [Development](#development)
 - [Interfaces](#interfaces)
     * [Browser User Interface (BUI)](#bui)
-    * [Terminal Commands](#commands)
+    * [Command Line Interface (CLI)](#commands)
 - [Citation](#Citation)
 - [Support](#support)
 - [Team](#team)
@@ -88,9 +88,9 @@ With this method any change to the code will be reflected on the package immedia
 
 CxSystem's BUI is built to provide users with an interactive environment for changing the parameters for simulations. 
 
-### Terminal Commands
+### Command Line Interface (CLI)
 
-Beside the BUI, Some of the main functionalities of the `CxSystem2` are available as terminal Commands, including the BUI itself. All of the following commands have built-in documentations available with `-h` or `--help` flags:  
+Beside the BUI, Some of the main functionalities of the `CxSystem2` are available in terminal, including the BUI itself. All of the following commands have built-in documentations available with `-h` or `--help` flags:  
 
 #### `cxsystem2`
 
