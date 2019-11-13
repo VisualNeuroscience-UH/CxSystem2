@@ -152,7 +152,8 @@ class neuron_reference(object):
         getattr(self, self.output_neuron['type'])()
         # </editor-fold>
 
-        # <editor-fold desc="...Loading positions">
+        # <editor-fold desc="...Creating positions">
+        # w = position in cortex (in mm), z = position in retina (in mm)
         self.output_neuron['z_center'] = network_center
         self.output_neuron['w_center'] = 17 * log(self.output_neuron['z_center']+ 1)
         self.output_neuron['w_positions'] = self._get_w_positions(self.output_neuron['number_of_neurons'],
@@ -166,6 +167,7 @@ class neuron_reference(object):
 
     def _get_w_positions(self, N, layout,  general_grid_radius,min_distance):
 
+        # w position = position in cortex, in millimeters
         r = general_grid_radius / mm
         possible_pos_idx = arange (-r,r,min_distance/mm)
         if layout == 'fixed_grid':
