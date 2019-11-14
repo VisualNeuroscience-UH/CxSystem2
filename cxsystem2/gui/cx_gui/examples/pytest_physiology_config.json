@@ -3,12 +3,12 @@
     {
       "Variable": "model_variation",
       "Value": 1,
-      "Comment": ""
+      "Comment": "# 0 not used? Remove from CxSystem?"
     },
     {
       "Variable": "neuron_model",
       "Value": "'EIF'",
-      "Comment": ""
+      "Comment": "# EIF model defined in equation_template.py module"
     },
     {
       "Variable": "excitation_model",
@@ -73,12 +73,12 @@
     {
       "Variable": "background_rate",
       "Value": "0*Hz",
-      "Comment": "# Rate of Poisson-distributed background excitation"
+      "Comment": " # Was 0.3*Hz"
     },
     {
       "Variable": "background_rate_inhibition",
       "Value": "0*Hz",
-      "Comment": "# Rate of Poisson-distributed background inhibition"
+      "Comment": ""
     },
     {
       "Variable": "tonic_depol_level",
@@ -166,11 +166,6 @@
       ]
     },
     {
-      "Variable": "delay_GLOBAL",
-      "Value": "3.0*ms",
-      "Comment": "# Synaptic delay"
-    },
-    {
       "Variable": "Ee_GLOBAL",
       "Value": "0*mV",
       "Comment": "# Excitatory (AMPA) equilibrium potential"
@@ -181,14 +176,29 @@
       "Comment": "# Inhibitory (GABA-A) equilibrium potential"
     },
     {
+      "Variable": "tau_e_alpha_GLOBAL",
+      "Value": "0.0*ms",
+      "Comment": "# not used"
+    },
+    {
+      "Variable": "tau_i_alpha_GLOBAL",
+      "Value": "0.0* ms",
+      "Comment": "# not used"
+    },
+    {
       "Variable": "tau_e_GLOBAL",
       "Value": "3.0*ms",
-      "Comment": "# AMPA"
+      "Comment": "#AMPA"
     },
     {
       "Variable": "tau_i_GLOBAL",
       "Value": "8.3*ms",
-      "Comment": "# GABA-A"
+      "Comment": "#GABA-A"
+    },
+    {
+      "Variable": "scaling_alpha_GLOBAL",
+      "Value": 9999,
+      "Comment": "# not used"
     },
     {
       "Variable": "scaling_nmda_GLOBAL",
@@ -410,147 +420,147 @@
       "Key-Value": [
         {
           "Key": "delay_in_SS",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_in_PC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_in_BC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_in_L1i",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_SS_SS",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_SS_PC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_SS_BC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_SS_MC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_SS_L1i",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_PC_SS",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_PC_PC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_PC_BC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_PC_MC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_PC_L1i",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_BC_SS",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_BC_PC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_BC_BC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_BC_MC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_BC_L1i",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_MC_SS",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_MC_PC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_MC_BC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_MC_MC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_MC_L1i",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_L1i_SS",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_L1i_PC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_L1i_BC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_L1i_MC",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         },
         {
           "Key": "delay_L1i_L1i",
-          "Value": "delay_GLOBAL",
+          "Value": "3.0*ms",
           "Comment": ""
         }
       ]
@@ -582,6 +592,11 @@
           "Key": "EL",
           "Value": "-72.4306544604 * mV",
           "Comment": "# Membrane equilibrium potential"
+        },
+        {
+          "Key": "V_init",
+          "Value": "-72.4306544604 * mV",
+          "Comment": "# V init"
         },
         {
           "Key": "Vcut",
@@ -634,6 +649,21 @@
           "Comment": "# Inhibitory time constant (GABA-A)"
         },
         {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
           "Key": "scaling_nmda",
           "Value": "scaling_nmda_GLOBAL",
           "Comment": ""
@@ -680,7 +710,7 @@
         },
         {
           "Key": "tau_tonic_rampup",
-          "Value": "50*ms",
+          "Value": " 50*ms",
           "Comment": ""
         },
         {
@@ -715,6 +745,11 @@
         },
         {
           "Key": "EL",
+          "Value": "-70.8507355932 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_init",
           "Value": "-70.8507355932 * mV",
           "Comment": ""
         },
@@ -769,6 +804,21 @@
           "Comment": ""
         },
         {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
           "Key": "scaling_nmda",
           "Value": "scaling_nmda_GLOBAL",
           "Comment": ""
@@ -815,7 +865,7 @@
         },
         {
           "Key": "tau_tonic_rampup",
-          "Value": "50*ms",
+          "Value": " 50*ms",
           "Comment": ""
         },
         {
@@ -845,6 +895,11 @@
         },
         {
           "Key": "EL",
+          "Value": "-73.0276 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_init",
           "Value": "-73.0276 * mV",
           "Comment": ""
         },
@@ -885,7 +940,7 @@
         },
         {
           "Key": "Ra",
-          "Value": "[100, 100, 150, 150, 150] * Mohm",
+          "Value": "[100,100,150,150,150] * Mohm",
           "Comment": ""
         },
         {
@@ -911,6 +966,21 @@
         {
           "Key": "tau_i",
           "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
           "Comment": ""
         },
         {
@@ -960,7 +1030,7 @@
         },
         {
           "Key": "tau_tonic_rampup",
-          "Value": "50*ms",
+          "Value": " 50*ms",
           "Comment": ""
         },
         {
@@ -990,6 +1060,11 @@
         },
         {
           "Key": "EL",
+          "Value": "-72.65804 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_init",
           "Value": "-72.65804 * mV",
           "Comment": ""
         },
@@ -1030,7 +1105,7 @@
         },
         {
           "Key": "Ra",
-          "Value": "[100, 100, 150, 150, 150] * Mohm",
+          "Value": "[100,100,150,150,150] * Mohm",
           "Comment": ""
         },
         {
@@ -1056,6 +1131,21 @@
         {
           "Key": "tau_i",
           "Value": "tau_i_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
           "Comment": ""
         },
         {
@@ -1105,7 +1195,7 @@
         },
         {
           "Key": "tau_tonic_rampup",
-          "Value": "50*ms",
+          "Value": " 50*ms",
           "Comment": ""
         },
         {
@@ -1140,6 +1230,11 @@
         },
         {
           "Key": "EL",
+          "Value": "-73.66282 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_init",
           "Value": "-73.66282 * mV",
           "Comment": ""
         },
@@ -1194,6 +1289,21 @@
           "Comment": ""
         },
         {
+          "Key": "tau_e_alpha",
+          "Value": "tau_e_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "tau_i_alpha",
+          "Value": "tau_i_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
+          "Key": "scaling_alpha",
+          "Value": "scaling_alpha_GLOBAL",
+          "Comment": ""
+        },
+        {
           "Key": "scaling_nmda",
           "Value": "scaling_nmda_GLOBAL",
           "Comment": ""
@@ -1240,7 +1350,7 @@
         },
         {
           "Key": "tau_tonic_rampup",
-          "Value": "50*ms",
+          "Value": " 50*ms",
           "Comment": ""
         },
         {

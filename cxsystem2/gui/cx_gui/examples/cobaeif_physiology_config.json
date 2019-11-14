@@ -107,9 +107,13 @@
     },
     {
       "Variable": "sp",
-      "Key-Value": [{
-          "Key": "sp_in_SS", "Value": "0.8", "Comment": ""
-        }]
+      "Key-Value": [
+        {
+          "Key": "sp_in_SS",
+          "Value": "0.8",
+          "Comment": ""
+        }
+      ]
     },
     {
       "Variable": "VPM",
@@ -131,6 +135,11 @@
         },
         {
           "Key": "EL",
+          "Value": "-60 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_init",
           "Value": "-60 * mV",
           "Comment": ""
         },
@@ -201,6 +210,11 @@
         },
         {
           "Key": "EL",
+          "Value": "-60 * mV",
+          "Comment": ""
+        },
+        {
+          "Key": "V_init",
           "Value": "-60 * mV",
           "Comment": ""
         },

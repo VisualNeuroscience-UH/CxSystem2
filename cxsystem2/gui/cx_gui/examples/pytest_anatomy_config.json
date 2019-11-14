@@ -1,15 +1,16 @@
 {
   "params": {
     "runtime": "0.2*second",
-    "device": "Python",
+    "device": "python",
     "sys_mode": "local",
     "scale": 1,
     "grid_radius": "210*um",
     "min_distance": "1*um",
-    "init_vms": 1,
-    "workspace_path": "~/CxWorkspace",
-    "simulation_title": "pytest",
-    "import_connections_from": "#",
+    "init_vms": 0,
+    "compression_method": "gzip",
+    "workspace_path": "~/CxPytestWorkspace",
+    "simulation_title": "sim_pytest",
+    "import_connections_from": "./tests/connection_files/connections_20190517_06115909_python_200ms.gz",
     "load_positions_only": 0,
     "benchmark": 0,
     "profiling": 0,
@@ -23,7 +24,7 @@
     "cluster_number_of_nodes": 1,
     "cluster_address": "taito.csc.fi",
     "cluster_username": "username",
-    "cluster_workspace": "/homeappl/home/username/CxWorkspace"
+    "cluster_workspace": "/homeappl/home/username/CxWork"
   },
   "IN": [
     {
@@ -46,7 +47,12 @@
       "net_center": "--",
       "monitors": "[Sp]",
       "n_background_inputs": 630,
-      "n_background_inhibition": 290
+      "n_background_inhibition": 290,
+      "noise_sigma": "--",
+      "gemean": "--",
+      "gestd": "--",
+      "gimean": "--",
+      "gistd": "--"
     },
     {
       "idx": 2,
@@ -57,7 +63,12 @@
       "net_center": "--",
       "monitors": "[Sp]",
       "n_background_inputs": 630,
-      "n_background_inhibition": 290
+      "n_background_inhibition": 290,
+      "noise_sigma": "--",
+      "gemean": "--",
+      "gestd": "--",
+      "gimean": "--",
+      "gistd": "--"
     },
     {
       "idx": 3,
@@ -68,7 +79,12 @@
       "net_center": "--",
       "monitors": "[Sp]",
       "n_background_inputs": 630,
-      "n_background_inhibition": 290
+      "n_background_inhibition": 290,
+      "noise_sigma": "--",
+      "gemean": "--",
+      "gestd": "--",
+      "gimean": "--",
+      "gistd": "--"
     },
     {
       "idx": 4,
@@ -79,7 +95,12 @@
       "net_center": "--",
       "monitors": "[Sp]",
       "n_background_inputs": 500,
-      "n_background_inhibition": 180
+      "n_background_inhibition": 180,
+      "noise_sigma": "--",
+      "gemean": "--",
+      "gestd": "--",
+      "gimean": "--",
+      "gistd": "--"
     },
     {
       "idx": 5,
@@ -90,7 +111,12 @@
       "net_center": "--",
       "monitors": "[Sp]",
       "n_background_inputs": 500,
-      "n_background_inhibition": 180
+      "n_background_inhibition": 180,
+      "noise_sigma": "--",
+      "gemean": "--",
+      "gestd": "--",
+      "gimean": "--",
+      "gistd": "--"
     }
   ],
   "S": [
