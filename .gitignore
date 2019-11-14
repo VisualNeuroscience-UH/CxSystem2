@@ -56,6 +56,7 @@ tests/temp_connection_files
 cxsystem2.egg-info
 dist
 build
+.eggs
 
 # Developer files
 test_notebooks/
@@ -66,3 +67,4 @@ test_notebooks/
 # SSL certificates
 **/server_cert.key
 **/server_cert.crt
+
