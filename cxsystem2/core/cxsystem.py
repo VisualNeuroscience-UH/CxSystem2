@@ -226,7 +226,7 @@ class CxSystem(object):
             cluster_flag = 0
 
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1 : # this means CxSystem is running in cluster and is trying to spawn an array run on a node
-                array_run_suffix = '_' + Path(anatomy_and_system_config).name.split('_')[-2] + '_' + Path(anatomy_and_system_config).name.split('_')[-1]
+                array_run_suffix = '_' + Path(anatomy_and_system_config).stem.split('_')[-2] + '_' + Path(anatomy_and_system_config).stem.split('_')[-1]
                 print("spawning index: %d, step: %d" %(int(cluster_run_start_idx),int(cluster_run_step)))
                 cluster_flag = 1
                 suffix = array_run_suffix

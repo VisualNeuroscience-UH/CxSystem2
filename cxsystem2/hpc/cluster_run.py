@@ -49,13 +49,14 @@ class cluster_run(object):
         try:
             self.cluster_username = self.parameter_finder(array_run_obj.anatomy_df, 'cluster_username')
             assert self.cluster_username != 'username', "Cluster username must be changed in the configuration file, currently it is the default value 'username'"
-            print ("Loggin in with user '%s'"%self.cluster_username)
+            print (" -  Loggin in with user '%s'"%self.cluster_username)
         except NameError:
-            self.cluster_username = input('cluster_username: ')
+            self.cluster_username = input(' -  Enter cluster username: ')
         try:
             self.password = self.parameter_finder(array_run_obj.anatomy_df, 'password')
         except NameError:
-            self.password = getpass.getpass('Enter password for user {}: '.format(self.cluster_username))
+            self.password = getpass.getpass(' -  Enter password for user {}: '
+                                            ''.format(self.cluster_username))
 
 
         # self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
@@ -86,13 +87,15 @@ class cluster_run(object):
         self.local_cluster_folder = self.local_workspace.joinpath('cluster_run' + self.suffix)
         if not self.local_cluster_folder.is_dir():
             os.mkdir(self.local_cluster_folder.as_posix())
-
-        imported_connections_file = Path(self.parameter_finder(array_run_obj.anatomy_df, 'import_connections_from'))
-        if imported_connections_file.is_file():
-            scp.put(imported_connections_file.as_posix(), self.cluster_workspace.as_posix())
-            new_path = Path('./').joinpath(imported_connections_file.name).as_posix()
-            self.change_parameter_value_in_file(anat_file_path.as_posix(), self.local_cluster_folder.joinpath(anat_file_path.name), 'import_connections_from', new_path)
-            anat_file_path = self.local_cluster_folder.joinpath(anat_file_path.name)
+        try:
+            imported_connections_file = Path(self.parameter_finder(array_run_obj.anatomy_df, 'import_connections_from'))
+            if imported_connections_file.is_file():
+                scp.put(imported_connections_file.as_posix(), self.cluster_workspace.as_posix())
+                new_path = Path('./').joinpath(imported_connections_file.name).as_posix()
+                self.change_parameter_value_in_file(anat_file_path.as_posix(), self.local_cluster_folder.joinpath(anat_file_path.name), 'import_connections_from', new_path)
+                anat_file_path = self.local_cluster_folder.joinpath(anat_file_path.name)
+        except TypeError: # this is when the value is # or -- for instance
+            pass
         scp.put(anat_file_path.as_posix(), self.cluster_workspace.joinpath(self.remote_anat_filename).as_posix())
         scp.put(physio_file_path.as_posix(), self.cluster_workspace.joinpath(self.remote_phys_filename).as_posix())
 
@@ -107,9 +110,10 @@ class cluster_run(object):
         self.slurm_file_path = Path(self.parameter_finder(array_run_obj.anatomy_df, 'cluster_job_file_path')).expanduser()
         if not self.slurm_file_path.is_file():
             if not self.slurm_file_path.is_absolute():
-                raise RelativePathError("Slurm file path is not absolute")
+                raise RelativePathError("\nSlurm file {} not found. make sure the path to the file is "
+                                        "absolute".format(self.slurm_file_path.as_posix()))
             else:
-                raise FileNotFoundError("Slurm file not found")
+                raise FileNotFoundError("\nSlurm file {} not found".format(self.slurm_file_path.as_posix()))
         # building slurm :
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
             with open(self.slurm_file_path.as_posix(),'r') as sl1:
