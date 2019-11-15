@@ -429,7 +429,12 @@ class CxSystem(object):
 
     def run(self):
         if not self.array_run:
-            run(self.runtime, report='text',profile=True)
+
+            if self.device != 'genn':
+                run(self.runtime, report='text',profile=True)
+            else:
+                run(self.runtime, report='text') # genn doesn't support detailed profiling
+
             if self.profiling == 1:
                 print()
                 if len(profiling_summary().names) < 20:
@@ -514,6 +519,7 @@ class CxSystem(object):
             print(" -  CxSystem is performing benchmarking. The Brian2 "
                    "should be configured to use benchmarking.")
         if self.device.lower() == 'genn':
+            import brian2genn
             set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
             prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
@@ -1305,14 +1311,14 @@ class CxSystem(object):
 
             ### creating the initial synaptic connection :
             try:
-                exec("%s = Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s)" \
+                exec("%s = Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )" \
                      % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
-                        _dyn_syn_eq_name,_dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name))
+                        _dyn_syn_eq_name,_dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name, eval(_dyn_syn_namespace_name)['delay']))
             except NameError:  # for when there is no "on_post =...", i.e. fixed connection
                 exec("%s = Synapses(%s,%s,model = %s, on_pre = %s, "
-                      "namespace= %s)" \
+                      "namespace= %s, delay = %s)" \
                      % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
-                        _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name))
+                        _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name,eval(_dyn_syn_namespace_name)['delay']))
 
             ###############
             ############### Connecting synapses
@@ -1445,9 +1451,9 @@ class CxSystem(object):
                 exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,
                                                     _dyn_syn_namespace_name)
                       ) # set the weights
-            exec("%s.delay=%s['delay']" % (_dyn_syn_name,
-                                            _dyn_syn_namespace_name) ) # set
-            # the delays
+            # # the next two lines are commented out for GeNN and are added as a parameter when creating syn
+            # exec("%s.delay=%s['delay']" % (_dyn_syn_name,
+            #                                 _dyn_syn_namespace_name) ) # set the delays
             setattr(self.main_module, _dyn_syn_name, eval(_dyn_syn_name))
             try:
                 setattr(self.Cxmodule, _dyn_syn_name, eval(_dyn_syn_name))
