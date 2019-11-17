@@ -30,7 +30,7 @@ from pathlib import Path
 
 from docopt import docopt
 
-from cxsystem2.configuration.config_file_converter import filetype_converter
+from cxsystem2.configuration.config_file_converter import ConfigConverter
 
 
 def main():
@@ -43,11 +43,11 @@ def main():
 
     else:
         if filepath.suffix == '.json':
-            converted = filetype_converter(filepath)
+            converted = ConfigConverter(filepath)
             converted.save_as_csv()
 
         if filepath.suffix == '.csv':
-            converted = filetype_converter(filepath)
+            converted = ConfigConverter(filepath)
             converted.save_as_json()
 
 

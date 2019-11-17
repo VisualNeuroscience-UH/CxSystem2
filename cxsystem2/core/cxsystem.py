@@ -363,13 +363,13 @@ class CxSystem(object):
         '''
         if type(conf) == str:
             if '.json' in conf.lower():
-                converter = fileconverter.filetype_converter(conf)
+                converter = fileconverter.ConfigConverter(conf)
                 data = converter.get_csv()
             else:
                 data = pandas.read_csv(conf, header=None)
         else:
             if type(conf) == dict: # it means we've received json data
-                converter = fileconverter.filetype_converter(conf)
+                converter = fileconverter.ConfigConverter(conf)
                 data = converter.get_csv_from_json_data()
             else:
                 data = conf

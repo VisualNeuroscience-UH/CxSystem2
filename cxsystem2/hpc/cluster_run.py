@@ -74,10 +74,10 @@ class cluster_run(object):
         scp = SCPClient(self.client.get_transport())
 
         if 'json' in anat_file_path.suffix.lower():
-            converter = fileconverter.filetype_converter(anat_file_path.as_posix())
+            converter = fileconverter.ConfigConverter(anat_file_path.as_posix())
             anat_file_path = Path(converter.save_as_csv(overwrite=True))
         if 'json' in physio_file_path.suffix.lower():
-            converter = fileconverter.filetype_converter(physio_file_path.as_posix())
+            converter = fileconverter.ConfigConverter(physio_file_path.as_posix())
             physio_file_path = Path(converter.save_as_csv(overwrite=True))
 
         print(" -  Transferring configuration files ...")
