@@ -8,11 +8,7 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-
-from brian2  import *
-from numpy import *
 import os
-import ntpath
 import pickle as pickle
 import zlib
 import bz2

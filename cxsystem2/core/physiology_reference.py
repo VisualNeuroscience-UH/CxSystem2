@@ -8,10 +8,16 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-from cxsystem2.core.parameter_parser import *
+from cxsystem2.core.parameter_parser import synapse_parser, neuron_parser
 import random as rnd
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.neurodynlib.neuron_models import neuron_factory
+import numpy as np
+# do not remove nan, it's used in evals
+from numpy import nan
+from brian2.units import *
+import brian2 as b2
+
 
 class neuron_reference(object):
     '''
@@ -28,7 +34,7 @@ class neuron_reference(object):
         :param cell_type: type of cell in the NeuronGroup: currently PC, SS, BC, MC and L1i.
         :param layers_idx: indicating the layer in which the cell group is located. In case of SS, BC, MC and L1i it is an integer \
          but for PC which is a multi-compartmental neuron, it is a tuple array. This tuple numpy array defines the first \
-         and last layers in which the neuron resides. So array([4,1]) means that the soma resides in layer 4 and the apical \
+         and last layers in which the neuron resides. So np.array([4,1]) means that the soma resides in layer 4 and the apical \
          dendrites which are (2 compartments) extend to layer 2/3 and 1. To avoid confusion, layer 2 is used as the indicator \
          of layer 2/3. Hence, if the last compartment of a neuron is in layer 2/3, use number 2.
         :param network_center: as the name implies, this argument defines the center of teh NeuronGroup() in visual field coordinates. The default value is 0+0j.
@@ -41,7 +47,7 @@ class neuron_reference(object):
 
         # <editor-fold desc="...General neuron model initialization">
         self.physio_config_df = physio_config_df
-        neuron_reference._celltypes = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_I','HH_E', 'NDNEURON'])
+        neuron_reference._celltypes = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_I','HH_E', 'NDNEURON'])
         assert general_grid_radius > min_distance , ' -  The distance between cells should be less than the grid radius'
         assert cell_type in neuron_reference._celltypes, " -  Cell type '%s' is not defined" % cell_type  # check cell type
         assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"  # check layer index
@@ -61,17 +67,16 @@ class neuron_reference(object):
         self.output_neuron['soma_layer'] = int(layers_idx[0])
         # _comparts_tmp1 & 2 are for extracting the layer of the compartments if applicable
         if self.output_neuron['type'] == 'PC':
-            self._comparts_tmp1 = array(list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1)))
-            self._comparts_tmp2 = delete(self._comparts_tmp1, where(
-                self._comparts_tmp1 == 3)) if 3 in self._comparts_tmp1 else self._comparts_tmp1
+            self._comparts_tmp1 = np.array(list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1)))
+            self._comparts_tmp2 = np.delete(self._comparts_tmp1, np.where(self._comparts_tmp1 == 3)) if 3 in self._comparts_tmp1 else self._comparts_tmp1
             self.output_neuron['dends_layer'] = self._comparts_tmp2
             self.output_neuron['dend_comp_num'] = len(self.output_neuron['dends_layer'])
             self.output_neuron['total_comp_num'] = self.output_neuron['dend_comp_num'] + 3
 
         else:
             self.output_neuron['dends_layer'] = self.output_neuron['soma_layer']
-            self.output_neuron['dend_comp_num'] = array([0])
-            self.output_neuron['total_comp_num'] = array([1])
+            self.output_neuron['dend_comp_num'] = np.array([0])
+            self.output_neuron['total_comp_num'] = np.array([1])
             # number of compartments if applicable
 
         self.output_neuron['namespace'] = neuron_parser(self.output_neuron, physio_config_df).output_namespace
@@ -155,11 +160,11 @@ class neuron_reference(object):
         # <editor-fold desc="...Creating positions">
         # w = position in cortex (in mm), z = position in retina (in mm)
         self.output_neuron['z_center'] = network_center
-        self.output_neuron['w_center'] = 17 * log(self.output_neuron['z_center']+ 1)
+        self.output_neuron['w_center'] = 17 * np.log(self.output_neuron['z_center']+ 1)
         self.output_neuron['w_positions'] = self._get_w_positions(self.output_neuron['number_of_neurons'],
                                                                 'fixed_grid', general_grid_radius,min_distance)
-        # self.output_neuron['w_positions'] = 17 * log(self.output_neuron['z_positions'] + 1)
-        self.output_neuron['z_positions'] =  list(map(lambda x: e ** (x/17) - 1,self.output_neuron['w_positions'] ))
+        # self.output_neuron['w_positions'] = 17 * np.log(self.output_neuron['z_positions'] + 1)
+        self.output_neuron['z_positions'] =  list(map(lambda x: np.e ** (x/17) - 1,self.output_neuron['w_positions'] ))
         print(" -  Customized " + str(cell_type) + " neuron in layer " + str(layers_idx) + " initialized with " + \
               str(self.output_neuron['number_of_neurons']) + " neurons.")
 
@@ -173,7 +178,7 @@ class neuron_reference(object):
         if layout == 'fixed_grid':
             _positions = [(rnd.choice(possible_pos_idx),rnd.choice(possible_pos_idx)) for a1,a2 in zip(list(range(N)),list(range(N)))]
             for idx,item in enumerate(_positions):
-                while sqrt(_positions[idx][0]**2 + _positions[idx][1]**2)>r:
+                while np.sqrt(_positions[idx][0]**2 + _positions[idx][1]**2)>r:
                     _positions[idx] =  (rnd.choice(possible_pos_idx),rnd.choice(possible_pos_idx))
             # _positions =[tuple(map(operator.add,_itm, (float(real(_centre)),float(imag(_centre))))) for _itm in _positions]
             _positions = [complex(_itm[0],_itm[1]) + self.output_neuron['w_center'] for _itm in _positions]
@@ -205,7 +210,7 @@ class neuron_reference(object):
         self.output_neuron['reset'] = x.get_reset_statements()
         self.output_neuron['refractory'] = x.get_refractory_period()
 
-        self.output_neuron['equation'] += Equations('''x : meter
+        self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
     def PC(self):
@@ -244,8 +249,9 @@ class neuron_reference(object):
 
         if self.model_variation is False:  # For backwards compatibility
 
-            assert 'noise_sigma' in self.output_neuron[
-                'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1? "
+            assert 'noise_sigma' in self.output_neuron['namespace'].keys(), \
+                "Noise sigma is used in model_variation model, but it is not defined in the configuration file. " \
+                "Did you mean to set model_variation  in physiologyi configuration to 1? "
             # <editor-fold desc="...Fixed equations">
             eq_template_soma = '''
             dvm/dt = ((gL*(EL-vm) + gealpha * (Ee-vm) + gialpha * (Ei-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) +I_dendr +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5 : volt (unless refractory)
@@ -262,13 +268,13 @@ class neuron_reference(object):
             dgialpha/dt = (gi-gialpha)/tau_i : siemens
             '''
 
-            self.output_neuron['equation'] = Equations(eq_template_dend, vm="vm_basal", ge="ge_basal",
+            self.output_neuron['equation'] = b2.Equations(eq_template_dend, vm="vm_basal", ge="ge_basal",
                                                        gealpha="gealpha_basal",
                                                        C=self.output_neuron['namespace']['C'][0],
                                                        gL=self.output_neuron['namespace']['gL'][0],
                                                        gi="gi_basal", geX="geX_basal", gialpha="gialpha_basal",
                                                        gealphaX="gealphaX_basal", I_dendr="Idendr_basal")
-            self.output_neuron['equation'] += Equations(eq_template_soma, gL=self.output_neuron['namespace']['gL'][1],
+            self.output_neuron['equation'] += b2.Equations(eq_template_soma, gL=self.output_neuron['namespace']['gL'][1],
                                                         ge='ge_soma', geX='geX_soma', gi='gi_soma',
                                                         gealpha='gealpha_soma',
                                                         gealphaX='gealphaX_soma',
@@ -278,7 +284,7 @@ class neuron_reference(object):
                                                         taum_soma=self.output_neuron['namespace']['taum_soma'])
             for _ii in range(
                     self.output_neuron['dend_comp_num'] + 1):  # extra dendritic compartment in the same level of soma
-                self.output_neuron['equation'] += Equations(eq_template_dend, vm="vm_a%d" % _ii,
+                self.output_neuron['equation'] += b2.Equations(eq_template_dend, vm="vm_a%d" % _ii,
                                                             C=self.output_neuron['namespace']['C'][_ii],
                                                             gL=self.output_neuron['namespace']['gL'][_ii],
                                                             ge="ge_a%d" % _ii,
@@ -287,30 +293,30 @@ class neuron_reference(object):
                                                             gealphaX="gealphaX_a%d" % _ii, I_dendr="Idendr_a%d" % _ii)
 
             # Defining decay between soma and basal dendrite & apical dendrites
-            self.output_neuron['equation'] += Equations('I_dendr = gapre*(vmpre-vmself)  : amp',
+            self.output_neuron['equation'] += b2.Equations('I_dendr = gapre*(vmpre-vmself)  : amp',
                                                         gapre=1 / (self.output_neuron['namespace']['Ra'][0]),
                                                         I_dendr="Idendr_basal", vmself="vm_basal", vmpre="vm")
-            self.output_neuron['equation'] += Equations(
+            self.output_neuron['equation'] += b2.Equations(
                 'I_dendr = gapre*(vmpre-vmself)  + gapost*(vmpost-vmself) : amp',
                 gapre=1 / (self.output_neuron['namespace']['Ra'][1]),
                 gapost=1 / (self.output_neuron['namespace']['Ra'][0]),
                 I_dendr="Idendr_soma", vmself="vm",
                 vmpre="vm_a0", vmpost="vm_basal")
-            self.output_neuron['equation'] += Equations('I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
+            self.output_neuron['equation'] += b2.Equations('I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
                                                         gapre=1 / (self.output_neuron['namespace']['Ra'][2]),
                                                         gapost=1 / (self.output_neuron['namespace']['Ra'][1]),
                                                         I_dendr="Idendr_a0", vmself="vm_a0", vmpre="vm_a1", vmpost="vm")
 
             # Defining decay between apical dendrite compartments
             for _ii in arange(1, self.output_neuron['dend_comp_num']):
-                self.output_neuron['equation'] += Equations(
+                self.output_neuron['equation'] += b2.Equations(
                     'I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
                     gapre=1 / (self.output_neuron['namespace']['Ra'][_ii]),
                     gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1]),
                     I_dendr="Idendr_a%d" % _ii, vmself="vm_a%d" % _ii,
                     vmpre="vm_a%d" % (_ii + 1), vmpost="vm_a%d" % (_ii - 1))
 
-            self.output_neuron['equation'] += Equations('I_dendr = gapost*(vmpost-vmself) : amp',
+            self.output_neuron['equation'] += b2.Equations('I_dendr = gapost*(vmpost-vmself) : amp',
                                                         I_dendr="Idendr_a%d" % self.output_neuron['dend_comp_num'],
                                                         gapost=1 / (self.output_neuron['namespace']['Ra'][-1]),
                                                         vmself="vm_a%d" % self.output_neuron['dend_comp_num'],
@@ -319,7 +325,7 @@ class neuron_reference(object):
 
         else:
 
-            # <editor-fold desc="...Model variation equations">
+            # <editor-fold desc="...Model variation b2.Equations">
             # TODO - Figure out why this is different from old eqs
             # n_apical = self.output_neuron['dend_comp_num'] + 1
             # x = nd.LegacyPyramidalCell(n_apical)
@@ -359,7 +365,7 @@ class neuron_reference(object):
 
             dendritic_extent = self.output_neuron['dend_comp_num']
 
-            self.output_neuron['equation'] = Equations(eq_template_dend, vm="vm_basal", ge="ge_basal",
+            self.output_neuron['equation'] = b2.Equations(eq_template_dend, vm="vm_basal", ge="ge_basal",
                                                        gealpha="gealpha_basal",
                                                        C=self.output_neuron['namespace']['C'][0],
                                                        gL=self.output_neuron['namespace']['gL'][0],
@@ -372,7 +378,7 @@ class neuron_reference(object):
                                                        g_gabab="g_gabab_basal", g_gabab_alpha="g_gabab_alpha_basal", g_gabab_alpha1="g_gabab_alpha1_basal",
                                                        B="B_basal")
 
-            self.output_neuron['equation'] += Equations(eq_template_soma, gL=self.output_neuron['namespace']['gL'][1],
+            self.output_neuron['equation'] += b2.Equations(eq_template_soma, gL=self.output_neuron['namespace']['gL'][1],
                                                         ge='ge_soma', geX='geX_soma', gi='gi_soma',
                                                         gealpha='gealpha_soma',
                                                         gealphaX='gealphaX_soma',
@@ -392,7 +398,7 @@ class neuron_reference(object):
 
             for _ii in range(
                     self.output_neuron['dend_comp_num'] + 1):  # extra dendritic compartment in the same level of soma
-                self.output_neuron['equation'] += Equations(eq_template_dend, vm="vm_a%d" % _ii,
+                self.output_neuron['equation'] += b2.Equations(eq_template_dend, vm="vm_a%d" % _ii,
                                                             C=self.output_neuron['namespace']['C'][_ii],
                                                             gL=self.output_neuron['namespace']['gL'][_ii],
                                                             ge="ge_a%d" % _ii,
@@ -416,10 +422,10 @@ class neuron_reference(object):
                                                             B="B_a%d" % _ii)
 
             # Defining decay between soma and basal dendrite & apical dendrites
-            self.output_neuron['equation'] += Equations('I_dendr = gapre*(vmpre-vmself)  : amp',
+            self.output_neuron['equation'] += b2.Equations('I_dendr = gapre*(vmpre-vmself)  : amp',
                                                         gapre=1 / (self.output_neuron['namespace']['Ra'][0]),
                                                         I_dendr="Idendr_basal", vmself="vm_basal", vmpre="vm")
-            self.output_neuron['equation'] += Equations(
+            self.output_neuron['equation'] += b2.Equations(
                 'I_dendr = gapre*(vmpre-vmself)  + gapost*(vmpost-vmself) : amp',
                 gapre=1 / (self.output_neuron['namespace']['Ra'][1]),
                 gapost=1 / (self.output_neuron['namespace']['Ra'][0]),
@@ -429,21 +435,21 @@ class neuron_reference(object):
             # If there's more than one apical dendrite compartment
             if dendritic_extent > 0:
 
-                self.output_neuron['equation'] += Equations('I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
+                self.output_neuron['equation'] += b2.Equations('I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
                                                             gapre=1 / (self.output_neuron['namespace']['Ra'][2]),
                                                             gapost=1 / (self.output_neuron['namespace']['Ra'][1]),
                                                             I_dendr="Idendr_a0", vmself="vm_a0", vmpre="vm_a1", vmpost="vm")
 
                 # Defining decay between apical dendrite compartments
                 for _ii in arange(1, self.output_neuron['dend_comp_num']):
-                    self.output_neuron['equation'] += Equations(
+                    self.output_neuron['equation'] += b2.Equations(
                         'I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
                         gapre=1 / (self.output_neuron['namespace']['Ra'][_ii]),
                         gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1]),
                         I_dendr="Idendr_a%d" % _ii, vmself="vm_a%d" % _ii,
                         vmpre="vm_a%d" % (_ii + 1), vmpost="vm_a%d" % (_ii - 1))
 
-                self.output_neuron['equation'] += Equations('I_dendr = gapost*(vmpost-vmself) : amp',
+                self.output_neuron['equation'] += b2.Equations('I_dendr = gapost*(vmpost-vmself) : amp',
                                                             I_dendr="Idendr_a%d" % self.output_neuron['dend_comp_num'],
                                                             gapost=1 / (self.output_neuron['namespace']['Ra'][dendritic_extent-1]),
                                                             vmself="vm_a%d" % self.output_neuron['dend_comp_num'],
@@ -451,13 +457,13 @@ class neuron_reference(object):
 
             # If dendritic_extent is zero ie. there's only one apical dendrite compartment
             else:
-                self.output_neuron['equation'] += Equations('I_dendr = gapre*(vmpre-vmself)  : amp',
+                self.output_neuron['equation'] += b2.Equations('I_dendr = gapre*(vmpre-vmself)  : amp',
                                                             gapre=1 / (self.output_neuron['namespace']['Ra'][1]),
                                                             I_dendr="Idendr_a0", vmself="vm_a0", vmpre="vm")
 
             #</editor-fold>
 
-        self.output_neuron['equation'] += Equations('''x : meter
+        self.output_neuron['equation'] += b2.Equations('''x : meter
                             y : meter''')
 
     def BC(self):
@@ -478,7 +484,7 @@ class neuron_reference(object):
         if self.model_variation is False:
             assert 'noise_sigma' in self.output_neuron[
                 'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
-            self.output_neuron['equation'] = Equations('''
+            self.output_neuron['equation'] = b2.Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
                 dge/dt = -ge/tau_e : siemens
                 dgi/dt = -gi/tau_i : siemens
@@ -506,7 +512,7 @@ class neuron_reference(object):
             self.output_neuron['reset'] = x.get_reset_statements()
             self.output_neuron['refractory'] = x.get_refractory_period()
 
-        self.output_neuron['equation'] += Equations('''x : meter
+        self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
     def L1i(self):
@@ -530,7 +536,7 @@ class neuron_reference(object):
             assert 'noise_sigma' in self.output_neuron[
                 'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
 
-            self.output_neuron['equation'] = Equations('''
+            self.output_neuron['equation'] = b2.Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
                 dge/dt = -ge/tau_e : siemens
                 dgi/dt = -gi/tau_i : siemens
@@ -557,7 +563,7 @@ class neuron_reference(object):
             self.output_neuron['reset'] = x.get_reset_statements()
             self.output_neuron['refractory'] = x.get_refractory_period()
 
-        self.output_neuron['equation'] += Equations('''x : meter
+        self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
     def MC(self):
@@ -581,7 +587,7 @@ class neuron_reference(object):
             assert 'noise_sigma' in self.output_neuron[
                 'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
 
-            self.output_neuron['equation'] = Equations('''
+            self.output_neuron['equation'] = b2.Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
                 dge/dt = -ge/tau_e : siemens
                 dgi/dt = -gi/tau_i : siemens
@@ -610,7 +616,7 @@ class neuron_reference(object):
             self.output_neuron['refractory'] = x.get_refractory_period()
 
 
-        self.output_neuron['equation'] += Equations('''x : meter
+        self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
     def SS(self):
@@ -633,7 +639,7 @@ class neuron_reference(object):
                 'namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
 
             assert 'noise_sigma' in self.output_neuron['namespace'].keys(), "Noise sigma is used in model_variation model, but it is not defined in the configuration file. Did you mean to set model_variation  in physiologyi configuration to 1?"
-            self.output_neuron['equation'] = Equations('''
+            self.output_neuron['equation'] = b2.Equations('''
                 dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) +tonic_current*(1-exp(-t/(50*msecond)))) / C) + noise_sigma*xi*taum_soma**-0.5: volt (unless refractory)
                 dge/dt = -ge/tau_e : siemens
                 dgi/dt = -gi/tau_i : siemens
@@ -661,7 +667,7 @@ class neuron_reference(object):
             self.output_neuron['reset'] = x.get_reset_statements()
             self.output_neuron['refractory'] = x.get_refractory_period()
 
-        self.output_neuron['equation'] += Equations('''x : meter
+        self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
     def VPM(self):
@@ -739,7 +745,7 @@ class synapse_reference(object):
         * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
 
         '''
-        synapse_reference.syntypes = array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_calcium', 'Depressing', 'Facilitating'])
+        synapse_reference.syntypes = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_calcium', 'Depressing', 'Facilitating'])
         assert syn_type in synapse_reference.syntypes, " -  Synapse type '%s' is not defined" % syn_type
         self.output_synapse = {}
         self.output_synapse['type'] = syn_type
@@ -820,7 +826,7 @@ class synapse_reference(object):
 
         '''
 
-        self.output_synapse['equation'] = Equations('''
+        self.output_synapse['equation'] = b2.Equations('''
             wght : siemens
             wght0 : siemens
             dapre/dt = -apre/taupre : siemens (event-driven)
@@ -857,7 +863,7 @@ class synapse_reference(object):
         '''
         #TODO scaling to all synapses in a cell. Invert for inhibitory synapses. Check hertz for spike monitor,
         # TODO check scaling factors with simulations.
-        self.output_synapse['equation'] = Equations('''
+        self.output_synapse['equation'] = b2.Equations('''
             wght0 : siemens
             dwght/dt = scaling_speed * wght * (ap_target_frequency - spike_sensor)  : siemens (event-driven)
             dapre/dt = -apre/taupre : siemens (event-driven)
@@ -896,7 +902,7 @@ class synapse_reference(object):
 
         '''
 
-        self.output_synapse['equation'] = Equations('''
+        self.output_synapse['equation'] = b2.Equations('''
             wght:siemens
             ''')
 
@@ -917,7 +923,7 @@ class synapse_reference(object):
 
         '''
 
-        self.output_synapse['equation'] = Equations('''
+        self.output_synapse['equation'] = b2.Equations('''
             wght:siemens
             ''')
 
@@ -938,7 +944,7 @@ class synapse_reference(object):
 
         """
 
-        self.output_synapse['equation'] = Equations('''
+        self.output_synapse['equation'] = b2.Equations('''
         dR/dt = (1-R)/tau_d : 1 (event-driven)
         wght : siemens
         ''')
@@ -970,7 +976,7 @@ class synapse_reference(object):
 
         """
 
-        self.output_synapse['equation'] = Equations('''
+        self.output_synapse['equation'] = b2.Equations('''
         dR/dt = (1-R)/tau_fd : 1 (event-driven)
         du/dt = (U_f-u)/tau_f : 1 (event-driven) 
         wght : siemens

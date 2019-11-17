@@ -10,19 +10,20 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 from cxsystem2.core import cxsystem as CX
 from cxsystem2.core.exceptions import InvalidConfigurationError
-from brian2 import *
 import multiprocessing
 import time
 import shutil
 import os
 import pandas as pd
+import numpy as np
+from numpy import where
 import zlib
 import bz2
 import pickle as pickle
 import sys
 import itertools
-import json
 from pathlib import Path
+import math
 
 class array_run(object):
 
@@ -358,8 +359,8 @@ class array_run(object):
         idx = idx[0]
         whitelist = set('abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-')
 
-        if any(df.iloc[:,0].str.contains('row_type')):
-            definition_rows_indices = array(df[0][df[0] == 'row_type'].index.tolist())
+        if np.any(df.iloc[:,0].str.contains('row_type')):
+            definition_rows_indices = np.array(df[0][df[0] == 'row_type'].index.tolist())
             target_row = max(where(definition_rows_indices < idx[0])[0])
             title = str(df.loc[target_row][idx[1]])
             value = str(df.loc[idx[0]][idx[1]])

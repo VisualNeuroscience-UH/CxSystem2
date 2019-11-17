@@ -9,11 +9,9 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-#import pip
-from brian2 import *
+
 import time
-import shutil
-import datetime
+import numpy as np
 import os
 import pickle as pickle
 import getpass
@@ -189,7 +187,7 @@ class cluster_run(object):
         return out[0]
 
     def parameter_finder(self,df,keyword):
-        location = where(df.values == keyword)
+        location = np.where(df.values == keyword)
         if location[0].size:
             counter = int(location[0])+1
             while counter < df.shape[0] :
@@ -204,7 +202,7 @@ class cluster_run(object):
 
     def change_parameter_value_in_file(self,filepath, save_path, parameter,new_value):
         df = pd.read_csv(filepath, header=None)
-        location = where(df.values == parameter)
+        location = np.where(df.values == parameter)
         if location[0].size == 1:
             df.at[int(location[0] + 1), int(location[1])] = new_value
             df.to_csv(save_path,header=False,index=False)

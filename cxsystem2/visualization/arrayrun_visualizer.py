@@ -2,7 +2,7 @@ import zlib
 import pickle as pickle
 import bz2
 from pathlib import Path
-import brian2 as br2
+import brian2 as b2
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -50,7 +50,7 @@ class arrayrun_visualizer:
                         all_axes[-1].set_title(ng)
                         all_axes[-1].set_xlabel('Time (ms)')
                         all_axes[-1].set_ylabel('Neuron index')
-                        all_axes[-1].plot(spike_dat['t']/br2.units.ms, spike_dat['i'],'.k')
+                        all_axes[-1].plot(spike_dat['t']/b2.units.ms, spike_dat['i'],'.k')
                     if idx_in_fig > 0:
                         plt.tight_layout()
                         plt.text(0.05, 0.05, file.as_posix(), transform=f.transFigure, size=8)

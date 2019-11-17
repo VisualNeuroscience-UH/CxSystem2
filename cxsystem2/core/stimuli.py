@@ -8,15 +8,17 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-from numpy import *
-from brian2  import *
-# import scipy.io as sio
 from scipy import io
 import os
 import pickle as pickle
 import zlib
 import bz2
 import shutil
+from brian2.units import *
+import brian2 as b2
+import numpy as np
+
+
 
 
 
@@ -73,16 +75,16 @@ class stimuli(object):
         sparse_stimulus[:, 0::SOA_in_N_frames] = dense_stimulus
 
         try:
-            frameduration = double(_V1_mats['frameduration'])
+            frameduration = b2.double(_V1_mats['frameduration'])
             raise NotImplementedError('Frameduration coming from actual video frame rate. This is not implemented yet for CxSystem')
         except:
             frameduration = stimulus_epoch_duration
-        frames = TimedArray(np.transpose(sparse_stimulus),
+        frames = b2.TimedArray(np.transpose(sparse_stimulus),
                             dt=frameduration * ms)  # video_data has to be shape (frames, neurons), dt=frame rate
         self.frames = frames
         exec('self.factor = %s' %freq)
         self.i_patterns[len(self.i_patterns)] = frames.values * self.factor  # These must be final firing rates
-        _all_stim = squeeze(_V1_mats['stimulus'])
+        _all_stim = np.squeeze(_V1_mats['stimulus'])
         if len(_all_stim.shape) == 2:
             slash_indices = [idx for idx, ltr in enumerate(self.input_mat_path) if ltr == '/']
             print(' -  One video stimulus found in file ' + self.input_mat_path[slash_indices[-1]+1:])
@@ -91,16 +93,16 @@ class stimuli(object):
         '''
         Calculating input sequence based on the video input.
         '''
-        set_device('cpp_standalone', directory=os.path.join(self.output_folder,'Input_cpp_run'+ self.output_file_suffix ))
-        inputdt = defaultclock.dt
+        b2.set_device('cpp_standalone', directory=os.path.join(self.output_folder,'Input_cpp_run'+ self.output_file_suffix ))
+        inputdt = b2.defaultclock.dt
         spikemons = []
         N0 = len(self.i_patterns[0].T)
         frames = self.frames
         factor = self.factor
-        tmp_group = NeuronGroup(N0, 'rate = frames(t,i)*factor : Hz', threshold='rand()<rate*dt')
-        tmp_network = Network()
+        tmp_group = b2.NeuronGroup(N0, 'rate = frames(t,i)*factor : Hz', threshold='b2.rand()<rate*dt')
+        tmp_network = b2.Network()
         tmp_network.add(tmp_group)
-        tmp_mon = SpikeMonitor(tmp_group)
+        tmp_mon = b2.SpikeMonitor(tmp_group)
         tmp_network.add(tmp_mon)
         spikemons.append(tmp_mon)
         if self.BaseLine == 0 * second:

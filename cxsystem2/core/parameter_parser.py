@@ -10,10 +10,12 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-from brian2  import *
+
 import numpy as np
-
-
+from brian2.units import *
+import brian2 as b2
+# do not remove the following import as it will be used in the evals
+from numpy import nan, array
 
 
 class synapse_parser(object):
@@ -51,7 +53,7 @@ class synapse_parser(object):
         self.output_synapse = output_synapse
         self.physio_config_df = physio_config_df
 
-        synapse_parser.type_ref = array (['STDP','STDP_with_scaling', 'Fixed', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
+        synapse_parser.type_ref = np.array (['STDP','STDP_with_scaling', 'Fixed', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
         assert output_synapse['type'] in synapse_parser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
         # Commented Cp and Cd out because not used in this branch /HH
@@ -374,7 +376,7 @@ class neuron_parser (object):
     'This class embeds all parameter sets associated to all neuron types and will return it as a namespace in form of dictionary'
     def __init__(self, output_neuron,physio_config_df):
         self.physio_config_df = physio_config_df
-        neuron_parser.type_ref = array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_E','HH_I', 'NDNEURON'])
+        neuron_parser.type_ref = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM','HH_E','HH_I', 'NDNEURON'])
         assert output_neuron['type'] in neuron_parser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['type']
 
         # Handling of "neuron subtype" parameters; new since Aug 2018

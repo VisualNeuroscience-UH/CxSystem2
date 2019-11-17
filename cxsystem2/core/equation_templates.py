@@ -9,7 +9,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
 from string import Template
-import brian2 as br2
+import brian2 as b2
 
 class EquationHelper(object):
     """
@@ -304,7 +304,7 @@ class EquationHelper(object):
             return final_membrane_equation
         else:
             substitutables = {k: k+'_'+self.compartment for k in self.comp_specific_vars}
-            compartment_eq = br2.Equations(final_membrane_equation, **substitutables)
+            compartment_eq = b2.Equations(final_membrane_equation, **substitutables)
 
             return compartment_eq
 
