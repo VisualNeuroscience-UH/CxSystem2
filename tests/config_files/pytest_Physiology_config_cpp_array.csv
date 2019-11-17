@@ -20,7 +20,7 @@ U_f,,0.09,
 ### BACKGROUND INPUT ###,,,
 background_rate,,0*Hz, # Was 0.3*Hz
 background_rate_inhibition,,0*Hz,
-tonic_depol_level,,{0.95 & 1.25 & 1.55 & 1.85 & 2.15},# From rheobase: Array
+tonic_depol_level,,{1.25 & 1.55 & 1.85},# From rheobase: Array
 ,,,
 ### MAIN CONNECTION WEIGHTS ###,,,
 J,,0.72*nS,# E to E weight

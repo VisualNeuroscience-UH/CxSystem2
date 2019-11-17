@@ -69,7 +69,7 @@ def get_spike_data():
 def test_outputfile(cxsystem_run_fixture2):
 	'''Test for 5 existing outputfiles'''
 	outputfilelist = [item for item in os.listdir(simulation_path.as_posix()) if 'tonic_depol_level' in item]
-	assert len([item for item in outputfilelist if os.access(simulation_path.joinpath(item), os.W_OK)]) == 10
+	assert len([item for item in outputfilelist if os.access(simulation_path.joinpath(item), os.W_OK)]) == 6
 	
 # @pytest.mark.xfail(reason='not identical spikes')		
 def test_spikecount_10percent_tolerance(cxsystem_run_fixture2, capsys, get_spike_data):
