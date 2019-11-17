@@ -8,11 +8,12 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
+import bz2
 import os
 import pickle as pickle
 import zlib
-import bz2
 from pathlib import Path
+
 
 class workspace(object):
     '''

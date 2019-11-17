@@ -23,10 +23,13 @@ Description:
 """
 
 
-from docopt import docopt
-from cxsystem2.hpc.cluster_run import cluster_downlaoder
 import sys
 from pathlib import Path
+
+from docopt import docopt
+
+from cxsystem2.hpc.cluster_run import cluster_downlaoder
+
 
 def main():
     arguments = docopt(__doc__)

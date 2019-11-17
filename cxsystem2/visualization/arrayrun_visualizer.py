@@ -1,10 +1,12 @@
-import zlib
-import pickle as pickle
 import bz2
+import pickle as pickle
+import zlib
 from pathlib import Path
+
 import brian2 as b2
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+
 
 class arrayrun_visualizer:
     def __init__(self, folder_path, out_filename = None):

@@ -8,18 +8,16 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-from scipy import io
+import bz2
 import os
 import pickle as pickle
-import zlib
-import bz2
 import shutil
-from brian2.units import *
+import zlib
+
 import brian2 as b2
 import numpy as np
-
-
-
+from brian2.units import *
+from scipy import io
 
 
 class stimuli(object):

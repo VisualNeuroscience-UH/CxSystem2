@@ -1,11 +1,11 @@
-import pandas as pd
-from pathlib import Path
-from pprint import pprint
-import json
 import csv
-import pandas
+import json
 import os
-from io import StringIO
+from pathlib import Path
+
+import pandas
+import pandas as pd
+
 '''
 This file converts the two types of configuration files, i.e. CSV and JSON to each other. 
 '''
@@ -343,19 +343,10 @@ class filetype_converter():
         return self.new_filepath
 
 if __name__ == '__main__':
-    from pprint import pprint
-    # p = Path('./tests/config_files/pytest_Anatomy_config.csv')
-    # p = Path('./tests/config_files/pytest_Physiology_config.csv')
-    # p = Path('./tests/config_files/pytest_Anatomy_config.json')
-    # p = Path('./tests/config_files/pytest_Physiology_config.json')
-    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Anatomy_config.csv')
-    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step1_Physiology_config.csv')
-    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Anatomy_config.csv')
-    # p = Path('.\config_files\SimplifiedMarkram\Markram_Step2_Physiology_config.csv')
-    # p = Path('/Users/vafandal/gitrepos/CxSystem2/config_files/Rev2_Step1gamma_Physiology_config.csv')
+
     p = Path('/home/henhok/PycharmProjects/CxSystem2/test_notebooks/new_physio.json')
 
     converter = filetype_converter(p)
-    # converter.save_as_json()
     converter.save_as_csv()
+    # from pprint import pprint
     # pprint(converter.output)

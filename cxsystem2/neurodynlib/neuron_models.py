@@ -10,20 +10,19 @@
 # Neuron models that were used from the exercise code repository are:
 # AdEx, passive_cable, exp_IF, HH, LIF, NeuronAbstract, NeuronTypeOne, NeuronTypeTwo, fitzhugh_nagumo
 
-import numpy as np
-import matplotlib.pyplot as plt
-import random
-import brian2 as b2
-from brian2.units import *
-from cxsystem2.neurodynlib.tools import plot_tools, spike_tools, input_factory
-from string import Template
-from datetime import datetime
 import json
+import random
+from datetime import datetime
+from string import Template
+
+import brian2 as b2
+import matplotlib.pyplot as plt
+import numpy as np
+from brian2.units import *
+
 from cxsystem2.neurodynlib.receptor_models import ReceptorModel
-from IPython.core.display import display, HTML
+from cxsystem2.neurodynlib.tools import plot_tools, input_factory
 
-
-import sys
 # sys.path.append('/home/henhok/PycharmProjects/brian2modelfitting/')
 # import brian2modelfitting as mofi
 

@@ -1,9 +1,10 @@
-import os
-from pathlib import Path
 import ctypes
-from sys import platform, exit
-import webbrowser
+import os
 import socket
+import webbrowser
+from pathlib import Path
+from sys import platform, exit
+
 
 class disable_file_system_redirection:
     if platform == 'win32':

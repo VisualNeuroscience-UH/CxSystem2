@@ -16,8 +16,8 @@
 # Neuronal Dynamics: From Single Neurons to Networks and Models of Cognition.
 # Cambridge University Press, 2014.
 
-import matplotlib.pyplot as plt
 import brian2 as b2
+import matplotlib.pyplot as plt
 import numpy
 
 

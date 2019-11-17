@@ -1,12 +1,11 @@
-import zlib
-import pickle
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-from brian2.units import *
-from pathlib import Path
-import re
 import json
+import pickle
+import re
+import zlib
+from pathlib import Path
+
+import numpy as np
+from brian2.units import *
 
 
 class SpikeData(object):

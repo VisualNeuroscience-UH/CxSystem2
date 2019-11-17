@@ -26,10 +26,13 @@ Description:
 """
 
 
-from docopt import docopt
-from cxsystem2.configuration.config_file_converter import filetype_converter
 import sys
 from pathlib import Path
+
+from docopt import docopt
+
+from cxsystem2.configuration.config_file_converter import filetype_converter
+
 
 def main():
     arguments = docopt(__doc__)

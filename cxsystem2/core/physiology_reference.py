@@ -8,15 +8,16 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-from cxsystem2.core.parameter_parser import synapse_parser, neuron_parser
 import random as rnd
-from cxsystem2.core import equation_templates as eqt
-from cxsystem2.neurodynlib.neuron_models import neuron_factory
-import numpy as np
-# do not remove nan, it's used in evals
-from numpy import nan
-from brian2.units import *
+
 import brian2 as b2
+import numpy as np
+from brian2.units import *
+from numpy import nan
+
+from cxsystem2.core import equation_templates as eqt
+from cxsystem2.core.parameter_parser import synapse_parser, neuron_parser
+from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 
 class neuron_reference(object):
@@ -1047,3 +1048,6 @@ class synapse_reference(object):
         except NameError:
             new_key = next(iter(df['Value'][df['Key'] == key_name])).replace("']", "").split("['")
             return self.value_extractor(df,new_key)
+
+    def import_fix(self):
+        nan

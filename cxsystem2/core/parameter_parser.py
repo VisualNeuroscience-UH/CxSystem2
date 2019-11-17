@@ -13,8 +13,6 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 import numpy as np
 from brian2.units import *
-import brian2 as b2
-# do not remove the following import as it will be used in the evals
 from numpy import nan, array
 
 
@@ -481,3 +479,6 @@ class neuron_parser (object):
             new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
             return self.value_extractor(df,new_key)
 
+    def import_fix(self):
+        nan
+        array

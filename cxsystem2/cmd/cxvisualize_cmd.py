@@ -33,12 +33,14 @@ Description:
 """
 
 
-from docopt import docopt
-from cxsystem2.visualization.spikedata_to_csvs import SpikeData
+import os
 import sys
 from pathlib import Path
-import os
 from shutil import which
+
+from docopt import docopt
+
+from cxsystem2.visualization.spikedata_to_csvs import SpikeData
 
 if which("visimpl.AppImage") is None:
     VISIMPL_BINARY = '~/visimpl/visimpl.AppImage'

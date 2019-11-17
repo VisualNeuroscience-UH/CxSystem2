@@ -8,22 +8,25 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
+import bz2
+import itertools
+import math
+import multiprocessing
+import os
+import pickle as pickle
+import shutil
+import sys
+import time
+import zlib
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from numpy import where
+
 from cxsystem2.core import cxsystem as CX
 from cxsystem2.core.exceptions import InvalidConfigurationError
-import multiprocessing
-import time
-import shutil
-import os
-import pandas as pd
-import numpy as np
-from numpy import where
-import zlib
-import bz2
-import pickle as pickle
-import sys
-import itertools
-from pathlib import Path
-import math
+
 
 class array_run(object):
 

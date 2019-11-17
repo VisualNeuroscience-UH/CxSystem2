@@ -9,7 +9,9 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
 from string import Template
+
 import brian2 as b2
+
 
 class EquationHelper(object):
     """

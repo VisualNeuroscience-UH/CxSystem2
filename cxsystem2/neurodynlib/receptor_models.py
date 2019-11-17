@@ -1,3 +1,4 @@
+
 class ReceptorModel(object):
     # <editor-fold desc="SYNAPTIC EXC/INH MODEL COMPONENTS">
     default_synaptic_excinh_strings = {}

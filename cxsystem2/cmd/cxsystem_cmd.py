@@ -37,11 +37,14 @@ Description:
 
 """
 
-from docopt import docopt
-from cxsystem2.core.cxsystem import CxSystem
-import cxsystem2 as cxmodule
-from pathlib import Path
 import sys
+from pathlib import Path
+
+from docopt import docopt
+
+import cxsystem2 as cxmodule
+from cxsystem2.core.cxsystem import CxSystem
+
 
 def main():
     arguments = docopt(__doc__)

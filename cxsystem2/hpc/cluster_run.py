@@ -10,21 +10,24 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
 
-import time
-import numpy as np
+import getpass
 import os
 import pickle as pickle
-import getpass
-import paramiko
-from scp import SCPClient
+import socket
+import time
 from builtins import input
-from sys import platform
 from pathlib import Path
+from sys import platform
+
+import numpy as np
+import pandas as pd
+import paramiko
+from ping3 import ping
+from scp import SCPClient
+
 from cxsystem2.configuration import config_file_converter as fileconverter
 from cxsystem2.core.exceptions import ParameterNotFoundError, ClusterNotReachableError, RelativePathError
-import socket
-from ping3 import ping
-import pandas as pd
+
 
 class cluster_run(object):
 

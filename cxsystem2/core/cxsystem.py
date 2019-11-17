@@ -9,37 +9,39 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
-from cxsystem2.core.physiology_reference import neuron_reference, synapse_reference
-from cxsystem2.core.parameter_parser import synapse_parser
-from cxsystem2.core.workspace_manager import workspace
-from cxsystem2.core.exceptions import ParameterNotFoundError
-from cxsystem2.core.stimuli import stimuli
 import ast
-import brian2 as b2
-from brian2.units import *
-from brian2 import rand
-from numpy import nan
-import sys
-from datetime import datetime
-import os
-import pickle as pickle
-import zlib
-import bz2
-import time
-import numpy as np
-import scipy.sparse as scprs
 import builtins
+import bz2
 import csv
 import json
-import shutil
-import pandas
-import threading
 import multiprocessing
-from cxsystem2.core import equation_templates as eqt
-from cxsystem2.configuration import config_file_converter as fileconverter
-from cxsystem2.gui import gui
+import os
+import pickle as pickle
+import shutil
+import sys
+import threading
+import time
+import zlib
+from datetime import datetime
 from pathlib import Path
+
+import brian2 as b2
+import numpy as np
+import pandas
+import scipy.sparse as scprs
+from brian2 import rand
+from brian2.units import *
 from matplotlib import pyplot as plt
+from numpy import nan
+
+from cxsystem2.configuration import config_file_converter as fileconverter
+from cxsystem2.core import equation_templates as eqt
+from cxsystem2.core.exceptions import ParameterNotFoundError
+from cxsystem2.core.parameter_parser import synapse_parser
+from cxsystem2.core.physiology_reference import neuron_reference, synapse_reference
+from cxsystem2.core.stimuli import stimuli
+from cxsystem2.core.workspace_manager import workspace
+from cxsystem2.gui import gui
 
 b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
 
@@ -526,7 +528,6 @@ class CxSystem(object):
             print(" -  CxSystem is performing benchmarking. The Brian2 "
                    "should be configured to use benchmarking.")
         if self.device.lower() == 'genn':
-            import brian2genn
             b2.set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
             b2.prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
