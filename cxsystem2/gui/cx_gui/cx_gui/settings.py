@@ -32,7 +32,6 @@ logging.config.dictConfig({
         },
     },
     'loggers': {
-    # root logger
         '': {
             'level': 'ERROR',
             'handlers': ['console'],

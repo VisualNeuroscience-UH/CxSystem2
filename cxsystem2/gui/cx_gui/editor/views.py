@@ -1,16 +1,19 @@
+import logging
+import os
+from pathlib import Path
+
 from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
-import logging
-import sys, os
-from pathlib import Path
-[sys.path.append(i) for i in ['.', '..', '../..']]
+
+# [sys.path.append(i) for i in ['.', '..', '../..']]
 from cxsystem2.core.cxsystem import CxSystem as Cx
 import multiprocessing
 from getpass import getpass
 import json
 
 logging.getLogger("requests").setLevel(logging.WARNING)
+
 
 # Create your views here.
 def index(request):
@@ -20,21 +23,21 @@ def index(request):
     # return HttpResponse("Hello, world. You're at the polls index.")
 
 
-def CxSpawner(anatomy, physiology,root_path):
-    '''
+def cxspawner(anatomy, physiology, root_path):
+    """
     The function that each spawned process runs and parallel instances of CxSystems are created here.
-
-    :param idx: index of the requested parallel CxSystem.
-    :param working: the index of the process that is being currently performed. This is to keep track of running processes to prevent spawning more than required processes.
-    :param paths: The path for saving the output of the current instance of CxSystem.
-    '''
+    :param root_path:
+    :param physiology:
+    :param anatomy:
+    """
     from time import sleep
     sleep(10)
     print(root_path)
     os.chdir(root_path)
 
-    cm =  Cx(anatomy, physiology)
+    cm = Cx(anatomy, physiology)
     cm.run()
+
 
 def sanitize_data(received_data):
     received_data = received_data.replace('false', '0')
@@ -43,6 +46,7 @@ def sanitize_data(received_data):
     return received_data
 
 
+# noinspection PyProtectedMember
 @csrf_exempt
 def simulate(request):
     # There request that we receive here is the following from django_simulation_request.js :
@@ -67,9 +71,10 @@ def simulate(request):
         sanitized_receive_data = eval(sanitize_data(received_data))
 
         anatomy = sanitized_receive_data['anatomy']
-        physiology = { "physio_data": sanitized_receive_data['physiology']}
+        physiology = {"physio_data": sanitized_receive_data['physiology']}
 
-        # we can either save the data temporarily as json and use those for simulating, or pass the data itself and config_file_converter will take care of the save_to_file part
+        # # we can either save the data temporarily as json and use those for simulating,
+        # # or pass the data itself and config_file_converter will take care of the save_to_file part
         # with open('.\\tmp_anatomy.json', 'w') as f:
         #     json.dump(anatomy, f)
         # with open('.\\tmp_physio.json', 'w') as f:
@@ -78,14 +83,13 @@ def simulate(request):
 
         if anatomy['params']['run_in_cluster'] == 1:
             anatomy['params']['password'] = getpass('Please enter your password for user {}: '.format(anatomy["params"]["cluster_username"]))
-        p = multiprocessing.Process(target=CxSpawner, args=(anatomy, physiology,Path.cwd().parent.parent))
+        p = multiprocessing.Process(target=cxspawner, args=(anatomy, physiology, Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()
     except Exception as e:
         print(e)
 
     return HttpResponse("simulation started successfully")
-
 
 
 @csrf_exempt
@@ -98,8 +102,8 @@ def load_example(request):
         filename = example_name + '_physiology_config.json'
     current_dir = Path.cwd()
     examples_path = current_dir.joinpath('examples').joinpath(filename)
-    if (examples_path.is_file()):
-        with open(examples_path) as json_file :
+    if examples_path.is_file():
+        with open(examples_path.as_posix()) as json_file:
             data = json.load(json_file)
 
     return HttpResponse(json.dumps(data), content_type="application/json")

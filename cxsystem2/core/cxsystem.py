@@ -287,7 +287,7 @@ class CxSystem(object):
         print(" -  Cortical Module initialization Done.")
 
     def runGUI(self, ssl=False, port=None):
-        gui.runserver(ssl = ssl, port = port)
+        gui.RunServer(ssl = ssl, port = port)
 
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:,0][self.anat_and_sys_conf_df.loc[:,0]=='row_type'].index
