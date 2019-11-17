@@ -1969,6 +1969,10 @@ class CxSystem(object):
             tmp_str = "ax.set_title('%s')" % (title)
             exec(tmp_str)
 
+    def import_optimizer(self):
+        rand()
+        scprs.csr_matrix()
+
 
 if __name__ == '__main__' :
     root = Path(Path(os.getcwd()).parents[1])
