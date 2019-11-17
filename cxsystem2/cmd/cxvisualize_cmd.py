@@ -32,7 +32,6 @@ Description:
 
 """
 
-
 import os
 import sys
 from pathlib import Path
@@ -45,9 +44,9 @@ from cxsystem2.visualization.spikedata_to_csvs import SpikeData
 if which("visimpl.AppImage") is None:
     VISIMPL_BINARY = '~/visimpl/visimpl.AppImage'
     if not Path(VISIMPL_BINARY).is_file():
-        raise FileNotFoundError ("visimple binary not found ")
+        raise FileNotFoundError("ViSimpl binary not found ")
 else:
-    VISIMPL_BINARY = 'visimpl.AppImage' # visimple is alerady in path
+    VISIMPL_BINARY = 'visimpl.AppImage'  # ViSimpl is already in path
 
 
 def _convert(filepath):
@@ -55,9 +54,12 @@ def _convert(filepath):
     structure_csv, spikes_csv, subsets_json = x.save_for_visimpl()
     return structure_csv, spikes_csv, subsets_json
 
+
 def _run_visimpl(structure_csv, spikes_csv, subsets_json):
-    run_visimpl_cmd = VISIMPL_BINARY + ' -csv ' + str(structure_csv) + ' ' + str(spikes_csv) + ' -se ' + str(subsets_json)
+    run_visimpl_cmd = VISIMPL_BINARY + ' -csv ' + str(structure_csv) + ' ' + str(spikes_csv) + ' -se ' + str(
+        subsets_json)
     os.system(run_visimpl_cmd)
+
 
 def main():
     arguments = docopt(__doc__)
@@ -70,10 +72,11 @@ def main():
         structure_csv, spikes_csv, subsets_json = _convert(filepath)
         if not arguments['--convert']:
             _run_visimpl(structure_csv, spikes_csv, subsets_json)
-        if  arguments['--delete']:
+        if arguments['--delete']:
             os.remove(structure_csv)
             os.remove(spikes_csv)
             os.remove(subsets_json)
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:

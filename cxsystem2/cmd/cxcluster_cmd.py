@@ -5,7 +5,7 @@ Usage:
   cxcluster META_FILE_PATH
 
 
-Cluster result downlaoder for `CxSystem`. 
+Downloads result data of `CxSystem` from cluster.
 
 Arguments:
   META_FILE_PATH    Path to cluster run metadata file  
@@ -22,7 +22,6 @@ Description:
 
 """
 
-
 import sys
 from pathlib import Path
 
@@ -35,13 +34,14 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
 
-    metapath = Path(arguments['META_FILE_PATH'])
-    if not metapath.is_file():
-        print("Error: metada file {} not found".format(metapath.as_posix()))
+    metadata_path = Path(arguments['META_FILE_PATH'])
+    if not metadata_path.is_file():
+        print("Error: metadata file {} not found".format(metadata_path.as_posix()))
     else:
-        cluster_downlaoder(metapath.as_posix())
+        cluster_downlaoder(metadata_path.as_posix())
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     if len(sys.argv) == 1:
         sys.argv.append('-h')
     main()

@@ -25,7 +25,6 @@ Description:
 
 """
 
-
 import sys
 from pathlib import Path
 
@@ -44,14 +43,15 @@ def main():
 
     else:
         if filepath.suffix == '.json':
-            conv = filetype_converter(filepath)
-            conv.save_as_csv()
+            converted = filetype_converter(filepath)
+            converted.save_as_csv()
 
         if filepath.suffix == '.csv':
-            conv = filetype_converter(filepath)
-            conv.save_as_json()
+            converted = filetype_converter(filepath)
+            converted.save_as_json()
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     if len(sys.argv) == 1:
         sys.argv.append('-h')
     main()
