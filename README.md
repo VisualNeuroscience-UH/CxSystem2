@@ -9,6 +9,7 @@
 [![Github Issues](http://img.shields.io/github/issues-pr/VisualNeuroscience-UH/CxSystem2.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/pulls)
 [![Documentation Status](https://readthedocs.org/projects/cxsystem/badge/?version=master)](http://cxsystem.readthedocs.io/en/master/?badge=master)
 [![PyPI version](https://badge.fury.io/py/cxsystem2.svg)](https://badge.fury.io/py/cxsystem2)
+[![Build Status](https://travis-ci.org/VisualNeuroscience-UH/CxSystem2.svg?branch=master)](https://travis-ci.org/VisualNeuroscience-UH/CxSystem2)
 
 ## Table of Contents 
 
