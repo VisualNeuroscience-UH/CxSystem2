@@ -27,7 +27,7 @@ from pathlib import Path
 
 from docopt import docopt
 
-from cxsystem2.hpc.cluster_run import cluster_downlaoder
+from cxsystem2.hpc.cluster_run import ClusterDownloader
 
 
 def main():
@@ -38,7 +38,7 @@ def main():
     if not metadata_path.is_file():
         print("Error: metadata file {} not found".format(metadata_path.as_posix()))
     else:
-        cluster_downlaoder(metadata_path.as_posix())
+        ClusterDownloader(metadata_path.as_posix())
 
 
 if __name__ == '__main__':
