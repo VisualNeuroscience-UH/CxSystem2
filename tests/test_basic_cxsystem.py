@@ -66,7 +66,7 @@ class TestInit:
 		
 	def test_input_argument_types(self):
 		assert isinstance(CM.timestamp, str) 
-		assert isinstance(CM.ArrayRun, int), "Indirect test for input arg instantiated_from_array_run"
+		assert isinstance(CM.array_run, int), "Indirect test for input arg instantiated_from_array_run"
 		assert isinstance(CM.cluster_run_start_idx, int) 
 		assert isinstance(CM.cluster_run_step, int) 
 		assert isinstance(CM.array_run_in_cluster, int) 
