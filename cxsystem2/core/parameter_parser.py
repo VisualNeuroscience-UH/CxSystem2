@@ -132,7 +132,7 @@ class SynapseParser(object):
         else:
             self._K12 = np.average([2.79, 1.09])
 
-    def _scale_by_calcium(self,
+    def scale_by_calcium(self,
                           ca,
                           cw=None):
         """
@@ -164,19 +164,19 @@ class SynapseParser(object):
             u_i = self.value_extractor(self.physio_config_df, 'U_I')
 
             if self.output_synapse['pre_group_type'] in excitatory_groups:
-                self.output_namespace['U'] = self._scale_by_calcium(ca, u_e)
+                self.output_namespace['U'] = self.scale_by_calcium(ca, u_e)
             elif self.output_synapse['pre_group_type'] in inhibitory_groups:
-                self.output_namespace['U'] = self._scale_by_calcium(ca, u_i)
+                self.output_namespace['U'] = self.scale_by_calcium(ca, u_i)
             else:
                 print('Warning! Unrecognized group type %s will have '
                       'outbound synapses with averaged utilization factor' %
                       self.output_synapse['pre_group_type'])
                 u = np.average([u_e, u_i])
-                self.output_namespace['U'] = self._scale_by_calcium(ca, u)
+                self.output_namespace['U'] = self.scale_by_calcium(ca, u)
 
         else:
             u_f = self.value_extractor(self.physio_config_df, 'U_f')
-            self.output_namespace['U_f'] = self._scale_by_calcium(ca, u_f)
+            self.output_namespace['U_f'] = self.scale_by_calcium(ca, u_f)
 
     def stdp(self):
         """
@@ -271,8 +271,8 @@ class SynapseParser(object):
         # Calcium scaling is just multiplication by a constant so we can scale min and mean wght
         # instead of scaling individual weights separately after randomization
         if self.calcium_concentration > 0:
-            mean_wght = self._scale_by_calcium(self.calcium_concentration, mean_wght)
-            min_wght = self._scale_by_calcium(self.calcium_concentration, min_wght)
+            mean_wght = self.scale_by_calcium(self.calcium_concentration, mean_wght)
+            min_wght = self.scale_by_calcium(self.calcium_concentration, min_wght)
 
         # SET the weight (uniform distribution [min_wght, min_wght+mean_wght])
         # NB!! You might think (min_wght, mean_wght) should be the other way around, but remember that rand gives
@@ -299,8 +299,8 @@ class SynapseParser(object):
     #     # Calcium scaling is just multiplication by a constant so we can scale mean and SD wght
     #     # instead of scaling individual weights separately after randomization (change of variables of the Gaussian PDF)
     #     if self.calcium_concentration > 0:
-    #         mean_wght = self._scale_by_calcium(self.calcium_concentration, mean_wght)
-    #         sd_wght  = self._scale_by_calcium(self.calcium_concentration, sd_wght) # we don't want to prescribe SDs separately in this model
+    #         mean_wght = self.scale_by_calcium(self.calcium_concentration, mean_wght)
+    #         sd_wght  = self.scale_by_calcium(self.calcium_concentration, sd_wght) # we don't want to prescribe SDs separately in this model
     #
     #     # SET the weight
     #     self.output_namespace['init_wght'] = '(%f + %f*randn()) * nS' % (mean_wght, sd_wght)

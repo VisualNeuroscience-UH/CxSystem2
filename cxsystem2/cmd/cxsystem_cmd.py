@@ -53,10 +53,10 @@ def main():
     if arguments['--runserver']:
         if arguments['--https']:
             cx = CxSystem()
-            cx.runGUI(ssl=True, port=arguments['--port'])
+            cx.run_bui(ssl=True, port=arguments['--port'])
         else:
             cx = CxSystem()
-            cx.runGUI(ssl=False, port=arguments['--port'])
+            cx.run_bui(ssl=False, port=arguments['--port'])
 
     if arguments['--anatomy'] and arguments['--physiology']:
         anatomy_path = Path(arguments['--anatomy'])
