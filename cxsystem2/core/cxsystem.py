@@ -111,7 +111,7 @@ class CxSystem:
         except KeyError:
             pass
         self.parameter_to_method_mapping = {
-            ### system parameter definitions:
+            # system parameter definitions:
             # Parameter_name : [set priority (0 is highest),function_to_run]
             'device': [0, self.set_device],
             'save_input_video': [1, self.save_input_video],
@@ -139,15 +139,15 @@ class CxSystem:
             'cluster_username': [22, self.passer],
             'cluster_workspace': [23, self.passer],
             'integration': [24, self.integration],
-            ####
-            #### Line definitions:
+            # Line definitions:
             'G': [nan, self.neuron_group],
             'S': [nan, self.synapse],
             'IN': [nan, self.relay],
             'params': [nan, self.set_runtime_parameters],
         }
-        self.timestamp = '_' + str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '') \
-            [0:str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.') + 3].replace('.', '')
+        self.timestamp = '_' + \
+                        str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '')\
+                             [0:str(datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.') + 3].replace('.', '')
         if output_file_suffix == "":
             self.suffix = self.timestamp + output_file_suffix
         else:
@@ -199,7 +199,7 @@ class CxSystem:
         self.anat_and_sys_conf_df = read_config_file(anatomy_and_system_config)
         self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.applymap(lambda x: x.strip() if type(x) == str else x)
 
-        ## dropping the commented lines :
+        # dropping the commented lines :
         self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.drop(self.anat_and_sys_conf_df[0].index[self.anat_and_sys_conf_df[0][
             self.anat_and_sys_conf_df[0].str.contains('#') == True].index.tolist()]).reset_index(drop=True)
         self.physio_config_df = self.physio_config_df.drop(self.physio_config_df['Variable'].index[self.physio_config_df['Variable'][
@@ -256,7 +256,8 @@ class CxSystem:
             array_run_path = Path(Path(Path(__file__).parent).parent).joinpath('hpc').joinpath('array_run.py').as_posix()
             cluster_flag = 0
 
-            if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:  # this means CxSystem is running in cluster and is trying to spawn an array run on a node
+            # next condition means CxSystem is running in cluster and is trying to spawn an array run on a node
+            if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:
                 array_run_suffix = '_' + Path(anatomy_and_system_config).stem.split('_')[-2] + '_' + Path(anatomy_and_system_config).stem.split('_')[
                     -1]
                 print("spawning index: %d, step: %d" % (int(cluster_run_start_idx), int(cluster_run_step)))
@@ -497,8 +498,8 @@ class CxSystem:
             self.device = 'Python'
 
         if not np.any(self.current_parameters_list.str.contains('compression_method')):
-            print(
-                " -  compresison_method is not defined in the configuration file. Default compression method is gzip")  # gzip is default of workspace manager
+            # gzip is default of workspace manager
+            print(" -  compresison_method is not defined in the configuration file. Default compression method is gzip")
 
         for ParamIdx, parameter in self.current_parameters_list.items():
             if parameter not in list(self.parameter_to_method_mapping.keys()):
@@ -603,12 +604,14 @@ class CxSystem:
 
     def neuron_group(self):
         """
-        The method that creates the NeuronGroups() based on the parameters that are extracted from the configuration file in the __init__ method of the class.
+        The method that creates the NeuronGroups() based on the parameters that are extracted from the
+        configuration file in the __init__ method of the class.
 
         Main internal variables:
 
         * mon_args: contains the monitor arguments extracted from the target line.
-        * net_center: center position of the neuron group in visual field coordinates, description can be found in configuration file tutorial.
+        * net_center: center position of the neuron group in visual field coordinates, description can be found in
+                        configuration file tutorial.
         * _dyn_neurongroup_name: Generated variable name for the NeuronGroup() object in brian2.
         * _dyn_neuronnumber_name: Generated variable name for corresponding Neuron Number.
         * _dyn_neuron_eq_name: Generated variable name for the NeuronGroup() equation.
@@ -616,7 +619,8 @@ class CxSystem:
         * _dyn_neuron_reset_name: Generated variable name for the NeuronGroup() reset value.
         * _dyn_neuron_refra_name: Generated variable name for the NeuronGroup() refractory value.
         * _dyn_neuron_namespace_name: Generated variable name for the NeuronGroup() namespace.
-        * NG_init: NeuronGroups() should be initialized with a random vm, ge and gi values. To address this, a 6-line code is generated and put in this variable, the running of which will lead to initialization of current NeuronGroup().
+        * NG_init: NeuronGroups() should be initialized with a random vm, ge and gi values. To address this, a 6-line code
+                    is generated and put in this variable, the running of which will lead to initialization of current NeuronGroup().
         """
 
         # <editor-fold desc="...Parameter preprocessing">
@@ -634,7 +638,8 @@ class CxSystem:
         assert not np.any(self.current_values_list.loc[obligatory_indices] == '--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
         assert len(self.current_values_list) == self.current_parameters_list_orig_len, \
-            " -  One or more of of the columns for NeuronGroup definition is missing in the following line (lengths not equal: {} and {}):\n {} \n {}  ".format(
+            " -  One or more of of the columns for NeuronGroup definition is missing in the following" \
+            " line (lengths not equal: {} and {}):\n {} \n {}  ".format(
                 len(self.current_values_list),
                 self.current_parameters_list_orig_len,
                 self.current_parameters_list,
@@ -743,11 +748,11 @@ class CxSystem:
 
         # Generating variable names for Groups, NeuronNumbers, Equations, Threshold, Reset, Refractory and Namespace
         if neuron_subtype == '--':
-            _dyn_neurongroup_name = self._NeuronGroup_prefix + str(current_idx) + '_' + neuron_type + '_L' + str(layer_idx).replace \
-                (', ', 'toL').replace('[', '').replace(']', '')
+            _dyn_neurongroup_name = self._NeuronGroup_prefix + str(current_idx) + '_' + neuron_type + '_L' + \
+                                    str(layer_idx).replace(', ', 'toL').replace('[', '').replace(']', '')
         else:
-            _dyn_neurongroup_name = self._NeuronGroup_prefix + str(current_idx) + '_' + neuron_subtype + '_L' + str(layer_idx).replace \
-                (', ', 'toL').replace('[', '').replace(']', '')
+            _dyn_neurongroup_name = self._NeuronGroup_prefix + str(current_idx) + '_' + neuron_subtype + '_L' + \
+                                    str(layer_idx).replace(', ', 'toL').replace('[', '').replace(']', '')
         self.neurongroups_list.append(_dyn_neurongroup_name)
         _dyn_neuronnumber_name = self._NeuronNumber_prefix + str(current_idx)
         _dyn_neuron_eq_name = self._NeuronEquation_prefix + str(current_idx)
@@ -778,7 +783,7 @@ class CxSystem:
         # self.customized_neurons_list[current_idx]['namespace']['gistd'] = eval(gistd)
 
         # Creating the actual NeuronGroup() using the variables in the previous 6 lines
-        exec("%s= b2.NeuronGroup(%s, model=%s, method='%s', threshold=%s, reset=%s,refractory = %s, namespace = %s)" \
+        exec("%s= b2.NeuronGroup(%s, model=%s, method='%s', threshold=%s, reset=%s,refractory = %s, namespace = %s)"
              % (_dyn_neurongroup_name, _dyn_neuronnumber_name, _dyn_neuron_eq_name, self.numerical_integration_method
                 , _dyn_neuron_thres_name, _dyn_neuron_reset_name, _dyn_neuron_refra_name, _dyn_neuron_namespace_name))
         # </editor-fold>
@@ -855,7 +860,7 @@ class CxSystem:
                 # Go through all excitatory receptors (unfortunately different binomial distrib for every receptor)
                 for receptor in exc_receptors:
                     poisson_target = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
-                    exec("%s = b2.PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
+                    exec("%s = b2.PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)"
                          % (poisson_target, _dyn_neurongroup_name, receptor, n_background_inputs,
                             background_rate, background_weight))
 
@@ -868,7 +873,7 @@ class CxSystem:
                 # Go through all inhibitory receptors
                 for receptor in inh_receptors:
                     poisson_target_inh = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
-                    exec("%s = b2.PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
+                    exec("%s = b2.PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)"
                          % (poisson_target_inh, _dyn_neurongroup_name, receptor, n_background_inhibition,
                             background_rate_inhibition, background_weight_inhibition))
                     try:
@@ -898,7 +903,7 @@ class CxSystem:
                 for receptor in exc_receptors:
                     for target_comp in target_comp_list:
                         poisson_target = 'bg_%s_%s_%s' % (receptor, _dyn_neurongroup_name, target_comp)
-                        exec("%s = b2.PoissonInput(target=%s, target_var='%s_%s', N=%s, rate=%s, weight=%s)" \
+                        exec("%s = b2.PoissonInput(target=%s, target_var='%s_%s', N=%s, rate=%s, weight=%s)"
                              % (poisson_target, _dyn_neurongroup_name, receptor, target_comp, n_inputs_to_each_comp,
                                 background_rate, background_weight))
                         try:
@@ -909,7 +914,7 @@ class CxSystem:
                 # Background inhibition for PC neurons (targeting soma)
                 for receptor in inh_receptors:
                     poisson_target_inh = 'bg_%s_%s' % (receptor, _dyn_neurongroup_name)
-                    exec("%s = b2.PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)" \
+                    exec("%s = b2.PoissonInput(target=%s, target_var='%s_soma', N=%s, rate=%s, weight=%s)"
                          % (poisson_target_inh, _dyn_neurongroup_name, receptor, n_background_inhibition,
                             background_rate_inhibition, background_weight_inhibition))
                     try:
@@ -931,9 +936,9 @@ class CxSystem:
                   % _dyn_neurongroup_name)
         # Setting the position of the neurons in the current NeuronGroup.
         try:
-            exec(
-                "%s.x=b2.real(self.customized_neurons_list[%d]['w_positions'])*mm\n%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm" % (
-                    _dyn_neurongroup_name, current_idx, _dyn_neurongroup_name, current_idx))
+            exec("%s.x=b2.real(self.customized_neurons_list[%d]['w_positions'])*mm\n"
+                "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm"
+                % (_dyn_neurongroup_name, current_idx, _dyn_neurongroup_name, current_idx))
         except ValueError as e:
             raise ValueError(
                 e.message + ' -  You are probably trying to load the positions from a file that does not contain the same number of cells.')
@@ -1054,12 +1059,15 @@ class CxSystem:
                         if self.scale >= 1:
                             assert int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]) < \
                                    self.customized_neurons_list[-1]['number_of_neurons'], \
-                                " -  The stop index (%d) in the following monitor, is higher than the number of neurons in the group (%d): \n %s " % (
-                                int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
-                                self.customized_neurons_list[-1]['number_of_neurons'], str(self.current_values_list.tolist()),)
+                                " -  The stop index (%d) in the following monitor, is higher than" \
+                                " the number of neurons in the group (%d): \n %s " % \
+                                (int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
+                                 self.customized_neurons_list[-1]['number_of_neurons'], str(self.current_values_list.tolist()),)
+
                         elif int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]) < self.customized_neurons_list[-1]['number_of_neurons']:
-                            "\n Warning: The stop index (%d) in the following monitor, is higher than the number of neurons in the group (%d): \n %s . This is caused by using a scale < 1" % (
-                                int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
+                            "\n Warning: The stop index (%d) in the following monitor, is higher than the number of neurons in the group (%d):" \
+                            " \n %s . This is caused by using a scale < 1" \
+                            %(int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
                                 self.customized_neurons_list[-1]['number_of_neurons'],
                                 str(self.current_values_list.tolist()),)
 
@@ -1076,8 +1084,7 @@ class CxSystem:
                 else:
                     self.workspace.create_results_key('%s_all' % sub_mon_arg[0])  # Create a key in save_data()
                     # object for that specific StateMonitor variable.
-                    Mon_name = monitor_options[mon_tag][0] + \
-                               str(self.monitor_idx) + '_' + object_name + '__' + sub_mon_arg[0]
+                    Mon_name = monitor_options[mon_tag][0] + str(self.monitor_idx) + '_' + object_name + '__' + sub_mon_arg[0]
                     # After simulation, the following syntax will be used to save this specific monitor's result:
                     # self.workspace.syntax_bank.append("self.workspace.data['%s_all']"
                     #                                          "['%s'] = %s.%s"
@@ -1105,18 +1112,24 @@ class CxSystem:
 
     def synapse(self):
         """
-        The method that creates the Synapses() in brian2, based on the parameters that are extracted from the configuration file in the __init__ method of the class.
+        The method that creates the Synapses() in brian2, based on the parameters that are extracted from
+        the configuration file in the __init__ method of the class.
 
         Main internal variables:
 
         * mon_args: contains the monitor arguments extracted from the target line.
-        * args: normally args contains a set of arguments for a single Synapses() object. However, this changes when the post-synaptic neuron is the first (with index of 0) compartment of a multi-compartmental neuron. In this case, one might intend to target all three sub-compartments, i.e. Basal dendrites, Soma and proximal apical dendrites. So the single set of arguments will be changed to 3 sets of arguments and a for loop will take care of every one of them.
+        * args: normally args contains a set of arguments for a single Synapses() object.
+                However, this changes when the post-synaptic neuron is the first (with index of 0) compartment of a
+                multi-compartmental neuron. In this case, one might intend to target all three sub-compartments,
+                i.e. Basal dendrites, Soma and proximal apical dendrites. So the single set of arguments will be changed
+                to 3 sets of arguments and a for loop will take care of every one of them.
         * dyn_syn_name: Generated variable name for the Synapses() object in brian2.
         * _dyn_syn_eq_name: Generated variable name for the Synapses() equation.
         * _dyn_syn_pre_eq_name: Generated variable name for pre_synaptic equations, i.e. "on_pre=..."
         * _dyn_syn_post_eq_name: Generated variable name for post_synaptic equations, i.e. "on_post= ..."
         * _dyn_syn_namespace_name: Generated variable name for the Synapses() namespace.
-        * syn_con_str: The string containing the syntax for connect() method of a current Synapses() object. This string changes depending on using the [p] and [n] tags in the configuration file.
+        * syn_con_str: The string containing the syntax for connect() method of a current Synapses() object. This string
+                        changes depending on using the [p] and [n] tags in the configuration file.
         """
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
                         'save_connection', 'custom_weight']
@@ -1200,14 +1213,17 @@ class CxSystem:
                 self.current_values_list = self.current_values_list.append(pandas.Series([_pre_type, _post_type]), ignore_index=True)
                 #  In case the target is from compartment 0 which has 3 compartments itself
                 if str(_post_com_idx)[0] == '0':
-                    assert len(_post_com_idx) > 1, \
-                        ' -  The soma layer of a compartmental neuron is being targeted, but the exact compartment in the layer is not defined. After 0, use "b" for basal dendrites, "s" for soma and "a" for apical dendrites.'
+                    assert len(_post_com_idx) > 1, ' -  The soma layer of a compartmental neuron is being targeted, but the exact ' \
+                                                   'compartment in the layer is not defined. After 0, use "b" for basal dendrites, ' \
+                                                   '"s" for soma and "a" for apical dendrites.'
                     if _current_probs != '--':
                         assert len(_post_com_idx[1:]) == len(_current_probs), \
-                            " -  When targeting multiple compartments near soma, their probability, i.e. 'p', should be defined separately. Unless it's marked as '--'"
+                            " -  When targeting multiple compartments near soma, their probability," \
+                            " i.e. 'p', should be defined separately. Unless it's marked as '--'"
                     if _current_ns != '--':
                         assert len(_post_com_idx[1:]) == len(_current_ns), \
-                            " -  When targeting multiple compartments near soma, their number of connections, i.e. 'n', should be defined separately. Unless it's marked as '--'"
+                            " -  When targeting multiple compartments near soma, their number of connections," \
+                            " i.e. 'n', should be defined separately. Unless it's marked as '--'"
                     # creating the required synapses for targeting compartment 0, it can be at most 3 synapses (basal,
                     # soma or apical), hence the name triple_args
                     triple_args = []
@@ -1238,16 +1254,15 @@ class CxSystem:
             assert int(current_post_syn_idx) < len(self.neurongroups_list), \
                 ' -  The synapse in the following line is targeting a group index that is not defined:\n%s' % str(
                     list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
-            pre_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in \
-                                 self.customized_neurons_list if int(tmp_group['idx']) == \
-                                 int(current_pre_syn_idx)][0]
-            post_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in \
-                                  self.customized_neurons_list if int(tmp_group['idx']) == \
-                                  int(current_post_syn_idx)][0]
+            pre_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in
+                                 self.customized_neurons_list if int(tmp_group['idx']) == int(current_pre_syn_idx)][0]
+            post_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in
+                                  self.customized_neurons_list if int(tmp_group['idx']) == int(current_post_syn_idx)][0]
             _pre_type = self.customized_neurons_list[pre_group_ref_idx]['type']  # Pre-synaptic neuron type
             _post_type = self.customized_neurons_list[post_group_ref_idx]['type']  # Post-synaptic neuron type
             assert _post_type != 'PC', \
-                ' -  The post_synaptic group is a multi-compartmental PC but the target compartment is not selected. Use [C] tag followed by compartment number.'
+                ' -  The post_synaptic group is a multi-compartmental PC but the target compartment is' \
+                ' not selected. Use [C] tag followed by compartment number.'
             self.current_values_list = self.current_values_list.append(pandas.Series([_pre_type, _post_type, '_soma']), ignore_index=True)
             self.current_parameters_list = self.current_parameters_list.append(pandas.Series(['pre_type', 'post_type', 'post_comp_name']),
                                                                                ignore_index=True)
@@ -1308,25 +1323,24 @@ class CxSystem:
                 pass
             exec("%s=self.customized_synapses_list[%d]['namespace']" % (_dyn_syn_namespace_name, current_idx))
 
-            ### creating the initial synaptic connection :
+            # creating the initial synaptic connection :
             try:
-                exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )" \
+                exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )"
                      % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
                         _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name,
                         eval(_dyn_syn_namespace_name)['delay']))
             except NameError:  # for when there is no "on_post =...", i.e. fixed connection
                 exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, "
-                     "namespace= %s, delay = %s)" \
+                     "namespace= %s, delay = %s)"
                      % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
                         _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name, eval(_dyn_syn_namespace_name)['delay']))
 
-            ###############
-            ############### Connecting synapses
-            ###############
+
+            # Connecting synapses
 
             # Technical preparations & parameter parsing first
             _syn_ref_name = self.neurongroups_list[int(current_pre_syn_idx)][self.neurongroups_list[int(
-                current_pre_syn_idx)].index('_') + 1:] + "__to__" + self.neurongroups_list[self. \
+                current_pre_syn_idx)].index('_') + 1:] + "__to__" + self.neurongroups_list[self.
                 customized_synapses_list[-1]['post_group_idx']][self.neurongroups_list[self. \
                 customized_synapses_list[-1]['post_group_idx']].index('_') + 1:] + \
                             self.customized_synapses_list[-1]['post_comp_name']
@@ -1338,9 +1352,10 @@ class CxSystem:
                     self.default_load_flag = -1
                     _do_load = int(syn[index_of_load_connection].replace('<--', ''))
                     if _do_load == 1:
-                        assert hasattr(self,
-                                       'imported_connections'), " -  Synaptic connection in the following line is set to be loaded, however the import_connection_from is not defined in the parameters. The connection is being created:\n%s" % str(
-                            list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
+                        assert hasattr(self,'imported_connections'), \
+                            " -  Synaptic connection in the following line is set to be loaded, however the import_connection_from" \
+                            " is not defined in the parameters. The connection is being created:\n%s"\
+                            % str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
                 else:
                     load_connection_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'load_connection'].index),
                                                'no match')
@@ -1350,7 +1365,7 @@ class CxSystem:
                 pass
 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and not hasattr(self, 'imported_connections'):
-                ## only load the file if it's not loaded already, and if the connections are supposed to tbe loaded frmo the file
+                # only load the file if it's not loaded already, and if the connections are supposed to tbe loaded frmo the file
                 self.set_import_connections_path()
 
             try:
@@ -1411,8 +1426,9 @@ class CxSystem:
                         # syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))/(sqrt((x_pre-x_post) \
                         #    **2+(y_pre-y_post)**2)/mm)'   " % (float(p_arg), self.customized_synapses_list[-1]['ilam'])
                         syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))'" % (
-                            float(p_arg), self.customized_synapses_list[-1][
-                                'ilam'])  # todo the divisoin by the distance is temporarily removed to avoid division by zeros, try to understand what is going on using Hanna's email and if it's needed, add a fixed version
+                            float(p_arg), self.customized_synapses_list[-1]['ilam'])
+                        # todo the divisoin by the distance is temporarily removed to avoid division by zeros,
+                        #  try to understand what is going on using Hanna's email and if it's needed, add a fixed version
 
                 # If no connection probability is defined, then use "sparseness" values as connection probability and
                 # possibly scale with distance
@@ -1440,8 +1456,9 @@ class CxSystem:
                         # syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))/(sqrt((x_pre-x_post)\
                         # **2+(y_pre-y_post)**2)/mm)'   " % (p_arg, self.customized_synapses_list[-1]['ilam'])
                         syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))'" % (
-                            p_arg, self.customized_synapses_list[-1][
-                                'ilam'])  # todo the divisoin by the distance is temporarily removed to avoid division by zeros, try to understand what is going on using Hanna's email and if it's needed, add a fixed version
+                            p_arg, self.customized_synapses_list[-1]['ilam'])
+                        # todo the divisoin by the distance is temporarily removed to avoid division by zeros,
+                        #  try to understand what is going on using Hanna's email and if it's needed, add a fixed version
                 try:
                     syn_con_str += ',n=%d)' % int(n_arg)
                 except ValueError:
@@ -1482,13 +1499,13 @@ class CxSystem:
                 self.total_number_of_connections += _current_connections
                 try:
                     print(" -  %s%s to %s: Number of synapses %d \t Number "
-                          "of connections: %d \t Total synapses: %d \t " "Total connections: %d" \
+                          "of connections: %d \t Total synapses: %d \t " "Total connections: %d"
                           % (_load_str, _pre_group_idx, _post_group_idx, num_tmp, _current_connections,
                              self.total_number_of_synapses,
                              self.total_number_of_connections))
                 except (ValueError, UnboundLocalError):
                     print(" -  Connection created from %s to %s: Number of "
-                          "synapses %d \t Number of connections: %d \t Total synapses: %d \t Total connections: %d" \
+                          "synapses %d \t Number of connections: %d \t Total synapses: %d \t Total connections: %d"
                           % (_pre_group_idx, _post_group_idx, num_tmp, _current_connections,
                              self.total_number_of_synapses,
                              self.total_number_of_connections))
@@ -1503,10 +1520,10 @@ class CxSystem:
                 self.do_save_connections = 1
                 self.workspace.create_connections_key(_syn_ref_name)
                 self.workspace.syntax_bank.append(
-                    'self.workspace.connections["%s"]["data"] = scprs.csr_matrix((%s.wght[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))' \
+                    'self.workspace.connections["%s"]["data"] ='
+                    ' scprs.csr_matrix((%s.wght[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))'
                     % (_syn_ref_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name))
-                self.workspace.syntax_bank.append('self.workspace.connections["%s"]["n"] = %d' \
-                                                  % (_syn_ref_name, int(n_arg)))
+                self.workspace.syntax_bank.append('self.workspace.connections["%s"]["n"] = %d' % (_syn_ref_name, int(n_arg)))
             # elif (self.default_save_flag==1 or (self.default_save_flag==-1 and _do_save )) and \
             #         not hasattr(self,'workspace') :
             #     raise ValueError(" -  Synaptic connection is set to be saved, however the save_brian_data_path parameter is not defined.")
@@ -1599,10 +1616,14 @@ class CxSystem:
                 exec("%s=%s" % (thread_NRes_name, "'emit_spike=0'"),
                      globals(), locals())
                 exec("%s= b2.NeuronGroup(%s, model=%s,method='%s', "
-                     "threshold=%s, reset=%s)" \
-                     % (thread_NG_name, thread_NN_name, thread_NE_name,
-                        self.numerical_integration_method, thread_NT_name,
-                        thread_NRes_name), globals(), locals())
+                     "threshold=%s, reset=%s)" % (thread_NG_name,
+                                                  thread_NN_name,
+                                                  thread_NE_name,
+                                                  self.numerical_integration_method,
+                                                  thread_NT_name,
+                                                  thread_NRes_name),
+                     globals(),
+                     locals())
                 if hasattr(self, 'imported_connections'):
                     # in case the NG index are different. for example a MC_L2 neuron might have had
                     # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1621,8 +1642,8 @@ class CxSystem:
 
                 # setting the position of the neurons based on the positions in the .mat input file:
                 exec("%s.x=b2.real(self.customized_neurons_list[%d]["
-                     "'w_positions'])*mm\n" \
-                     "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm" % \
+                     "'w_positions'])*mm\n"
+                     "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm" %
                      (thread_NG_name, self.video_input_idx, thread_NG_name,
                       self.video_input_idx), globals(), locals())
                 self.workspace.results['positions_all']['z_coord'][thread_NG_name] = \
@@ -1633,7 +1654,7 @@ class CxSystem:
                 thread_SGsyn_name = 'SGEN_Syn'  # variable name for the Synapses() object
                 # that connects b2.SpikeGeneratorGroup() and relay neurons.
                 exec("%s = b2.Synapses(SPK_GENERATOR, %s, "
-                     "on_pre='emit_spike+=1')" % \
+                     "on_pre='emit_spike+=1')" %
                      (thread_SGsyn_name, thread_NG_name), globals(),
                      locals())  # connecting the b2.SpikeGeneratorGroup() and relay group.
                 exec("%s.connect(j='i')" % thread_SGsyn_name, globals(),
@@ -1736,7 +1757,7 @@ class CxSystem:
             exec("%s=%s" % (_dyn_neuron_reset_name, "'emit_spike=0'"),
                  globals(), locals())
             exec("%s= b2.NeuronGroup(%s, model=%s, method='%s',threshold=%s, "
-                 "reset=%s)" \
+                 "reset=%s)"
                  % (_dyn_neurongroup_name, _dyn_neuronnumber_name,
                     _dyn_neuron_eq_name, self.numerical_integration_method,
                     _dyn_neuron_thres_name, _dyn_neuron_reset_name), globals(), locals())
@@ -1759,8 +1780,8 @@ class CxSystem:
                     'w_positions']
             # setting the position of the neurons:
             exec("%s.x=b2.real(self.customized_neurons_list[%d]["
-                 "'w_positions'])*mm\n" \
-                 "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm" \
+                 "'w_positions'])*mm\n"
+                 "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm"
                  % (_dyn_neurongroup_name, current_idx, _dyn_neurongroup_name,
                     current_idx), globals(), locals())
             # saving the positions :
@@ -1769,9 +1790,8 @@ class CxSystem:
             self.workspace.results['number_of_neurons'][_dyn_neurongroup_name] = eval(_dyn_neuronnumber_name)
             SGsyn_name = 'SGEN_Syn'  # variable name for the Synapses() object
             # that connects b2.SpikeGeneratorGroup() and relay neurons.
-            exec("%s = b2.Synapses(GEN, %s, on_pre='emit_spike+=1')" \
-                 % (SGsyn_name, _dyn_neurongroup_name), globals(), locals()
-                 )  # connecting the b2.SpikeGeneratorGroup() and relay group.
+            exec("%s = b2.Synapses(GEN, %s, on_pre='emit_spike+=1')" % (SGsyn_name, _dyn_neurongroup_name), globals(), locals())
+            # connecting the b2.SpikeGeneratorGroup() and relay group.
             eval(SGsyn_name).connect(j='i')
             setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
             setattr(self.main_module, SGsyn_name, eval(SGsyn_name))
@@ -1817,9 +1837,7 @@ class CxSystem:
             exec("%s=%s" % (NRes_name, "'emit_spike=0'"), globals(),
                  locals())
             exec("%s= b2.NeuronGroup(%s, model=%s,method='%s', threshold=%s, "
-                 "reset=%s)" \
-                 % (NG_name, NN_name, NE_name, self.numerical_integration_method, NT_name,
-                    NRes_name), globals(), locals())
+                 "reset=%s)" % (NG_name, NN_name, NE_name, self.numerical_integration_method, NT_name, NRes_name), globals(), locals())
             if hasattr(self, 'imported_connections'):
                 # in case the NG index are different. for example a MC_L2 neuron might have had
                 # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1838,8 +1856,8 @@ class CxSystem:
 
             # setting the position of the neurons based on the positions in the .mat input file:
             exec("%s.x=b2.real(self.customized_neurons_list[%d]["
-                 "'w_positions'])*mm\n" \
-                 "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm" % \
+                 "'w_positions'])*mm\n"
+                 "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm" %
                  (NG_name, self.spike_input_group_idx, NG_name,
                   self.spike_input_group_idx), globals(), locals())
             self.workspace.results['positions_all']['z_coord'][NG_name] = \
@@ -1849,10 +1867,9 @@ class CxSystem:
             self.workspace.results['number_of_neurons'][NG_name] = eval(NN_name)
             SGsyn_name = 'SGEN_Syn'  # variable name for the Synapses() object
             # that connects b2.SpikeGeneratorGroup() and relay neurons.
-            exec("%s = b2.Synapses(SPK_GENERATOR, %s, on_pre='emit_spike+=1')" % \
-                 (SGsyn_name,
-                  NG_name), globals(), locals())  # connecting the
-            # b2.SpikeGeneratorGroup() and relay group.
+            exec("%s = b2.Synapses(SPK_GENERATOR, %s, on_pre='emit_spike+=1')" %
+                 (SGsyn_name, NG_name), globals(), locals())
+            # connecting the b2.SpikeGeneratorGroup() and relay group.
             exec("%s.connect(j='i')" % SGsyn_name, globals(), locals())  #
             # SV change
             setattr(self.main_module, NG_name, eval(NG_name))
@@ -1916,7 +1933,8 @@ class CxSystem:
 
     def gather_result(self):
         """
-        After the simulation and using the syntaxes that are previously prepared in the syntax_bank of save_data() object, this method saves the collected data to a file.
+        After the simulation and using the syntaxes that are previously prepared in the syntax_bank of save_data() object,
+        this method saves the collected data to a file.
 
         """
         print(" -  Generating the syntaxes for saving CX output:")
@@ -1935,25 +1953,6 @@ class CxSystem:
             self.workspace.connections['positions_all']['w_coord'] = self.workspace.results['positions_all']['w_coord']
             self.workspace.connections['positions_all']['z_coord'] = self.workspace.results['positions_all']['z_coord']
             self.workspace.save_connections_to_file()
-
-    def visualise_connectivity(self, s):
-        Ns = len(s.source)
-        Nt = len(s.target)
-        plt.figure(figsize=(10, 4))
-        plt.subplot(121)
-        plt.plot(np.zeros(Ns), arange(Ns), 'ok', ms=10)
-        plt.plot(np.ones(Nt), arange(Nt), 'ok', ms=10)
-        for i, j in zip(s.i, s.j):
-            plt.plot([0, 1], [i, j], '-k')
-        plt.xticks([0, 1], ['Source', 'Target'])
-        plt.ylabel('Neuron index')
-
-    def multi_y_plotter(self, length, variable, title):
-        for i in range(length):
-            tmp_str = 'ax.plot(item.t/ms, item.%s[%d])' % (variable, i)
-            exec(tmp_str)
-            tmp_str = "ax.set_title('%s')" % title
-            exec(tmp_str)
 
     @staticmethod
     def import_optimizer():
