@@ -40,7 +40,7 @@ from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.core.parameter_parser import synapse_parser
 from cxsystem2.core.physiology_reference import neuron_reference, synapse_reference
 from cxsystem2.core.stimuli import stimuli
-from cxsystem2.core.workspace_manager import workspace
+from cxsystem2.core.workspace_manager import Workspace
 from cxsystem2.gui import gui
 
 b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
@@ -221,7 +221,7 @@ class CxSystem(object):
             trials_per_config = 0
         # check for array_run and return
         if np.any(check_array_run_anatomy) or np.any(check_array_run_physiology) or (trials_per_config > 1 and not instantiated_from_array_run):
-            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'),self.suffix)
+            self.workspace = Workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'),self.suffix)
             self.workspace.create_simulation(self.parameter_finder(self.anat_and_sys_conf_df, 'simulation_title'))
             suffix = self.suffix
             tmp_folder_path = self.workspace.get_workspace_folder().joinpath('.tmp'+suffix)
@@ -385,10 +385,10 @@ class CxSystem(object):
 
     def set_workspace(self,*args):
         if self.cluster_run_start_idx == -1 and self.cluster_run_step == -1 and self.array_run_in_cluster == 0:
-            self.workspace = workspace(args[0],self.suffix)
+            self.workspace = Workspace(args[0],self.suffix)
         else: # this means cxsystem is running in cluster
             print(" -  CxSystem is running in Cluster ... ")
-            self.workspace = workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'cluster_workspace'),self.suffix)
+            self.workspace = Workspace(self.parameter_finder(self.anat_and_sys_conf_df, 'cluster_workspace'),self.suffix)
             print(" -  CxSystem knows it's running in cluster and set the output folder to : {}".format(self.workspace.get_workspace_folder()))
 
     def set_compression_method(self,*args):

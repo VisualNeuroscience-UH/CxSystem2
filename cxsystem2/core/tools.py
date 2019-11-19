@@ -8,7 +8,7 @@ import pandas as pd
 from cxsystem2.core.exceptions import ParameterNotFoundError
 
 
-def save_to_file(save_path, data):
+def write_to_file(save_path, data):
     if '.gz' in save_path:
         with open(save_path, 'wb') as fb:
             fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
@@ -18,6 +18,20 @@ def save_to_file(save_path, data):
     elif '.pickle' in save_path:
         with open(save_path, 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
+
+def load_from_file(file_path):
+    if file_path.suffix == '.gz':
+        with open(file_path.as_posix(), 'rb') as fb:
+            data = zlib.decompress(fb.read())
+            loaded_data = pickle.loads(data)
+    elif file_path.suffix == '.bz2':
+        with bz2.BZ2File(file_path.as_posix(), 'rb') as fb:
+            loaded_data = pickle.load(fb)
+    elif file_path.suffix == '.pickle':
+        with open(file_path.as_posix(), 'rb') as fb:
+            loaded_data= pickle.load(fb)
+    return loaded_data
+
 
 def parameter_finder(df,keyword):
     location = np.where(df.values == keyword)

@@ -22,7 +22,7 @@ import pandas as pd
 
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
-from cxsystem2.core.tools import save_to_file, parameter_finder
+from cxsystem2.core.tools import write_to_file, parameter_finder
 
 
 class ArrayRun(object):
@@ -275,7 +275,7 @@ class ArrayRun(object):
 
         for item in list(paths.keys()):
             self.final_metadata_df['Full path'][item] = paths[item]
-        save_to_file(os.path.join(os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename), self.final_metadata_df)
+        write_to_file(os.path.join(os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename), self.final_metadata_df)
         print(" -  Array run metadata saved at: %s" % os.path.join(
             os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename))
 
