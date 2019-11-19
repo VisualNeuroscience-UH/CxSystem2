@@ -1,26 +1,29 @@
+import json
 import logging
+import multiprocessing
 import os
+from getpass import getpass
 from pathlib import Path
 
 from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 
-# [sys.path.append(i) for i in ['.', '..', '../..']]
 from cxsystem2.core.cxsystem import CxSystem as Cx
-import multiprocessing
-from getpass import getpass
-import json
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 
-# Create your views here.
 def index(request):
-    # latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    is_https = False
+    if request.is_secure():
+        is_https = True
+    # only authenticate if it's running in https
     template = loader.get_template('editor/index.html')
-    return HttpResponse(template.render({}, request))
-    # return HttpResponse("Hello, world. You're at the polls index.")
+    context = {
+        'is_https' : is_https,
+    }
+    return HttpResponse(template.render(context, request))
 
 
 def cxspawner(anatomy,
@@ -28,9 +31,9 @@ def cxspawner(anatomy,
               root_path):
     """
     The function that each spawned process runs and parallel instances of CxSystems are created here.
+    :param anatomy:
     :param root_path:
     :param physiology:
-    :param anatomy:
     """
     from time import sleep
     sleep(10)

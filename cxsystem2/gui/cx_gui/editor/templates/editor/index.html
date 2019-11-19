@@ -17,6 +17,12 @@
 <script src="/static/scripts/django_simulation_request.js"></script>
 <!--<script src="/static/css/foundation-5.5.3/js/foundation.min.js"></script>-->
 
+{% if is_https %}
+    <script src="/static/scripts/jso.js"></script>
+    <script src="/static/scripts/auth.js"></script>
+    <script> authenticate(); </script>
+{% endif %}
+
 <script>
     // Set the default CSS theme and icon library globally
     JSONEditor.defaults.theme = 'foundation5';
