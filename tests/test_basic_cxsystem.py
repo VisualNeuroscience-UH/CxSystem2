@@ -58,8 +58,10 @@ class TestInit:
 	def test_local_variable_names(self):
 		assert CM.__init__.__code__.co_varnames == \
 		('self', 'anatomy_and_system_config', 'physiology_config', 'output_file_suffix', 'instantiated_from_array_run',
-		 'cluster_run_start_idx', 'cluster_run_step', 'array_run_in_cluster', 'params_indices', 'row_idx',
-		 'number_of_new_columns', 'number_of_rows', 'existing_rows', 'new_columns', 'empty_dataframe',
+		 'cluster_run_start_idx', 'cluster_run_step', 'array_run_in_cluster', 'now', 'params_indices', 'row_idx',
+		 'number_of_new_columns',
+		 # 'number_of_rows', # currently commented in the cxsystem.py
+		 'existing_rows', 'new_columns', 'empty_dataframe',
 		 'new_anat_and_sys_conf_df', 'row', 'check_array_run_anatomy', 'check_array_run_physiology',
 		 'trials_per_config', 'suffix', 'tmp_folder_path', 'tmp_anat_path', 'tmp_physio_path', 'array_run_path',
 		 'cluster_flag', 'array_run_suffix', 'tmp_anat_path2', 'f', 'tmp_physio_path2', 'command', 'tmp_cluster')
