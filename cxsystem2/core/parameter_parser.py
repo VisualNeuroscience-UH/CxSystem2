@@ -185,11 +185,10 @@ class SynapseParser(object):
         This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
         Following STDP values are set in this method: Apre, Apost, Tau_pre, Tau_post, wght_max, wght0.
         """
-        self.output_namespace['Apre'], self.output_namespace['Apost'], self.output_namespace['taupre'], \
-        self.output_namespace['taupost'] = self.value_extractor(self.physio_config_df,
-                                                                'stdp_%s_%s' % (self.output_synapse['pre_group_type'],
-                                                                                self.output_synapse['post_group_type'] +
-                                                                                self.output_synapse['post_comp_name']))
+        self.output_namespace['Apre'], self.output_namespace['Apost'], self.output_namespace['taupre'], self.output_namespace['taupost'] = \
+            self.value_extractor(self.physio_config_df, 'stdp_%s_%s' % (self.output_synapse['pre_group_type'],
+                                                                        self.output_synapse['post_group_type'] +
+                                                                        self.output_synapse['post_comp_name']))
 
         stdp_max_strength_coefficient = self.value_extractor(self.physio_config_df, 'stdp_max_strength_coefficient')
         self.output_namespace['wght_max'] = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (
@@ -207,10 +206,10 @@ class SynapseParser(object):
         """
         The STDP method for assigning the STDP parameters to the customized_synapses() object.
         """
-        self.output_namespace['Apre'], self.output_namespace['Apost'], self.output_namespace['taupre'], \
-        self.output_namespace['taupost'] = self.value_extractor(self.physio_config_df, 'stdp_%s_%s' % (self.output_synapse['pre_group_type'],
-                                                                                                       self.output_synapse['post_group_type'] +
-                                                                                                       self.output_synapse['post_comp_name']))
+        self.output_namespace['Apre'], self.output_namespace['Apost'], self.output_namespace['taupre'], self.output_namespace['taupost'] = \
+            self.value_extractor(self.physio_config_df,
+                                 'stdp_%s_%s' % (self.output_synapse['pre_group_type'],
+                                                 self.output_synapse['post_group_type'] + self.output_synapse['post_comp_name']))
         self.output_namespace['tau_synaptic_scaling'] = self.value_extractor(self.physio_config_df,
                                                                              'tau_synaptic_scaling')
         self.output_namespace['ap_target_frequency'] = self.value_extractor(self.physio_config_df,

@@ -374,10 +374,10 @@ class NeuronReference(object):
             # Old model variation equations using equation_templates (from November 2018)
             eq_template_soma = eqt.EquationHelper(neuron_model=self.pc_neuron_model, is_pyramidal=True,
                                                   compartment='soma', exc_model=self.pc_excitation_model,
-                                                  inh_model=self.pc_inhibition_model).getMembraneEquation(return_string=True)
+                                                  inh_model=self.pc_inhibition_model).get_membrane_equation(return_string=True)
             eq_template_dend = eqt.EquationHelper(neuron_model=self.pc_neuron_model, is_pyramidal=True,
                                                   compartment='dend', exc_model=self.pc_excitation_model,
-                                                  inh_model=self.pc_inhibition_model).getMembraneEquation(return_string=True)
+                                                  inh_model=self.pc_inhibition_model).get_membrane_equation(return_string=True)
 
             dendritic_extent = self.output_neuron['dend_comp_num']
 
@@ -515,7 +515,7 @@ class NeuronReference(object):
         else:
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
@@ -568,7 +568,7 @@ class NeuronReference(object):
         else:
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
@@ -623,7 +623,7 @@ class NeuronReference(object):
         else:
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
@@ -675,7 +675,7 @@ class NeuronReference(object):
         else:
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).getMembraneEquation()
+            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
