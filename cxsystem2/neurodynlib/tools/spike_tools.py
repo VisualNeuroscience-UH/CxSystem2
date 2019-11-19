@@ -30,7 +30,8 @@ import brian2 as b2
 import numpy as np
 
 
-def get_spike_time(voltage_monitor, spike_threshold):
+def get_spike_time(voltage_monitor,
+                   spike_threshold):
     """
     Detects the spike times in the voltage. Here, the spike time is DEFINED as the value in
     voltage_monitor.t for which voltage_monitor.v[idx] is above threshold AND
@@ -189,7 +190,10 @@ class PopulationSpikeStats:
         return cv
 
 
-def filter_spike_trains(spike_trains, window_t_min=0.*b2.ms, window_t_max=None, idx_subset=None):
+def filter_spike_trains(spike_trains,
+                        window_t_min=0.*b2.ms,
+                        window_t_max=None,
+                        idx_subset=None):
     """
     creates a new dictionary neuron_idx=>spike_times where all spike_times are in the
         half open interval [window_t_min,window_t_max)
@@ -236,7 +240,9 @@ def filter_spike_trains(spike_trains, window_t_min=0.*b2.ms, window_t_max=None, 
     return filtered_spike_trains
 
 
-def get_spike_train_stats(spike_monitor, window_t_min=0.*b2.ms, window_t_max=None):
+def get_spike_train_stats(spike_monitor,
+                          window_t_min=0.*b2.ms,
+                          window_t_max=None):
     """
     Analyses the spike monitor and returns a PopulationSpikeStats instance.
 
@@ -269,7 +275,9 @@ def get_spike_train_stats(spike_monitor, window_t_min=0.*b2.ms, window_t_max=Non
     return stats
 
 
-def _spike_train_2_binary_vector(spike_train, vector_length, discretization_dt):
+def _spike_train_2_binary_vector(spike_train,
+                                 vector_length,
+                                 discretization_dt):
     """
     Convert the time-stamps of the spike_train into a binary vector of the given length.
         Note: if more than one spike fall into the same time bin, only one is counted, surplus spikes are ignored.

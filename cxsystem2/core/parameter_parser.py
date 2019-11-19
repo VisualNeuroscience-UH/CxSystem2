@@ -42,7 +42,9 @@ class synapse_parser(object):
     _steep_post = _excitatory_groups + _steep_post_inhibitory_groups
     _shallow_post = _shallow_post_inhibitory_groups
 
-    def __init__(self,output_synapse,physio_config_df):
+    def __init__(self,
+                 output_synapse,
+                 physio_config_df):
         '''
         The initialization method for namespaces() object.
 
@@ -74,7 +76,9 @@ class synapse_parser(object):
         # Set (initial) weights for chosen synapse type
         getattr(synapse_parser, output_synapse['type'])(self)
 
-    def value_extractor(self, df, key_name):
+    def value_extractor(self,
+                        df,
+                        key_name):
         non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
             exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx]))
@@ -124,7 +128,9 @@ class synapse_parser(object):
         else:
             self._K12 = np.average([2.79, 1.09])
 
-    def _scale_by_calcium(self, ca, cw=None):
+    def _scale_by_calcium(self,
+                          ca,
+                          cw=None):
         """
         Scales synaptic weight depending on calcium level
 

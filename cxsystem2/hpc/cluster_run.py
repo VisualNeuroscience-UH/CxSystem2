@@ -29,7 +29,11 @@ from cxsystem2.core.tools import parameter_finder, change_parameter_value_in_fil
 
 class ClusterRun:
 
-    def __init__(self, array_run_obj, anat_file_path, physio_file_path, suffix=""):
+    def __init__(self,
+                 array_run_obj,
+                 anat_file_path,
+                 physio_file_path,
+                 suffix=""):
 
         try:
             self.cluster_workspace = Path(parameter_finder(array_run_obj.anatomy_df, 'cluster_workspace'))
@@ -184,7 +188,9 @@ class ClusterRun:
         if not p:
             raise ClusterNotReachableError("Cluster node is not reachable")
 
-    def ssh_commander(self, command, print_flag=False):
+    def ssh_commander(self,
+                      command,
+                      print_flag=False):
         stdin, stdout, stderr = self.client.exec_command(command, get_pty=True)
         out = stdout.read(),
         if print_flag is True:
@@ -211,7 +217,9 @@ class ClusterDownloader:
         self.retrieve()
 
     @staticmethod
-    def ssh_commander(client, command, print_flag):
+    def ssh_commander(client,
+                      command,
+                      print_flag):
         stdin, stdout, stderr = client.exec_command(command)
         out = stdout.read(),
         if print_flag:

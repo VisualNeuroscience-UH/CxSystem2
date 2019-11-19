@@ -55,7 +55,9 @@ def _convert(filepath):
     return structure_csv, spikes_csv, subsets_json
 
 
-def _run_visimpl(structure_csv, spikes_csv, subsets_json):
+def _run_visimpl(structure_csv,
+                 spikes_csv,
+                 subsets_json):
     run_visimpl_cmd = VISIMPL_BINARY + ' -csv ' + str(structure_csv) + ' ' + str(spikes_csv) + ' -se ' + str(
         subsets_json)
     os.system(run_visimpl_cmd)

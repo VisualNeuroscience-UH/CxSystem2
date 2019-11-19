@@ -28,7 +28,9 @@ def find_free_port():
 
 
 class RunServer:
-    def __init__(self, ssl=False, port=None):
+    def __init__(self,
+                 ssl=False,
+                 port=None):
         try:
             python_cmd_version = os.popen('python --version').read().strip().split(' ')[1]
             if int(python_cmd_version[0]) < 3:

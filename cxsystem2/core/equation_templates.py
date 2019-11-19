@@ -239,7 +239,13 @@ class EquationHelper(object):
 
     # </editor-fold>
 
-    def __init__(self, neuron_model='EIF', is_pyramidal=False, compartment='soma', exc_model='SIMPLE_E', inh_model='SIMPLE_I', custom_strings=None):
+    def __init__(self,
+                 neuron_model='EIF',
+                 is_pyramidal=False,
+                 compartment='soma',
+                 exc_model='SIMPLE_E',
+                 inh_model='SIMPLE_I',
+                 custom_strings=None):
         self.neuron_model = neuron_model
         self.is_pyramidal = is_pyramidal
         self.compartment = compartment
@@ -283,7 +289,9 @@ class EquationHelper(object):
         self.comp_specific_vars = EquationHelper.CompSpecificVariables[exc_model] + \
                                   EquationHelper.CompSpecificVariables[inh_model]
 
-    def getMembraneEquation(self, base_dict=None, return_string=False):
+    def getMembraneEquation(self,
+                            base_dict=None,
+                            return_string=False):
 
         membrane_equation = Template(EquationHelper.membrane_eq_template)
         all_membrane_model_strings = dict(self.neuron_model_strings)
@@ -310,7 +318,9 @@ class EquationHelper(object):
 
             return compartment_eq
 
-    def getDict(self, base_dict=None, specific_compartment='XX'):
+    def getDict(self,
+                base_dict=None,
+                specific_compartment='XX'):
 
         compartment_dict = dict(base_dict)
         substitutables = {k: k + '_' + specific_compartment for k in self.comp_specific_vars}

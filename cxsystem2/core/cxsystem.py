@@ -286,7 +286,9 @@ class CxSystem(object):
            self.configuration_executor()
         print(" -  Cortical Module initialization Done.")
 
-    def runGUI(self, ssl=False, port=None):
+    def runGUI(self,
+               ssl=False,
+               port=None):
         gui.RunServer(ssl = ssl, port = port)
 
     def configuration_executor(self):
@@ -311,7 +313,9 @@ class CxSystem(object):
                                 self.parameter_to_method_mapping[self.anat_and_sys_conf_df.loc[self.value_line_idx, 0]][1]()
                     break
 
-    def parameter_finder(self,df,keyword):
+    def parameter_finder(self,
+                         df,
+                         keyword):
         location = np.where(df.values == keyword)
         if location[0].size:
             counter = int(location[0])+1
@@ -325,7 +329,9 @@ class CxSystem(object):
         else:
             raise NameError(' -  Variable %s not found in the configuration file.'%keyword)
 
-    def value_extractor(self, df, key_name):
+    def value_extractor(self,
+                        df,
+                        key_name):
         non_dict_indices = df['Variable'].dropna()[df['Key'].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
             exec("%s=%s" % (df['Variable'][non_dict_idx], df['Value'][non_dict_idx]))
@@ -353,7 +359,9 @@ class CxSystem(object):
         except Exception as e:
             print(e)
 
-    def read_config_file(self, conf, header = False):
+    def read_config_file(self,
+                         conf,
+                         header = False):
         '''
         This function reads the file and convert it to csv from json if necessary.
         It only works by loading the csv without headers. (header=none)

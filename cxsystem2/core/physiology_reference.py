@@ -27,7 +27,16 @@ class neuron_reference(object):
     New types of neurons should be implemented in this class.
     '''
 
-    def __init__(self,idx, number_of_neurons, cell_type, layers_idx, general_grid_radius ,min_distance, physio_config_df, network_center=0 + 0j, cell_subtype='--'):
+    def __init__(self,
+                 idx,
+                 number_of_neurons,
+                 cell_type,
+                 layers_idx,
+                 general_grid_radius,
+                 min_distance,
+                 physio_config_df,
+                 network_center=0 + 0j,
+                 cell_subtype='--'):
         '''
         initialize the neuron_reference based on the arguments.
 
@@ -38,7 +47,8 @@ class neuron_reference(object):
          and last layers in which the neuron resides. So np.array([4,1]) means that the soma resides in layer 4 and the apical \
          dendrites which are (2 compartments) extend to layer 2/3 and 1. To avoid confusion, layer 2 is used as the indicator \
          of layer 2/3. Hence, if the last compartment of a neuron is in layer 2/3, use number 2.
-        :param network_center: as the name implies, this argument defines the center of teh NeuronGroup() in visual field coordinates. The default value is 0+0j.
+        :param network_center: as the name implies, this argument defines the center of teh NeuronGroup() in visual field coordinates.
+                The default value is 0+0j.
         :param resolution: resolution for formation of neurons in the grid. Default value is 0.1
 
         Main internal variables:

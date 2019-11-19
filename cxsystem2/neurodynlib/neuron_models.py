@@ -72,7 +72,9 @@ class PointNeuron(object):
     default_neuron_parameters = {}
     model_info_url = 'http://neuronaldynamics.epfl.ch/online/'
 
-    def __init__(self, is_pyramidal=False, compartment='soma'): #, custom_strings=None):
+    def __init__(self,
+                 is_pyramidal=False,
+                 compartment='soma'):
 
         self.is_pyramidal = is_pyramidal
         self.compartment = compartment

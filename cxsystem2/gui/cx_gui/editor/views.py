@@ -23,7 +23,9 @@ def index(request):
     # return HttpResponse("Hello, world. You're at the polls index.")
 
 
-def cxspawner(anatomy, physiology, root_path):
+def cxspawner(anatomy,
+              physiology,
+              root_path):
     """
     The function that each spawned process runs and parallel instances of CxSystems are created here.
     :param root_path:

@@ -266,7 +266,9 @@ def test_outputfile(cxsystem_run_fixture):
 	assert os.access(CM.workspace.get_simulation_folder().joinpath(outputfilelist[0]), os.W_OK)
 	
 # @pytest.mark.xfail(reason='not identical spikes')		
-def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_data):
+def test_spikecount_10percent_tolerance(cxsystem_run_fixture,
+										capsys,
+										get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
@@ -274,7 +276,8 @@ def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_
 		assert 0.9 <= spike_count_proportion <= 1.1
 
 @pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')		
-def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
+def test_spikecount_strict(cxsystem_run_fixture,
+						   get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
@@ -282,7 +285,8 @@ def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
 		assert spike_count_proportion == 1.0
 
 @pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')		
-def test_spiketiming_strict(cxsystem_run_fixture, get_spike_data):
+def test_spiketiming_strict(cxsystem_run_fixture,
+							get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	for key in keys:
@@ -290,7 +294,9 @@ def test_spiketiming_strict(cxsystem_run_fixture, get_spike_data):
 		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
 		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
 		
-def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
+def test_spikecount_report(cxsystem_run_fixture,
+						   capsys,
+						   get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 	with capsys.disabled():
@@ -301,7 +307,9 @@ def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
 			print('Proportion of spike counts (new/old) for {0} is {1:.2f}'.format(key, spike_count_proportion))
 		# assert spike_count_proportion == 1.0
 
-def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
+def test_spiketiming_report(cxsystem_run_fixture,
+							capsys,
+							get_spike_data):
 	spikes_all, new_spikes_all = get_spike_data
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 
