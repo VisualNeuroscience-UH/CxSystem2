@@ -48,7 +48,7 @@ Adding Neuron Model
 --------------------
 Adding a new neuron group
 `````````````````````````
-Equations for different neuron types are in the class *neuron_reference* in physiology_reference.py. Under this class, there is a separate method for each neuron group containing equation templates. Adding a new neuron group can be done by copy-pasting the method of eg. the BC neuron group and renaming it (ChC for chandelier cell):
+Equations for different neuron types are in the class *NeuronReference* in physiology_reference.py. Under this class, there is a separate method for each neuron group containing equation templates. Adding a new neuron group can be done by copy-pasting the method of eg. the BC neuron group and renaming it (ChC for chandelier cell):
 
 .. code-block:: python
 
@@ -61,11 +61,11 @@ Equations for different neuron types are in the class *neuron_reference* in phys
       self.output_neuron['equation'] += Equations('''x : meter
                                                      y : meter''')
 
-You also need to add the neuron type to the list of accepted types under the init of *neuron_reference*:
+You also need to add the neuron type to the list of accepted types under the init of *NeuronReference*:
 
 .. code-block:: python
 
-   neuron_reference._celltypes = array([...existing neuron types..., 'ChC'])
+   NeuronReference._celltypes = array([...existing neuron types..., 'ChC'])
 
 Similarly, add the neuron type also to the list of accepted types under the init of :code:`NeuronParser` (in :code:`parameter_parser.py`), and create a method for parameter processing. Often, parameters can be used as such in the equations, so the method becomes:
 
@@ -87,7 +87,7 @@ After this, the neuron equation parameters should be added to Physiological conf
 
 Adding alternative neuron models to existing groups
 ```````````````````````````````````````````````````````
-Typically you want to add an alternative neuron model to an existing neuron group. Suppose you wanted to have the adaptive exponential integrate-and-fire model (AdEx) alongside the regular exponential integrate-and-fire model (EIF). You want to flexibly switch between the models using a 0/1 flag in the physiological configuration file. First, you would add the AdEx equations to :code:`neuron_reference`:
+Typically you want to add an alternative neuron model to an existing neuron group. Suppose you wanted to have the adaptive exponential integrate-and-fire model (AdEx) alongside the regular exponential integrate-and-fire model (EIF). You want to flexibly switch between the models using a 0/1 flag in the physiological configuration file. First, you would add the AdEx equations to :code:`NeuronReference`:
 
 .. code-block:: python
 
@@ -103,7 +103,7 @@ Typically you want to add an alternative neuron model to an existing neuron grou
                 dw/dt = (a*(vm - EL)-w)/tau_w : amp
                 ''', ge='ge_soma', gi='gi_soma')
 
-Make a similar change to all the neuron groups you want to be affected. Then, extract :code:`flag_adex` in the init of :code:`neuron_reference`:
+Make a similar change to all the neuron groups you want to be affected. Then, extract :code:`flag_adex` in the init of :code:`NeuronReference`:
 
 .. code-block:: python
 		
@@ -119,11 +119,11 @@ It is a good idea to extract any flag under :code:`try` unless you want it to be
 
 Adding Synapse Model
 ---------------------
-Similarly to adding new neuron groups, you need to add the new synapse types to the lists of accepted types. Suppose you wanted to add a 'Depressing' synapse type (a form of short-term synaptic plasticity). First, in the init of :code:`synapse_reference` (:code:`physiology_reference.py`):
+Similarly to adding new neuron groups, you need to add the new synapse types to the lists of accepted types. Suppose you wanted to add a 'Depressing' synapse type (a form of short-term synaptic plasticity). First, in the init of :code:`SynapseReference` (:code:`physiology_reference.py`):
 
 .. code-block:: python
 
-   synapse_reference.syntypes = array([...existing synapse types..., 'Depressing'])
+   SynapseReference.syntypes = array([...existing synapse types..., 'Depressing'])
 
 Then similarly in the init of *synapse_parser* (parameter_parser.py):
 
@@ -131,7 +131,7 @@ Then similarly in the init of *synapse_parser* (parameter_parser.py):
 
    synapse_parser.type_ref = array ([...existing synapse types..., 'Depressing'])
    
-Equations for the new synapse type can then be added as a method under *synapse_reference*:
+Equations for the new synapse type can then be added as a method under *SynapseReference*:
 
 .. code-block:: python
 

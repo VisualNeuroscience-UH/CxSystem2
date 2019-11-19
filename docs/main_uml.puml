@@ -24,7 +24,7 @@ void spike()
 }
 
 package "physiology_reference module"{
-class neuron_reference{
+class NeuronReference{
 output_neuron{}
 void PC()
 void BC()
@@ -34,15 +34,15 @@ void SS()
 void VPM()
 }
 
-class synapse_reference{
+class SynapseReference{
 output_synapse{}
 void STDP()
 void STDP_with_scaling()
 void Fixed()
 }
-synapse_reference <-up- N2
+SynapseReference <-up- N2
 N2 -- CxSystem
-neuron_reference <-up- N1
+NeuronReference <-up- N1
 N1 -- CxSystem
 
 }
@@ -66,8 +66,8 @@ void _L1i()
 void _MC()
 void _SS()
 }
-NeuronParser <-up- neuron_reference
-synapse_parser <-up- synapse_reference
+NeuronParser <-up- NeuronReference
+synapse_parser <-up- SynapseReference
 }
 
 package "save_data module"{

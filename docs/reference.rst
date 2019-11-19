@@ -26,15 +26,15 @@ Parameter Parser module
 Physiology Reference module
 ------------------------------------
 .. module:: physiology_reference
-.. autoclass:: neuron_reference
+.. autoclass:: NeuronReference
    :members:
 
-   .. automethod:: physiology_reference.neuron_reference.__init__
+   .. automethod:: physiology_reference.NeuronReference.__init__
 
-.. autoclass:: synapse_reference
+.. autoclass:: SynapseReference
     :members:
 
-    .. automethod:: physiology_reference.synapse_reference.__init__
+    .. automethod:: physiology_reference.SynapseReference.__init__
 
 
 Array_run module

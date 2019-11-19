@@ -38,7 +38,7 @@ from cxsystem2.configuration import config_file_converter as fileconverter
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.core.parameter_parser import SynapseParser
-from cxsystem2.core.physiology_reference import neuron_reference, synapse_reference
+from cxsystem2.core.physiology_reference import NeuronReference, SynapseReference
 from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.workspace_manager import Workspace
 from cxsystem2.gui import gui
@@ -80,8 +80,8 @@ class CxSystem(object):
 
         Main internal variables:
 
-        * customized_neurons_list: This list contains the neuron_reference instances. So for each neuron group target line, there would be an element in this list which contains all the information for that particular neuron group.
-        * customized_synapses_list: This list contains the synapse_reference instances. Hence, for each synapse custom line, there would be an element in this list, containing all the necessary information.
+        * customized_neurons_list: This list contains the NeuronReference instances. So for each neuron group target line, there would be an element in this list which contains all the information for that particular neuron group.
+        * customized_synapses_list: This list contains the SynapseReference instances. Hence, for each synapse custom line, there would be an element in this list, containing all the necessary information.
         * neurongroups_list: This list contains name of the NeuronGroup() instances that are placed in the Globals().
         * synapses_name_list: This list contains name of the Synapses() instances that are placed in the Globals().
         * monitor_name_bank: The dictionary containing the name of the monitors that are defined for any NeuronGroup() or Synapses().
@@ -150,8 +150,8 @@ class CxSystem(object):
         self.current_parameters_list_orig_len = 0 # current_parameters_list is changing at some point in the code, so the original length of it is needed
         self.current_values_list = []
         self.NG_indices = []
-        self.customized_neurons_list = []  # This list contains the neuron_reference instances. So for each neuron group target line, there would be an element in this list which contains all the information for that particular neuron group.
-        self.customized_synapses_list = []  # This list contains the synapse_reference instances. Hence, for each synapse custom line, there would be an element in this list, containing all the necessary information.
+        self.customized_neurons_list = []  # This list contains the NeuronReference instances. So for each neuron group target line, there would be an element in this list which contains all the information for that particular neuron group.
+        self.customized_synapses_list = []  # This list contains the SynapseReference instances. Hence, for each synapse custom line, there would be an element in this list, containing all the necessary information.
         self.neurongroups_list = []  # This list contains name of the NeuronGroup() instances that are placed in the Globals().
         self.synapses_name_list = []  # This list contains name of the Synapses() instances that are placed in the Globals().
         self.monitor_name_bank = {}  # The dictionary containing the name of the monitors that are defined for any NeuronGroup() or Synapses().
@@ -749,10 +749,10 @@ class CxSystem(object):
         #</editor-fold>
 
         # <editor-fold desc="...Generation of neuron reference">
-        self.customized_neurons_list.append(neuron_reference(idx, number_of_neurons, neuron_type,
-                                                             layer_idx, self.general_grid_radius, self.min_distance, self.physio_config_df,
-                                                             network_center=net_center,cell_subtype=neuron_subtype).output_neuron)  # creating a
-        # neuron_reference() object and passing the positional arguments to it. The main member of the class called
+        self.customized_neurons_list.append(NeuronReference(idx, number_of_neurons, neuron_type,
+                                                            layer_idx, self.general_grid_radius, self.min_distance, self.physio_config_df,
+                                                            network_center=net_center, cell_subtype=neuron_subtype).output_neuron)  # creating a
+        # NeuronReference() object and passing the positional arguments to it. The main member of the class called
         # output_neuron is then appended to customized_neurons_list.
         # in case of threshold/reset/refractory overwrite
         # if threshold != '--':
@@ -1303,10 +1303,10 @@ class CxSystem(object):
 
             # check monitors in line:
             current_idx = len(self.customized_synapses_list)
-            # creating a synapse_reference object and passing the positional arguments to it. The main member of
+            # creating a SynapseReference object and passing the positional arguments to it. The main member of
             # the class called output_synapse is then appended to customized_synapses_list:
-            self.customized_synapses_list.append(synapse_reference(receptor, pre_syn_idx, post_syn_idx, syn_type,
-                                                                   pre_type, post_type, self.physio_config_df, post_comp_name, custom_weight).output_synapse)
+            self.customized_synapses_list.append(SynapseReference(receptor, pre_syn_idx, post_syn_idx, syn_type,
+                                                                  pre_type, post_type, self.physio_config_df, post_comp_name, custom_weight).output_synapse)
             _pre_group_idx = self.neurongroups_list[self.customized_synapses_list[-1]['pre_group_idx']]
             _post_group_idx = self.neurongroups_list[self.customized_synapses_list[-1]['post_group_idx']]
             # Generated variable name for the Synapses(), equation, pre_synaptic and post_synaptic equation and Namespace
@@ -1761,8 +1761,8 @@ class CxSystem(object):
                 print(" -  Positions for the group %s loaded" %
                       _dyn_neurongroup_name)
             else: # generating the positions:
-                vpm_customized_neuron = neuron_reference(current_idx, int(number_of_neurons), 'VPM', '0', eval(radius),
-                                                         self.min_distance, self.physio_config_df, network_center=net_center)
+                vpm_customized_neuron = NeuronReference(current_idx, int(number_of_neurons), 'VPM', '0', eval(radius),
+                                                        self.min_distance, self.physio_config_df, network_center=net_center)
                 self.customized_neurons_list[current_idx]['z_positions'] = vpm_customized_neuron.output_neuron[
                     'z_positions']
                 self.customized_neurons_list[current_idx]['w_positions'] = vpm_customized_neuron.output_neuron[
