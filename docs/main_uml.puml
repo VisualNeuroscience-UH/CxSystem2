@@ -57,7 +57,7 @@ void STDP()
 void STDP_with_scaling()
 void Fixed()
 }
-class "neuron_parser"{
+class "NeuronParser"{
 
 output_namespace{}
 void _PC()
@@ -66,7 +66,7 @@ void _L1i()
 void _MC()
 void _SS()
 }
-neuron_parser <-up- neuron_reference
+NeuronParser <-up- neuron_reference
 synapse_parser <-up- synapse_reference
 }
 

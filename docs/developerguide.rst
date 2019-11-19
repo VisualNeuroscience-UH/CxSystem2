@@ -67,7 +67,7 @@ You also need to add the neuron type to the list of accepted types under the ini
 
    neuron_reference._celltypes = array([...existing neuron types..., 'ChC'])
 
-Similarly, add the neuron type also to the list of accepted types under the init of :code:`neuron_parser` (in :code:`parameter_parser.py`), and create a method for parameter processing. Often, parameters can be used as such in the equations, so the method becomes:
+Similarly, add the neuron type also to the list of accepted types under the init of :code:`NeuronParser` (in :code:`parameter_parser.py`), and create a method for parameter processing. Often, parameters can be used as such in the equations, so the method becomes:
 
 .. code-block:: python
 

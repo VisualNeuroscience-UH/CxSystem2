@@ -12,10 +12,10 @@ Cortical System module
 Parameter Parser module
 ------------------------------------
 .. module:: parameter_parser
-.. autoclass:: neuron_parser
+.. autoclass:: NeuronParser
    :members:
 
-   .. automethod:: parameter_parser.neuron_parser.__init__
+   .. automethod:: parameter_parser.NeuronParser.__init__
 
 .. autoclass:: synapse_parser
    :members:

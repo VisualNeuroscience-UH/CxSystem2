@@ -16,7 +16,7 @@ from brian2.units import *
 from numpy import nan
 
 from cxsystem2.core import equation_templates as eqt
-from cxsystem2.core.parameter_parser import synapse_parser, neuron_parser
+from cxsystem2.core.parameter_parser import SynapseParser, NeuronParser
 from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 
@@ -90,7 +90,7 @@ class neuron_reference(object):
             self.output_neuron['total_comp_num'] = np.array([1])
             # number of compartments if applicable
 
-        self.output_neuron['namespace'] = neuron_parser(self.output_neuron, physio_config_df).output_namespace
+        self.output_neuron['namespace'] = NeuronParser(self.output_neuron, physio_config_df).output_namespace
         self.output_neuron['equation'] = ''
         # </editor-fold>
 
@@ -770,7 +770,7 @@ class synapse_reference(object):
         self.output_synapse['post_group_type'] = post_type
         self.output_synapse['post_comp_name'] = post_comp_name
         self.output_synapse['custom_weight'] = custom_weight
-        _name_space = synapse_parser(self.output_synapse, physio_config_df)
+        _name_space = SynapseParser(self.output_synapse, physio_config_df)
         self.output_synapse['namespace'] = {}
         self.output_synapse['namespace'] = _name_space.output_namespace
         try:

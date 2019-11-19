@@ -37,7 +37,7 @@ from numpy import nan
 from cxsystem2.configuration import config_file_converter as fileconverter
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.exceptions import ParameterNotFoundError
-from cxsystem2.core.parameter_parser import synapse_parser
+from cxsystem2.core.parameter_parser import SynapseParser
 from cxsystem2.core.physiology_reference import neuron_reference, synapse_reference
 from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.workspace_manager import Workspace
@@ -826,10 +826,10 @@ class CxSystem(object):
             except ValueError:
                 flag_bg_calcium_scaling = 0
 
-            bg_synapse = synapse_parser({'type': 'Fixed', 'pre_group_type': 'SS', 'post_group_type': neuron_type},
-                                        self.physio_config_df)
-            bg_synapse_inh = synapse_parser({'type': 'Fixed', 'pre_group_type': 'BC', 'post_group_type': neuron_type},
-                                            self.physio_config_df)
+            bg_synapse = SynapseParser({'type': 'Fixed', 'pre_group_type': 'SS', 'post_group_type': neuron_type},
+                                       self.physio_config_df)
+            bg_synapse_inh = SynapseParser({'type': 'Fixed', 'pre_group_type': 'BC', 'post_group_type': neuron_type},
+                                           self.physio_config_df)
 
             if neuron_type in ['L1i', 'BC', 'MC']:
                 background_weight = self.value_extractor(self.physio_config_df, 'background_E_I_weight')
