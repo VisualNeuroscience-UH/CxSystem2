@@ -19,6 +19,7 @@ def write_to_file(save_path, data):
         with open(save_path, 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
 
+
 def load_from_file(file_path):
     if file_path.suffix == '.gz':
         with open(file_path.as_posix(), 'rb') as fb:
@@ -29,30 +30,32 @@ def load_from_file(file_path):
             loaded_data = pickle.load(fb)
     elif file_path.suffix == '.pickle':
         with open(file_path.as_posix(), 'rb') as fb:
-            loaded_data= pickle.load(fb)
+            loaded_data = pickle.load(fb)
     return loaded_data
 
 
-def parameter_finder(df,keyword):
+def parameter_finder(df, keyword):
     location = np.where(df.values == keyword)
+    value = ''
     if location[0].size:
-        counter = int(location[0])+1
-        while counter < df.shape[0] :
+        counter = int(location[0]) + 1
+        while counter < df.shape[0]:
             if '#' not in str(df.loc[counter][int(location[1])]):
                 value = df.loc[counter][int(location[1])]
                 break
             else:
-                counter+=1
+                counter += 1
         return value
     else:
-        raise NameError('Variable %s not found in the configuration file.'%keyword)
+        raise NameError('Variable %s not found in the configuration file.' % keyword)
 
-def change_parameter_value_in_file(filepath, save_path, parameter,new_value):
+
+def change_parameter_value_in_file(filepath, save_path, parameter, new_value):
     df = pd.read_csv(filepath, header=None)
     location = np.where(df.values == parameter)
     if location[0].size == 1:
         df.at[int(location[0] + 1), int(location[1])] = new_value
-        df.to_csv(save_path,header=False,index=False)
+        df.to_csv(save_path, header=False, index=False)
     elif location[0].size == 1:
         raise ParameterNotFoundError('Parameter {} not found in the configuration file.'.format(parameter))
     else:
