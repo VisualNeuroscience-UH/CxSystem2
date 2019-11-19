@@ -39,7 +39,7 @@ from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.core.parameter_parser import synapse_parser
 from cxsystem2.core.physiology_reference import neuron_reference, synapse_reference
-from cxsystem2.core.stimuli import stimuli
+from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.workspace_manager import Workspace
 from cxsystem2.gui import gui
 
@@ -1560,8 +1560,8 @@ class CxSystem(object):
             print(" -  Creating an input based on the video input ...")
             input_mat_path = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='path'].index.item()]
             freq = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='freq'].index.item()]
-            inp = stimuli(duration=self.runtime,input_mat_path=input_mat_path,output_folder=self.workspace.get_simulation_folder_as_posix(), \
-                          output_file_suffix = self.StartTime_str ,output_file_extension = self.workspace.get_output_extension())
+            inp = Stimuli(duration=self.runtime, input_mat_path=input_mat_path, output_folder=self.workspace.get_simulation_folder_as_posix(), \
+                          output_file_suffix = self.StartTime_str, output_file_extension = self.workspace.get_output_extension())
             proc = multiprocessing.Process(target=inp.generate_inputs, args=(freq,))
             proc.start()
             self.video_input_idx =len(self.neurongroups_list)
