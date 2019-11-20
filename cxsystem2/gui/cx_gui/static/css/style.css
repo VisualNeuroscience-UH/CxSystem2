@@ -153,3 +153,8 @@ dd.active > a {
 button.tabs__button--active{
     background: #008CBA !important;
 }
+
+#welcome{
+    margin-right: 20px;
+    background: #333 !important;
+}

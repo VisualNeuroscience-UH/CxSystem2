@@ -1,4 +1,5 @@
 wheel
+requests
 asn1crypto
 bcrypt
 Brian2

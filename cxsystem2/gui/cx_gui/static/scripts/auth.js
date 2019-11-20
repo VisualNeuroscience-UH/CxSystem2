@@ -4,8 +4,8 @@ let client = new jso.JSO({
 	redirect_uri: "https://127.0.0.1:4443", // The URL where you is redirected back, and where you perform run the callback() function.
 	authorization: "https://services.humanbrainproject.eu/oidc/authorize",
 });
-
-var session_token;
+var hbp_auth_response;
+var session_token = '';
 function authenticate() {
   try {
     client.callback();
@@ -30,9 +30,12 @@ $.ajax({
     },
     method: 'GET',
     success: function(data){
-	    // console.log(data);
-        // document.getElementById("hbp-user-data").innerHTML = JSON.stringify(data);
-	    // document.getElementById("hbp-user-id").innerHTML = data.id;
+        hbp_auth_response = data;
+        document.getElementById('welcome').innerHTML = "Welcome " + data.givenName + "  <img id=\"imagebox\" width=\"30\" height=\"30\" style='margin-left:5px;'/>";
+        document.getElementById('imagebox').src = data.picture;
+
+	    console.log(data);
+
     }
 });
 });

@@ -16,24 +16,21 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 def is_authorized(request):
+    session_token = ''
     if "Authorization" in request.headers.keys():
         session_token = request.headers['Authorization'].split(' ')[1]
-        user_api = "https://services.humanbrainproject.eu/idm/v1/api/user/me"
-        headers = {"Authorization": 'Bearer ' + session_token}
-        reply = requests.get(user_api, headers=headers)
-        if reply.ok:
-            return True
-    print("User is not authorized")
-    return False
+    user_api = "https://services.humanbrainproject.eu/idm/v1/api/user/me"
+    headers = {"Authorization": 'Bearer ' + session_token}
+    reply = requests.get(user_api, headers=headers)
+    return reply
+
 
 def index(request):
-    is_https = False
-    if request.is_secure():
-        is_https = True
     # only authenticate if it's running in https
+
     template = loader.get_template('editor/index.html')
     context = {
-        'is_https' : is_https,
+        'is_secure' : request.is_secure(),
     }
     return HttpResponse(template.render(context, request))
 
@@ -83,7 +80,7 @@ def simulate(request):
     # then the "false" statements that are from Javascript should be changed to False in python so that parsing using eval
     # does not raise error
     try:
-        if not is_authorized(request):
+        if request.is_secure() and not is_authorized(request).ok:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         received_data = list(request._get_post().keys())[0]
         sanitized_receive_data = eval(sanitize_data(received_data))
@@ -115,7 +112,7 @@ def simulate(request):
 
 @csrf_exempt
 def load_example(request):
-    if not is_authorized(request):
+    if request.is_secure() and not is_authorized(request).ok:
         return HttpResponse(json.dumps({'authorized':'false'}), content_type="application/json")
     data = {'authorized':'true'}
     example_name = request.body.decode('utf-8').split('=')[0]

@@ -17,9 +17,9 @@
 <script src="/static/scripts/django_simulation_request.js"></script>
 <!--<script src="/static/css/foundation-5.5.3/js/foundation.min.js"></script>-->
 
-{% if is_https %}
-    <script src="/static/scripts/jso.js"></script>
-    <script src="/static/scripts/auth.js"></script>
+<script src="/static/scripts/jso.js"></script>
+<script src="/static/scripts/auth.js"></script>
+{% if is_secure %}
     <script> authenticate(); </script>
 {% endif %}
 
@@ -70,6 +70,12 @@
                 <input id="simulator" type="submit" value="Simulate" style="display: none;"/>
             </form>
         </ul>
+
+        {% if is_secure %}
+        <ul class="right">
+            <li class="active" ><a id="welcome"  href="javascript:void(0);" ></a></li>
+        </ul>
+        {% endif %}
     </section>
 </nav>
 
