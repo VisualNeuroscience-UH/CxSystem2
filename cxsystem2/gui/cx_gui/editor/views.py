@@ -4,6 +4,7 @@ import multiprocessing
 import os
 from getpass import getpass
 from pathlib import Path
+import requests
 
 from django.http import HttpResponse
 from django.template import loader
@@ -13,6 +14,17 @@ from cxsystem2.core.cxsystem import CxSystem as Cx
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
+
+def is_authorized(request):
+    if "Authorization" in request.headers.keys():
+        session_token = request.headers['Authorization'].split(' ')[1]
+        user_api = "https://services.humanbrainproject.eu/idm/v1/api/user/me"
+        headers = {"Authorization": 'Bearer ' + session_token}
+        reply = requests.get(user_api, headers=headers)
+        if reply.ok:
+            return True
+    print("User is not authorized")
+    return False
 
 def index(request):
     is_https = False
@@ -70,8 +82,9 @@ def simulate(request):
     # We wil need to get its first key using list(request._get_post().keys())[0]
     # then the "false" statements that are from Javascript should be changed to False in python so that parsing using eval
     # does not raise error
-
     try:
+        if not is_authorized(request):
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         received_data = list(request._get_post().keys())[0]
         sanitized_receive_data = eval(sanitize_data(received_data))
 
@@ -91,16 +104,23 @@ def simulate(request):
         p = multiprocessing.Process(target=cxspawner, args=(anatomy, physiology, Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()
+        return HttpResponse(json.dumps({"authorized":"true", "response": "simulation started successfully"}))
     except Exception as e:
         print(e)
+        return HttpResponse(json.dumps({"authorized":"true", "response": "Something went wrong on server"}))
 
-    return HttpResponse("simulation started successfully")
+
+
 
 
 @csrf_exempt
 def load_example(request):
-    example_name = list(request._get_post().keys())[0]
-    config_type = list(request._get_post().values())[0]
+    if not is_authorized(request):
+        return HttpResponse(json.dumps({'authorized':'false'}), content_type="application/json")
+    data = {'authorized':'true'}
+    example_name = request.body.decode('utf-8').split('=')[0]
+    config_type = request.body.decode('utf-8').split('=')[1]
+
     if config_type == 'anatomy':
         filename = example_name + '_anatomy_config.json'
     else:
@@ -109,6 +129,5 @@ def load_example(request):
     examples_path = current_dir.joinpath('examples').joinpath(filename)
     if examples_path.is_file():
         with open(examples_path.as_posix()) as json_file:
-            data = json.load(json_file)
-
+            data.update(json.load(json_file))
     return HttpResponse(json.dumps(data), content_type="application/json")

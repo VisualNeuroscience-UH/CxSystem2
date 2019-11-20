@@ -1,13 +1,11 @@
 $(function () {
     $('#simulation_form').submit(function () {
-        Swal.fire(
-          'Simulation Started',
-          '',
-          'success'
-        );
         $.ajax({
             type: 'POST',
             url: 'simulate',
+            headers: {
+                'Authorization': 'Basic '+ session_token
+            },
             data: JSON.stringify({
                 'anatomy': {
                     "params": JSON.parse(JSON.stringify( params_editor.getValue())
@@ -31,8 +29,37 @@ $(function () {
                             .replace(/\+/g, encodeURIComponent('+'))
                             .replace(/&/g, encodeURIComponent('&'))
                             .replace(/#/g, encodeURIComponent('#'))),
-            })
+            }),
+            success: function(response){
+                var res = JSON.parse(response);
+                console.log(res);
+                if (res['authorized'] !== 'true'){
+                    authenticate();
+                }
+                else{
+                    Swal.fire(
+                      res["response"],
+                      '',
+                      'success'
+                    );
+                }
+            },
+            error: function(response){
+                var res = JSON.parse(response);
+                if (res['authorized'] !== 'true'){
+                    authenticate();
+                }
+                else{
+                    Swal.fire(
+                      res["response"],
+                      '',
+                      'error'
+                    );
+                }
+            }
         });
         return false;
     });
 });
+
+

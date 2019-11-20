@@ -8,10 +8,10 @@ function setupTabs() {
 
             topBar.querySelectorAll('.tabs__button').forEach(button => {
                 button.classList.remove("tabs__button--active");
-            })
+            });
             tabsContainer.querySelectorAll('.tabs__content').forEach(tab => {
                 tab.classList.remove("tabs__content--active");
-            })
+            });
 
 
             tabToActivate.classList.add("tabs__content--active");
@@ -32,11 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".tabs__topbar").forEach(tabsContainer => {
         tabsContainer.querySelector(".tabs__button").click();
     })
-})
+});
 
 $('.tabs__button').click(function () {
     $(this).addClass("tabs__button--active");
-})
+});
 
 
 var imported_data;
@@ -45,13 +45,21 @@ var imported_data;
 
 function load_example(example_name) {
      request_data = {};
-     request_data[example_name] = 'anatomy'
+     request_data[example_name] = 'anatomy';
      $.ajax({
             type: 'POST',
             url: 'load_example',
-            data: request_data,
+            headers: {
+                'Authorization': 'Basic '+ session_token
+            },
             dataType: "json",
+            data: request_data,
             success: function(anatomy){
+                // console.log(anatomy);
+                if (anatomy['authorized'] !== 'true'){
+                    authenticate();
+                    return;
+                }
                 for (var key in anatomy) {
                     switch (key) {
                         case "params":
@@ -80,10 +88,23 @@ function load_example(example_name) {
      $.ajax({
             type: 'POST',
             url: 'load_example',
+            headers: {
+                'Authorization': 'Basic '+ session_token,
+            },
             data: request_data,
             dataType: "json",
             success: function(physio){
+                // console.log('phys',physio);
+                if (physio['authorized'] !== 'true'){
+                    authenticate();
+                    return;
+                }
                 physio_editor.setValue(physio['physio_data']);
+                Swal.fire(
+                      'Example Loaded',
+                      '',
+                      'success'
+                );
             }
      });
      $("button[data-for-tab='1']").click();
