@@ -74,7 +74,7 @@ $(function () {
                 var typedArray = new Uint8Array(r.match(/[\da-f]{2}/gi).map(function (h) {
                     return parseInt(h, 16)
                 }));
-                download(typedArray, filename, 'application/gzip');
+                download(typedArray, 'workspace.tar.gz', 'application/gzip');
             },
             error: function (response) {
                 var res = JSON.parse(response);

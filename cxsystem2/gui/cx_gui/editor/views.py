@@ -156,7 +156,7 @@ def download_workspace(request):
                 file_data = binascii.hexlify(f.read())
             response = HttpResponse(str(file_data), content_type='application/gzip')
             response['Content-Disposition'] = 'attachment; filename="%s"' % userid
-
+            os.remove(tar_path.as_posix())
         except IOError:
             response = HttpResponse('File not exist')
 
