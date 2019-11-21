@@ -54,7 +54,9 @@ AUTHOR = "Vafa Andalibi, Henri Hokkanen, Simo Vanni"
 AUTHOR_EMAIL = "vafa.andalibi@gmail.com"
 URL = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 with open("cxsystem2/__init__.py",'r') as f :
-    VERSION = f.readline().split('=')[1].strip(' ').strip('"')
+    VERSION = f.readlines()
+    VERSION = VERSION[-1]
+    VERSION = VERSION.split('=')[1].strip(' ').strip('"')
 
 setup(
     name=NAME,
