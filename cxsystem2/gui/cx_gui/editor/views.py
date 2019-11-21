@@ -5,6 +5,8 @@ import os
 from getpass import getpass
 from pathlib import Path
 import requests
+import tarfile
+import binascii
 
 from django.http import HttpResponse
 from django.template import loader
@@ -92,8 +94,8 @@ def simulate(request):
 
         anatomy = sanitized_receive_data['anatomy']
         if request.is_secure() and userid != '':
-            server_workspace_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid)
-            anatomy['params']['workspace_path'] = server_workspace_path.as_posix()
+            user_workspace_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+            anatomy['params']['workspace_path'] = user_workspace_path.as_posix()
         physiology = {"physio_data": sanitized_receive_data['physiology']}
 
         # # we can either save the data temporarily as json and use those for simulating,
@@ -132,3 +134,32 @@ def load_example(request):
         with open(examples_path.as_posix()) as json_file:
             data.update(json.load(json_file))
     return HttpResponse(json.dumps(data), content_type="application/json")
+
+@csrf_exempt
+def download_workspace(request):
+    print("hiiiiii")
+    if request.is_secure():
+        userid = ''
+        auth_response = is_authorized(request)
+        if auth_response.ok:
+            userid = auth_response.json()['id']
+        else:
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+
+        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        tar_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid + ".gz")
+        tar = tarfile.open(tar_path.as_posix(), "w:gz")
+        tar.add(user_workspace_path.as_posix(), arcname=userid)
+        tar.close()
+
+        try:
+            with open(tar_path.as_posix(), 'rb') as f:
+                file_data = binascii.hexlify(f.read())
+            response = HttpResponse(str(file_data), content_type='application/gzip')
+            response['Content-Disposition'] = 'attachment; filename="%s"' % userid
+
+        except IOError:
+            response = HttpResponse('File not exist')
+
+        return response
+

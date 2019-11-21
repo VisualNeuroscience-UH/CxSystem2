@@ -73,6 +73,14 @@
 
         {% if is_secure %}
         <ul class="right">
+            <form id='downloader_form' action='download'>
+                {% csrf_token %}
+                <a class="button success" href="javascript:void(0);" onclick="document.getElementById('downloader').click()">Download Workspace</a>
+                <input id="downloader" type="submit" value="Download" style="display: none;"/>
+            </form>
+        </ul>
+
+        <ul class="right">
             <li class="active" ><a id="welcome"  href="javascript:void(0);" ></a></li>
         </ul>
         {% endif %}
