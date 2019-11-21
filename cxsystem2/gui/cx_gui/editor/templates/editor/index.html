@@ -72,11 +72,20 @@
         </ul>
 
         {% if is_secure %}
+
         <ul class="right">
             <form id='downloader_form' action='download'>
                 {% csrf_token %}
                 <a class="button success" href="javascript:void(0);" onclick="document.getElementById('downloader').click()">Download Workspace</a>
                 <input id="downloader" type="submit" value="Download" style="display: none;"/>
+            </form>
+        </ul>
+
+        <ul class="right">
+            <form id='lsworkspace_form' action='lsworkspace'>
+                {% csrf_token %}
+                <a class="button secondary" href="javascript:void(0);" onclick="document.getElementById('lsworkspace').click()">Workspace Files</a>
+                <input id="lsworkspace" type="submit" value="LSWorkspace" style="display: none;"/>
             </form>
         </ul>
 

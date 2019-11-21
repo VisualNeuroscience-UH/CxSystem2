@@ -104,3 +104,33 @@ function download(content, filename, contentType) {
 }
 
 
+
+
+$(function () {
+    $('#lsworkspace_form').submit(function () {
+        $.ajax({
+            type: 'POST',
+            url: 'ls_workspace',
+            headers: {
+                'Authorization': 'Basic ' + session_token
+            },
+            success: function (response) {
+                alert(response);
+            },
+            error: function (response) {
+                var res = JSON.parse(response);
+                if (res['authorized'] !== 'true') {
+                    authenticate();
+                } else {
+                    Swal.fire(
+                        res["response"],
+                        '',
+                        'error'
+                    );
+                }
+            }
+        });
+        return false;
+    });
+});
+

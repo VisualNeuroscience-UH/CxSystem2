@@ -137,7 +137,6 @@ def load_example(request):
 
 @csrf_exempt
 def download_workspace(request):
-    print("hiiiiii")
     if request.is_secure():
         userid = ''
         auth_response = is_authorized(request)
@@ -163,3 +162,31 @@ def download_workspace(request):
 
         return response
 
+def list_files(startpath):
+    output = ''
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        # print('{}{}/'.format(indent, os.path.basename(root)))
+        output += '{}{}/\n'.format(indent, os.path.basename(root))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            output += '{}{}\n'.format(subindent, f)
+            # print('{}{}'.format(subindent, f))
+    return output
+
+@csrf_exempt
+def ls_workspace(request):
+    if request.is_secure():
+        userid = ''
+        auth_response = is_authorized(request)
+        if auth_response.ok:
+            userid = auth_response.json()['id']
+        else:
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+
+        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        dir_list = list_files(user_workspace_path.as_posix())
+        dir_list = dir_list[6:]
+
+        return HttpResponse(dir_list, content_type='text/plain')
