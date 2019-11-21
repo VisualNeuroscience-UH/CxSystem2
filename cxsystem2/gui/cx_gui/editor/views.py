@@ -80,12 +80,20 @@ def simulate(request):
     # then the "false" statements that are from Javascript should be changed to False in python so that parsing using eval
     # does not raise error
     try:
-        if request.is_secure() and not is_authorized(request).ok:
-            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+        userid = ''
+        if request.is_secure():
+            auth_response = is_authorized(request)
+            if auth_response.ok:
+                userid = auth_response.json()['id']
+            else:
+                return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         received_data = list(request._get_post().keys())[0]
         sanitized_receive_data = eval(sanitize_data(received_data))
 
         anatomy = sanitized_receive_data['anatomy']
+        if request.is_secure() and userid != '':
+            server_workspace_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+            anatomy['params']['workspace_path'] = server_workspace_path.as_posix()
         physiology = {"physio_data": sanitized_receive_data['physiology']}
 
         # # we can either save the data temporarily as json and use those for simulating,
@@ -105,10 +113,6 @@ def simulate(request):
     except Exception as e:
         print(e)
         return HttpResponse(json.dumps({"authorized":"true", "response": "Something went wrong on server"}))
-
-
-
-
 
 @csrf_exempt
 def load_example(request):
