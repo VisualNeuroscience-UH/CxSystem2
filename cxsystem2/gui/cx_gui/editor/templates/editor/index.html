@@ -20,7 +20,16 @@
 <script src="/static/scripts/jso.js"></script>
 <script src="/static/scripts/auth.js"></script>
 {% if is_secure %}
-    <script> authenticate(); </script>
+    <script>
+        var client = new jso.JSO({
+            providerID: "{{ provider_id }}",
+            client_id: "{{ client_id }}",
+            redirect_uri: "{{ redirect_uri }}",
+            authorization: "{{ authorization }}"
+        });
+
+        authenticate();
+    </script>
 {% endif %}
 
 <script>
@@ -72,6 +81,7 @@
         </ul>
 
         {% if is_secure %}
+
 
         <ul class="right">
             <form id='downloader_form' action='download'>
@@ -267,8 +277,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.10.2/ajv.bundle.js"></script>
 <script src="/static/scripts/main.js"></script>
 <script src="/static/scripts/intro.min.js"></script>
-
-
 <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
 <!--<script src="https://malsup.github.com/jquery.form.js"></script>-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.js"></script>

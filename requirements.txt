@@ -34,3 +34,4 @@ six
 sqlparse
 sympy
 Werkzeug
+pyyaml

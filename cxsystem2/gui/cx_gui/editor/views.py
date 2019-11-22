@@ -2,6 +2,7 @@ import json
 import logging
 import multiprocessing
 import os
+import yaml
 from getpass import getpass
 from pathlib import Path
 import requests
@@ -31,9 +32,21 @@ def index(request):
     # only authenticate if it's running in https
 
     template = loader.get_template('editor/index.html')
-    context = {
-        'is_secure' : request.is_secure(),
-    }
+    if request.is_secure():
+        yaml_path = Path().home().joinpath('.cxconfig.yaml')
+        with open(yaml_path.as_posix(), 'r') as file:
+            oauth_config = yaml.load(file, Loader=yaml.FullLoader)
+        context = {
+            'provider_id': oauth_config[0]['oauth2']['provider-id'],
+            'client_id' : oauth_config[0]['oauth2']['client-id'],
+            'redirect_uri': oauth_config[0]['oauth2']['redirect-uri'],
+            'authorization': oauth_config[0]['oauth2']['authorization'],
+            'is_secure' : request.is_secure(),
+        }
+    else:
+        context = {
+            'is_secure' : request.is_secure(),
+        }
     return HttpResponse(template.render(context, request))
 
 

@@ -2,12 +2,6 @@ var hbp_auth_response;
 var session_token = '';
 
 function authenticate(callback) {
-    let client = new jso.JSO({
-        providerID: "HBP",
-        client_id: "f34780ff-7842-499c-8440-5777c28e360d",
-        redirect_uri: "https://127.0.0.1:4443", // The URL where you is redirected back, and where you perform run the callback() function.
-        authorization: "https://services.humanbrainproject.eu/oidc/authorize",
-    });
 
     try {
         client.callback();

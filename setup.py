@@ -43,6 +43,7 @@ six
 sqlparse
 sympy
 Werkzeug
+pyyaml
 """.split("\n")
 
 
@@ -57,6 +58,7 @@ with open("cxsystem2/__init__.py",'r') as f :
     VERSION = f.readlines()
     VERSION = VERSION[-1]
     VERSION = VERSION.split('=')[1].strip(' ').strip('"')
+
 
 setup(
     name=NAME,
@@ -102,7 +104,8 @@ setup(
             'cxsystem2 = cxsystem2.cmd.cxsystem_cmd:main',
             'cxconfig = cxsystem2.cmd.cxconfig_cmd:main',
             'cxcluster = cxsystem2.cmd.cxcluster_cmd:main',
-            'cxvisualize = cxsystem2.cmd.cxvisualize_cmd:main'
+            'cxvisualize = cxsystem2.cmd.cxvisualize_cmd:main',
+            'cxserver = cxsystem2.cmd.cxserver_cmd:main'
         ],
     }
 )

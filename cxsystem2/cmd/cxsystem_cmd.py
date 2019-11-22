@@ -2,7 +2,6 @@
 
 Usage:
   cxsystem2 (-h | --help)
-  cxsystem2 --runserver [--https] [--port=PORT]
   cxsystem2 -a ANATOMY_FILE -p PHYSIOLOGY_FILE
   cxsystem2 (-v | --version)
 
@@ -14,20 +13,11 @@ Arguments:
 Options:
   -h --help     Show this screen
   -v --version  Show current cxsystem version
-  --runserver   runs http[s] server for GUI
-  --https       run server with ssl certificate
-  --port=PORT   runs the server on port PORT
   -a ANATOMY_FILE --anatomy=ANATOMY_FILE    sets the anatomy file path
   -p PHYSIOLOGY_FILE --physiology=PHYSIOLOGY_FILE   sets the physiology file path
 
 
 Description:
-
-  cxsystem2 --runserver --https
-    spawns a secure web server to run the GUI on
-
-  cxsystem2 --runserver --port=PORT
-    runs the server on a specific port number PORT, otherwise random port would be used
 
   cxsystem2 -a ./anatomy.csv -p ./physiology.csv
     runs the cxsystem using the anatomy file called anatomy.csv and physiology file called physiology.csv
@@ -49,14 +39,6 @@ from cxsystem2.core.cxsystem import CxSystem
 def main():
     arguments = docopt(__doc__)
     # print(arguments)
-
-    if arguments['--runserver']:
-        if arguments['--https']:
-            cx = CxSystem()
-            cx.run_bui(ssl=True, port=arguments['--port'])
-        else:
-            cx = CxSystem()
-            cx.run_bui(ssl=False, port=arguments['--port'])
 
     if arguments['--anatomy'] and arguments['--physiology']:
         anatomy_path = Path(arguments['--anatomy'])
