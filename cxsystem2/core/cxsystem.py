@@ -309,8 +309,9 @@ class CxSystem:
 
     @staticmethod
     def run_bui(ssl=False,
-                port=None):
-        gui.RunServer(ssl=ssl, port=port)
+                port=None,
+                nobrowser=False):
+        gui.RunServer(ssl=ssl, port=port, nobrowser=nobrowser)
 
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:, 0][self.anat_and_sys_conf_df.loc[:, 0] == 'row_type'].index

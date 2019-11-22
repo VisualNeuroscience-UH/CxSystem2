@@ -30,7 +30,8 @@ def find_free_port():
 class RunServer:
     def __init__(self,
                  ssl=False,
-                 port=None):
+                 port=None,
+                 nobrowser=False):
         try:
             python_cmd_version = os.popen('python --version').read().strip().split(' ')[1]
             if int(python_cmd_version[0]) < 3:
@@ -49,14 +50,16 @@ class RunServer:
         if port is None:
             port = find_free_port()
         if ssl:
-            a_website = "https://127.0.0.1:{}/".format(port)
-            webbrowser.open_new_tab(a_website)
+            if not nobrowser:
+                a_website = "https://127.0.0.1:{}/".format(port)
+                webbrowser.open_new_tab(a_website)
             if platform == 'win32':
                 disable_file_system_redirection().__enter__()
             os.system("python manage.py runserver_plus {port} --cert server_cert".format(port=port))
         else:
-            a_website = "http://127.0.0.1:{}/".format(port)
-            webbrowser.open_new_tab(a_website)
+            if not nobrowser:
+                a_website = "http://127.0.0.1:{}/".format(port)
+                webbrowser.open_new_tab(a_website)
             if platform == 'win32':
                 disable_file_system_redirection().__enter__()
             os.system("python manage.py runserver {port}".format(port=port))

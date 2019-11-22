@@ -2,8 +2,8 @@
 
 Usage:
   cxserver (-h | --help)
-  cxserver [--port=PORT]
-  cxserver --https [-p PROVIDERID -c CLIENTID -r REDIRECTURI -a AUTHORIZATION] [--port=PORT]
+  cxserver [--port=PORT] [--no-browser]
+  cxserver --https [-p PROVIDERID -c CLIENTID -r REDIRECTURI -a AUTHORIZATION] [--port=PORT] [--no-browser]
   cxserver --overwrite -p PROVIDERID -c CLIENTID -r REDIRECTURI -a AUTHORIZATION
 
 Web server for running the BUI for `cxsystem2`
@@ -21,6 +21,7 @@ Options:
   --https           run server with ssl certificate
   --port=PORT       runs the server on port PORT
   --overwrite       rewrite the oauth config file with the new parameters
+  --no-browser      do not open browser after running the server
   -p PROVIDERID --provider-id=PROVIDERID        sets the provider id
   -c CLIENTID --client-id=CLIENTID            sets the client id
   -r REDIRECTURI --redirect-uri=REDIRECTURI      sets the redirect url
@@ -55,7 +56,7 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
     yaml_path = Path().home().joinpath('.cxconfig.yaml')
-    oauth_config = {}
+
     if arguments['--https']:
         cx = CxSystem()
         if not yaml_path.is_file() and \
@@ -65,8 +66,6 @@ def main():
             not arguments['--authorization']):
             print ("Cxserver needs OAuth configuration to run in https mode. These parameters should either be set as parameters (see usage)"
                    " or they should be put in ~/.cxconfig.yaml in yaml formart.")
-            # sys.argv = [sys.argv[0], '-h']
-            # main()
         elif yaml_path.is_file() and \
                 arguments['--provider-id'] and \
                 arguments['--client-id'] and \
@@ -90,10 +89,12 @@ def main():
                 yaml.dump(oauth_config, file)
             print("Configuration yaml file updated successfully.")
             cx.run_bui(ssl=True,
-                       port=arguments['--port'])
+                       port=arguments['--port'],
+                       nobrowser=arguments['--no-browser'])
         elif yaml_path.is_file():
             cx.run_bui(ssl=True,
-                       port=arguments['--port'])
+                       port=arguments['--port'],
+                       nobrowser=arguments['--no-browser'])
 
     elif arguments['--overwrite']:
         oauth_config = [{'oauth2':{
@@ -107,7 +108,8 @@ def main():
     else:
         cx = CxSystem()
         cx.run_bui(ssl=False,
-                   port=arguments['--port'])
+                   port=arguments['--port'],
+                   nobrowser=arguments['--no-browser'])
 
 
 if __name__ == '__main__':
