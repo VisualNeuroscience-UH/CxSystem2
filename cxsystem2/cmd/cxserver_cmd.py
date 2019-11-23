@@ -9,23 +9,23 @@ Usage:
 Web server for running the BUI for `cxsystem2`
 
 Arguments:
-  PORT              port number on which the BUI server runs
-  PROVIDERID        provider id for OAuth2 client for authentication
-  CLIENTID          client id for OAuth2 client for authentication
-  REDIRECTURI       redirect url for OAuth2 client for authentication
-  AUTHORIZATION     authorization url for OAuth2 client for authentication
+  PORT                                              port number on which the BUI server runs
+  PROVIDERID                                        provider id for OAuth2 client for authentication
+  CLIENTID                                          client id for OAuth2 client for authentication
+  REDIRECTURI                                       redirect url for OAuth2 client for authentication
+  AUTHORIZATION                                     authorization url for OAuth2 client for authentication
 
 Options:
-  -h --help         Show this screen
-  -v --version      Show current cxsystem version
-  --https           run server with ssl certificate
-  --port=PORT       runs the server on port PORT
-  --overwrite       rewrite the oauth config file with the new parameters
-  --no-browser      do not open browser after running the server
-  -p PROVIDERID --provider-id=PROVIDERID        sets the provider id
-  -c CLIENTID --client-id=CLIENTID            sets the client id
-  -r REDIRECTURI --redirect-uri=REDIRECTURI      sets the redirect url
-  -a AUTHORIZATION --authorization=AUTHORIZATION   sets the authorization url
+  -h --help                                         Show this screen
+  -v --version                                      Show current cxsystem version
+  --https                                           Run server with ssl certificate
+  --port=PORT                                       Runs the server on port PORT
+  --overwrite                                       Rewrite the oauth config file with the new parameters
+  --no-browser                                      Do not open browser after running the server
+  -p PROVIDERID --provider-id=PROVIDERID            Sets the provider id
+  -c CLIENTID --client-id=CLIENTID                  Sets the client id
+  -r REDIRECTURI --redirect-uri=REDIRECTURI         Sets the redirect url
+  -a AUTHORIZATION --authorization=AUTHORIZATION    Sets the authorization url
 
 
 Description:

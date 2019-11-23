@@ -8,15 +8,14 @@ Usage:
 Downloads result data of `CxSystem` from cluster.
 
 Arguments:
-  META_FILE_PATH    Path to cluster run metadata file  
+  META_FILE_PATH            Path to cluster run metadata file
 
 Options:
-  -h --help     Show this screen
+  -h --help                 Show this screen
 
 Description:
 
   cxcluster ./sample_meta.pkl
-
     Uses the information in the metadata file to download the results if ready, and otherwise wait for the results. 
     User will be prompted for the remote password. 
 

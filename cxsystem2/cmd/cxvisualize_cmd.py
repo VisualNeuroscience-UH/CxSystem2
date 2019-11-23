@@ -8,10 +8,10 @@ Usage:
 A tool for visualizing `CxSystem` spike data in ViSimpl.
 
 Arguments:
-  FILENAME      Path to results file
-  FOLDERPATH    Path to folder containing array run files
-  TIMESTAMP     Timestamp suffix of the arrayrun files
-  SAMPLINGRATE  Sampling rate for the rasterplots
+  FILENAME                                          Path to results file
+  FOLDERPATH                                        Path to folder containing array run files
+  TIMESTAMP                                         Timestamp suffix of the arrayrun files
+  SAMPLINGRATE                                      Sampling rate for the rasterplots
 
 Options:
   -h --help                                         Show this screen

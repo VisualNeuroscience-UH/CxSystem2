@@ -8,13 +8,13 @@ Usage:
 A cortex simulation framework called `CxSystem`.
 
 Arguments:
-  PORT    port number on which the GUI server runs
+  PORT                                              port number on which the GUI server runs
 
 Options:
-  -h --help     Show this screen
-  -v --version  Show current cxsystem version
-  -a ANATOMY_FILE --anatomy=ANATOMY_FILE    sets the anatomy file path
-  -p PHYSIOLOGY_FILE --physiology=PHYSIOLOGY_FILE   sets the physiology file path
+  -h --help                                         Show this screen
+  -v --version                                      Show current cxsystem version
+  -a ANATOMY_FILE --anatomy=ANATOMY_FILE            Sets the anatomy file path
+  -p PHYSIOLOGY_FILE --physiology=PHYSIOLOGY_FILE   Sets the physiology file path
 
 
 Description:

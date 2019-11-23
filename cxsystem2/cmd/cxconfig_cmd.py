@@ -8,19 +8,17 @@ Usage:
 A configuration file converter for `CxSystem`.
 
 Arguments:
-  FILENAME    Path to configuration file to convert
+  FILENAME              Path to configuration file to convert
 
 Options:
-  -h --help     Show this screen
+  -h --help             Show this screen
 
 Description:
 
   cxconfig ./sample_conf.json
-
     converts the file `sample_conf.json` in current directory to csv and saves it as `sample_conf.csv`
 
   cxconfig ./sample_conf.csv
-
     converts the file `sample_conf.csv` in current directory to csv and saves it as `sample_conf.json`
 
 """
