@@ -214,17 +214,16 @@ def list_files(startpath):
         level = root.replace(startpath, '').count(os.sep)
         indent = ' ' * 4 * (level)
         # print('{}{}/'.format(indent, os.path.basename(root)))
-        output += '{}{}/\n'.format(indent, os.path.basename(root))
+        output += '{}{}/<br>'.format(indent, os.path.basename(root))
         subindent = ' ' * 4 * (level + 1)
         for f in files:
-            output += '{}{}\n'.format(subindent, f)
+            output += '{}{}<br>'.format(subindent, f)
             # print('{}{}'.format(subindent, f))
     return output
 
 @csrf_exempt
 def ls_workspace(request):
     if request.is_secure():
-        userid = ''
         auth_response = is_authorized(request)
         if auth_response.ok:
             userid = auth_response.json()['id']
@@ -241,7 +240,6 @@ def ls_workspace(request):
 @csrf_exempt
 def sim_status(request):
     if request.is_secure():
-        userid = ''
         auth_response = is_authorized(request)
         if auth_response.ok:
             userid = auth_response.json()['id']
@@ -253,7 +251,7 @@ def sim_status(request):
         all_lines = []
         with open(outputfile_path.as_posix(),'r') as f:
             for line in f:
-                all_lines.append(line + '<br>')
+                all_lines.append(line)
         output = ''.join(all_lines[-30:]) # just send the last 30 lines
 
         return HttpResponse(output, content_type='text/plain')

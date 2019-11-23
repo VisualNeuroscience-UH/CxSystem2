@@ -86,7 +86,14 @@ var req_lsworkspace = function () {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
                 authenticate(req_lsworkspace);
             } else {
-                alert(response);
+                // alert(response);
+                Swal.fire(
+                    {
+                        title: "Tree Remote Folder Structure",
+                        html: '<pre style="text-align: left !important;">' + response + '<pre>',
+                        width: '80%',
+                        content: 'span',
+                    })
             }
         }
     });
@@ -106,12 +113,12 @@ var req_simstatus = function () {
             } else {
                 // alert(response);
                 Swal.fire(
-                {
-                    title: "Output of the Simulation (last 30 lines)",
-                  html: '<div style="text-align: left;">'  +response + '<div>',
-                    width: '80%',
-                    content: 'span',
-                })
+                    {
+                        title: "Output of the Simulation (last 30 lines)",
+                        html: '<pre style="text-align: left;">' + response + '<pre>',
+                        width: '80%',
+                        content: 'span',
+                    })
             }
         }
     });
