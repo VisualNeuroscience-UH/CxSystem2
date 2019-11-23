@@ -1,15 +1,16 @@
+import binascii
 import json
 import logging
 import multiprocessing
 import os
+import shutil
 import sys
-import yaml
+import tarfile
 from getpass import getpass
 from pathlib import Path
-import requests
-import tarfile
-import binascii
 
+import requests
+import yaml
 from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
@@ -255,3 +256,18 @@ def sim_status(request):
         output = ''.join(all_lines[-30:]) # just send the last 30 lines
 
         return HttpResponse(output, content_type='text/plain')
+
+@csrf_exempt
+def delete_all(request):
+    if request.is_secure():
+        auth_response = is_authorized(request)
+        if auth_response.ok:
+            userid = auth_response.json()['id']
+        else:
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+
+        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        shutil.rmtree(user_workspace_path.as_posix())
+        os.mkdir(user_workspace_path.as_posix())
+
+        return HttpResponse(json.dumps({"authorized":"true", "response": "Workspace folder cleaned successfully"}))

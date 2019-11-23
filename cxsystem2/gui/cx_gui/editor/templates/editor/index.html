@@ -108,6 +108,15 @@
         </ul>
 
         <ul class="right">
+            <form id='delete_remote_form' action='delete_remote'>
+                {% csrf_token %}
+                <a class="button alert" href="javascript:void(0);" onclick="document.getElementById('delete_remote').click()">Delete All</a>
+                <input id="delete_remote" type="submit" value="delete_remote" style="display: none;"/>
+            </form>
+        </ul>
+
+
+        <ul class="right">
             <li class="active"><a id="welcome" href="javascript:void(0);"></a></li>
         </ul>
 

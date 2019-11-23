@@ -126,6 +126,28 @@ var req_simstatus = function () {
 };
 
 
+var req_delete = function () {
+    $.ajax({
+        type: 'POST',
+        url: 'delete',
+        headers: {
+            'Authorization': 'Basic ' + session_token
+        },
+        success: function (response) {
+            if (response['authorized'] != null && response['authorized'] !== 'true') {
+                authenticate(req_simstatus);
+            } else {
+                Swal.fire(
+                    {
+                        title: JSON.parse(response)["response"],
+                    })
+            }
+        }
+    });
+    return false;
+};
+
+
 function download(content, filename, contentType) {
     if (!contentType) contentType = 'application/octet-stream';
     var a = document.createElement('a');
@@ -154,4 +176,9 @@ $(function () {
 $(function () {
     $('#simstatus_form').submit(req_simstatus);
 });
+
+$(function () {
+    $('#delete_remote_form').submit(req_delete);
+});
+
 
