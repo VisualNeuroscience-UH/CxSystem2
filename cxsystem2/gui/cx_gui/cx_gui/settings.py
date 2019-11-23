@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-
+from pathlib import Path
 import logging.config
 
 # set the logging level to error:
@@ -24,17 +24,37 @@ logging.config.dictConfig({
             # exact format is not important, this is the minimum information
             'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
         },
+        'file': {
+            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+        }
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'console',
         },
+        'error_logfile': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': Path.home().joinpath('.cxerror.log').as_posix()
+        },
+        'info_logfile': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': Path.home().joinpath('.cxinfo.log').as_posix()
+        }
+
     },
     'loggers': {
-        '': {
+        'error_logger': {
             'level': 'ERROR',
-            'handlers': ['console'],
+            'handlers': ['console', 'error_logfile'],
+        },
+        'info_logger': {
+            'level': 'INFO',
+            'handlers': ['console', 'info_logfile'],
         },
     },
 })

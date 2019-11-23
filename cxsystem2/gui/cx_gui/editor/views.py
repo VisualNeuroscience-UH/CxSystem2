@@ -19,6 +19,7 @@ from cxsystem2.core.cxsystem import CxSystem as Cx
 from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
 
 logging.getLogger("requests").setLevel(logging.WARNING)
+infologger = logging.getLogger('info_logger')
 
 
 def is_authorized(request):
@@ -125,6 +126,7 @@ def simulate(request):
                 userid = auth_response.json()['id']
             else:
                 return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+        infologger.info("User {} started simulation".format(userid))
         received_data = list(request._get_post().keys())[0]
         sanitized_receive_data = eval(sanitize_data(received_data))
 
@@ -162,12 +164,16 @@ def simulate(request):
         return HttpResponse(json.dumps({"authorized":"true", "response": "simulation started successfully"}))
     except Exception as e:
         print(e)
-        return HttpResponse(json.dumps({"authorized":"true", "response": "Something went wrong on server"}))
+        return HttpResponse(json.dumps({"authorized":"true", "response": "Something went wrong before simulation"}))
 
 @csrf_exempt
 def load_example(request):
-    if request.is_secure() and not is_authorized(request).ok:
+    auth_response = is_authorized(request)
+    if request.is_secure() and not auth_response.ok:
         return HttpResponse(json.dumps({'authorized':'false'}), content_type="application/json")
+    userid = auth_response.json()['id']
+    infologger.info("User {} loaded example file {}".format(userid,request.body.decode('utf-8')))
+
     data = {'authorized':'true'}
     example_name = request.body.decode('utf-8').split('=')[0]
     config_type = request.body.decode('utf-8').split('=')[1]
@@ -198,7 +204,7 @@ def download_workspace(request):
         tar = tarfile.open(tar_path.as_posix(), "w:gz")
         tar.add(user_workspace_path.as_posix(), arcname=userid)
         tar.close()
-
+        infologger.info("User {} downloaded workspace, size: {} Bytes".format(userid, os.path.getsize(tar_path.as_posix())))
         try:
             with open(tar_path.as_posix(), 'rb') as f:
                 file_data = binascii.hexlify(f.read())
@@ -231,7 +237,7 @@ def ls_workspace(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-
+        infologger.info("User {} listed workspace files".format(userid))
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
         dir_list = list_files(user_workspace_path.as_posix())
         dir_list = dir_list[6:]
@@ -247,7 +253,7 @@ def sim_status(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-
+        infologger.info("User {} checked simulation status".format(userid))
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
         outputfile_path = user_workspace_path.joinpath('cxoutput.out')
         all_lines = []
@@ -266,7 +272,7 @@ def delete_all(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-
+        infologger.info("User {} cleaned workspace".format(userid))
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
         shutil.rmtree(user_workspace_path.as_posix())
         os.mkdir(user_workspace_path.as_posix())
@@ -307,7 +313,7 @@ def visualize(request):
 
         rplot = rasterplot_pdf_generator(simulation_folder.as_posix(),timestamp,sampling_rate)
         output_pdf_path = Path(rplot.get_output_file_path())
-
+        infologger.info("User {} visualized rasterplot, pdf size: {} Bytes".format(userid,os.path.getsize(output_pdf_path.as_posix())))
         with open(output_pdf_path.as_posix(), 'rb') as f:
             pdf_file = binascii.hexlify(f.read())
         response = HttpResponse(str(pdf_file), content_type='application/pdf')
