@@ -3,7 +3,7 @@
 Usage:
   cxvisualize (-h | --help)
   cxvisualize  [ -d | -c ] FILEPATH
-  cxvisualize --array-run FOLDERPATH TIMESTAMP [-s SAMPLINGRATE]
+  cxvisualize --rasterplot-pdf FOLDERPATH TIMESTAMP [--sampling-rate SAMPLINGRATE]
 
 A tool for visualizing `CxSystem` spike data in ViSimpl.
 
@@ -14,11 +14,11 @@ Arguments:
   SAMPLINGRATE  Sampling rate for the rasterplots
 
 Options:
-  -h --help         Show this screen
-  --array-run       Generate a rasterplot pdf for arrayrun
-  -c --convert      Convert results for use in ViSimpl
-  -d --delete       Delete ViSimpl-related files after visualization
-  -s                Sampling rate for raster plot (default is 0.05)
+  -h --help                                         Show this screen
+  --rasterplot-pdf                                  Generate a rasterplot pdf for arrayrun
+  -c --convert                                      Convert results for use in ViSimpl
+  -d --delete                                       Delete ViSimpl-related files after visualization
+  -s SAMPLINGRATE --sampling-rate=SAMPLINGRATE      Sampling rate for raster plot (default is 0.05)
 
 Description:
 
@@ -32,7 +32,7 @@ Description:
   cxvisualize -c ./results.gz
     converts the results file into two CSVs and one JSON for ViSimpl (no visualization)
 
-  cxvisualize --array-run ./cobaeif 20191123_1353509
+  cxvisualize --rasterplot-pdf ./cobaeif 20191123_1353509
     Generates a pdf of rasterplots of all groups in the array run
 
 """
@@ -45,7 +45,7 @@ from shutil import which
 from docopt import docopt
 
 from cxsystem2.visualization.spikedata_to_csvs import SpikeData
-from cxsystem2.visualization.arrayrun_visualizer import arrayrun_visualizer
+from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
 
 
 VISIMPL_BINARY = ''
@@ -77,7 +77,7 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
 
-    if arguments['--array-run']:
+    if arguments['--rasterplot-pdf']:
         folder_path = Path(arguments['FOLDERPATH'])
         if not folder_path.is_dir():
             print("arrayrun folder not found. Make sure the path is correct.")
@@ -89,12 +89,12 @@ def main():
             print("arrayrun folder does not contain files with that timestamp.")
             return
         sampling_rate = 0.05
-        if arguments['SAMPLINGRATE']:
-            if float(arguments['SAMPLINGRATE']) > 1 or float(arguments['SAMPLINGRATE']) <= 0 :
+        if arguments['--sampling-rate']:
+            if float(arguments['--sampling-rate']) > 1 or float(arguments['--sampling-rate']) <= 0 :
                 print ("Sampling rate must be between 0 and 1")
                 return
-            sampling_rate = float(arguments['SAMPLINGRATE'])
-        arrayrun_visualizer(folder_path, timestamp, sampling_rate)
+            sampling_rate = float(arguments['--sampling-rate'])
+        rasterplot_pdf_generator(folder_path, timestamp, sampling_rate)
     else:
         filepath = Path(arguments['FILEPATH'])
         if not filepath.is_file():
@@ -108,8 +108,6 @@ def main():
                 os.remove(structure_csv)
                 os.remove(spikes_csv)
                 os.remove(subsets_json)
-
-
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from cxsystem2.core.tools import load_from_file
 
 
-class arrayrun_visualizer:
+class rasterplot_pdf_generator:
     def __init__(self, workspace_path, timestamp, sampling_rate):
         self.workspace_path = Path(workspace_path)
         self.timestamp = timestamp.strip('_')
@@ -64,6 +64,5 @@ class arrayrun_visualizer:
                     print("The file '{}' is not a brian data file, skipping ...".format(file.name))
 
 
-
 if __name__ == '__main__':
-    viz = arrayrun_visualizer('/home/corriel/CxServerWorkspace/307314/cobaeif','_20191123_1353509',0.01)
+    viz = rasterplot_pdf_generator('/home/corriel/CxServerWorkspace/307314/cobaeif', '_20191123_1353509', 0.01)
