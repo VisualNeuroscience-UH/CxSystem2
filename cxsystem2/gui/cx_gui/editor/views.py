@@ -84,7 +84,7 @@ def cxspawner_secure(anatomy,
     print(root_path)
     os.chdir(root_path)
 
-    cm = Cx(anatomy, physiology)
+    cm = Cx(anatomy, physiology,array_run_stdout_file=Path(user_workspace_path).joinpath("cxoutput.out"))
     cm.run()
     print("Process {} finished for user {} ".format(os.getpid(),userid))
 
@@ -254,6 +254,6 @@ def sim_status(request):
         with open(outputfile_path.as_posix(),'r') as f:
             for line in f:
                 all_lines.append(line + '<br>')
-        output = ''.join(all_lines[-50:]) # just send the last 30 lines
+        output = ''.join(all_lines[-30:]) # just send the last 30 lines
 
         return HttpResponse(output, content_type='text/plain')

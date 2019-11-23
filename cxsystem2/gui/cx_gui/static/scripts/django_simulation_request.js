@@ -107,7 +107,7 @@ var req_simstatus = function () {
                 // alert(response);
                 Swal.fire(
                 {
-                    title: "Output of the Simulation (tail)",
+                    title: "Output of the Simulation (last 30 lines)",
                   html: '<div style="text-align: left;">'  +response + '<div>',
                     width: '80%',
                     content: 'span',

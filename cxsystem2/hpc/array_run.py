@@ -35,7 +35,8 @@ class ArrayRun(object):
                  cluster_run_step,
                  anatomy_file_path,
                  physio_file_path,
-                 array_run_is_in_cluster=0):
+                 array_run_is_in_cluster=0,
+                 array_run_stdout_file = None):
         """
         Initialize the ArrayRun for running several instances of CxSystem in parallel.
 
@@ -47,6 +48,10 @@ class ArrayRun(object):
         self.cluster_start_idx = cluster_run_start_idx
         self.cluster_step = cluster_run_step
         self.array_run_is_in_cluster = array_run_is_in_cluster
+        if array_run_stdout_file == 'None':
+            self.array_run_stdout_file = None
+        else:
+            self.array_run_stdout_file = array_run_stdout_file
         if self.cluster_start_idx == -1 and self.cluster_step == -1:
             # this means this instance of array run is actually trying to run a bunch of instances in the cluster
             from cxsystem2.hpc.cluster_run import ClusterRun
@@ -214,7 +219,7 @@ class ArrayRun(object):
             return
         self.spawner(0, len(self.final_messages) * self.trials_per_config)  # this runs when not in cluster
 
-    def arr_run(self, idx, working, paths):
+    def arr_run(self, idx, working, paths, stdout_file):
         """
         The function that each spawned process runs and parallel instances of CxSystems are created here.
 
@@ -223,6 +228,8 @@ class ArrayRun(object):
                 to prevent spawning more than required processes.
         :param paths: The path for saving the output of the current instance of CxSystem.
         """
+        if stdout_file:
+            sys.stdout = open(stdout_file, "a+")
         orig_idx = idx
         working.value += 1
         np.random.seed(idx)
@@ -267,7 +274,7 @@ class ArrayRun(object):
             time.sleep(1.5)
             if working.value < self.number_of_process:
                 idx = start_idx + len(jobs)
-                p = multiprocessing.Process(target=self.arr_run, args=(idx, working, paths))
+                p = multiprocessing.Process(target=self.arr_run, args=(idx, working, paths, self.array_run_stdout_file))
                 jobs.append(p)
                 p.start()
         for j in jobs:
@@ -402,8 +409,8 @@ class ArrayRun(object):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 9:
-        print("Array run needs 8 arguments and is not built to be called separately")
+    if len(sys.argv) != 10:
+        print("Array run needs 9 arguments and is not built to be called separately")
         sys.exit(1)
     anatomy_df = pd.read_csv(sys.argv[1], header=None)
     physiology_df = pd.read_csv(sys.argv[2])
@@ -413,4 +420,5 @@ if __name__ == '__main__':
     anat_file_address = sys.argv[6]
     physio_file_address = sys.argv[7]
     array_run_in_cluster = int(sys.argv[8])
-    ArrayRun(anatomy_df, physiology_df, suffix, cluster_start_idx, cluster_step, anat_file_address, physio_file_address, array_run_in_cluster)
+    array_run_stdout_file = sys.argv[9]
+    ArrayRun(anatomy_df, physiology_df, suffix, cluster_start_idx, cluster_step, anat_file_address, physio_file_address, array_run_in_cluster, array_run_stdout_file)

@@ -72,7 +72,8 @@ class CxSystem:
                  instantiated_from_array_run=0,
                  cluster_run_start_idx=-1,
                  cluster_run_step=-1,
-                 array_run_in_cluster=0):
+                 array_run_in_cluster=0,
+                 array_run_stdout_file = None):
         """
         Initialize the cortical system by parsing both of the configuration files.
 
@@ -81,7 +82,7 @@ class CxSystem:
         :param output_file_suffix: switch the GeNN mode on/off (1/0), by default GeNN is off
         :param instantiated_from_array_run: this flag, 0 by default, determines whether this instance of CxSystem is instantiated from
                                             another instance of CxSystem which is running an array run.
-
+        :param stdout_file_path: this is only used for saving arrayrun stdout
         Main internal variables:
 
         * customized_neurons_list: This list contains the NeuronReference instances. So for each neuron group target line,
@@ -188,6 +189,7 @@ class CxSystem:
         self.profiling = 0
         self.array_run_in_cluster = array_run_in_cluster
         self.awaited_conf_lines = []
+        self.array_run_stdout_file = array_run_stdout_file
 
         self.physio_config_df = read_config_file(physiology_config, header=True)
         self.physio_config_df = self.physio_config_df.applymap(lambda x: b2.NaN if str(x)[0] == '#' else x)
@@ -271,7 +273,7 @@ class CxSystem:
                     json.dump(physiology_config, f)
                 physiology_config = tmp_physio_path2
             # this is vulnerable to code injection
-            command = 'python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster}'.format(
+            command = 'python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}'.format(
                 array_run=array_run_path,
                 anat_df=tmp_anat_path,
                 physio_df=tmp_physio_path,
@@ -280,7 +282,8 @@ class CxSystem:
                 step=int(cluster_run_step),
                 anat_path=anatomy_and_system_config,
                 physio_path=physiology_config,
-                cluster=cluster_flag
+                cluster=cluster_flag,
+                stdout_file=self.array_run_stdout_file
             )
             os.system(command)
             self.array_run = 1

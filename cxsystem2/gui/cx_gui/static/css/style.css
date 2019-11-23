@@ -161,6 +161,5 @@ button.tabs__button--active{
 
 .swal2-content {
     font-size: 1em !important;
-    border-style: solid;
     padding : 10px !important;
 }
