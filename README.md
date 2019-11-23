@@ -96,7 +96,11 @@ Beside the BUI, Some of the main functionalities of the `CxSystem2` are availabl
 
 #### `cxsystem2`
 
-This command (all in lower letters and case sensitive) is the main command of the `CxSystem2` and can be used to run the django server for BUI or run simulations by passing the anatomy and physiology configuration files. 
+This command (all in lower letters and case sensitive) can be used to run a simulation locally using anatomy and physiology configuration files. 
+
+#### `cxserver`
+
+This command will run the `CxSystem2` BUI django server.
 
 #### `cxconfig` 
 
@@ -108,7 +112,9 @@ Use `cxcluster` to download the results from the cluster. `cxcluster` takes in o
 
 #### `cxvisualize`
 
-This command can be used to visualize the result of the simulation using `visimpl` visualizer. 
+This command can be used to visualize the result of the simulation using `visimpl` visualizer. It can also be used to generate a pdf of rasterplots from a set of simulations.
+
+
 
 ## Documentation
 
