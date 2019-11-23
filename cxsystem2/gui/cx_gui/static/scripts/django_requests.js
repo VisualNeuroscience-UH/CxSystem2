@@ -33,11 +33,10 @@ var req_simulate = function () {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
                 authenticate(req_download_workspace);
             } else {
-                Swal.fire(
-                    'Simulation request sent ...',
-                    '',
-                    'success'
-                );
+               Swal.fire(
+                    {
+                        title: JSON.parse(response)["response"],
+                    })
             }
         }
     });

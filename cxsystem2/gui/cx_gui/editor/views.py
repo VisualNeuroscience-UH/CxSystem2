@@ -134,6 +134,9 @@ def simulate(request):
         user_workspace_path = Path()
         if request.is_secure() and userid != '':
             user_workspace_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+            if workspace_is_full(user_workspace_path):
+                return HttpResponse(json.dumps({"authorized": "true", "response": "Workspace is full. Try downloading your workspace, delete the content, then retry."}))
+
             anatomy['params']['workspace_path'] = user_workspace_path.as_posix()
         physiology = {"physio_data": sanitized_receive_data['physiology']}
 
@@ -161,7 +164,7 @@ def simulate(request):
                                               Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()
-        return HttpResponse(json.dumps({"authorized":"true", "response": "simulation started successfully"}))
+        return HttpResponse(json.dumps({"authorized":"true", "response": "Simulation request submitted successfully"}))
     except Exception as e:
         print(e)
         return HttpResponse(json.dumps({"authorized":"true", "response": "Something went wrong before simulation"}))
@@ -229,6 +232,15 @@ def list_files(startpath):
             # print('{}{}'.format(subindent, f))
     return output
 
+def workspace_is_full(p):
+    allowance = 2 # allowed space in GB
+    path = Path(p)
+    directory_size_bytes = sum(f.stat().st_size for f in path.glob('**/*') if f.is_file())
+    directory_size_gb = directory_size_bytes/1024/1024/1024
+    if directory_size_gb >= 2:
+        return True
+    return False
+
 @csrf_exempt
 def ls_workspace(request):
     if request.is_secure():
@@ -289,6 +301,9 @@ def visualize(request):
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
 
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        if workspace_is_full(user_workspace_path):
+            return HttpResponse(json.dumps({"authorized": "true", "response": "Workspace is full. Try downloading your workspace, delete the content, then retry."}))
+
         req_data = eval(request.body.decode('utf-8'))
         folder = req_data['folder']
         timestamp = req_data['timestamp'].strip('_')
