@@ -185,7 +185,14 @@ var req_visualize = function () {
                     var typedArray = new Uint8Array(r.match(/[\da-f]{2}/gi).map(function (h) {
                         return parseInt(h, 16)
                     }));
-                    download(typedArray, 'output.pdf', 'application/pdf');
+                    var blob = new Blob([typedArray], {
+                        type: 'application/pdf'
+                    });
+                    var file = window.URL.createObjectURL(blob);
+                    document.querySelector("iframe").src = file;
+                    $("iframe").show();
+                    // download(typedArray, 'output.pdf', 'application/pdf');
+
                 }
             }
         }

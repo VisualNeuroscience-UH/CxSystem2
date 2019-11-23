@@ -18,7 +18,7 @@ Options:
   --rasterplot-pdf                                  Generate a rasterplot pdf for arrayrun
   -c --convert                                      Convert results for use in ViSimpl
   -d --delete                                       Delete ViSimpl-related files after visualization
-  -s SAMPLINGRATE --sampling-rate=SAMPLINGRATE      Sampling rate for raster plot (default is 0.05)
+  -s SAMPLINGRATE --sampling-rate=SAMPLINGRATE      Sampling rate for raster plot (default is 1%)
 
 Description:
 
@@ -33,7 +33,10 @@ Description:
     converts the results file into two CSVs and one JSON for ViSimpl (no visualization)
 
   cxvisualize --rasterplot-pdf ./cobaeif 20191123_1353509
-    Generates a pdf of rasterplots of all groups in the array run
+    Generates a pdf of rasterplots of all groups in the folder with 20191123_1353509 timestamp
+
+  cxvisualize --rasterplot-pdf ./cobaeif 20191123_1353509 --sampling-rate=4%
+    Generates a pdf of rasterplots of all groups in the folder with timestamp 20191123_1353509 and sampling rate or 4%
 
 """
 
@@ -88,10 +91,13 @@ def main():
         if len(files) == 0:
             print("arrayrun folder does not contain files with that timestamp.")
             return
-        sampling_rate = 0.05
+        sampling_rate = '5%'
         if arguments['--sampling-rate']:
-            if float(arguments['--sampling-rate']) > 1 or float(arguments['--sampling-rate']) <= 0 :
-                print ("Sampling rate must be between 0 and 1")
+            if arguments['--sampling-rate'].count('%') != 1 or \
+                not arguments['--sampling-rate'][-1].isdigit() or \
+                float(arguments['--sampling-rate'][:-1]) > 100 or \
+                float(arguments['--sampling-rate'][:-1]) <= 0 :
+                print ("Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%")
                 return
             sampling_rate = float(arguments['--sampling-rate'])
         rasterplot_pdf_generator(folder_path, timestamp, sampling_rate)

@@ -11,7 +11,7 @@ class rasterplot_pdf_generator:
     def __init__(self, workspace_path, timestamp, sampling_rate):
         self.workspace_path = Path(workspace_path)
         self.timestamp = timestamp.strip('_')
-        self.sampling_rate = float(sampling_rate)
+        self.sampling_rate = float(sampling_rate[:-1])/100
         assert 0 < self.sampling_rate <= 1  , "sampling rate must be between 0 and 1"
         dir_file_list = self.workspace_path.glob('**/*')
         self.files = [x for x in dir_file_list if x.is_file() and timestamp in x.as_posix() and 'results' in x.as_posix()]
@@ -69,4 +69,4 @@ class rasterplot_pdf_generator:
         return self.out_filename.as_posix()
 
 if __name__ == '__main__':
-    viz = rasterplot_pdf_generator('/home/corriel/CxServerWorkspace/307314/sim_pytest', '20191123_1506038', 0.01)
+    viz = rasterplot_pdf_generator('/home/corriel/CxServerWorkspace/307314/sim_pytest', '20191123_1506038', '1%')

@@ -252,14 +252,14 @@
                     <input type="text" name="simulation_name" value="">
                     Timestamp Suffix, e.g. 20191123_1506038:<br>
                     <input type="text" name="timestamp_suffix" value="">
-                    Sampling rate:<br>
-                    <input type="text" name="sampling_rate" value="0.05">
-                    <input type="submit" value="Download">
+                    Sampling rate in percentage, e.g. 1%:<br>
+                    <input type="text" name="sampling_rate" value="1%">
+                    <input type="submit" value="Visualize Rasterplot">
                     <br>
                     <br>
                 </form>
-                <div style="width: 100% !important;">
-                    <iframe src="/pdf/test.pdf" style="width: 100% !important;height: 90% !important;"></iframe>
+                <div style="width: 80% !important;">
+                    <iframe id='pdf_holder' src="" type="application/pdf" style="width: 100% !important;height: 50vw !important; overflow: auto !important; display:none"></iframe>
                 </div>
             </div>
 

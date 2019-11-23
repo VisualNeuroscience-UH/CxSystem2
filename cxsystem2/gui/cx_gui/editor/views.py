@@ -285,16 +285,26 @@ def visualize(request):
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
         req_data = eval(request.body.decode('utf-8'))
         folder = req_data['folder']
-        timestamp = req_data['timestamp']
+        timestamp = req_data['timestamp'].strip('_')
         sampling_rate = req_data['sampling']
         simulation_folder = user_workspace_path.joinpath(folder)
         if not simulation_folder.is_dir():
             return HttpResponse(json.dumps({"authorized": "true", "response": "Folder not found. Make sure you are typing the correct folder name."}))
 
-        dir_file_list = user_workspace_path.glob('**/*')
+        dir_file_list = simulation_folder.glob('**/*')
         files = [x for x in dir_file_list if x.is_file() and timestamp in x.as_posix() and 'results' in x.as_posix()]
-        if len(files) == 0:
+        print(files)
+        if len(files) == 0 or len(timestamp) != 16:
             return HttpResponse(json.dumps({"authorized": "true", "response": "No file with that timestamp was found."}))
+
+        try:
+            if sampling_rate.count('%') != 1 or \
+                    float(sampling_rate[:-1]) > 100 or \
+                    float(sampling_rate[:-1]) <= 0 :
+                return HttpResponse(json.dumps({"authorized": "true", "response": "Sampling rate is not valid"}))
+        except ValueError:
+            return HttpResponse(json.dumps({"authorized": "true", "response": "Sampling rate is not valid"}))
+
         rplot = rasterplot_pdf_generator(simulation_folder.as_posix(),timestamp,sampling_rate)
         output_pdf_path = Path(rplot.get_output_file_path())
 
