@@ -1,22 +1,21 @@
-import bz2
-import pickle as pickle
-import zlib
 from pathlib import Path
 
 import brian2 as b2
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+from cxsystem2.core.tools import load_from_file
+
 
 class arrayrun_visualizer:
-    def __init__(self, folder_path, out_filename = None):
-        self.arrayrun_folder = Path(folder_path)
-        dir_file_list = self.arrayrun_folder.glob('**/*')
-        self.files = [x for x in dir_file_list if x.is_file()]
-        if out_filename is None:
-            self.out_filename = self.arrayrun_folder.joinpath('arrayrun_plot.pdf')
-        else:
-            self.out_filename = Path(out_filename)
+    def __init__(self, workspace_path, timestamp, sampling_rate):
+        self.workspace_path = Path(workspace_path)
+        self.timestamp = timestamp.strip('_')
+        self.sampling_rate = float(sampling_rate)
+        assert 0 < self.sampling_rate <= 1  , "sampling rate must be between 0 and 1"
+        dir_file_list = self.workspace_path.glob('**/*')
+        self.files = [x for x in dir_file_list if x.is_file() and timestamp in x.as_posix() and 'results' in x.as_posix()]
+        self.out_filename = self.workspace_path.joinpath('plot_{}.pdf'.format(self.timestamp))
         self.generate_pdf()
 
     def generate_pdf(self):
@@ -31,9 +30,10 @@ class arrayrun_visualizer:
             f.set_figheight(pdf_height)
             f.set_figwidth(pdf_width)
             for file in self.files:
+                print("Current file: {}".format(file))
                 all_axes = []
                 idx_in_fig = -1
-                tmp_dat = self.data_loader(file.as_posix())
+                tmp_dat = load_from_file(file.as_posix())
                 try:
                     spikes = tmp_dat['spikes_all']
                     for ng, spike_dat in spikes.items():
@@ -52,30 +52,18 @@ class arrayrun_visualizer:
                         all_axes[-1].set_title(ng)
                         all_axes[-1].set_xlabel('Time (ms)')
                         all_axes[-1].set_ylabel('Neuron index')
-                        all_axes[-1].plot(spike_dat['t']/b2.units.ms, spike_dat['i'],'.k')
+                        step = int((1 // self.sampling_rate) + 1)
+                        s = spike_dat['t']/b2.units.ms
+                        t = spike_dat['i']
+                        all_axes[-1].plot(s[::step], t[::step],'.k',markersize=1)
                     if idx_in_fig > 0:
                         plt.tight_layout()
-                        plt.text(0.05, 0.05, file.as_posix(), transform=f.transFigure, size=8)
+                        plt.text(0.05, 0.05, file.name, transform=f.transFigure, size=8)
                         pdf.savefig(f)
                 except KeyError:
                     print("The file '{}' is not a brian data file, skipping ...".format(file.name))
 
-    def data_loader(self, input_path):
-        if '.gz' in input_path:
-            with open(input_path, 'rb') as fb:
-                data = zlib.decompress(fb.read())
-                loaded_data = pickle.loads(data)
-        elif '.bz2' in input_path:
-            with bz2.BZ2File(input_path, 'rb') as fb:
-                loaded_data = pickle.load(fb)
-        elif 'pickle' in input_path:
-            with open(input_path, 'rb') as fb:
-                loaded_data = pickle.load(fb)
-        else:
-            loaded_data = {}
-        return loaded_data
-
 
 
 if __name__ == '__main__':
-    viz = arrayrun_visualizer('/Users/vafandal/gitrepos/CxSystem2/sim_results')
+    viz = arrayrun_visualizer('/home/corriel/CxServerWorkspace/307314/cobaeif','_20191123_1353509',0.01)
