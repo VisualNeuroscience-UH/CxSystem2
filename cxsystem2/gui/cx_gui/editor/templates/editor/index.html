@@ -1,7 +1,17 @@
 <title>CxSystem2 </title>
-<!-- <link rel="stylesheet" href="/assets/dcode.css">-->
-<!--<link rel="shortcut icon" href="/static/images/favicon.ico">-->
-<!--<link rel='icon' href="/static/images/favicon.ico" type='image/x-icon'/>-->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+{% if is_secure %}
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-153149215-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-153149215-1');
+</script>
+{% endif %}
+
 <link rel="shortcut icon" type="image/png" href="/static/images/favicon.ico"/>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
