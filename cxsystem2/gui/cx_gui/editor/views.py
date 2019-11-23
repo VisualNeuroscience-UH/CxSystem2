@@ -16,6 +16,7 @@ from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 
 from cxsystem2.core.cxsystem import CxSystem as Cx
+from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -100,7 +101,7 @@ def sanitize_data(received_data):
 # noinspection PyProtectedMember
 @csrf_exempt
 def simulate(request):
-    # There request that we receive here is the following from django_simulation_request.js :
+    # There request that we receive here is the following from django_requests.js :
     # data: JSON.stringify({
     #     'anatomy': {
     #         "params": params_editor.getValue(),
@@ -271,3 +272,35 @@ def delete_all(request):
         os.mkdir(user_workspace_path.as_posix())
 
         return HttpResponse(json.dumps({"authorized":"true", "response": "Workspace folder cleaned successfully"}))
+
+@csrf_exempt
+def visualize(request):
+    if request.is_secure():
+        auth_response = is_authorized(request)
+        if auth_response.ok:
+            userid = auth_response.json()['id']
+        else:
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+
+        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        req_data = eval(request.body.decode('utf-8'))
+        folder = req_data['folder']
+        timestamp = req_data['timestamp']
+        sampling_rate = req_data['sampling']
+        simulation_folder = user_workspace_path.joinpath(folder)
+        if not simulation_folder.is_dir():
+            return HttpResponse(json.dumps({"authorized": "true", "response": "Folder not found. Make sure you are typing the correct folder name."}))
+
+        dir_file_list = user_workspace_path.glob('**/*')
+        files = [x for x in dir_file_list if x.is_file() and timestamp in x.as_posix() and 'results' in x.as_posix()]
+        if len(files) == 0:
+            return HttpResponse(json.dumps({"authorized": "true", "response": "No file with that timestamp was found."}))
+        rplot = rasterplot_pdf_generator(simulation_folder.as_posix(),timestamp,sampling_rate)
+        output_pdf_path = Path(rplot.get_output_file_path())
+
+        with open(output_pdf_path.as_posix(), 'rb') as f:
+            pdf_file = binascii.hexlify(f.read())
+        response = HttpResponse(str(pdf_file), content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % output_pdf_path.name
+
+        return response

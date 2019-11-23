@@ -9,5 +9,6 @@ urlpatterns = [
     path("download_workspace", views.download_workspace),
     path("ls_workspace", views.ls_workspace),
     path("simstatus", views.sim_status),
-    path("delete", views.delete_all)
+    path("delete", views.delete_all),
+    path("visualize", views.visualize),
 ]

@@ -148,6 +148,52 @@ var req_delete = function () {
 };
 
 
+var req_visualize = function () {
+    $.ajax({
+        type: 'POST',
+        url: 'visualize',
+        data: JSON.stringify(
+            {
+                "folder": $("input[name=simulation_name").val(),
+                "timestamp": $("input[name=timestamp_suffix").val(),
+                "sampling": $("input[name=sampling_rate").val()
+            }
+        ),
+        headers: {
+            'Authorization': 'Basic ' + session_token
+        },
+        beforeSend: function () {
+            Swal.fire(
+                {
+                    title: 'Generating and downloading the pdf, please wait ...',
+                    showConfirmButton: false,
+                    timer: 3000
+                }
+            );
+        },
+        success: function (response) {
+            if (response['authorized'] != null && response['authorized'] !== 'true') {
+                authenticate(req_simstatus);
+            } else {
+                try {
+                    Swal.fire(
+                        {
+                            title: JSON.parse(response)["response"],
+                        })
+                } catch (err) {
+                    var r = response.substring(2, response.length - 1);
+                    var typedArray = new Uint8Array(r.match(/[\da-f]{2}/gi).map(function (h) {
+                        return parseInt(h, 16)
+                    }));
+                    download(typedArray, 'output.pdf', 'application/pdf');
+                }
+            }
+        }
+    });
+    return false;
+};
+
+
 function download(content, filename, contentType) {
     if (!contentType) contentType = 'application/octet-stream';
     var a = document.createElement('a');
@@ -163,11 +209,9 @@ $(function () {
     $('#lsworkspace_form').submit(req_lsworkspace);
 });
 
-
 $(function () {
     $('#downloader_form').submit(req_download_workspace);
 });
-
 
 $(function () {
     $('#simulation_form').submit(req_simulate);
@@ -181,4 +225,6 @@ $(function () {
     $('#delete_remote_form').submit(req_delete);
 });
 
-
+$(function () {
+    $('#visualize_form').submit(req_visualize);
+});

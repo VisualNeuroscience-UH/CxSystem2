@@ -14,7 +14,7 @@
 <!--<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>-->
 <script src="/static/scripts/jquery-3.4.1.min.js"></script>
 <script src="/static/scripts/schema.js"></script>
-<script src="/static/scripts/django_simulation_request.js"></script>
+<script src="/static/scripts/django_requests.js"></script>
 <!--<script src="/static/css/foundation-5.5.3/js/foundation.min.js"></script>-->
 
 <script src="/static/scripts/jso.js"></script>
@@ -38,7 +38,7 @@
     JSONEditor.defaults.iconlib = 'fontawesome4';
 </script>
 
-<body>
+<body style="background-color: #f2f2f2">
 
 
 <nav class="top-bar" data-topbar role="navigation">
@@ -54,19 +54,21 @@
 
             <li class="active"><a href="#" onclick="document.getElementById('home-button').click();">Home</a></li>
 
-            <li class="active" data-step="1"
-                data-intro="Use this button to import anatomy and physiology configuration files"><a
-                    href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import
-                Parameters/Physiology</a></li>
+            <li class="active" data-step="1" data-intro="Use this button to import anatomy and physiology configuration files">
+                <a href="javascript:void(0);" onclick="document.getElementById('file-input').click()">Import Parameters/Physiology</a></li>
 
-            <li class="active"><a href="javascript:void(0);" onclick="downloadanatomy()"
-                                  data-step="2"
-                                  data-intro="When you are done changing the anatomy configuration file, use this button to download your changed configuration file.">Export
-                Parameters</a></li>
-            <li class="active"><a href="javascript:void(0);" onclick="downloadphysiology()"
-                                  data-step="3"
-                                  data-intro="When you are done changing the physiology configuration file, use this button to download your changed configuration file.">Export
-                Physiology</a></li>
+            <li class="active">
+                <a href="javascript:void(0);" onclick="downloadanatomy()"
+                   data-step="2"
+                   data-intro="When you are done changing the anatomy configuration file, use this button to download your changed configuration file.">Export
+                    Parameters</a></li>
+
+            <li class="active">
+                <a href="javascript:void(0);" onclick="downloadphysiology()"
+                   data-step="3"
+                   data-intro="When you are done changing the physiology configuration file, use this button to download your changed configuration file.">Export
+                    Physiology</a></li>
+
             <li class="active"><a href="javascript:void(0);" onclick="javascript:introJs().start();">Help</a></li>
         </ul>
         <ul class="right">
@@ -156,7 +158,7 @@
                 data-step="9"
                 data-intro="Use this tab to configure the physiological parameters of the network ">Physiology
         </button>
-        <button class="tabs__button" data-for-tab="5"
+        <button class="tabs__button" data-for-tab="7"
                 data-step="9"
                 data-intro="Use this tab to visualize the simulation results on the server ">Rasterplot
         </button>
@@ -214,7 +216,6 @@
                 <div style="border: solid #e1e1e1 1px; padding: 5px;width: 70%;">
                     <p>
                         The following examples are currently available for simulation:
-
                     </p>
                 </div>
 
@@ -242,6 +243,26 @@
         </div>
         <div class="tabs__content" data-tab="5">
             <div id='physio_holder'></div>
+        </div>
+
+        <div class="tabs__content" data-tab="7" style="width: 90% !important;height: 100vh !important;">
+            <div id='rasterplot' style="height: 90vh !important;">
+                <form id='visualize_form' action='visualize' style="width:30%">
+                    Simulation Name (folder name), e.g. cobaeif:<br>
+                    <input type="text" name="simulation_name" value="">
+                    Timestamp Suffix, e.g. 20191123_1506038:<br>
+                    <input type="text" name="timestamp_suffix" value="">
+                    Sampling rate:<br>
+                    <input type="text" name="sampling_rate" value="0.05">
+                    <input type="submit" value="Download">
+                    <br>
+                    <br>
+                </form>
+                <div style="width: 100% !important;">
+                    <iframe src="/pdf/test.pdf" style="width: 100% !important;height: 90% !important;"></iframe>
+                </div>
+            </div>
+
         </div>
 
         <div class="tabs__content" data-tab="6">
