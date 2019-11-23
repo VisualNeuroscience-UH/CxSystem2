@@ -2,6 +2,7 @@ import json
 import logging
 import multiprocessing
 import os
+import sys
 import yaml
 from getpass import getpass
 from pathlib import Path
@@ -59,13 +60,33 @@ def cxspawner(anatomy,
     :param root_path:
     :param physiology:
     """
-    from time import sleep
-    sleep(10)
+    print("PID: ",os.getpid())
+    sys.stdout = open(str(os.getpid()) + ".out", "w")
     print(root_path)
     os.chdir(root_path)
 
     cm = Cx(anatomy, physiology)
     cm.run()
+
+def cxspawner_secure(anatomy,
+              physiology,
+              root_path,
+              user_workspace_path,
+              userid):
+    """
+    The function that each spawned process runs and parallel instances of CxSystems are created here.
+    :param anatomy:
+    :param root_path:
+    :param physiology:
+    """
+    sys.stdout = open(Path(user_workspace_path).joinpath("cxoutput.out"), "a+")
+    print("Process {} started for user {} ".format(os.getpid(), userid))
+    print(root_path)
+    os.chdir(root_path)
+
+    cm = Cx(anatomy, physiology)
+    cm.run()
+    print("Process {} finished for user {} ".format(os.getpid(),userid))
 
 
 def sanitize_data(received_data):
@@ -106,6 +127,7 @@ def simulate(request):
         sanitized_receive_data = eval(sanitize_data(received_data))
 
         anatomy = sanitized_receive_data['anatomy']
+        user_workspace_path = Path()
         if request.is_secure() and userid != '':
             user_workspace_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid)
             anatomy['params']['workspace_path'] = user_workspace_path.as_posix()
@@ -121,7 +143,18 @@ def simulate(request):
 
         if anatomy['params']['run_in_cluster'] == 1:
             anatomy['params']['password'] = getpass('Please enter your password for user {}: '.format(anatomy["params"]["cluster_username"]))
-        p = multiprocessing.Process(target=cxspawner, args=(anatomy, physiology, Path.cwd().parent.parent))
+        if request.is_secure() and userid != '':
+            p = multiprocessing.Process(target=cxspawner_secure,
+                                        args=(anatomy,
+                                              physiology,
+                                              Path.cwd().parent.parent,
+                                              user_workspace_path.as_posix(),
+                                              userid))
+        else:
+            p = multiprocessing.Process(target=cxspawner,
+                                        args=(anatomy,
+                                              physiology,
+                                              Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()
         return HttpResponse(json.dumps({"authorized":"true", "response": "simulation started successfully"}))
@@ -203,3 +236,24 @@ def ls_workspace(request):
         dir_list = dir_list[6:]
 
         return HttpResponse(dir_list, content_type='text/plain')
+
+
+@csrf_exempt
+def sim_status(request):
+    if request.is_secure():
+        userid = ''
+        auth_response = is_authorized(request)
+        if auth_response.ok:
+            userid = auth_response.json()['id']
+        else:
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+
+        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        outputfile_path = user_workspace_path.joinpath('cxoutput.out')
+        all_lines = []
+        with open(outputfile_path.as_posix(),'r') as f:
+            for line in f:
+                all_lines.append(line + '<br>')
+        output = ''.join(all_lines[-50:]) # just send the last 30 lines
+
+        return HttpResponse(output, content_type='text/plain')

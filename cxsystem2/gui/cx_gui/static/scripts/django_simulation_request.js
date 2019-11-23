@@ -75,16 +75,6 @@ var req_download_workspace = function () {
     return false;
 };
 
-
-function download(content, filename, contentType) {
-    if (!contentType) contentType = 'application/octet-stream';
-    var a = document.createElement('a');
-    var blob = new Blob([content], {'type': contentType});
-    a.href = window.URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-}
-
 var req_lsworkspace = function () {
     $.ajax({
         type: 'POST',
@@ -103,6 +93,41 @@ var req_lsworkspace = function () {
     return false;
 };
 
+var req_simstatus = function () {
+    $.ajax({
+        type: 'POST',
+        url: 'simstatus',
+        headers: {
+            'Authorization': 'Basic ' + session_token
+        },
+        success: function (response) {
+            if (response['authorized'] != null && response['authorized'] !== 'true') {
+                authenticate(req_simstatus);
+            } else {
+                // alert(response);
+                Swal.fire(
+                {
+                    title: "Output of the Simulation (tail)",
+                  html: '<div style="text-align: left;">'  +response + '<div>',
+                    width: '80%',
+                    content: 'span',
+                })
+            }
+        }
+    });
+    return false;
+};
+
+
+function download(content, filename, contentType) {
+    if (!contentType) contentType = 'application/octet-stream';
+    var a = document.createElement('a');
+    var blob = new Blob([content], {'type': contentType});
+    a.href = window.URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+}
+
 // form submission events:
 
 $(function () {
@@ -117,5 +142,9 @@ $(function () {
 
 $(function () {
     $('#simulation_form').submit(req_simulate);
+});
+
+$(function () {
+    $('#simstatus_form').submit(req_simstatus);
 });
 
