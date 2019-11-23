@@ -20,16 +20,16 @@
 <script src="/static/scripts/jso.js"></script>
 <script src="/static/scripts/auth.js"></script>
 {% if is_secure %}
-    <script>
-        var client = new jso.JSO({
-            providerID: "{{ provider_id }}",
-            client_id: "{{ client_id }}",
-            redirect_uri: "{{ redirect_uri }}",
-            authorization: "{{ authorization }}"
-        });
+<script>
+    var client = new jso.JSO({
+        providerID: "{{ provider_id }}",
+        client_id: "{{ client_id }}",
+        redirect_uri: "{{ redirect_uri }}",
+        authorization: "{{ authorization }}"
+    });
 
-        authenticate();
-    </script>
+    authenticate();
+</script>
 {% endif %}
 
 <script>
@@ -82,11 +82,11 @@
 
         {% if is_secure %}
 
-
         <ul class="right">
             <form id='downloader_form' action='download'>
                 {% csrf_token %}
-                <a class="button success" href="javascript:void(0);" onclick="document.getElementById('downloader').click()">Download Workspace</a>
+                <a class="button success large-expanded" href="javascript:void(0);" onclick="document.getElementById('downloader').click()">Download
+                    Workspace</a>
                 <input id="downloader" type="submit" value="Download" style="display: none;"/>
             </form>
         </ul>
@@ -94,7 +94,7 @@
         <ul class="right">
             <form id='lsworkspace_form' action='lsworkspace'>
                 {% csrf_token %}
-                <a class="button secondary" href="javascript:void(0);" onclick="document.getElementById('lsworkspace').click()">Workspace Files</a>
+                <a class="button secondary" href="javascript:void(0);" onclick="document.getElementById('lsworkspace').click()">Workspace</a>
                 <input id="lsworkspace" type="submit" value="LSWorkspace" style="display: none;"/>
             </form>
         </ul>
@@ -102,15 +102,17 @@
         <ul class="right">
             <form id='simstatus_form' action='simstatus'>
                 {% csrf_token %}
-                <a class="button secondary" href="javascript:void(0);" onclick="document.getElementById('simstatus').click()">Simulation Status</a>
+                <a class="button secondary" href="javascript:void(0);" onclick="document.getElementById('simstatus').click()">Simulations</a>
                 <input id="simstatus" type="submit" value="simstatus" style="display: none;"/>
             </form>
         </ul>
 
         <ul class="right">
-            <li class="active" ><a id="welcome"  href="javascript:void(0);" ></a></li>
+            <li class="active"><a id="welcome" href="javascript:void(0);"></a></li>
         </ul>
+
         {% endif %}
+
     </section>
 </nav>
 
@@ -238,7 +240,8 @@
                         We have prepared several configurations files for sample networks of different examples:
                     <h4>Pytest</h4>
                     <p>
-                        <a href="#" onclick="load_example('pytest')">Click here</a> to load the configuration for the pytest example which is basically a generic sample network.
+                        <a href="#" onclick="load_example('pytest')">Click here</a> to load the configuration for the pytest example which is
+                        basically a generic sample network.
                     </p>
 
                     <h4>COBA-EIF</h4>
