@@ -21,7 +21,9 @@ class rasterplot_pdf_generator:
     def generate_pdf(self):
         idx_in_fig = 0
         pdf_height = 12.69
+        # pdf_height = 7.69
         pdf_width = 8.27
+        # pdf_width = 4.27
         fig_x = 3
         fig_y = 2
         figs_per_page = fig_x * fig_y
@@ -58,11 +60,13 @@ class rasterplot_pdf_generator:
                         all_axes[-1].plot(s[::step], t[::step],'.k',markersize=1)
                     if idx_in_fig > 0:
                         plt.tight_layout()
-                        plt.text(0.05, 0.05, file.name, transform=f.transFigure, size=8)
+                        plt.text(0.4, 0.01, file.name, transform=f.transFigure, size=8, weight="bold")
                         pdf.savefig(f)
                 except KeyError:
                     print("The file '{}' is not a brian data file, skipping ...".format(file.name))
 
+    def get_output_file_path(self):
+        return self.out_filename.as_posix()
 
 if __name__ == '__main__':
-    viz = rasterplot_pdf_generator('/home/corriel/CxServerWorkspace/307314/cobaeif', '_20191123_1353509', 0.01)
+    viz = rasterplot_pdf_generator('/home/corriel/CxServerWorkspace/307314/sim_pytest', '20191123_1506038', 0.01)
