@@ -106,7 +106,7 @@ runtime_params_schema = {
         },
         "cluster_job_file_path": {
             "type": "string",
-            "description": "Absolute path and filename of the Slurm batch file (slurm.job)",
+            "description": "Absolute path and filename of the Slurm batch file (csc_taito.job)",
             "default" : "--"
         },
         "cluster_number_of_nodes": {
@@ -119,6 +119,11 @@ runtime_params_schema = {
         "cluster_address": {
             "type": "string",
             "description": "Address of the HPC server (e.g. taito.csc.fi)",
+            "default" : "--"
+        },
+        "cluster_login_node": {
+            "type": "string",
+            "description": "Address of the login node in case there exists one",
             "default" : "--"
         },
         "cluster_username": {

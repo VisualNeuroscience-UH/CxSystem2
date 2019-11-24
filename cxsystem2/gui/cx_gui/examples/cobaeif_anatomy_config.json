@@ -19,7 +19,7 @@
     "trials_per_config": 1,
     "default_clock": "0.1*ms",
     "run_in_cluster": 0,
-    "cluster_job_file_path": "./cxsystem2/slurm.job",
+    "cluster_job_file_path": "./cxsystem2/csc_taito.job",
     "cluster_number_of_nodes": 1,
     "cluster_address": "taito.csc.fi",
     "cluster_username": "username",
