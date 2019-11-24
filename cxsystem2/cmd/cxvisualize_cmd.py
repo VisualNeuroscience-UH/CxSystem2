@@ -93,13 +93,16 @@ def main():
             return
         sampling_rate = '5%'
         if arguments['--sampling-rate']:
-            if arguments['--sampling-rate'].count('%') != 1 or \
-                not arguments['--sampling-rate'][-1].isdigit() or \
-                float(arguments['--sampling-rate'][:-1]) > 100 or \
-                float(arguments['--sampling-rate'][:-1]) <= 0 :
-                print ("Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%")
+            try:
+                if arguments['--sampling-rate'].count('%') != 1 or \
+                    float(arguments['--sampling-rate'][:-1]) > 100 or \
+                    float(arguments['--sampling-rate'][:-1]) <= 0 :
+                    print ("Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%")
+                    return
+            except ValueError:
+                print("Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%")
                 return
-            sampling_rate = float(arguments['--sampling-rate'])
+            sampling_rate = arguments['--sampling-rate']
         rasterplot_pdf_generator(folder_path, timestamp, sampling_rate)
     else:
         filepath = Path(arguments['FILEPATH'])
