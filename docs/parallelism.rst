@@ -64,7 +64,7 @@ which triggers the cluster run.
  .. csv-table::
    
    cluster_job_file_path
-   ./slurm.job
+   ./csc_taito.job
 
 This parameter defines the address of the template workload management system file. In this case the a template for Slurm system is made available in the Github page which can be used for any cluster that utilizes the Slurm. In case the cluster of choice uses another workload management system, the template file should be specified in the configuration file.
 

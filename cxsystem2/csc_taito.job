@@ -10,9 +10,6 @@
 ##SBATCH --mail-type=END
 ##SBATCH --mail-user=
 
-#export PATH=${USERAPPL}/my_python/bin:$PATH
-#export PYTHONPATH=${USERAPPL}/my_python/lib/python2.7/site-packages:$PYTHONPATH
-
 module purge
 module load python-env/3.5.3
 ##module load gcc/4.8.2

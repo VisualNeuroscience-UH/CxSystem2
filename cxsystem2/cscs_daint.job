@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH -n 1
+#SBATCH -C mc
+#SBATCH -t 00:30:00
+#SBATCH -J auto_cluster_job
+#SBATCH -o auto_cluster_job.out.%j
+#SBATCH -e auto_cluster_job.er.%j
+#SBATCH --mem=100000
+##SBATCH --mail-type=END
+##SBATCH --mail-user=
+
+module purge
+module load cray-python/3.6.5.7
+module list
+
+set -xe
+
+cd ${SLURM_SUBMIT_DIR:-.}
+pwd
+
