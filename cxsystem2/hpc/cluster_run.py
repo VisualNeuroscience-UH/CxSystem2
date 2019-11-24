@@ -34,7 +34,7 @@ class ClusterRun:
                  anat_file_path,
                  physio_file_path,
                  suffix=""):
-
+        time.sleep(20)
         try:
             self.cluster_workspace = Path(parameter_finder(array_run_obj.anatomy_df, 'cluster_workspace'))
         except NameError:
@@ -46,6 +46,12 @@ class ClusterRun:
             self.cluster_address = parameter_finder(array_run_obj.anatomy_df, 'cluster_address')
         except NameError:
             raise ParameterNotFoundError("cluster_address is not defined for running CxSystem on cluster")
+
+        try:
+            self.cluster_login_node = parameter_finder(array_run_obj.anatomy_df, 'cluster_login_node')
+        except NameError:
+            print(" -  No cluster login node found. Directly conencting to cluster address {}".format(self.cluster_address))
+            self.cluster_login_node = '--'
 
         # # the following call will check if the cluster is available or not, but it needs root access
         # self.ping_cluster()
@@ -69,10 +75,25 @@ class ClusterRun:
         print(" -  temp file suffix is %s" % self.suffix)
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
-        self.client.set_missing_host_key_policy(paramiko.WarningPolicy)
-        self.client.connect(self.cluster_address, port=22, username=self.cluster_username, password=self.password)
-        print(" -  Connected to %s" % self.cluster_address)
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        if self.cluster_login_node != '--':
+            print (" -  Connecting to login node {}".format(self.cluster_login_node))
+            sock = paramiko.ProxyCommand("ssh {}@{} nc {} 22".format(self.cluster_username,
+                                                                     self.cluster_login_node,
+                                                                     self.cluster_address))
+            sock.settimeout(30)
+            self.client.connect(self.cluster_address,
+                                port=22,
+                                username=self.cluster_username,
+                                password=self.password,
+                                sock=sock)
+        else:
+            self.client.connect(self.cluster_address,
+                                port=22,
+                                username=self.cluster_username,
+                                password=self.password)
 
+        print(" -  Connected to %s" % self.cluster_address)
         print(" -  Creating workspace folder if not exists")
         self.ssh_commander('mkdir -p {}'.format(self.cluster_workspace.as_posix()))
         scp = SCPClient(self.client.get_transport())
@@ -106,7 +127,7 @@ class ClusterRun:
         scp.put(physio_file_path.as_posix(), self.cluster_workspace.joinpath(self.remote_phys_filename).as_posix())
 
         # ask user to set the number of nodes, time and memory:
-        print(" -  Please check the default slurm.job file and set the time, memory and uncomment and enter email address if you wish."
+        print(" -  Please check the default csc_taito.job file and set the time, memory and uncomment and enter email address if you wish."
               "\nNote that the number of nodes in default slurm file should always be set to 1."
               " Instead you should enter the number of nodes in the CxSystem network config file. "
               "\nAlso the default number of CPUs=16 does not need to be changed most of the times. ")
@@ -165,6 +186,7 @@ class ClusterRun:
         print(" -  Slurm job successfully submitted")
         cluster_metadata = \
             {'cluster_address': self.cluster_address,
+             'cluster_login_node': self.cluster_login_node,
              'cluster_username': self.cluster_username,
              'local_workspace': self.local_workspace.as_posix(),
              'local_cluster_run_folder': self.local_cluster_folder.as_posix(),
@@ -206,11 +228,26 @@ class ClusterDownloader:
         self.metadata = self.load_metadata()
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
-        self.client.set_missing_host_key_policy(paramiko.WarningPolicy)
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.password = getpass.getpass('Enter password for user {}: '.format(self.metadata['cluster_username']))
-        self.client.connect(self.metadata['cluster_address'], port=22, username=self.metadata['cluster_username'], password=self.password)
-        self.scpclient = SCPClient(self.client.get_transport())
+        if self.metadata['cluster_login_node'] != '--':
+            print (" -  Connecting to login node {}".format(self.metadata['cluster_login_node']))
+            sock = paramiko.ProxyCommand("ssh {}@{} nc {} 22".format(self.metadata['cluster_username'],
+                                                                     self.metadata['cluster_login_node'],
+                                                                     self.metadata['cluster_address']))
+            sock.settimeout(30)
+            self.client.connect(self.metadata['cluster_address'],
+                                port=22,
+                                username=self.metadata['cluster_username'],
+                                password=self.password,
+                                sock=sock)
+        else:
+            self.client.connect(self.metadata['cluster_address'],
+                                port=22,
+                                username=self.metadata['cluster_username'],
+                                password=self.password)
 
+        self.scpclient = SCPClient(self.client.get_transport())
         time.sleep(1)
         if not Path(self.metadata['local_workspace']).is_dir():
             os.mkdir(self.metadata['local_workspace'])
