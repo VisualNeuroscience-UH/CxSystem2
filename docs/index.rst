@@ -6,15 +6,15 @@
 CxSystem
 ========================================================
 
-This is the documentation for CxSystem, a flexible cortical simulation framework, implemented in python over `Brian2 package
+This is the documentation for CxSystem2, a flexible cortical simulation framework, implemented in python over `Brian2 package
 <http://briansimulator.org>`_.
 
-The CxSystem is intended for easy and efficient numerical simulation of biomimetic spiking network **cortical** models. The model is constructed in two \
-csv files, and the program itself can be run using CxSystem.py.  
+The CxSystem is intended for easy and efficient numerical simulation of biomimetic spiking network **cortical** models.
+The model is constructed in two files in either CSV or JSON format.
 
-The CxSystem has an open source code, and can be freely used under GNU GENERAL PUBLIC LICENSE Version 3 (see `Copying.txt
-<https://github.com/sivanni/CxSystem/blob/master/Copying.txt>`_). The articles \
-describing the details and testing of the framework has been accepted to Neural Computation.
+The CxSystem is open source, and can be freely used under GNU GENERAL PUBLIC LICENSE Version 3 (see `LICENSE
+<https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/LICENSE>`_). The articles describing the details and
+testing of the framework has been accepted to Neural Computation.
 
 
 Contents:

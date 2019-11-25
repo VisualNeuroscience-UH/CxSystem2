@@ -1,41 +1,43 @@
 Reference Documentation
 ====================================
 
-Cortical System module 
+Core module
 ------------------------------------
-.. module:: CxSystem
+.. module:: cxsystem2.core.cxsystem
 .. autoclass:: CxSystem
    :members:
    
-   .. automethod:: CxSystem.CxSystem.__init__
+   .. automethod:: CxSystem.__init__
 
-Parameter Parser module
-------------------------------------
-.. module:: parameter_parser
+.. module:: cxsystem2.core.parameter_parser
 .. autoclass:: NeuronParser
    :members:
 
-   .. automethod:: parameter_parser.NeuronParser.__init__
+   .. automethod:: NeuronParser.__init__
 
-.. autoclass:: synapse_parser
+.. autoclass:: SynapseParser
    :members:
 
-   .. automethod:: parameter_parser.synapse_parser.__init__
+   .. automethod:: SynapseParser.__init__
 
 
-Physiology Reference module
-------------------------------------
-.. module:: physiology_reference
+.. module:: cxsystem2.core.physiology_reference
 .. autoclass:: NeuronReference
    :members:
 
-   .. automethod:: physiology_reference.NeuronReference.__init__
+   .. automethod:: NeuronReference.__init__
 
 .. autoclass:: SynapseReference
     :members:
 
-    .. automethod:: physiology_reference.SynapseReference.__init__
+    .. automethod:: SynapseReference.__init__
 
+
+..module:: cxsystem2.core.workspace_manager
+.. autoclass:: Workspace
+    :members:
+
+    .. automethod:: Workspace.__init__
 
 Array_run module
 ----------------
@@ -48,11 +50,11 @@ Array_run module
 
 Stimuli module
 ----------------
-.. module:: stimuli
-.. autoclass:: stimuli
+.. module:: cxsystem2.core.stimuli
+.. autoclass:: Stimuli
    :members:
 
-   .. automethod:: stimuli.stimuli.__init__
+   .. automethod:: Stimuli.__init__
 
 Save data module 
 ------------------
