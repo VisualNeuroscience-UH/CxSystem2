@@ -7,7 +7,7 @@
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/bug.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/enhancement.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
 [![Github Issues](http://img.shields.io/github/issues-pr/VisualNeuroscience-UH/CxSystem2.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/pulls)
-[![Documentation Status](https://readthedocs.org/projects/cxsystem/badge/?version=master)](http://cxsystem.readthedocs.io/en/master/?badge=master)
+[![Documentation Status](https://readthedocs.org/projects/cxsystem2/badge/?version=latest)](https://cxsystem2.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/cxsystem2.svg)](https://badge.fury.io/py/cxsystem2)
 [![Build Status](https://travis-ci.org/VisualNeuroscience-UH/CxSystem2.svg?branch=master)](https://travis-ci.org/VisualNeuroscience-UH/CxSystem2)
 
@@ -118,7 +118,7 @@ This command can be used to visualize the result of the simulation using `visimp
 
 ## Documentation
 
-To be updated: To access the documentation of the CxSystem, please check out the [readthedocs page](http://cxsystem.readthedocs.io/en/master/) of the project.
+To be updated: To access the documentation of the CxSystem, please check out the [cxsystem2.readthedocs.io](https://cxsystem2.readthedocs.io/en/latest/) of the project.
 
 ## Citation
 

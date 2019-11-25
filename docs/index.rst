@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-CxSystem
+CxSystem2
 ========================================================
 
 This is the documentation for CxSystem2, a flexible cortical simulation framework, implemented in python over `Brian2 package
