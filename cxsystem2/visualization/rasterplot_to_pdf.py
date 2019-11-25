@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import brian2 as b2
+import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -9,6 +10,7 @@ from cxsystem2.core.tools import load_from_file
 
 class rasterplot_pdf_generator:
     def __init__(self, workspace_path, timestamp, sampling_rate):
+        matplotlib.use('Agg')
         self.workspace_path = Path(workspace_path)
         self.timestamp = timestamp.strip('_')
         self.sampling_rate = float(sampling_rate[:-1])/100
