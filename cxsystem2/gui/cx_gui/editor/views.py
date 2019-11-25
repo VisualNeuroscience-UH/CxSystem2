@@ -171,11 +171,12 @@ def simulate(request):
 
 @csrf_exempt
 def load_example(request):
-    auth_response = is_authorized(request)
-    if request.is_secure() and not auth_response.ok:
-        return HttpResponse(json.dumps({'authorized':'false'}), content_type="application/json")
-    userid = auth_response.json()['id']
-    infologger.info("User {} loaded example file {}".format(userid,request.body.decode('utf-8')))
+    if request.is_secure():
+        auth_response = is_authorized(request)
+        if not auth_response.ok:
+            return HttpResponse(json.dumps({'authorized':'false'}), content_type="application/json")
+        userid = auth_response.json()['id']
+        infologger.info("User {} loaded example file {}".format(userid,request.body.decode('utf-8')))
 
     data = {'authorized':'true'}
     example_name = request.body.decode('utf-8').split('=')[0]
