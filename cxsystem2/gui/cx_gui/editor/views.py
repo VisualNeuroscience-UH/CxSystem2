@@ -63,8 +63,6 @@ def cxspawner(anatomy,
     :param root_path:
     :param physiology:
     """
-    print("PID: ",os.getpid())
-    sys.stdout = open(str(os.getpid()) + ".out", "w")
     print(root_path)
     os.chdir(root_path)
 
@@ -134,6 +132,7 @@ def simulate(request):
         user_workspace_path = Path()
         if request.is_secure() and userid != '':
             user_workspace_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+            user_workspace_path.mkdir(parents=True, exist_ok=True)
             if workspace_is_full(user_workspace_path):
                 return HttpResponse(json.dumps({"authorized": "true", "response": "Workspace is full. Try downloading your workspace, delete the content, then retry."}))
 
@@ -204,6 +203,7 @@ def download_workspace(request):
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
 
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        user_workspace_path.mkdir(parents=True, exist_ok=True)
         tar_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid + ".gz")
         tar = tarfile.open(tar_path.as_posix(), "w:gz")
         tar.add(user_workspace_path.as_posix(), arcname=userid)
@@ -252,6 +252,7 @@ def ls_workspace(request):
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         infologger.info("User {} listed workspace files".format(userid))
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        user_workspace_path.mkdir(parents=True, exist_ok=True)
         dir_list = list_files(user_workspace_path.as_posix())
         dir_list = dir_list[6:]
 
@@ -268,6 +269,7 @@ def sim_status(request):
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         infologger.info("User {} checked simulation status".format(userid))
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        user_workspace_path.mkdir(parents=True, exist_ok=True)
         outputfile_path = user_workspace_path.joinpath('cxoutput.out')
         all_lines = []
         with open(outputfile_path.as_posix(),'r') as f:
@@ -302,8 +304,10 @@ def visualize(request):
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
 
         user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        user_workspace_path.mkdir(parents=True, exist_ok=True)
         if workspace_is_full(user_workspace_path):
-            return HttpResponse(json.dumps({"authorized": "true", "response": "Workspace is full. Try downloading your workspace, delete the content, then retry."}))
+            return HttpResponse(json.dumps({"authorized": "true", "response":
+                "Workspace is full. Try downloading your workspace, delete the content, then retry."}))
 
         req_data = eval(request.body.decode('utf-8'))
         folder = req_data['folder']
