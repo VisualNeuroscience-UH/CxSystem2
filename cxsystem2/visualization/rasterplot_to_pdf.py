@@ -39,8 +39,9 @@ class rasterplot_pdf_generator:
                 try:
                     spikes = tmp_dat['spikes_all']
                     for ng, spike_dat in spikes.items():
+                        print('Plotting group {}'.format(ng))
                         idx_in_fig += 1
-                        if idx_in_fig > figs_per_page :
+                        if idx_in_fig >= figs_per_page :
                             all_axes = []
                             plt.tight_layout()
                             plt.text(0.05, -0.05, file.as_posix(), transform=f.transFigure, size=24)
@@ -48,7 +49,7 @@ class rasterplot_pdf_generator:
                             f = plt.figure()
                             f.set_figheight(pdf_height)
                             f.set_figwidth(pdf_width)
-                            idx_in_fig = -1
+                            idx_in_fig = 0
 
                         all_axes.append(plt.subplot2grid((fig_x,fig_y),(idx_in_fig // fig_y, idx_in_fig % fig_y)))
                         all_axes[-1].set_title(ng)
@@ -69,4 +70,4 @@ class rasterplot_pdf_generator:
         return self.out_filename.as_posix()
 
 if __name__ == '__main__':
-    viz = rasterplot_pdf_generator('/home/corriel/CxServerWorkspace/307314/sim_pytest', '20191123_1506038', '1%')
+    viz = rasterplot_pdf_generator('/Users/vafandal/CxWorkspace/step2', '20191125_1713122', '1%')
