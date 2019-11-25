@@ -92,9 +92,17 @@
             </form>
         </ul>
 
-        {% if is_secure %}
 
         <ul class="right">
+            <li class="active"><a id="welcome" href="javascript:void(0);"></a></li>
+        </ul>
+
+    </section>
+</nav>
+{% if is_secure %}
+<nav class="top-bar" data-topbar role="navigation">
+
+           <ul class="right">
             <form id='downloader_form' action='download'>
                 {% csrf_token %}
                 <a class="button success large-expanded" href="javascript:void(0);" onclick="document.getElementById('downloader').click()">Download
@@ -127,16 +135,8 @@
             </form>
         </ul>
 
-
-        <ul class="right">
-            <li class="active"><a id="welcome" href="javascript:void(0);"></a></li>
-        </ul>
-
-        {% endif %}
-
-    </section>
 </nav>
-
+{% endif %}
 
 <div>
     <input type="file" id="file-input" style="display: none;"/>
@@ -243,7 +243,7 @@
         </div>
         <div class="tabs__content" data-tab="3">
             <div class="medium-12 columns">
-                <span id='valid_indicator' style="margin-left: -15px; margin-down: 5px; "> hi </span>
+                <span id='valid_indicator' style="margin-left: -15px; margin-down: 5px; ">  </span>
             </div>
             <div id='neurons_holder'></div>
         </div>
