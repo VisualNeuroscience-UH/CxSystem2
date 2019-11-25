@@ -28,20 +28,17 @@ import numpy as np
 # Input Currents
 ###############
 def get_step_current(t_start, t_end, unit_time, amplitude, append_zero=True):
-
-    """Creates a step current. If t_start == t_end, then a single
+    """
+    Creates a step current. If t_start == t_end, then a single
     entry in the values array is set to amplitude.
 
-    Args:
-        t_start (int): start of the step
-        t_end (int): end of the step
-        unit_time (Brian2 unit): unit of t_start and t_end. e.g. 0.1*brian2.ms
-        amplitude (Quantity): amplitude of the step. e.g. 3.5*brian2.uamp
-        append_zero (bool, optional): if true, 0Amp is appended at t_end+1.
-        Without that trailing 0, Brian reads out the last value in the array (=amplitude) for all indices > t_end.
-
-    Returns:
-        TimedArray: Brian2.TimedArray
+    :param int t_start: start of the step
+    :param int t_end: end of the step
+    :param unit_time: unit of t_start and t_end. e.g. 0.1*brian2.ms
+    :param amplitude: amplitude of the step. e.g. 3.5*brian2.uamp
+    :param append_zero: if true, 0Amp is appended at t_end+1.  Without that trailing 0, Brian reads out the last
+            value in the array (=amplitude) for all indices > t_end.
+    :return: Brian2.TimedArray
     """
 
     assert isinstance(t_start, int), "t_start_ms must be of type int"

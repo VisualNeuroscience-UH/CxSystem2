@@ -13,7 +13,7 @@ from string import Template
 import brian2 as b2
 
 
-class EquationHelper(object):
+class EquationHelper:
     """
     Helper class for switching swiftly between neuron/synaptic current/synapse models in CxSystem.
     This is a preliminary version.

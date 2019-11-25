@@ -80,7 +80,7 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
 
 
 def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spike_train_idx_list=None,
-                          t_min=None, t_max=None, N_highlighted_spiketrains=3, avg_window_width=1.0 * b2.ms,
+                          t_min=None, t_max=None, N_highlighted_spiketrains=3, avg_window_width=None,
                           sup_title=None, figure_size=(10, 4)):
     """
     Visualizes the results of a network simulation: spike-train, population activity and voltage-traces.
@@ -110,6 +110,8 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
         Axes: Middle panel, population activity
         Axes: Bottom panel, voltage traces. None if no voltage monitor is provided.
     """
+    if avg_window_width is None:
+        avg_window_width = 1.0 * b2.ms
 
     assert isinstance(rate_monitor, b2.PopulationRateMonitor), \
         "rate_monitor  is not of type PopulationRateMonitor"

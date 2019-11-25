@@ -19,7 +19,7 @@ from scipy import io
 from cxsystem2.core.tools import write_to_file, load_from_file
 
 
-class Stimuli(object):
+class Stimuli:
     """
     [Extracted from VCXmodel] This is the stimulation object for applying the input to a particular NeuronGroup().
     Currently only video input is supported.

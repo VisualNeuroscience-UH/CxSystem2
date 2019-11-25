@@ -15,7 +15,7 @@ from brian2.units import *
 from numpy import nan, array
 
 
-class SynapseParser(object):
+class SynapseParser:
     """
     This class contains all the variables that are required for the Synapses() object namespaces.
     There are several reference dictionaries in this class for:
@@ -384,7 +384,7 @@ class SynapseParser(object):
         self.output_namespace['delay'] = '(%f + %f * rand()) * ms' % (min_delay, mean_delay)
 
 
-class NeuronParser(object):
+class NeuronParser:
     """This class embeds all parameter sets associated to all neuron types and will return it as a namespace in form of dictionary"""
 
     def __init__(self, output_neuron, physio_config_df):
