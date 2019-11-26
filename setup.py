@@ -57,8 +57,7 @@ URL = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 with open("cxsystem2/__init__.py",'r') as f :
     VERSION = f.readlines()
     VERSION = VERSION[-1]
-    VERSION = VERSION.split('=')[1].strip(' ').strip('"')
-
+    VERSION = VERSION.split('=')[1].strip(' ').strip('\n').strip('"')
 
 setup(
     name=NAME,

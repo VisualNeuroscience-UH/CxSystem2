@@ -41,7 +41,7 @@ class rasterplot_pdf_generator:
                 try:
                     spikes = tmp_dat['spikes_all']
                     for ng, spike_dat in spikes.items():
-                        print('Plotting group {}'.format(ng))
+                        # print('Plotting group {}'.format(ng))
                         idx_in_fig += 1
                         if idx_in_fig >= figs_per_page :
                             all_axes = []
