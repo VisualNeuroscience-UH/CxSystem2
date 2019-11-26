@@ -7,6 +7,7 @@ urlpatterns = [
     path("simulate", views.simulate),
     path("load_example", views.load_example),
     path("download_workspace", views.download_workspace),
+    path("download_files", views.download_files),
     path("ls_workspace", views.ls_workspace),
     path("simstatus", views.sim_status),
     path("delete", views.delete_all),

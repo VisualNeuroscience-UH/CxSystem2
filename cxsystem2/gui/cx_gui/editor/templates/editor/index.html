@@ -4,11 +4,15 @@
 {% if is_secure %}
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-153149215-1"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    window.dataLayer = window.dataLayer || [];
 
-  gtag('config', 'UA-153149215-1');
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'UA-153149215-1');
 </script>
 {% endif %}
 
@@ -103,38 +107,47 @@
 {% if is_secure %}
 <nav class="top-bar" data-topbar role="navigation">
 
-           <ul class="right">
-            <form id='downloader_form' action='download'>
-                {% csrf_token %}
-                <a class="button success large-expanded" href="javascript:void(0);" onclick="document.getElementById('downloader').click()">Download
-                    Workspace</a>
-                <input id="downloader" type="submit" value="Download" style="display: none;"/>
-            </form>
-        </ul>
+    <ul class="right">
+        {% csrf_token %}
+        <a class="button success large-expanded" href="javascript:void(0);"
+           onclick="req_download_files()">Download Files</a>
+    </ul>
 
-        <ul class="right">
-            <form id='lsworkspace_form' action='lsworkspace'>
-                {% csrf_token %}
-                <a class="button secondary" href="javascript:void(0);" onclick="document.getElementById('lsworkspace').click()">Workspace</a>
-                <input id="lsworkspace" type="submit" value="LSWorkspace" style="display: none;"/>
-            </form>
-        </ul>
+    <ul class="right">
+        <form id='downloader_form'>
+            {% csrf_token %}
+            <a class="button success large-expanded" href="javascript:void(0);"
+               onclick="document.getElementById('downloader').click()">Download Workspace</a>
+            <input id="downloader" type="submit" value="Download" style="display: none;"/>
+        </form>
+    </ul>
 
-        <ul class="right">
-            <form id='simstatus_form' action='simstatus'>
-                {% csrf_token %}
-                <a class="button secondary" href="javascript:void(0);" onclick="document.getElementById('simstatus').click()">Simulations</a>
-                <input id="simstatus" type="submit" value="simstatus" style="display: none;"/>
-            </form>
-        </ul>
+    <ul class="right">
+        <form id='lsworkspace_form'>
+            {% csrf_token %}
+            <a class="button secondary" href="javascript:void(0);"
+               onclick="document.getElementById('lsworkspace').click()">Show Workspace</a>
+            <input id="lsworkspace" type="submit" value="LSWorkspace" style="display: none;"/>
+        </form>
+    </ul>
 
-        <ul class="right">
-            <form id='delete_remote_form' action='delete_remote'>
-                {% csrf_token %}
-                <a class="button alert" href="javascript:void(0);" onclick="document.getElementById('delete_remote').click()">Delete All</a>
-                <input id="delete_remote" type="submit" value="delete_remote" style="display: none;"/>
-            </form>
-        </ul>
+    <ul class="right">
+        <form id='simstatus_form'>
+            {% csrf_token %}
+            <a class="button secondary" href="javascript:void(0);"
+               onclick="document.getElementById('simstatus').click()">Simulations Output</a>
+            <input id="simstatus" type="submit" value="simstatus" style="display: none;"/>
+        </form>
+    </ul>
+
+    <ul class="right">
+        <form id='delete_remote_form'>
+            {% csrf_token %}
+            <a class="button alert" href="javascript:void(0);"
+               onclick="document.getElementById('delete_remote').click()">Clear Workspace</a>
+            <input id="delete_remote" type="submit" value="delete_remote" style="display: none;"/>
+        </form>
+    </ul>
 
 </nav>
 {% endif %}

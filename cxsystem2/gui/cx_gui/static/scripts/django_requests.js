@@ -74,6 +74,51 @@ var req_download_workspace = function () {
     return false;
 };
 
+var req_download_files = function () {
+    Swal.fire({
+        title: 'Enter list of the files (separated by comma)',
+        input: 'text',
+        inputAttributes: {
+            autocapitalize: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Look up',
+        showLoaderOnConfirm: true,
+        preConfirm: (login) => {
+            $.ajax({
+                type: 'POST',
+                url: 'download_files',
+                headers: {
+                    'Authorization': 'Basic ' + session_token
+                },
+                data: {
+                    'files': login
+                },
+                success: function (response) {
+                    if (response['authorized'] != null && response['authorized'] !== 'true') {
+                        authenticate(req_lsworkspace);
+                    } else {
+                        try {
+                            Swal.fire(
+                                {
+                                    title: JSON.parse(response)["response"],
+                                })
+                        } catch (err) {
+                            var r = response.substring(2, response.length - 1);
+                            var typedArray = new Uint8Array(r.match(/[\da-f]{2}/gi).map(function (h) {
+                                return parseInt(h, 16)
+                            }));
+                            download(typedArray, 'collected_files.tar.gz', 'application/gzip');
+                        }
+                    }
+                }
+            });
+
+        },
+        allowOutsideClick: false
+    })
+};
+
 var req_lsworkspace = function () {
     $.ajax({
         type: 'POST',
@@ -90,8 +135,7 @@ var req_lsworkspace = function () {
                     {
                         title: "Tree Remote Folder Structure",
                         html: '<pre style="text-align: left !important;">' + response + '<pre>',
-                        width: '80%',
-                        content: 'span',
+                        width: '80%'
                     })
             }
         }
@@ -115,8 +159,7 @@ var req_simstatus = function () {
                     {
                         title: "Output of the Simulation (last 30 lines)",
                         html: '<pre style="text-align: left;">' + response + '<pre>',
-                        width: '80%',
-                        content: 'span',
+                        width: '80%'
                     })
             }
         }

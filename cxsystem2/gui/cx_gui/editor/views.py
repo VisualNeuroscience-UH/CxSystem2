@@ -220,6 +220,46 @@ def download_workspace(request):
 
         return response
 
+@csrf_exempt
+def download_files(request):
+    if request.is_secure():
+        auth_response = is_authorized(request)
+        if auth_response.ok:
+            userid = auth_response.json()['id']
+        else:
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+
+        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        user_workspace_path.mkdir(parents=True, exist_ok=True)
+
+        print(request.body.decode('utf-8'))
+        files = request.body.decode('utf-8').split('=')[1].replace('+','')
+        files = files.split('%2C')
+
+        ls = [x.name for x in user_workspace_path.glob('**/*')]
+        for file in files:
+            if file not in ls:
+                return HttpResponse(json.dumps({"authorized": "true", "response": "File {} not found".format(file)}))
+        command = 'cd {path} && find . '.format(path=user_workspace_path)
+        for file in files:
+            command += "-name {name} -or ".format(name=file)
+        command = command [:-5] # remove last or
+        command += " | xargs tar cfvz ./collected_files.tar.gz"
+        os.system(command)
+
+        compressed_file_path = user_workspace_path.joinpath('collected_files.tar.gz')
+        infologger.info("User {} downloaded a selection of files {}, size: {} Bytes"
+                        .format(userid, files, os.path.getsize(compressed_file_path.as_posix())))
+
+        with open(compressed_file_path.as_posix(), 'rb') as f:
+            file_data = binascii.hexlify(f.read())
+        response = HttpResponse(str(file_data), content_type='application/gzip')
+        response['Content-Disposition'] = 'attachment; filename="collected_files.tar.gz"'
+        os.remove(compressed_file_path.as_posix())
+
+        return response
+
+
 def list_files(startpath):
     output = ''
     for root, dirs, files in os.walk(startpath):
