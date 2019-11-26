@@ -86,14 +86,10 @@
             <li class="active"><a href="javascript:void(0);" onclick="javascript:introJs().start();">Help</a></li>
         </ul>
         <ul class="right">
-            <form id='simulation_form' action='simulate'>
                 {% csrf_token %}
-                <a class="button alert" href="javascript:void(0);"
-                   onclick="document.getElementById('simulator').click()"
+                <a class="button alert" href="javascript:void(0);" onclick="req_simulate()"
                    data-step="4"
                    data-intro="Use this button to initiate a simulation on the server">Simulate</a>
-                <input id="simulator" type="submit" value="Simulate" style="display: none;"/>
-            </form>
         </ul>
 
         {% if is_secure %}
@@ -109,44 +105,27 @@
 
     <ul class="right">
         {% csrf_token %}
-        <a class="button success large-expanded" href="javascript:void(0);"
-           onclick="req_download_files()">Download Files</a>
+        <a class="button success large-expanded" href="javascript:void(0);" onclick="req_download_files()">Download Files</a>
     </ul>
 
     <ul class="right">
-        <form id='downloader_form'>
             {% csrf_token %}
-            <a class="button success large-expanded" href="javascript:void(0);"
-               onclick="document.getElementById('downloader').click()">Download Workspace</a>
-            <input id="downloader" type="submit" value="Download" style="display: none;"/>
-        </form>
+            <a class="button success large-expanded" href="javascript:void(0);" onclick="req_download_workspace()">Download Workspace</a>
     </ul>
 
     <ul class="right">
-        <form id='lsworkspace_form'>
             {% csrf_token %}
-            <a class="button secondary" href="javascript:void(0);"
-               onclick="document.getElementById('lsworkspace').click()">Show Workspace</a>
-            <input id="lsworkspace" type="submit" value="LSWorkspace" style="display: none;"/>
-        </form>
+            <a class="button secondary" href="javascript:void(0);" onclick="req_lsworkspace()">Show Workspace</a>
     </ul>
 
     <ul class="right">
-        <form id='simstatus_form'>
             {% csrf_token %}
-            <a class="button secondary" href="javascript:void(0);"
-               onclick="document.getElementById('simstatus').click()">Simulations Output</a>
-            <input id="simstatus" type="submit" value="simstatus" style="display: none;"/>
-        </form>
+            <a class="button secondary" href="javascript:void(0);" onclick="req_simstatus()">Simulations Output</a>
     </ul>
 
     <ul class="right">
-        <form id='delete_remote_form'>
             {% csrf_token %}
-            <a class="button alert" href="javascript:void(0);"
-               onclick="document.getElementById('delete_remote').click()">Clear Workspace</a>
-            <input id="delete_remote" type="submit" value="delete_remote" style="display: none;"/>
-        </form>
+            <a class="button alert" href="javascript:void(0);" onclick="req_delete()">Clear Workspace</a>
     </ul>
 
 </nav>

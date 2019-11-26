@@ -53,7 +53,7 @@ var req_download_workspace = function () {
         beforeSend: function () {
             Swal.fire(
                 {
-                    title: 'Downloading the workspace, please wait ...',
+                    title: 'Compressing and downloading the workspace, this might take a few minutes ...',
                     showConfirmButton: false,
                     timer: 1500
                 }
@@ -252,27 +252,6 @@ function download(content, filename, contentType) {
     a.click();
 }
 
-// form submission events:
-
-$(function () {
-    $('#lsworkspace_form').submit(req_lsworkspace);
-});
-
-$(function () {
-    $('#downloader_form').submit(req_download_workspace);
-});
-
-$(function () {
-    $('#simulation_form').submit(req_simulate);
-});
-
-$(function () {
-    $('#simstatus_form').submit(req_simstatus);
-});
-
-$(function () {
-    $('#delete_remote_form').submit(req_delete);
-});
 
 $(function () {
     $('#visualize_form').submit(req_visualize);
