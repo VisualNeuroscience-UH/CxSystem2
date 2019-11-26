@@ -112,7 +112,7 @@ Use `cxcluster` to download the results from the cluster. `cxcluster` takes in o
 
 #### `cxvisualize`
 
-This command can be used to visualize the result of the simulation using `visimpl` visualizer. It can also be used to generate a pdf of rasterplots from a set of simulations.
+This command can be used to visualize the result of the simulation using `visimpl` visualizer. ViSimpl binaries are available at the Modeling and Virtual Reality Group [download page](https://gmrv.es/gmrvvis/visimpl/) at  Universidad Rey Juan Carlos and Universidad Politécnica de Madrid. This command can also be used to generate a pdf of rasterplots from a set of simulations.
 
 
 
