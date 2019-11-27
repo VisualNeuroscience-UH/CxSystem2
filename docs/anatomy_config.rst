@@ -1,8 +1,7 @@
-﻿
-.. _config_file:
+﻿.. _config_file:
 
-Network & Model Configuration File 
-=====================================
+Anatomy & simulation configuration
+==================================
 
 The Model & Network configuration file has two main types of lines:
 

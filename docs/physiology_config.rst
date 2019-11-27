@@ -1,6 +1,6 @@
 
-Physiological Configuration File
-=================================
+Physiology configuration
+========================
 
 
 The format of the physiological configuration file is different from that of the network and model configuration file in a sense that the parameters in the configuration file are placed vertically. Typically there are four types of columns in a physiological configuration file:

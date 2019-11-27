@@ -56,9 +56,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'CxSystem'
-copyright = u'2016, Andalibi, V., Hokkanen H., Vanni, S.'
-author = u'Andalibi, V., Hokkanen H., Vanni, S.'
+project = u'CxSystem2'
+copyright = u'2019, Andalibi V, Hokkanen H, Vanni S'
+author = u'Andalibi V, Hokkanen H, Vanni S'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

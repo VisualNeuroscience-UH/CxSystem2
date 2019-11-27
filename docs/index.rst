@@ -4,18 +4,29 @@
    contain the root `toctree` directive.
 
 CxSystem2
-========================================================
+=========
+CxSystem2 is a simulator for biomimetic spiking network models of cortical circuits. It is implemented in Python
+on top of the popular `Brian2 simulator <https://brian2.readthedocs.io/en/stable/index.html>`_, and runs on Linux,
+Windows and MacOS. There is also a :ref:`web-based version <usingbsp>` available via
+the Human Brain Project’s `Brain Simulation Platform (BSP) <https://www.humanbrainproject.eu/en/brain-simulation/brain-simulation-platform/>`_.
 
-This is the documentation for CxSystem2, a flexible cortical simulation framework, implemented in python over `Brian2 package
-<http://briansimulator.org>`_.
+CxSystem2 embraces the main goal of Brian -- minimizing development time -- by providing the user with
+a simplified interface. While many simple models can be written in pure Brian code, more complex models can get
+hard to manage due to the large number of biological details involved.
 
-The CxSystem is intended for easy and efficient numerical simulation of biomimetic spiking network **cortical** models. The model is constructed in two \
-csv files, and the program itself can be run using CxSystem.py.  
+We currently provide two interfaces for constructing networks: a browser-based interface (locally or via the BSP),
+and a comma-separated (csv) file-based interface. Before incorporating neuron models into a network,
+the user can explore their behavior using the neurodynlib<link> submodule. Spike output of network simulations can be
+visualized using `ViSimpl <http://gmrv.es/gmrvvis/visimpl/>`_, a visualization tool developed by the
+`GMRV Lab <http://gmrv.es/gmrvvis/>`_.
 
-The CxSystem has an open source code, and can be freely used under GNU GENERAL PUBLIC LICENSE Version 3 (see `Copying.txt
-<https://github.com/sivanni/CxSystem/blob/master/Copying.txt>`_). The articles \
-describing the details and testing of the framework has been accepted to Neural Computation.
+More information on our motivation is available `here <https://researchportal.helsinki.fi/files/126265396/Andalibi_2019_NECO.pdf>`_.
+We have used the simulator to construct `a simplified version of a comprehensive cortical microcircuit
+<https://researchportal.helsinki.fi/files/126265461/Hokkanen_2019_NECO.pdf>`_.
 
+The preliminary version of CxSystem2 was developed at `Aalto University <https://www.aalto.fi/en>`_, Finland, in 2012-2015, and
+the current version at the `University of Helsinki <https://www.helsinki.fi/en>`_, Finland, in 2013-2019.
+The software is distributed under the terms of the GNU GPL v3.
 
 Contents:
 
@@ -23,11 +34,8 @@ Contents:
    :maxdepth: 2
 
    introduction
-   overview
-   installation
-   configs
-   parallelism
-   examples
+   tutorials
+   userguide
    developerguide
    reference
 
