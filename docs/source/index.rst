@@ -27,7 +27,7 @@ Contents:
    configs
    parallelism
    examples
-   developerguide
+   developersguide
    reference
 
 

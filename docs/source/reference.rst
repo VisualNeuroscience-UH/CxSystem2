@@ -161,6 +161,10 @@ neurodynlib module
 
 
 .. module:: cxsystem2.neurodynlib.tools.spike_tools
+.. autoclass:: PopulationSpikeStats
+    :members:
+
+    .. automethod:: PopulationSpikeStats.__init__
 
 .. autofunction:: get_spike_time
 .. autofunction:: get_spike_stats

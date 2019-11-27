@@ -1,13 +1,24 @@
 Developer's Guide
 ====================
 
-This section provides a brief guideline for potential contributors. 
+This section section provides a brief guideline for potential contributors.
 
+Documentation
+-------------
+
+.. include:: developers_docs/devel_documentation.rst
+
+`cxsystem2` pypi package
+-------------------------
+
+.. include:: developers_docs/devel_pypi.rst
 
 Adding parameters
 ------------------
 
-The parameters of the Model & Network configuration file are defined and deployed in the main module, i.e. :code:`CxSystem.py`. There are two steps to add a new parameter:
+The parameters of the Model & Network configuration file are defined and
+deployed in the main module, i.e. :code:`CxSystem.py`. There are two steps to
+add a new parameter:
 
 * **Defining a function:**
   
@@ -150,45 +161,5 @@ Equations for the new synapse type can then be added as a method under *SynapseR
 
 After these changes, one can use the reference 'Depressing' in the anatomical CSV configuration file when defining connections between neuron groups. Definition of 'Facilitating' synapses could then be added in a similar way.
 
-
-Updating the Documentation
----------------------------
-
-Building the documentation locally 
-````````````````````````````````````
-Building the documentation locally is essential to test the modifications while preventing redundant pushes to the repository. Sphinx is well documented, yet we will provide the essentials for improving the documentation of the CxSystem. The documentation for reStructuredText is available `here`_.
-
-.. _here: http://www.sphinx-doc.org/en/stable/rest.html
-
-To build the documentation locally in Linux and Mac, first, install the sphinx using:
-
-.. code-block:: bash
-
-   $ sudo apt-get install python-sphinx
-
-When sphinx is installed, you can build the documentation using the following command:
-
-.. code-block:: bash
-
-   $ cd ./CxSystem/docs && make html 
-
-After compiling the documentation, you can open the updated local documentation by opening the following file in the browser:
-
-.. code-block:: bash 
-
-   ~/CxSystem/docs/_build/html/index.html
-
-The procedure for windows systems is similar. First install the Sphinx using:
-
-::
-
-   C:\CxSystem> pip install sphinx
-
-and then :code:`make html` in the :code:`docs` folder will build the documentation locally. 
-
-Mocking modules
-```````````````
-
-The auto-generated API using Sphinx tries to import the entire module hierarchy. This is not an issue when the document is built locally. However, not all the modules are available online in readthedocs website and therefore the online build will fail to generate the reference documentation. To address this issue, any imported module which is not part of the CxSystem must be added to :code:`autodoc_mock_imports` list in :code:`CxSystem/docs/conf.py`. 
 
 
