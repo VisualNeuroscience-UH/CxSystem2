@@ -13,6 +13,18 @@ Documentation
 
 .. include:: developers_docs/devel_pypi.rst
 
+
+
+Browser User Interface (BUI)
+----------------------------
+
+
+
+Command Line Interface (CLI)
+----------------------------
+
+
+
 Adding parameters
 ------------------
 
