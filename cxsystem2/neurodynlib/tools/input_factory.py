@@ -55,21 +55,25 @@ def get_step_current(t_start, t_end, unit_time, amplitude, append_zero=True):
 
 
 def get_ramp_current(t_start, t_end, unit_time, amplitude_start, amplitude_end, append_zero=True):
-    """Creates a ramp current. If t_start == t_end, then ALL entries are 0.
-
-    Args:
-        t_start (int): start of the ramp
-        t_end (int): end of the ramp
-        unit_time (Brian2 unit): unit of t_start and t_end. e.g. 0.1*brian2.ms
-        amplitude_start (Quantity): amplitude of the ramp at t_start. e.g. 3.5*brian2.uamp
-        amplitude_end (Quantity): amplitude of the ramp at t_end. e.g. 4.5*brian2.uamp
-        append_zero (bool, optional): if true, 0Amp is appended at t_end+1.
-            Without that trailing 0, Brian reads out the last value in the
-            array (=amplitude_end) for all indices > t_end.
-
-    Returns:
-        TimedArray: Brian2.TimedArray
     """
+    Creates a ramp current. If t_start == t_end, then ALL entries are 0.
+    :param t_start: start of the ramp
+    :type int
+    :param t_end: end of the ramp
+    :type int
+    :param unit_time: unit of t_start and t_end. e.g. 0.1*brian2.ms
+    :type Brian2 unit
+    :param amplitude_start: amplitude of the ramp at t_start. e.g. 3.5*brian2.uamp
+    :type Quantity
+    :param amplitude_end: amplitude of the ramp at t_end. e.g. 4.5*brian2.uamp
+    :type Quantity
+    :param append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0, Brian reads out the last value in the
+    array (=amplitude_end) for all indices > t_end.
+    :type bool, optional
+    :return: Brian2.TimedArray
+    :type TimedArray
+    """
+
     assert isinstance(t_start, int), "t_start_ms must be of type int"
     assert isinstance(t_end, int), "t_end must be of type int"
     assert b2.units.fundamentalunits.have_same_dimensions(amplitude_start, b2.amp), \
@@ -92,23 +96,29 @@ def get_ramp_current(t_start, t_end, unit_time, amplitude_start, amplitude_end, 
 def get_sinusoidal_current(t_start, t_end, unit_time,
                            amplitude, frequency, direct_current, phase_offset=0.,
                            append_zero=True):
-    """Creates a sinusoidal current. If t_start == t_end, then ALL entries are 0.
-
-    Args:
-        t_start (int): start of the sine wave
-        t_end (int): end of the sine wave
-        unit_time (Quantity, Time): unit of t_start and t_end. e.g. 0.1*brian2.ms
-        amplitude (Quantity, Current): maximum amplitude of the sinus e.g. 3.5*brian2.uamp
-        frequency (Quantity, Hz): Frequency of the sine. e.g. 0.5*brian2.kHz
-        direct_current(Quantity, Current): DC-component (=offset) of the current
-        phase_offset (float, Optional): phase at t_start. Default = 0.
-        append_zero (bool, optional): if true, 0Amp is appended at t_end+1. Without that
-            trailing 0, Brian reads out the last value in the array for all indices > t_end.
-
-
-    Returns:
-        TimedArray: Brian2.TimedArray
     """
+    Creates a sinusoidal current. If t_start == t_end, then ALL entries are 0.
+    :param t_start: start of the sine wave
+    :type int
+    :param t_end: end of the sine wave
+    :type int
+    :param unit_time: unit of t_start and t_end. e.g. 0.1*brian2.ms
+    :type Quantity, Time
+    :param amplitude: maximum amplitude of the sinus e.g. 3.5*brian2.uamp
+    :type Quantity, Current
+    :param frequency: Frequency of the sine. e.g. 0.5*brian2.kHz
+    :type Quantity, Hz
+    :param direct_current: DC-component (=offset) of the current
+    :type Quantity, Current
+    :param phase_offset: phase at t_start. Default = 0
+    :type float, Optional
+    :param append_zero:if true, 0Amp is appended at t_end+1. Without that trailing 0,
+    Brian reads out the last value in the array for all indices > t_end.
+    :type bool, optional
+    :return: Brian2.TimedArray
+    :type TimedArray
+    """
+
     assert isinstance(t_start, int), "t_start_ms must be of type int"
     assert isinstance(t_end, int), "t_end must be of type int"
     assert b2.units.fundamentalunits.have_same_dimensions(amplitude, b2.amp), \
@@ -140,7 +150,8 @@ def get_zero_current():
     Returns:
         TimedArray
     """
-    return get_step_current(0, 0, b2.ms, 0 * b2.amp, append_zero=False)
+    amp = 0. * b2.amp
+    return get_step_current(0, 0, b2.ms, amp, append_zero=False)
 
 
 def get_spikes_current(t_spikes, unit_time, amplitude, append_zero=True):
@@ -154,7 +165,7 @@ def get_spikes_current(t_spikes, unit_time, amplitude, append_zero=True):
         unit_time (Quantity, Time): unit of t_spikes . e.g. 1*brian2.ms
         amplitude (Quantity, Current):  amplitude of the spike. All spikes have the sampe amplitude
         append_zero (bool, optional): if true, 0Amp is appended at t_end+1. Without that trailing 0,
-            Brian reads out the last value in the array for all indices > t_end.
+        Brian reads out the last value in the array for all indices > t_end.
 
     Returns:
         TimedArray: Brian2.TimedArray

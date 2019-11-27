@@ -26,10 +26,8 @@ from cxsystem2.neurodynlib.tools import plot_tools, input_factory
 # sys.path.append('/home/henhok/PycharmProjects/brian2modelfitting/')
 # import brian2modelfitting as mofi
 
-b2.defaultclock.dt = 0.1 * ms
 
-
-class PointNeuron(object):
+class PointNeuron:
     """
     Helper class for switching swiftly between neuron/synaptic current/synapse models in CxSystem.
     This is a preliminary version.
@@ -534,8 +532,8 @@ class LifNeuron(PointNeuron):
     def get_random_param_set(self, random_seed=None):
         """
         creates a set of random parameters. All values are constrained to their typical range
-        Returns:
-            list: a list of (obfuscated) parameters. Use this vector when calling simulate_random_neuron()
+        :param random_seed:
+        :return: list: a list of (obfuscated) parameters. Use this vector when calling simulate_random_neuron()
         """
         random.seed(random_seed)
         v_rest = (-75. + random.randint(0, 15)) * mV
@@ -549,10 +547,10 @@ class LifNeuron(PointNeuron):
         return self._obfuscate_params(true_rand_params)
 
     def print_obfuscated_parameters(self, obfuscated_params):
-        """ Print the de-obfuscated values to the console
-        Args:
-            obfuscated_params:
-        Returns:
+        """
+        Print the de-obfuscated values to the console
+        :param obfuscated_params:
+        :return:
         """
         true_vals = self._deobfuscate_params(obfuscated_params)
         print("Resting potential: {}".format(true_vals[0]))
@@ -565,12 +563,11 @@ class LifNeuron(PointNeuron):
     def simulate_random_neuron(self, input_current, obfuscated_param_set):
         """
         Simulates a LIF neuron with unknown parameters (obfuscated_param_set)
-        Args:
-            input_current (TimedArray): The current to probe the neuron
-            obfuscated_param_set (list): obfuscated parameters
-        Returns:
-            StateMonitor: Brian2 StateMonitor for the membrane voltage "v"
-            SpikeMonitor: Biran2 SpikeMonitor
+        :param input_current (TimedArray): The current to probe the neuron
+        :param obfuscated_param_set (list): obfuscated parameters
+        :return:
+        StateMonitor: Brian2 StateMonitor for the membrane voltage "v"
+        SpikeMonitor: Biran2 SpikeMonitor
         """
         vals = self._deobfuscate_params(obfuscated_param_set)
         # run the LIF model
@@ -681,8 +678,8 @@ class AdexNeuron(PointNeuron):
     def plot_states(self, state_monitor):
         """
         Visualizes the state variables: w-t, v-t and phase-plane w-v
-        Args:
-            state_monitor (StateMonitor): States of "v" and "w"
+        :param state_monitor(StateMonitor): States of "v" and "w"
+        :return:
         """
         plt.subplot(2, 2, 1)
         plt.plot(state_monitor.t / ms, state_monitor.vm[0] / mV, lw=2)
@@ -751,12 +748,11 @@ class HodgkinHuxleyNeuron(PointNeuron):
         self.parameter_units.update(new_parameter_units)
 
     def plot_states(self, state_monitor):
-        """Plots the state_monitor variables ["vm", "I_e", "m", "n", "h"] vs. time.
-        Args:
-            state_monitor (StateMonitor): the data to plot
-            title (string, optional): plot title to display
         """
-
+        Plots the state_monitor variables ["vm", "I_e", "m", "n", "h"] vs. time.
+        :param state_monitor (StateMonitor): the data to plot
+        :return:
+        """
         plt.subplots(3, 1, sharex=True)
 
         plt.subplot(311)
@@ -842,9 +838,10 @@ class IzhikevichNeuron(PointNeuron):
     def plot_states(self, state_monitor):
         """
         Visualizes the state variables: u-t, v-t and phase-plane u-v
-        Args:
-            state_monitor (StateMonitor): States of "v" and "u"
+        :param state_monitor (StateMonitor): States of "v" and "u"
+        :return:
         """
+
         plt.subplot(2, 2, 1)
         plt.plot(state_monitor.t / ms, state_monitor.vm[0] / mV, lw=2)
         plt.xlabel("t [ms]")
@@ -946,7 +943,7 @@ class neuron_factory:
         return self.name_to_class[neuron_model_name]()
 
 
-# class FitzhughNagumo(object):
+# class FitzhughNagumo:
 #     """
 #     This file implements functions to simulate and analyze
 #     Fitzhugh-Nagumo type differential equations with Brian2.
@@ -1042,7 +1039,7 @@ class neuron_factory:
 #         return (v_fp, w_fp)
 #
 #
-# class passive_cable(object):
+# class passive_cable:
 #     """
 #     Implements compartmental model of a passive cable. See Neuronal Dynamics
 #     `Chapter 3 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch3.S2.html>`_

@@ -49,8 +49,10 @@ class SynapseParser:
         The initialization method for namespaces() object.
 
         :param output_synapse: This is the dictionary created in NeuronReference() in brian2_obj_namespaces module. This contains all the
-        information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to it. Following values are
-        set after initialization: Cp, Cd, sparseness, ilam. Other variables are then set based on the type of the synaptic connection (STDP,Fixed).
+                               information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to
+                               it. Following values are set after initialization:
+                               Cp, Cd, sparseness, ilam. Other variables are then set based on the type of the synaptic connection (STDP,Fixed).
+
         """
         self.output_synapse = output_synapse
         self.physio_config_df = physio_config_df

@@ -8,7 +8,7 @@ import numpy as np
 from brian2.units import *
 
 
-class SpikeData(object):
+class SpikeData:
 
     def __init__(self, filename):
 

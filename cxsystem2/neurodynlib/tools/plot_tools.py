@@ -90,17 +90,17 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
         spike_monitor (SpikeMonitor): spike trains of individual neurons
         voltage_monitor (StateMonitor): optional. voltage traces of some (same as in spike_train_idx_list) neurons
         spike_train_idx_list (list): optional. A list of neuron indices whose spike-train is plotted.
-            If no list is provided, all (up to 500) spike-trains in the spike_monitor are plotted. If None, the
-            the list in voltage_monitor.record is used.
+        If no list is provided, all (up to 500) spike-trains in the spike_monitor are plotted. If None, the
+        the list in voltage_monitor.record is used.
         t_min (Quantity): optional. lower bound of the plotted time interval.
-            if t_min is None, it is set to the larger of [0ms, (t_max - 100ms)]
+        if t_min is None, it is set to the larger of [0ms, (t_max - 100ms)]
         t_max (Quantity): optional. upper bound of the plotted time interval.
-            if t_max is None, it is set to the timestamp of the last spike in
+        if t_max is None, it is set to the timestamp of the last spike in
         N_highlighted_spiketrains (int): optional. Number of spike trains visually highlighted, defaults to 3
-            If N_highlighted_spiketrains==0 and voltage_monitor is not None, then all voltage traces of
-            the voltage_monitor are plotted. Otherwise N_highlighted_spiketrains voltage traces are plotted.
+        If N_highlighted_spiketrains==0 and voltage_monitor is not None, then all voltage traces of
+        the voltage_monitor are plotted. Otherwise N_highlighted_spiketrains voltage traces are plotted.
         avg_window_width (Quantity): optional. Before plotting the population rate (PopulationRateMonitor), the rate
-            is smoothed using a window of width = avg_window_width. Defaults is 1.0ms
+        is smoothed using a window of width = avg_window_width. Defaults is 1.0ms
         sup_title (String): figure suptitle. Default is None.
         figure_size (tuple): (width,height) tuple passed to pyplot's figsize parameter.
 
@@ -254,7 +254,7 @@ def plot_ISI_distribution(spike_stats, hist_nr_bins=50, xlim_max_ISI=None):
         spike_stats (neurodynex.tools.spike_tools.PopulationSpikeStats): statistics of a population activity
         hist_nr_bins (int): Number of histrogram bins. Default:50
         xlim_max_ISI (Quantity):  Default: None. In not None, the upper xlim of the plot is set to xlim_max_ISI.
-            The CV does not change if this bound is set.
+        The CV does not change if this bound is set.
 
     Returns:
         the figure
@@ -290,7 +290,7 @@ def plot_spike_train_power_spectrum(freq, mean_ps, all_ps, max_freq,
         all_ps (dict): power spectra for each single neuron
         max_freq (Quantity): The x-lim of the plot is [-0.05*max_freq, max_freq]
         mean_firing_freqs_per_neuron (float): None or the mean firing rate averaged across the neurons. Default is
-            None in which case the value is not shown in the legend
+        None in which case the value is not shown in the legend
         plot_f0 (bool): if true, the power at frequency 0 is plotted. Default is False and the value is not plotted.
     Returns:
         the figure and the index of the random neuron for which the PS is computed: all_ps[random_neuron_index]

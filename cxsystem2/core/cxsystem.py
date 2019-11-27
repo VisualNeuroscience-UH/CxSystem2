@@ -81,9 +81,8 @@ class CxSystem:
                                           or the dataframe containing the configuration data.
         :param output_file_suffix: switch the GeNN mode on/off (1/0), by default GeNN is off
         :param instantiated_from_array_run: this flag, 0 by default, determines whether this instance of CxSystem is instantiated from
-                                            another instance of CxSystem which is running an array run.
-        :param stdout_file_path: this is only used for saving arrayrun stdout
-        Main internal variables:
+                                             another instance of CxSystem which is running an array run.
+        :param stdout_file_path: this is only used for saving arrayrun stdout Main internal variables:
 
         * customized_neurons_list: This list contains the NeuronReference instances. So for each neuron group target line,
                                     there would be an element in this list which contains all the information for that particular neuron group.

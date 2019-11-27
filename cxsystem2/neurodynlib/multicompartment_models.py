@@ -1,7 +1,7 @@
 import brian2 as b2
 from brian2.units import *
 
-import cxsystem2.neurodynlib as nd
+import cxsystem2.neurodynlib.neuron_models as nd
 
 
 class LeakyCompartment(nd.PointNeuron):
@@ -25,7 +25,7 @@ class LeakyCompartment(nd.PointNeuron):
         super().__init__()
         # self.compartment_vars_and_consts = ['vm', 'g_leak', 'C']
 
-class MulticompartmentNeuron(object):
+class MulticompartmentNeuron:
     def __init__(self):
         super().__init__()
 

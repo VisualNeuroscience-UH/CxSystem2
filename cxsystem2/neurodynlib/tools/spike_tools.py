@@ -38,9 +38,10 @@ def get_spike_time(voltage_monitor,
     voltage_monitor.v[idx-1] is below threshold (crossing from below).
     Note: currently only the spike times of the first column in voltage_monitor are detected. Matrix-like
     monitors are not supported.
+
     Args:
-        voltage_monitor (StateMonitor): A state monitor with at least the fields "v: and "t"
-        spike_threshold (Quantity): The spike threshold voltage. e.g. -50*b2.mV
+        voltage_monitor (StateMonitor): A state monitor with at least the fields "v: and "t" spike_threshold (Quantity):
+        The spike threshold voltage. e.g. -50*b2.mV
 
     Returns:
         A list of spike times (Quantity)
@@ -65,6 +66,7 @@ def get_spike_stats(voltage_monitor, spike_threshold):
     Note: meanISI and firing frequency are set to numpy.nan if less than two spikes are detected
     Note: currently only the spike times of the first column in voltage_monitor are detected. Matrix-like
     monitors are not supported.
+
     Args:
         voltage_monitor (StateMonitor): A state monitor with at least the fields "v: and "t"
         spike_threshold (Quantity): The spike threshold voltage. e.g. -50*b2.mV
@@ -89,6 +91,7 @@ def get_spike_stats(voltage_monitor, spike_threshold):
 def pretty_print_spike_train_stats(voltage_monitor, spike_threshold):
     """
     Computes and returns the same values as get_spike_stats. Additionally prints these values to the console.
+
     Args:
         voltage_monitor:
         spike_threshold:
@@ -125,7 +128,7 @@ class PopulationSpikeStats:
             std_isi:
             all_ISI: list of ISI values (can be used to plot a histrogram)
             filtered_spike_trains the spike trains used to compute the stats. It's a time-window filtered copy of
-                the original spike_monitor.all_spike_trains.
+            the original spike_monitor.all_spike_trains.
 
         Returns:
             An instance of PopulationSpikeStats
@@ -200,13 +203,13 @@ def filter_spike_trains(spike_trains,
 
     Args:
         spike_trains (dict): a dictionary of spike trains. Typically obtained by
-            calling spike_monitor.spike_trains()
+        calling spike_monitor.spike_trains()
         window_t_min (Quantity): Lower bound of the time window: t>=window_t_min. Default is 0ms.
         window_t_max (Quantity): Upper bound of the time window: t<window_t_max.
-            Default is None, in which case no upper bound is set.
+        Default is None, in which case no upper bound is set.
         idx_subset (list, optional): a list of neuron indexes (dict keys) specifying a subset of neurons.
-            Neurons NOT in the key list are NOT added to the resulting dictionary. Default is None, in which case
-            all neurons are added to the resulting list.
+        Neurons NOT in the key list are NOT added to the resulting dictionary. Default is None, in which case
+        all neurons are added to the resulting list.
 
     Returns:
         a filtered copy of spike_trains
@@ -249,9 +252,9 @@ def get_spike_train_stats(spike_monitor,
     Args:
         spike_monitor (SpikeMonitor): Brian2 spike monitor
         window_t_min (Quantity): Lower bound of the time window: t>=window_t_min. The stats are computed
-            for spikes within the time window. Default is 0ms
+        for spikes within the time window. Default is 0ms
         window_t_max (Quantity): Upper bound of the time window: t<window_t_max. The stats are computed
-            for spikes within the time window. Default is None, in which case no upper bound is set.
+        for spikes within the time window. Default is None, in which case no upper bound is set.
 
     Returns:
         PopulationSpikeStats
@@ -280,7 +283,7 @@ def _spike_train_2_binary_vector(spike_train,
                                  discretization_dt):
     """
     Convert the time-stamps of the spike_train into a binary vector of the given length.
-        Note: if more than one spike fall into the same time bin, only one is counted, surplus spikes are ignored.
+    Note: if more than one spike fall into the same time bin, only one is counted, surplus spikes are ignored.
 
     Args:
         spike_train:
@@ -326,8 +329,8 @@ def get_averaged_single_neuron_power_spectrum(spike_monitor, sampling_frequency,
         spike_monitor (SpikeMonitor) : Brian2 SpikeMonitor
         sampling_frequency (Quantity): sampling frequency used to discretize the spike trains.
         window_t_min (Quantity): Lower bound of the time window: t>=window_t_min. Spikes
-            before window_t_min are not taken into account (set a lower bound if you want to exclude an initial
-            transient in the population activity)
+        before window_t_min are not taken into account (set a lower bound if you want to exclude an initial
+        transient in the population activity)
         window_t_max (Quantity): Upper bound of the time window: t<window_t_max.
         nr_neurons_average (int): Number of neurons over which the average is taken.
         subtract_mean (bool): If true, the mean value of the signal is subtracted before FFT. Default is False
@@ -390,12 +393,12 @@ def get_population_activity_power_spectrum(
 
     Args:
         rate_monitor (RateMonitor): Brian2 rate monitor. rate_monitor.rate is the signal being
-            analysed here. The temporal resolution is read from rate_monitor.clock.dt
+        analysed here. The temporal resolution is read from rate_monitor.clock.dt
         delta_f (Quantity): The desired frequency resolution.
         k_repetitions (int): The data rate_monitor.rate is split into k_repetitions which are FFT'd
-            independently and then averaged in frequency domain.
+        independently and then averaged in frequency domain.
         T_init (Quantity): Rates in the time interval [0, T_init] are removed before doing the
-            Fourier transform. Use this parameter to ignore the initial transient signals of the simulation.
+        Fourier transform. Use this parameter to ignore the initial transient signals of the simulation.
         subtract_mean_activity (bool): If true, the mean value of the signal is subtracted. Default is False
 
     Returns:

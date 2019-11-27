@@ -25,7 +25,7 @@ from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import write_to_file, parameter_finder
 
 
-class ArrayRun(object):
+class ArrayRun:
 
     def __init__(self,
                  anatomy_dataframe,

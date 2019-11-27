@@ -14,7 +14,7 @@ from pathlib import Path
 from cxsystem2.core.tools import write_to_file, load_from_file
 
 
-class Workspace(object):
+class Workspace:
     """
     As the name implies, this module is used for gathering the data and saving the result.
     """
@@ -30,8 +30,8 @@ class Workspace(object):
 
         * data: the main variable to be saved. It contains all the data about the positions of the NeuronGroup()s as well as the monitor results.
         * syntax_bank: Since the monitors are explicitly defined in the Globals(), extracting the data from them requires addressing their name
-        explicitely. To automatize this process, the syntaxes for extracting the data from the target monitors are generated and saved in this
-        variable, so that they can be run at the end of the simulation.
+                       explicitely. To automatize this process, the syntaxes for extracting the data from the target monitors are generated and
+                       saved in this variable, so that they can be run at the end of the simulation.
         """
         self.workspace_path = Path(workspace_path).expanduser()
         assert self.workspace_path.is_absolute(), "workspace path must be absolute."
