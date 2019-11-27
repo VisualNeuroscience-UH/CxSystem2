@@ -295,3 +295,7 @@ class ClusterDownloader:
         # print(" -  Results are downloaded and remote is cleaned.")
         # print(" -  Local environment cleaned.")
         print(" -  Downloads are available in: {}".format(self.metadata['local_cluster_run_download_folder']))
+
+    def clean_remote(self):
+        self.ssh_commander(self.client,
+                           'rm -rf {}'.format(self.metadata['cluster_simulation_folder']), 0).decode('utf-8').split('\n')

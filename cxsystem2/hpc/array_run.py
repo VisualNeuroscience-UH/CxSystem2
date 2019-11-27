@@ -23,7 +23,7 @@ import pandas as pd
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import write_to_file, parameter_finder
-
+from cxsystem2.hpc.cluster_run import ClusterRun
 
 class ArrayRun:
 
@@ -209,8 +209,8 @@ class ArrayRun:
         print(" -  array of Dataframes for anatomical and physiological configuration are ready")
         if self.run_in_cluster == 1 and self.cluster_start_idx == -1 and self.cluster_step == -1:  # to run the Cxsystems on the cluster
             self.total_configs = len(self.df_anat_final_array) * self.trials_per_config
-            self.config_per_node = self.total_configs / self.cluster_number_of_nodes
-            self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)[:int(self.total_configs / self.config_per_node)]
+            self.config_per_node = math.ceil(self.total_configs / self.cluster_number_of_nodes)
+            self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)
             ClusterRun(self, Path(anatomy_file_path), Path(physio_file_path), self.suffix)
             return
 
