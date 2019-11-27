@@ -1,4 +1,3 @@
-
 Physiology configuration
 ========================
 
@@ -15,87 +14,121 @@ It consists of constants (*variable-values*) and dictionaries (*variable-key-val
 There are five hard-coded cell types in CxSystem2 (two excitatory, SS and PC; three inhibitory, BC, MC and L1i),
 but the user can easily define subtypes, e.g. L4_MC. Subtypes can have arbitrary names (e.g. MyFavouriteBasketCellType, L5_LBC).
 
+
 .. _general_params:
 
 General model parameters
 ------------------------
-There are some pre-defined constants that should be defined in every model.
-Obligatory parameters (and their definitions):
-neuron_model, excitation_model, inhibition_model, pc_excitation_model, pc_inhibition_model, background_rate, background_rate_inhibition
+There are some pre-defined parameters that should be defined for every model. In particular, it is important to set
+the desired neuron model here. Currently, PCs are restricted to a single neuron model.
+Note that the model names must be surrounded by single-quotes.
+
+These parameters are included in the template configuration files.
+
+The parameters are:
+
+    :Physiology:    :code:`model_variation{0,1}`: This should be 1. Value 0 is only for backwards compatibility.
+
+        :code:`neuron_model{'string'}`: Specifies which neuron model to use for point neurons (other cells than PCs). :ref:`Available neuron models <neuron_models>`.
+
+        :code:`excitation_model{'string'}`: Specifies the model for excitatory receptors in point neurons. :ref:`Available receptor models <receptor_models>`.
+
+        :code:`inhibition_model{'string'}`: Specifies the model for inhibitory receptors in point neurons. :ref:`Available receptor models <receptor_models>`.
+
+        :code:`pc_excitation_model{'string'}`: Specifies the model for excitatory receptors in pyramidal cells. :ref:`Available receptor models <receptor_models>`.
+
+        :code:`pc_inhibition_model{'string'}`: Specifies the model for inhibitory receptors in pyramidal cells. :ref:`Available receptor models <receptor_models>`.
+
+        :code:`background_rate{float*Hz}`: Sets the rate for excitatory background synapses (Poisson-distributed). Receptors will be modeled as :code:`excitation_model`.
+
+        :code:`background_rate_inhibition{float*Hz}`: Sets the rate for inhibitory background synapses (Poisson-distributed). Receptors will be modeled as :code:`inhibition_model`.
+
+        :code:`background_E_E_weight{float*unit}`: Weight of excitatory-to-excitatory synapses.
+
+        :code:`background_E_I_weight{float*unit}`: Weight of excitatory-to-excitatory synapses.
+
+        :code:`background_I_E_weight{float*unit}`: Weight of inhibitory-to-excitatory synapses.
+
+        :code:`background_I_I_weight{float*unit}`: Weight of inhibitory-to-inhibitory synapses.
 
 
 .. _cell_params:
 
 Cell type-specific parameters
 -----------------------------
-Cell type-specific parameters are given as dictionaries. Subtype-specific parameters (e.g. L23_MC, L4_MC) will override parameters for the hard-coded types (MC).
-Examples
+Cell type-specific parameters are given as dictionaries. Subtype-specific parameters (e.g. L23_MC, L4_MC) will override
+parameters for the hard-coded types (MC). Parameter names must match those defined in neurodynlib.
+For example, to define parameters for BC cells that are modelled as exponential
+integrate-and-fire (EIF) neurons, you would write:
+
+ .. csv-table::
+   :widths: 2, 5, 5
+
+   BC	,C		,100 * pF
+    ,gL		,10 * nS
+    ,EL		,-70 * mV
+    ,VT		,-40 * mV
+    ,DeltaT		,2 * mV
+    ,Ee		,0 * mV
+    ,Ei		,-75 * mV
+    ,tau_e		,3 * ms
+    ,tau_i		,8 * ms
+    ,V_res		,VT - 4 * mV
+    ,Vcut		,VT + 5*DeltaT
+    ,V_init_min, EL
+    ,V_init_max, VT
+
+
+This would define a general basket cell type. You could then continue by defining parameters for L23_NBC (L2/3 nest
+basket cell) and setting the :code:`neuron_subtype` as L23_NBC for the corresponding group in the
+:ref:`Anatomy configuration <neuron_groups>`.
+
+As shown in the example, you can refer to parameters (and do computations using them!) defined earlier in the Physiology configuration.
 
 
 .. _connection_params:
 
 Parameters related to connections and synapses
 ----------------------------------------------
-Cw, delay are given as dictionaries. These are given with reference to the hard-coded cell types. Pathway-specific connection weights can be set in the anatomy configuration using the custom_weight parameter. If there is no custom_weight defined, then values in the cw dictionary will be used.
-Examples
+Connection weights and connections delays are also given as dictionaries (:code:`cw` and :code:`delay`, respectively).
+These are given with reference to the hard-coded cell types. Pathway-specific connection weights can be set in
+the anatomy configuration using the :code:`custom_weight` parameter. If there is no custom_weight defined,
+then values in the :code:`cw` dictionary will be used. Currently there is no way to define pathway- or neuron
+subtype-specific delays.
+
+These dictionaries are included in the template configuration files. Even though you might not have all the
+hard-coded cell types in your model, you don't need to delete the redundant lines.
 
 
 .. _other_params:
 
 Other simulation parameters
 ---------------------------
-Other stuff like calcium_concentration, STP parameters
+There are some additional parameters that are sometimes required. The most important are parameters related to
+short-term plasticity (STP) and to connection weight scaling by extracellular calcium concentration.
+To see how these are
+implemented, please see Methods in `Hokkanen et al. 2019 Neural Computation <https://researchportal.helsinki.fi/files/126265461/Hokkanen_2019_NECO.pdf>`_.
 
+For depressing synapses, you need the following parameters:
 
-***********************************************************************
+    :STP-Depressing:    :code:`U_E{float}`: Utilization factor for depressing excitatory synapses.
 
-The format of the physiological configuration file is different from that of the network and model configuration file in a sense that the parameters in the configuration file are placed vertically. Typically there are four types of columns in a physiological configuration file:
+        :code:`U_I{float}`: Utilization factor for depressing inhibitory synapses.
 
+        :code:`tau_d{float*unit}`: Recovery time constant (from depression).
 
-* **Variables**: is the first column and contains the name of the variable. Some values are in form of key:value pairs and others are just a regular variable with a value. 
+For facilitating synapses:
 
-  .. csv-table::
-     :widths: 7, 2, 2
-	      
-     calcium_concentration,  ,1
+    :STP-Facilitating:    :code:`U_f{float}`: Utilization increment for facilitating synapses.
 
-This line defines a variable called calcium_concentration and sets its value to 1. Note that the key is empty.
+        :code:`tau_f{float*unit}`: Facilitation decay time constant.
 
-* **Keys**: The keys for the former type of variables, i.e. those that contain key:value pairs, are defined in this column. In case the variable does not have a key, this cell in front of the variable could be left empty. 
-  
-* **Values**: Value will be set for either a variable with no keys, or for keys of a variable where the variable itself does not have a value, i.e. is in form of a key:value pairs.
+        :code:`tau_fd{float*unit}`: Recovery time constant for facilitating synapses.
 
- .. csv-table::
-   :widths: 2, 5, 5
+If you want to scale synapse weights with respect to extracellular calcium level, you should define the following
+parameters:
 
-   BC	,C		,100 * pF
-   	,gL		,10 * nS
-   	,Vr		,-67.66 * mV	
-   	,EL		,-67.66 * mV
-   	,VT		,-38.8 * mV
-   	,DeltaT		,2 * mV	
-   	,Ee		,0 * mV	
-   	,Ei		,-75 * mV	
-   	,tau_e		,3 * ms
-   	,tau_i		,8.3 * ms
-   	,taum_soma	,C/gL	
-   	,V_res		,VT- 4 * mV	
-   	,Vcut		,VT+ 5*DeltaT
+    :calcium:    :code:`calcium_concentration{float}`: Calcium concentration in mM. If set to 2.0, there is no scaling.
 
+        :code:`flag_background_calcium_scaling{0,1}`: Sets whether background inputs are also scaled with respect to calcium level.
 
-This example defines the different parameters and corresponding values for a BC neuron. The variable in this example is BC, where keys are its parameters and values are corresponding values.
-
-Note the following line in the above example:
-
-.. csv-table::
-   :widths: 2, 1
-	    
-   taum_soma , C/gL
-
-
-The key defines the Tau_m of the soma in the BC neuron. The value however, is a formula that uses the other keys of the BC neuron, i.e. C and gL.  
-
-* **comments**: any cell starting with # will be considered as a comment. We recommend to dedicate the fourth column to write a short description of the parameters, or key/value pairs.
-
-**Note:** Unlike network and model configuration file, the variable and key names in physiological configuration files could be set to any desired value that is used in the backend of the CxSystem. Attempts have been made to make the name of the current variable/keys descriptive so to make them understandable. All of the implemented variable/keys can be found in physiological configuration files in the `Github
-<https://github.com/sivanni/CxSystem/tree/master/config_files>`_ page. 
