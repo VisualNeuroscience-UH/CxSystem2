@@ -8,10 +8,13 @@ Documentation
 
 .. include:: developers_docs/devel_documentation.rst
 
-`cxsystem2` pypi package
--------------------------
+Pypi package
+-------------
 
 .. include:: developers_docs/devel_pypi.rst
+
+Continuous Integration
+----------------------
 
 
 

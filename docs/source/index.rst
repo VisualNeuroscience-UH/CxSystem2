@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to CxSystem2!
-=====================================
+======================
 
 CxSystem2 is a flexible cortical simulation framework, implemented in python over `Brian2 package
 <http://briansimulator.org>`_.
@@ -17,6 +17,7 @@ The CxSystem is open source, and can be freely used under GNU GPL3 (see `LICENSE
 testing of the framework have been published in Neural Computation [1]_ [2]_.
 
 Contents:
+---------
 
 .. toctree::
    :maxdepth: 2
@@ -34,7 +35,7 @@ Contents:
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
