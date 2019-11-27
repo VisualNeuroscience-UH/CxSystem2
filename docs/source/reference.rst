@@ -188,9 +188,9 @@ Configuration module
     .. automethod:: ConfigConverter.__init__
 
 
-gui module
+BUI module
 ------------------------------------
-.. module:: cxsystem2.gui.gui
+.. module:: cxsystem2.bui.bui
 .. autoclass:: RunServer
     :members:
 

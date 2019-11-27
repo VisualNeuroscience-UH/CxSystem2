@@ -1,4 +1,3 @@
-
 To release a new version of the `cxsystem2` in `pypi`, you should first update
 the version. The version of the `cxsystem2` are read from the `__version__`
 variable available in `cxsystem2/__init__.py`. If you update this variable,
@@ -6,7 +5,7 @@ all other references to the version number will be updated globally.
 
 We will use the following versioning format from `software versioning in wiki <https://en.wikipedia.org/wiki/Software_versioning>`__:
 
-.. code-block::
+.. code-block:: bash
 
       0 for alpha (status)
       1 for beta (status)
@@ -15,7 +14,7 @@ We will use the following versioning format from `software versioning in wiki <h
 
 For instance:
 
-.. code-block::
+.. code-block:: bash
 
       1.2.0.1 instead of 1.2-a1
       1.2.1.2 instead of 1.2-b2 (beta with some bug fixes)
