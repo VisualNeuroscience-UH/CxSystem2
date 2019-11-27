@@ -838,7 +838,9 @@ class IzhikevichNeuron(PointNeuron):
     def plot_states(self, state_monitor):
         """
         Visualizes the state variables: u-t, v-t and phase-plane u-v
-        :param state_monitor (StateMonitor): States of "v" and "u"
+
+        :param state_monitor: States of "v" and "u"
+        :type state_monitor: Brian2 StateMonitor
         :return:
         """
 
