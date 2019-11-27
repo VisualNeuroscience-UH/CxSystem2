@@ -2,6 +2,52 @@
 Physiology configuration
 ========================
 
+The physiological configuration consists of
+
+* :ref:`General model parameters <general_params>`
+* :ref:`Cell-type specific parameters <cell_params>`
+* :ref:`Parameters related to connections and synapses <connection_params>`
+* :ref:`Other simulation parameters <other_params>`
+
+The pre-defined structure of the physiology configuration is loose compared to the anatomy configuration.
+It consists of constants (*variable-values*) and dictionaries (*variable-key-values*).
+
+There are five hard-coded cell types in CxSystem2 (two excitatory, SS and PC; three inhibitory, BC, MC and L1i),
+but the user can easily define subtypes, e.g. L4_MC. Subtypes can have arbitrary names (e.g. MyFavouriteBasketCellType, L5_LBC).
+
+.. _general_params:
+
+General model parameters
+------------------------
+There are some pre-defined constants that should be defined in every model.
+Obligatory parameters (and their definitions):
+neuron_model, excitation_model, inhibition_model, pc_excitation_model, pc_inhibition_model, background_rate, background_rate_inhibition
+
+
+.. _cell_params:
+
+Cell type-specific parameters
+-----------------------------
+Cell type-specific parameters are given as dictionaries. Subtype-specific parameters (e.g. L23_MC, L4_MC) will override parameters for the hard-coded types (MC).
+Examples
+
+
+.. _connection_params:
+
+Parameters related to connections and synapses
+----------------------------------------------
+Cw, delay are given as dictionaries. These are given with reference to the hard-coded cell types. Pathway-specific connection weights can be set in the anatomy configuration using the custom_weight parameter. If there is no custom_weight defined, then values in the cw dictionary will be used.
+Examples
+
+
+.. _other_params:
+
+Other simulation parameters
+---------------------------
+Other stuff like calcium_concentration, STP parameters
+
+
+***********************************************************************
 
 The format of the physiological configuration file is different from that of the network and model configuration file in a sense that the parameters in the configuration file are placed vertically. Typically there are four types of columns in a physiological configuration file:
 
