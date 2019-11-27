@@ -1,4 +1,4 @@
 Tutorials
 =========
 
-To come: Running an example, Visualizing results, Constructing a new model, Using neurodynlib
+TODO: Running an example, Visualizing results, Constructing a new model, Using neurodynlib

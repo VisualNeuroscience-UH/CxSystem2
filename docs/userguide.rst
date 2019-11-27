@@ -8,6 +8,9 @@ User's guide
    physiology_config
    array_runs
    cluster_runs
+   visualization
+   commandline
+   localgui
 
 Visualization
 Command-line interface
