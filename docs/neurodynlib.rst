@@ -13,3 +13,14 @@ Neurodynlib is based on the exercise code repository accompanying the book
 The book is also published in print:
 Wulfram Gerstner, Werner M. Kistler, Richard Naud, and Liam Paninski.
 *Neuronal Dynamics: From Single Neurons to Networks and Models of Cognition*. Cambridge University Press, 2014.
+
+.. _neuron_models:
+
+Available neuron models
+-----------------------
+
+
+.. _receptor_models:
+
+Available receptor models
+-------------------------
