@@ -36,7 +36,7 @@ from cxsystem2.core.parameter_parser import SynapseParser
 from cxsystem2.core.physiology_reference import NeuronReference, SynapseReference
 from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.workspace_manager import Workspace
-from cxsystem2.gui import gui
+from cxsystem2.bui import bui
 from cxsystem2.core.tools import parameter_finder, read_config_file, load_from_file
 
 b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
@@ -313,7 +313,7 @@ class CxSystem:
     def run_bui(ssl=False,
                 port=None,
                 nobrowser=False):
-        gui.RunServer(ssl=ssl, port=port, nobrowser=nobrowser)
+        bui.RunServer(ssl=ssl, port=port, nobrowser=nobrowser)
 
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:, 0][self.anat_and_sys_conf_df.loc[:, 0] == 'row_type'].index
