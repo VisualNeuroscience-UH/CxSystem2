@@ -43,6 +43,8 @@ six
 sqlparse
 sympy
 Werkzeug
+sphinx
+sphinx-rtd-theme
 pyyaml
 """.split("\n")
 
