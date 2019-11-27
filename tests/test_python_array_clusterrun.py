@@ -25,8 +25,7 @@ file will test the cluster run.
 Vafa Andalibi, Simo Vanni 2019
 '''
 
-# cwd = os.getcwd()
-cwd = '/home/corriel/gitrepos/CxSystem2'
+cwd = os.getcwd()
 path = Path(cwd)
 anatomy_and_system_config = path.joinpath('tests', 'config_files', 'pytest_Anatomy_config_cluster.csv').as_posix()
 physiology_config = path.joinpath('tests', 'config_files', 'pytest_Physiology_config_cluster.csv').as_posix()
