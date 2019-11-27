@@ -1,3 +1,6 @@
+`pypi` package
+==============
+
 To release a new version of the `cxsystem2` in `pypi`, you should first update
 the version. The version of the `cxsystem2` are read from the `__version__`
 variable available in `cxsystem2/__init__.py`. If you update this variable,

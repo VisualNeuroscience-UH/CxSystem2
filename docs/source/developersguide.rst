@@ -3,29 +3,16 @@ Developer's Guide
 
 This section section provides a brief guideline for potential contributors.
 
-Documentation
--------------
-
-.. include:: developers_docs/devel_documentation.rst
-
-Pypi package
--------------
-
-.. include:: developers_docs/devel_pypi.rst
-
-Continuous Integration
-----------------------
+.. toctree::
+   :maxdepth: 1
 
 
-
-Browser User Interface (BUI)
-----------------------------
-
-
-
-Command Line Interface (CLI)
-----------------------------
-
+   ./developersguide/overview
+   ./developersguide/documentation
+   ./developersguide/pypi
+   ./developersguide/continuous_integration
+   ./developersguide/browser_user_interface
+   ./developersguide/command_line_interface
 
 
 Adding parameters

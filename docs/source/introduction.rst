@@ -1,10 +1,11 @@
 Introduction
 ============
 
+
 .. toctree::
    :maxdepth: 1
 
-   usingbsp
-   installation
-   neurodynlib
-   visimpl
+   ./introduction/usingbsp
+   ./introduction/installation
+   ./introduction/neurodynlib
+   ./introduction/visimpl

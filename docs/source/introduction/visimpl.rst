@@ -1,7 +1,7 @@
 Visualization in ViSimpl
 ========================
 
-.. image:: images/visimpl_screenshot.png
+.. image:: ../supplementary_data/visimpl_screenshot.png
   :alt: Screenshot of ViSimpl
 
 Simulation results from CxSystem2 can be visualized using ViSimpl, a 3D particle-based rendering tool developed by
