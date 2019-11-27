@@ -10,7 +10,7 @@ pc_inhibition_model,,'SIMPLE_I_GABAB',
 ,,,
 ### PRESYNAPTIC PARAMETERS ###,,,# Tsodyks-Markram STP model
 calcium_concentration,,2,
-U_E,,{0.5 & 0.6 & 0.7},
+U_E,,0.5,
 U_I,,0.25,
 tau_d,,670*ms,
 tau_f,,670*ms,
@@ -20,7 +20,7 @@ U_f,,0.09,
 ### BACKGROUND INPUT ###,,,
 background_rate,,0*Hz, # Was 0.3*Hz
 background_rate_inhibition,,0*Hz,
-tonic_depol_level,,1.55,# From rheobase
+tonic_depol_level,,{1.25 & 1.55 & 1.85},# From rheobase
 ,,,
 ### MAIN CONNECTION WEIGHTS ###,,,
 J,,0.72*nS,# E to E weight

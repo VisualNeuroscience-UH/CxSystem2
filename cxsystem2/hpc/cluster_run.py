@@ -66,11 +66,12 @@ class ClusterRun:
         try:
             self.password = parameter_finder(array_run_obj.anatomy_df, 'password')
         except NameError:
-            self.password = getpass.getpass(' -  Enter password for user {}: '
+            if 'CLUSTERPASS' in os.environ.keys():
+                self.password = os.environ['CLUSTERPASS']
+            else:
+                self.password = getpass.getpass(' -  Enter password for user {}: '
                                             ''.format(self.cluster_username))
 
-        # self.suffix =  '_' + str(datetime.datetime.now()).replace('-', '').replace(' ', '_')\
-        # .replace(':', '')[0:str(datetime.datetime.now()).replace('-', '').replace(' ', '_').replace(':', '').index('.')+3].replace('.','')
         self.suffix = suffix
         print(" -  temp file suffix is %s" % self.suffix)
         self.client = paramiko.SSHClient()
@@ -109,6 +110,7 @@ class ClusterRun:
 
         self.remote_anat_filename = '_tmp_anat_config{}.csv'.format(self.suffix)
         self.remote_phys_filename = '_tmp_physio_config{}.csv'.format(self.suffix)
+        self.local_workspace_unexpanded = Path(parameter_finder(array_run_obj.anatomy_df, 'workspace_path'))
         self.local_workspace = Path(parameter_finder(array_run_obj.anatomy_df, 'workspace_path')).expanduser()
         self.local_cluster_folder = self.local_workspace.joinpath('cluster_run' + self.suffix)
         if not self.local_cluster_folder.is_dir():
@@ -188,6 +190,7 @@ class ClusterRun:
             {'cluster_address': self.cluster_address,
              'cluster_login_node': self.cluster_login_node,
              'cluster_username': self.cluster_username,
+             'local_workspace_unexpanded': self.local_workspace_unexpanded.as_posix(),
              'local_workspace': self.local_workspace.as_posix(),
              'local_cluster_run_folder': self.local_cluster_folder.as_posix(),
              'local_cluster_run_download_folder': self.local_cluster_folder.joinpath('downloads'),
@@ -221,7 +224,7 @@ class ClusterRun:
 
 
 class ClusterDownloader:
-    def __init__(self, metapath):
+    def __init__(self, metapath, clean_remote = False, retreive = True):
         self.metadata_path = Path(metapath)
         if not self.metadata_path.is_file():
             raise FileNotFoundError("Cluster run metadata file not found: {}".format(self.metadata_path.as_posix()))
@@ -229,7 +232,10 @@ class ClusterDownloader:
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.password = getpass.getpass('Enter password for user {}: '.format(self.metadata['cluster_username']))
+        if 'CLUSTERPASS' in os.environ.keys():
+            self.password = os.environ['CLUSTERPASS']
+        else:
+            self.password = getpass.getpass('Enter password for user {}: '.format(self.metadata['cluster_username']))
         if self.metadata['cluster_login_node'] != '--':
             print (" -  Connecting to login node {}".format(self.metadata['cluster_login_node']))
             sock = paramiko.ProxyCommand("ssh {}@{} nc {} 22".format(self.metadata['cluster_username'],
@@ -251,7 +257,11 @@ class ClusterDownloader:
         time.sleep(1)
         if not Path(self.metadata['local_workspace']).is_dir():
             os.mkdir(self.metadata['local_workspace'])
-        self.retrieve()
+        if retreive:
+            self.retrieve()
+        if clean_remote:
+            self.clean_remote()
+        self.client.close()
 
     @staticmethod
     def ssh_commander(client,
@@ -291,11 +301,16 @@ class ClusterDownloader:
                 # self.ssh_commander(self.client, 'rm -rf {}'.format(self.metadata['cluster_workspace']), 0)
                 waiting_flag = False
             time.sleep(1)
-        self.client.close()
-        # print(" -  Results are downloaded and remote is cleaned.")
-        # print(" -  Local environment cleaned.")
+
         print(" -  Downloads are available in: {}".format(self.metadata['local_cluster_run_download_folder']))
 
     def clean_remote(self):
         self.ssh_commander(self.client,
-                           'rm -rf {}'.format(self.metadata['cluster_simulation_folder']), 0).decode('utf-8').split('\n')
+                           'rm -rf {}'.format(self.metadata['cluster_workspace']), 0).decode('utf-8').split('\n')
+        self.ssh_commander(self.client,
+                           'rm -rf {}'.format(self.metadata['local_workspace_unexpanded']), 0).decode('utf-8').split('\n')
+        print(" -  Results are downloaded and remote is cleaned.")
+
+if __name__ == '__main__':
+    cl = ClusterDownloader('/home/corriel/CxPytestWorkspace/cluster_run_20191127_1223593/cluster_metadata_20191127_1223593.pkl',retreive=False)
+    cl.clean_remote()

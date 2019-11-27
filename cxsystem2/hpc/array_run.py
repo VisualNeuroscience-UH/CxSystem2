@@ -212,6 +212,11 @@ class ArrayRun:
             self.config_per_node = math.ceil(self.total_configs / self.cluster_number_of_nodes)
             self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)
             ClusterRun(self, Path(anatomy_file_path), Path(physio_file_path), self.suffix)
+
+            print (" -  removing .tmp folder")
+            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
+            print("cleaning tmp folders " + tmp_folder_path)
+            shutil.rmtree(tmp_folder_path)
             return
 
         if cluster_run_start_idx != -1 and cluster_run_step != -1:  # this runs in cluster
