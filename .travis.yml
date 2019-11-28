@@ -6,8 +6,12 @@ python:
 install:
 - pip install -r requirements.txt
 - pip install .
-script:
-- pytest tests 
+matrix:
+  - script: pytest tests/test_basic_cxsystem.py
+  - script: pytest tests/test_cpp_and_array.py
+  - script: pytest tests/test_python_array_clusterrun.py
+    #script:
+    #- pytest tests 
 notifications:
   slack:
     secure: rlLWtxBUFu+o3mCcz1FnKi5Ylmsy9ZtaSG5Ex0c45oZpGWOidRdpoqJqgZO+nBpVgAcmupKmEjRHvOl2waPMgP2Xbyh++FOPCdEM+WB1R4cGPOVrAv+8H+m3A6oKSX+fRXjZM5rqEDgaV4LVlTQPkFfdcGX+tSwrlpHV5xeMRp2hhRJ4LZ/VvnzV/Y7B+Z1wSFyidiOflhGwzdp2todqIFt87ZpfJ7FEj3oPBtnvquGY0Yq3GoMgBDcRddFdo7UMk582H2FyEUdOk6v7Qnie9BBooSaA9tPlY4m5rBzD/hP47qXo3x7mOZaGQnl/TeItIVe9eJFesANStQKevgkeg/rK/iq4xM+7dMa+SQIu2AOShF1auwnVN/2nKPUlbgV4Idi3CQb6uH9lcFp7p9gRA3TXBj4+VUsP/74PMC2blR07G7s/r9+QGpYQLD+5ODZ9wNG9K+sOCB18hs3ZeuY94B+GDTWnsjZtFsV73OLy/+EfSyY4W9R+Vv5KdDDVd4ldkVx8QPQNSljska90GbA1M5Rspj78FdLDvCz4TqH5AsqavFmSyqshRrICVFJQS1H2z12kF4K5SKMbxcDMWYxqDUK34cqjefXfz2HPrJWtDCN23jFxa+4OBplMoUJxow4Al0Qu3SZnDKnRIoM17ILxb75mJODYo6f5Wd4TLhrqgpI=
