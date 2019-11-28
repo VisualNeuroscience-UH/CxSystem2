@@ -45,7 +45,6 @@ sympy
 Werkzeug
 sphinx
 sphinx-rtd-theme
-pytest-rerunfailures
 pyyaml
 """.split("\n")
 
