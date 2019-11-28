@@ -1,9 +1,9 @@
 <a href="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/README.md"><img src="https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/data_config/icon/cxsystem_logo.png?sanitize=true" width="50%"></a>
 
 # CxSystem2, A Flexible Cortical Simulation Framework
-> Warning: CxSystem2 BUI is developed for using in a local environment and should not be installed on a publicly accessible server unless extra security measures are added on top of it  
+> Warning: CxSystem2 BUI is developed for using in a local environment and should not be installed on a publicly accessible server unless extra security measures are added on top of it
 
-[![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/LICENSE) 
+[![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/blob/master/LICENSE)
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/bug.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 [![Github Issues](http://img.shields.io/github/issues/VisualNeuroscience-UH/CxSystem2/enhancement.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
 [![Github Issues](http://img.shields.io/github/issues-pr/VisualNeuroscience-UH/CxSystem2.svg)](https://github.com/VisualNeuroscience-UH/CxSystem2/pulls)
@@ -11,7 +11,7 @@
 [![PyPI version](https://badge.fury.io/py/cxsystem2.svg)](https://badge.fury.io/py/cxsystem2)
 [![Build Status](https://travis-ci.org/VisualNeuroscience-UH/CxSystem2.svg?branch=master)](https://travis-ci.org/VisualNeuroscience-UH/CxSystem2)
 
-## Table of Contents 
+## Table of Contents
 
 - [Synopsis](#synopsis)
 - [Installation](#installation)
@@ -42,7 +42,7 @@ We highly recommend installing `CxSystem2` on a virtual environment. Use the fol
 
 ### Windows
 
- Make sure you have python 3.5 or above. To create activate a `venv` in windows at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command): 
+ Make sure you have python 3.5 or above. To create activate a `venv` in windows at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command):
 
 ```shell
 C:\> python --version
@@ -57,7 +57,7 @@ Moreover, to use the C++ standalone device on Windows, install the [Visual C++ B
 
 ### Linux/Mac
 
-Make sure you have python 3.5 or above. To create activate a `venv` in Linux/Mac at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command): 
+Make sure you have python 3.5 or above. To create activate a `venv` in Linux/Mac at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command):
 
 ```shell
 $ python --version
@@ -70,17 +70,17 @@ $ source ~/CX2/bin/activate
 
 ### Development
 
-To develop `CxSystem2`, after cloning the repository install it with the following commands: 
+To develop `CxSystem2`, after cloning the repository install it with the following commands:
 
 ```shell
 (CX2) $ git clone https://github.com/VisualNeuroscience-UH/CxSystem2
 (CX2) $ cd CxSystem2
 (CX2) $ pip install --upgrade setuptools
 (CX2) $ pip install -r requirements.txt
-(CX2) $ pip install -U -e . 
+(CX2) $ pip install -U -e .
 ```
 
-With this method any change to the code will be reflected on the package immediately. 
+With this method any change to the code will be reflected on the package immediately.
 
 ## Interfaces
 
@@ -88,27 +88,27 @@ With this method any change to the code will be reflected on the package immedia
 
 ### Browser User Interface (BUI)
 
-CxSystem's BUI is built to provide users with an interactive environment for changing the parameters for simulations. 
+CxSystem's BUI is built to provide users with an interactive environment for changing the parameters for simulations.
 
 ### Command Line Interface (CLI)
 
-Beside the BUI, Some of the main functionalities of the `CxSystem2` are available in terminal, including the BUI itself. All of the following commands have built-in documentations available with `-h` or `--help` flags:  
+Beside the BUI, Some of the main functionalities of the `CxSystem2` are available in terminal, including the BUI itself. All of the following commands have built-in documentations available with `-h` or `--help` flags:
 
 #### `cxsystem2`
 
-This command (all in lower letters and case sensitive) can be used to run a simulation locally using anatomy and physiology configuration files. 
+This command (all in lower letters and case sensitive) can be used to run a simulation locally using anatomy and physiology configuration files.
 
 #### `cxserver`
 
 This command will run the `CxSystem2` BUI django server.
 
-#### `cxconfig` 
+#### `cxconfig`
 
-CxSystem2 supports `csv` and `json` for importing/exporting configuration files. To convert the configuration files, use the `cxconfig` and pass the path to the configuration file path as its argument. This command recognizes the file type and convert it to the alternative extension. 
+CxSystem2 supports `csv` and `json` for importing/exporting configuration files. To convert the configuration files, use the `cxconfig` and pass the path to the configuration file path as its argument. This command recognizes the file type and convert it to the alternative extension.
 
 #### `cxcluster`
 
-Use `cxcluster` to download the results from the cluster. `cxcluster` takes in one argument which is the path to the metadata file saved as a result of cluster-run submission. For convenience, at the end of a cluster-run job submission, `CxSystem2` prints the command that should be run to retrieve the result. 
+Use `cxcluster` to download the results from the cluster. `cxcluster` takes in one argument which is the path to the metadata file saved as a result of cluster-run submission. For convenience, at the end of a cluster-run job submission, `CxSystem2` prints the command that should be run to retrieve the result.
 
 #### `cxvisualize`
 
@@ -118,26 +118,26 @@ This command can be used to visualize the result of the simulation using `visimp
 
 ## Documentation
 
-To be updated: To access the documentation of the CxSystem, please check out the [cxsystem2.readthedocs.io](https://cxsystem2.readthedocs.io/en/latest/) of the project.
+You can access the documentation of the CxSystem2 at [cxsystem2.readthedocs.io](https://cxsystem2.readthedocs.io).
 
 ## Citation
 
-If you use CxSystem2 for your work, we kindly ask you to cite any of our related articles: 
+If you use CxSystem2 for your work, we kindly ask you to cite any of our related articles:
 
 ```
-Andalibi, V., Hokkanen, H., Vanni, S., Controlling complexity of cerebral cortex simulations—I: CxSystem, a flexible cortical simulation framework, 2019, Neural computation 
+Andalibi, V., Hokkanen, H., Vanni, S., Controlling complexity of cerebral cortex simulations—I: CxSystem, a flexible cortical simulation framework, 2019, Neural computation
 ```
 <br>
 
 ```
-Hokkanen, H., Andalibi, V., Vanni, S., Controlling complexity of cerebral cortex simulations—II: Streamlined microcircuits, 2019, Neural computation 
+Hokkanen, H., Andalibi, V., Vanni, S., Controlling complexity of cerebral cortex simulations—II: Streamlined microcircuits, 2019, Neural computation
 ```
 
 ## Support
 
 You are encouraged to use <a href="https://github.com/VisualNeuroscience-UH/CxSystem2/issues" target="_blank">Github's Issues</a> to report bugs, or request enhancements or new features.
 
-## Team 
+## Team
 
 - [Vafa Andalibi](https://www.andalibi.me)
 - [Henri Hokkanen](https://github.com/henhok)
@@ -145,7 +145,7 @@ You are encouraged to use <a href="https://github.com/VisualNeuroscience-UH/CxSy
 
 ## License
 
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) 
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 - **[GPL-3-Clause](https://www.gnu.org/licenses/gpl-3.0.en.html)**
 - Copyright 2019 © <a href="http://www.helsinki.fi/visualneuroscience/" target="_blank">HUS Helsinki University Hospital</a>.
