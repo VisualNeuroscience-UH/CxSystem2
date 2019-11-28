@@ -7,9 +7,9 @@ Visual Studio Code
 We strongly suggest to use the `vscode` for updating the documentation. After
 installing the `vscode`, add the following useful extensions:
 
-- **Code Spell**: used for spell checking
-- **reStructuredText**: shows the format errors in the `rst` files
-- **rewrap**: fix the line wrap of a paragraph with `Alt+q` shortcut
+- `Code Spell Checker`: used for spell checking
+- `reStructuredText`: shows the format errors in the `rst` files
+- `rewrap`: fix the line wrap of a paragraph with `Alt+q` shortcut
 
 At this point all the errors that corresponds to `reStructuredText` format will
 be shown in the `vscode`. After adding paragraphs, make sure to press `Alt+q`
