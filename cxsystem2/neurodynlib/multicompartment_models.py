@@ -5,6 +5,10 @@ import cxsystem2.neurodynlib.neuron_models as nd
 
 
 class LeakyCompartment(nd.PointNeuron):
+    """
+    Not implemented!
+    A leaky capacitor to be used as a template for pyramidal cell compartments.
+    """
 
     default_neuron_parameters = {
             'E_leak': -70 * mV,
@@ -26,11 +30,20 @@ class LeakyCompartment(nd.PointNeuron):
         # self.compartment_vars_and_consts = ['vm', 'g_leak', 'C']
 
 class MulticompartmentNeuron:
+    """
+    Not implemented!
+    A base class for multicompartmental neuron models.
+    """
     def __init__(self):
         super().__init__()
 
 
 class LegacyPyramidalCell(MulticompartmentNeuron):
+    """
+    Not implemented!
+    The kind of pyramidal cell used in Heikkinen et al. 2015 J Neurosci, Andalibi et al. 2019 Neural Computation,
+    and Hokkanen et al. 2019 Neural Computation. See cxsystem2.core.equation_templates for the current implementation.
+    """
 
     default_neuron_parameters = {
         'C': [10,20,30,40,50,60]*pF,

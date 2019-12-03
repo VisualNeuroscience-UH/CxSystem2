@@ -23,14 +23,10 @@ from brian2.units import *
 from cxsystem2.neurodynlib.receptor_models import ReceptorModel
 from cxsystem2.neurodynlib.tools import plot_tools, input_factory
 
-# sys.path.append('/home/henhok/PycharmProjects/brian2modelfitting/')
-# import brian2modelfitting as mofi
-
 
 class PointNeuron:
     """
-    Helper class for switching swiftly between neuron/synaptic current/synapse models in CxSystem.
-    This is a preliminary version.
+    Base class for point neurons
 
     """
 
@@ -70,9 +66,13 @@ class PointNeuron:
     default_neuron_parameters = {}
     model_info_url = 'http://neuronaldynamics.epfl.ch/online/'
 
-    def __init__(self,
-                 is_pyramidal=False,
-                 compartment='soma'):
+    def __init__(self, is_pyramidal=False, compartment='soma'):
+        """
+        Initializes the point neuron object
+
+        :param bool is_pyramidal: whether the point neuron model is part of a pyramidal/multicompartmental cell
+        :param string compartment: name of the compartment (eg. soma, basal, a3)
+        """
 
         self.is_pyramidal = is_pyramidal
         self.compartment = compartment
@@ -131,9 +131,9 @@ class PointNeuron:
         Compiles the membrane equation from the template for use in Brian2.
         This should be the only function where the template equation is used.
 
-        :param substitute_ad_hoc:
-        :param return_string:
-        :return:
+        :param dict substitute_ad_hoc: dictionary of temporary values to use in the equation template
+        :param bool return_string: If True, returns equations as a string. Otherwise, returns a b2.Equations object.
+        :return: string (or b2.Equations object)
         """
 
         # Get the generic template
@@ -166,6 +166,12 @@ class PointNeuron:
             return b2.Equations(model_membrane_equation)
 
     def get_compartment_equations(self, compartment_name):
+        """
+        Compiles the membrane equation and adds compartment name to all compartment-specific variables
+
+        :param string compartment_name: name of the compartment
+        :return: string
+        """
         membrane_eq = self.get_membrane_equation(return_string=True)
 
         substitutables = {key: key + '_' + compartment_name for key in self.compartment_vars_and_consts}
@@ -174,6 +180,12 @@ class PointNeuron:
         return compartment_eq
 
     def what_is_this(self):
+        """
+        Method to query for the URL describing the neuron model
+
+        :return: url
+        """
+
         return self.link_to_book
 
     def get_neuron_equations(self):
@@ -195,32 +207,62 @@ class PointNeuron:
     #     return compartment_dict
 
     def get_parameter_names(self):
+        """
+        Shows all the parameter names that can/must be defined
+
+        :return: list
+        """
         return self.default_neuron_parameters.keys()
 
     def get_neuron_parameters(self):
+        """
+        Shows all the current parameter names and values
+
+        :return: dict
+        """
         return self.neuron_parameters
 
     def set_neuron_parameters(self, **kwargs):
         """
         Set neuron parameters.
-        If you don't know the correct units, use first get_neuron_parameters() to get the default parameters with
+        If you don't know the correct units, use get_neuron_parameters() first to get the default parameters with
         correct units.
 
-        :param kwargs:
-        :return:
+        :param kwargs: new parameter values are given as arguments
         """
         self.neuron_parameters.update(kwargs)
 
     def get_reset_statements(self):
+        """
+        Get the statements that will be executed once the neuron hits the threshold.
+
+        :return: string
+        """
         return self.reset_statements
 
     def get_threshold_condition(self):
+        """
+        Get the spike threshold condition.
+
+        :return: string
+        """
         return self.threshold_condition
 
     def get_refractory_period(self):
+        """
+        Get the refractory period (after a spike).
+
+        :return: duration (typically in ms)
+        """
+
         return self.neuron_parameters['refractory_period']
 
     def get_initial_values(self):  # Model-specific
+        """
+        Get initial values. If the initial value of vm is None, will replace it with EL (reversal potential of leak).
+
+        :return:
+        """
         init_vals = dict(self.initial_values)
         if init_vals['vm'] is None:
             vm_dict = {'vm': self.neuron_parameters['EL']}
@@ -229,19 +271,45 @@ class PointNeuron:
         return init_vals
 
     def get_states_to_monitor(self):
+        """
+        Get state variables to monitor (for method plot_states())
+
+        :return: list
+        """
         return self.states_to_monitor
 
     def set_model_definition(self, key, string_to_set):
+        """
+        Set the value of a template placeholder.
+
+        :param string key: placeholder name
+        :param string string_to_set: placeholder value
+
+        """
         self.full_model_defns[key] = string_to_set
 
     def add_model_definition(self, key, string_to_add):
+        """
+        Append a string to a template placeholder.
+
+        :param string key: placeholder name
+        :param string_to_add: string to append to the placeholder
+
+        """
         try:
             self.full_model_defns[key] += string_to_add
         except KeyError:  # ie if nothing has been defined
             self.full_model_defns[key] = string_to_add
 
-    # TODO - stimulation with empty is weird
     def simulate_neuron(self, I_stim=input_factory.get_zero_current(), simulation_time=1000*ms, **kwargs):
+        """
+        Simulate/stimulate the neuron
+
+        :param I_stim: input stimulus (use the input_factory to create the stimulus)
+        :param simulation_time: duration (usually in milliseconds, eg. 3000*ms)
+        :param kwargs: custom neuron parameters can be given as arguments
+        :return: b2.StateMonitor, b2.SpikeMonitor
+        """
 
         neuron_parameters = dict(self.neuron_parameters)  # Make a copy of parameters; otherwise will change object params
         neuron_parameters.update(kwargs)
@@ -275,7 +343,15 @@ class PointNeuron:
         return state_monitor, spike_monitor
 
     def getting_started(self, step_amplitude=1.2*nA, sine_amplitude=2.5*nA, sine_freq=150*Hz, sine_dc=2*nA):
-        # Default here are for the LIF neuron
+        """
+        Simple example that stimulates the neuron with a step and a sinusoidal current.
+
+        :param step_amplitude: step current amplitude (in amps)
+        :param sine_amplitude: sine current amplitude (in amps)
+        :param sine_freq: sine current frequency (in Hz)
+        :param sine_dc: constant current to inject during the sine stimulation (in amps)
+        :return:
+        """
         # specify step current
         step_current = input_factory.get_step_current(t_start=100, t_end=200, unit_time=ms, amplitude=step_amplitude)
 
@@ -307,8 +383,17 @@ class PointNeuron:
         print("nr of spikes: {}".format(spike_monitor.count[0]))
         plt.show()
 
-    def plot_fi_curve(self, min_current=0*pA, max_current=1*nA, step_size=10*pA, max_rate=None, plot=True):
+    def plot_fi_curve(self, min_current=0*pA, max_current=1*nA, step_size=10*pA, plot=True, max_rate=None):
+        """
+        Plot the frequency-current (f-I) curve.
 
+        :param min_current: minimum current (in amps)
+        :param max_current: maximum current (in amps)
+        :param step_size: current step (in amps)
+        :param bool plot: whether to plot the results or not
+        :param max_rate: maximum frequency to show in the plot
+        :return: steps, counts (if plot is False)
+        """
         # Compute current steps
         steps = np.arange(min_current, max_current, step_size) * amp
         N_steps = len(steps)
@@ -354,9 +439,15 @@ class PointNeuron:
                 plt.ylim([0, max_rate])
             plt.show()
         else:
-            return counts
+            return steps, counts
 
     def plot_vm(self, state_monitor):
+        """
+        Plots the vm from a state monitor
+
+        :param state_monitor: b2.StateMonitor with vm recording
+
+        """
 
         plt.figure(figsize=(12, 4))
         plt.plot(state_monitor.t / ms, state_monitor.vm[0] / mV, lw=1)
@@ -366,15 +457,21 @@ class PointNeuron:
         plt.show()
 
     def plot_states(self, state_monitor):
+        """
+        Plots pre-defined state variables from a state monitor
+
+        :param state_monitor: b2.StateMonitor
+
+        """
 
         self.plot_vm(state_monitor)
 
     def get_json(self, include_neuron_name=True):
         """
-        Creates a json string of parameter names and values (units are discarded)
+        Creates a JSON string of parameter names and values (units are discarded).
 
-        :param include_neuron_name:
-        :return:
+        :param bool include_neuron_name: whether to include the neuron name
+        :return: string
         """
         neuron_parameters_wo_units = dict()
         neuron_parameters_wo_units[self.neuron_name] = dict()
@@ -387,6 +484,12 @@ class PointNeuron:
             return json.dumps(neuron_parameters_wo_units[self.neuron_name])
 
     def save_json(self, filename=None):
+        """
+        Saves the neuron parameters in a JSON file.
+
+        :param string filename: Path to file. If None, will save as neuron_name.json
+
+        """
 
         if filename is None:
             filename = self.neuron_name + '.json'
@@ -396,6 +499,13 @@ class PointNeuron:
             fi.close()
 
     def read_json(self, filename, neuron_name=None):
+        """
+        Read and load parameters from a JSON file.
+
+        :param string filename: Path to file
+        :param string neuron_name: the name of the neuron to read from the file
+
+        """
 
         with open(filename, 'r') as fi:
             params_dict = json.load(fi)
@@ -413,12 +523,26 @@ class PointNeuron:
         self.neuron_parameters = imported_params
 
     def list_neurons_in_json(self, filename):
+        """
+        List neuron types (sets of parameters) in a JSON file
+
+        :param string filename: Path to file
+        :return: list
+        """
+
         with open(filename, 'r') as fi:
             params_dict = json.load(fi)
 
         return list(params_dict.keys())
 
-    def add_tonic_current(self, tonic_current=50 * pA, tau_rampup=None):  # Used by CxSystem
+    def add_tonic_current(self, tonic_current=50 * pA, tau_rampup=None):
+        """
+        Adds tonic current injection to the neuron
+
+        :param tonic_current: amplitude of current injection (in amps)
+        :param tau_rampup: time constant for current ramp-up (in milliseconds)
+
+        """
 
         assert 'tonic_current' not in self.neuron_parameters.keys(), \
             "Tonic current is already set, please modify neuron parameters instead of using this method"
@@ -433,20 +557,39 @@ class PointNeuron:
         self.add_model_definition('EXT_CURRENTS', ext_currents_string)
 
     def add_external_current(self, current_name='I_ext', current_eqs=None):
+        """
+        Adds an external current to the neuron
+
+        :param string current_name: name of the current
+        :param string current_eqs: equations describing the external current
+        :return:
+        """
         self.add_model_definition('EXT_CURRENTS', '+ '+current_name)
         if current_eqs is None:
             self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_name + ': amp')
         else:
             self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_eqs)
 
-    def add_vm_noise(self, noise_sigma=2 * mV):  # Used by CxSystem
+    def add_vm_noise(self, noise_sigma=2*mV):
+        """
+        Adds a stochastic component to the membrane equation as explained in
+        `Brian2 documentation <https://brian2.readthedocs.io/en/stable/user/models.html#noise>`_
+
+        :param noise_sigma:
+        :return:
+        """
         self.set_model_definition('VM_NOISE', '+ noise_sigma*xi*taum_soma**-0.5')
         C = self.neuron_parameters['C']
         gL = self.neuron_parameters['gL']
         self.set_neuron_parameters(noise_sigma=noise_sigma, taum_soma=C / gL)
 
-    # TODO - Setting receptors should also set default params
-    def set_excitatory_receptors(self, receptor_name):  # Used by CxSystem
+    def set_excitatory_receptors(self, receptor_name):
+        """
+        Sets the excitatory receptors.
+
+        :param string receptor_name: name of receptor model (see neurodynlib.receptor_models)
+
+        """
         assert receptor_name in ReceptorModel.ExcModelNames, \
             "Undefined excitation model!"
 
@@ -457,11 +600,13 @@ class PointNeuron:
         # Add compartment-specific variable names to the common list
         self.compartment_vars_and_consts.extend(receptor_model.get_compartment_specific_variables())
 
-        # Aggregate all compartment-specific variables to a common list
-        # self.comp_specific_vars = NeuronSuperclass.CompSpecificVariables[exc_model] + \
-        #                           NeuronSuperclass.CompSpecificVariables[inh_model]
+    def set_inhibitory_receptors(self, receptor_name):
+        """
+        Sets the inhibitory receptors.
 
-    def set_inhibitory_receptors(self, receptor_name):  # Used by CxSystem
+        :param string receptor_name: name of receptor model (see neurodynlib.receptor_models)
+
+        """
         assert receptor_name in ReceptorModel.InhModelNames, \
             "Undefined inhibition model!"
 
@@ -472,25 +617,14 @@ class PointNeuron:
         # Add compartment-specific variable names to the common list
         self.compartment_vars_and_consts.extend(receptor_model.get_compartment_specific_variables())
 
-        # Aggregate all compartment-specific variables to a common list
-        # self.comp_specific_vars = NeuronSuperclass.CompSpecificVariables[exc_model] + \
-        #                           NeuronSuperclass.CompSpecificVariables[inh_model]
-
-    # def add_optimization_bounds(self, **kwargs):
-    #     self.variables_to_optimize = kwargs.keys()
-    #     self.optimization_bounds = dict(kwargs)
-    #
-    #     # for var in self.variables_to_optimize:
-    #     #     self.add_model_definition('EXT_CURRENTS_EQS', '\n')
-
 
 class LifNeuron(PointNeuron):
     """
-    Leaky Intergrate-and-Fire model.
-    See Neuronal Dynamics, `Chapter 1 Section 3 <http://neuronaldynamics.epfl.ch/online/Ch1.S3.html>`_
+    Leaky Intergrate-and-Fire (LIF) model.
+    See Neuronal Dynamics, `Chapter 1 Section 3 <http://neuronaldynamics.epfl.ch/online/Ch1.S3.html>`_.
     """
 
-    __OBFUSCATION_FACTORS = [543, 622, 9307, 584, 2029, 211]
+    # __OBFUSCATION_FACTORS = [543, 622, 9307, 584, 2029, 211]
 
     # The large gL and capacitance are from the original code
     default_neuron_parameters = {
@@ -509,84 +643,84 @@ class LifNeuron(PointNeuron):
         super().__init__()
 
 
-    def _obfuscate_params(self, param_set):
-        """ A helper to _obfuscate_params a parameter vector.
-        Args:
-            param_set:
-        Returns:
-            list: obfuscated list
-        """
-        obfuscated_factors = [LifNeuron.__OBFUSCATION_FACTORS[i] * param_set[i] for i in range(6)]
-        return obfuscated_factors
+    # def _obfuscate_params(self, param_set):
+    #     """ A helper to _obfuscate_params a parameter vector.
+    #     Args:
+    #         param_set:
+    #     Returns:
+    #         list: obfuscated list
+    #     """
+    #     obfuscated_factors = [LifNeuron.__OBFUSCATION_FACTORS[i] * param_set[i] for i in range(6)]
+    #     return obfuscated_factors
+    #
+    # def _deobfuscate_params(self, obfuscated_params):
+    #     """ A helper to deobfuscate a parameter set.
+    #     Args:
+    #         obfuscated_params (list):
+    #     Returns:
+    #         list: de-obfuscated list
+    #     """
+    #     param_set = [obfuscated_params[i] / LifNeuron.__OBFUSCATION_FACTORS[i] for i in range(6)]
+    #     return param_set
 
-    def _deobfuscate_params(self, obfuscated_params):
-        """ A helper to deobfuscate a parameter set.
-        Args:
-            obfuscated_params (list):
-        Returns:
-            list: de-obfuscated list
-        """
-        param_set = [obfuscated_params[i] / LifNeuron.__OBFUSCATION_FACTORS[i] for i in range(6)]
-        return param_set
-
-    def get_random_param_set(self, random_seed=None):
-        """
-        creates a set of random parameters. All values are constrained to their typical range
-        :param random_seed:
-        :return: list: a list of (obfuscated) parameters. Use this vector when calling simulate_random_neuron()
-        """
-        random.seed(random_seed)
-        v_rest = (-75. + random.randint(0, 15)) * mV
-        v_reset = v_rest + random.randint(-10, +10) * mV
-        firing_threshold = random.randint(-40, +5) * mV
-        membrane_resistance = random.randint(2, 15) * Mohm
-        membrane_time_scale = random.randint(2, 30) * ms
-        abs_refractory_period = random.randint(1, 7) * ms
-        true_rand_params = [v_rest, v_reset, firing_threshold,
-                            membrane_resistance, membrane_time_scale, abs_refractory_period]
-        return self._obfuscate_params(true_rand_params)
-
-    def print_obfuscated_parameters(self, obfuscated_params):
-        """
-        Print the de-obfuscated values to the console
-        :param obfuscated_params:
-        :return:
-        """
-        true_vals = self._deobfuscate_params(obfuscated_params)
-        print("Resting potential: {}".format(true_vals[0]))
-        print("Reset voltage: {}".format(true_vals[1]))
-        print("Firing threshold: {}".format(true_vals[2]))
-        print("Membrane resistance: {}".format(true_vals[3]))
-        print("Membrane time-scale: {}".format(true_vals[4]))
-        print("Absolute refractory period: {}".format(true_vals[5]))
-
-    def simulate_random_neuron(self, input_current, obfuscated_param_set):
-        """
-        Simulates a LIF neuron with unknown parameters (obfuscated_param_set)
-        :param input_current (TimedArray): The current to probe the neuron
-        :param obfuscated_param_set (list): obfuscated parameters
-        :return:
-        StateMonitor: Brian2 StateMonitor for the membrane voltage "v"
-        SpikeMonitor: Biran2 SpikeMonitor
-        """
-        vals = self._deobfuscate_params(obfuscated_param_set)
-        # run the LIF model
-        state_monitor, spike_monitor = self.simulate_LIF_neuron(
-            input_current,
-            simulation_time=50 * ms,
-            EL=vals[0],
-            v_reset=vals[1],
-            firing_threshold=vals[2],
-            R=vals[3],
-            tau=vals[4],
-            abs_refractory_period=vals[5])
-        return state_monitor, spike_monitor
+    # def get_random_param_set(self, random_seed=None):
+    #     """
+    #     creates a set of random parameters. All values are constrained to their typical range
+    #     :param random_seed:
+    #     :return: list: a list of (obfuscated) parameters. Use this vector when calling simulate_random_neuron()
+    #     """
+    #     random.seed(random_seed)
+    #     v_rest = (-75. + random.randint(0, 15)) * mV
+    #     v_reset = v_rest + random.randint(-10, +10) * mV
+    #     firing_threshold = random.randint(-40, +5) * mV
+    #     membrane_resistance = random.randint(2, 15) * Mohm
+    #     membrane_time_scale = random.randint(2, 30) * ms
+    #     abs_refractory_period = random.randint(1, 7) * ms
+    #     true_rand_params = [v_rest, v_reset, firing_threshold,
+    #                         membrane_resistance, membrane_time_scale, abs_refractory_period]
+    #     return self._obfuscate_params(true_rand_params)
+    #
+    # def print_obfuscated_parameters(self, obfuscated_params):
+    #     """
+    #     Print the de-obfuscated values to the console
+    #     :param obfuscated_params:
+    #     :return:
+    #     """
+    #     true_vals = self._deobfuscate_params(obfuscated_params)
+    #     print("Resting potential: {}".format(true_vals[0]))
+    #     print("Reset voltage: {}".format(true_vals[1]))
+    #     print("Firing threshold: {}".format(true_vals[2]))
+    #     print("Membrane resistance: {}".format(true_vals[3]))
+    #     print("Membrane time-scale: {}".format(true_vals[4]))
+    #     print("Absolute refractory period: {}".format(true_vals[5]))
+    #
+    # def simulate_random_neuron(self, input_current, obfuscated_param_set):
+    #     """
+    #     Simulates a LIF neuron with unknown parameters (obfuscated_param_set)
+    #     :param input_current (TimedArray): The current to probe the neuron
+    #     :param obfuscated_param_set (list): obfuscated parameters
+    #     :return:
+    #     StateMonitor: Brian2 StateMonitor for the membrane voltage "v"
+    #     SpikeMonitor: Biran2 SpikeMonitor
+    #     """
+    #     vals = self._deobfuscate_params(obfuscated_param_set)
+    #     # run the LIF model
+    #     state_monitor, spike_monitor = self.simulate_LIF_neuron(
+    #         input_current,
+    #         simulation_time=50 * ms,
+    #         EL=vals[0],
+    #         v_reset=vals[1],
+    #         firing_threshold=vals[2],
+    #         R=vals[3],
+    #         tau=vals[4],
+    #         abs_refractory_period=vals[5])
+    #     return state_monitor, spike_monitor
 
 
 class EifNeuron(PointNeuron):
     """
-    Exponential Integrate-and-Fire model.
-    See Neuronal Dynamics, `Chapter 5 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch5.S2.html>`_
+    Exponential Integrate-and-Fire (EIF) model.
+    See Neuronal Dynamics, `Chapter 5 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch5.S2.html>`_.
     """
 
     # The large gL and capacitance come from the original code
@@ -636,8 +770,8 @@ class EifNeuron(PointNeuron):
 
 class AdexNeuron(PointNeuron):
     """
-    Adaptive Exponential Integrate-and-Fire model.
-    See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_
+    Adaptive Exponential Integrate-and-Fire (ADEX) model.
+    See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_.
     """
 
     # Default values (see Table 6.1, Initial Burst)
@@ -677,9 +811,10 @@ class AdexNeuron(PointNeuron):
 
     def plot_states(self, state_monitor):
         """
-        Visualizes the state variables: w-t, v-t and phase-plane w-v
-        :param state_monitor(StateMonitor): States of "v" and "w"
-        :return:
+        Visualizes the state variables: w-t, vm-t and phase-plane w-vm
+
+        :param state_monitor: b2.StateMonitor
+
         """
         plt.subplot(2, 2, 1)
         plt.plot(state_monitor.t / ms, state_monitor.vm[0] / mV, lw=2)
@@ -703,7 +838,7 @@ class AdexNeuron(PointNeuron):
 
 class HodgkinHuxleyNeuron(PointNeuron):
     """
-    Implementation of a Hodgkin-Huxley neuron (with Na, K and leak channels).
+    Implementation of a Hodgkin-Huxley neuron with Na, K and leak channels (SIMPLE_HH).
     See Neuronal Dynamics, `Chapter 2 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch2.S2.html>`_
     """
 
@@ -749,9 +884,10 @@ class HodgkinHuxleyNeuron(PointNeuron):
 
     def plot_states(self, state_monitor):
         """
-        Plots the state_monitor variables ["vm", "I_e", "m", "n", "h"] vs. time.
-        :param state_monitor (StateMonitor): the data to plot
-        :return:
+        Plots the state variables vm, m, n, h vs. time.
+
+        :param state_monitor: b2.StateMonitor
+
         """
         plt.subplots(3, 1, sharex=True)
 
@@ -802,23 +938,25 @@ class HodgkinHuxleyNeuron(PointNeuron):
 
 class IzhikevichNeuron(PointNeuron):
     """
-    Izhikevich model.
+    Izhikevich model (IZHIKEVICH).
     See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_
-    Here, we use the formulation and parameters presented in Izhikevich & Edelman 2008 PNAS
+
+    Here, we use the formulation and parameters presented in
+    `Izhikevich & Edelman 2008 PNAS <https://www.pnas.org/content/105/9/3593>`_
     """
 
     # Default parameters give a chattering (CH) neuron
     default_neuron_parameters = {
             'EL': -60.0*mV,            # equivalent to v_r in PNAS 2008
-            'V_res': -40.0*mV,           # c
-            'VT': -40.0*mV,       # v_t
+            'V_res': -40.0*mV,         # c
+            'VT': -40.0*mV,            # v_t
             'C': 50*pF,
             'k': 1.5*nS/mV,
-            'a': 0.03/ms,  # inverse of recovery time constant
+            'a': 0.03/ms,              # inverse of recovery time constant
             'b': 5*nS,
             'd': 150* pA,
             'refractory_period': 2.0 * ms,
-            'Vcut': 35.0*mV               # v_peak
+            'Vcut': 35.0*mV            # v_peak
     }
 
 
@@ -837,11 +975,10 @@ class IzhikevichNeuron(PointNeuron):
 
     def plot_states(self, state_monitor):
         """
-        Visualizes the state variables: u-t, v-t and phase-plane u-v
+        Visualizes the state variables: u-t, vm-t and phase-plane u-vm
 
-        :param state_monitor: States of "v" and "u"
-        :type state_monitor: Brian2 StateMonitor
-        :return:
+        :param state_monitor: b2.StateMonitor
+
         """
 
         plt.subplot(2, 2, 1)
@@ -866,8 +1003,9 @@ class IzhikevichNeuron(PointNeuron):
 
 class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from plots in cell type atlas
     """
-    Leaky Integrate-and-Fire with After-spike Currents (LIF-ASC; GLIF_3).
-    One of the generalized LIF (GLIF) models used in the Allen Brain Institute.
+    Leaky Integrate-and-Fire with After-spike Currents (LIF-ASC).
+    One of the generalized LIF (GLIF_3) models used in the Allen Brain Institute.
+
     For more information, see http://celltypes.brain-map.org/ ,
     http://help.brain-map.org/display/celltypes/Documentation?_ga=2.31556414.1221863260.1571652272-1994599725.1571652272 ,
     or Teeter et al. 2018 Nature Comm. https://www.nature.com/articles/s41467-017-02717-4
@@ -908,9 +1046,12 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
     def read_abi_neuron_config(self, neuron_config):
         """
         Method for importing parameters from the Allen Brain Institute's cell type atlas.
-        Parameters can be obtained by downloading the json from the website. You can also use the AllenSDK:
-        from allensdk.api.queries.glif_api import GlifApi
-        neuron_config = GlifApi().get_neuron_configs([neuronal_model_id])[neuronal_model_id]
+        Parameters can be obtained by downloading the json from their website.
+
+        You can also use the AllenSDK::
+
+           from allensdk.api.queries.glif_api import GlifApi
+           neuron_config = GlifApi().get_neuron_configs([neuronal_model_id])[neuronal_model_id]
 
         :param neuron_config:
         :return:
@@ -937,9 +1078,12 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
 
 class neuron_factory:
     def __init__(self):
-        self.name_to_class = {'LIF': LifNeuron, 'EIF': EifNeuron, 'Adex': AdexNeuron,
-                         'HH': HodgkinHuxleyNeuron, 'HodgkinHuxley': HodgkinHuxleyNeuron,
-                         'Izhikevich': IzhikevichNeuron, 'LIFASC': LifAscNeuron}
+        self.name_to_class = {'LIF': LifNeuron, 'LifNeuron': LifNeuron,
+                              'EIF': EifNeuron, 'EifNeuron': EifNeuron,
+                              'ADEX': AdexNeuron, 'AdexNeuron': AdexNeuron,
+                         'SIMPLE_HH': HodgkinHuxleyNeuron, 'HodgkinHuxleyNeuron': HodgkinHuxleyNeuron,
+                         'IZHIKEVICH': IzhikevichNeuron, 'IzhikevichNeuron': IzhikevichNeuron,
+                              'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
 
     def get_class(self,neuron_model_name):
         return self.name_to_class[neuron_model_name]()

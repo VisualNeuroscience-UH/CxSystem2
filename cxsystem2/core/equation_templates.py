@@ -15,13 +15,9 @@ import brian2 as b2
 
 class EquationHelper:
     """
-    Helper class for switching swiftly between neuron/synaptic current/synapse models in CxSystem.
-    This is a preliminary version.
-
-    Builds equation systems of the form:
-    dvm/dt = ((I_NEURON_MODEL + I_SYNAPTIC + I_OTHER)/C) + I_VM_NOISE
-    NEURON_MODEL_DYNAMICS
-    SYNAPTIC_CURRENT_DYNAMICS
+    Helper class for switching swiftly between neuron/receptor models in CxSystem.
+    Currently used only for the pyramidal cell (PC) cell type; point neuron models
+    have been migrated to neurodynlib.
     """
 
     membrane_eq_template = '''
