@@ -11,14 +11,13 @@
 # AdEx, passive_cable, exp_IF, HH, LIF, NeuronAbstract, NeuronTypeOne, NeuronTypeTwo, fitzhugh_nagumo
 
 import json
-import random
 from datetime import datetime
 from string import Template
-
 import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy as np
 from brian2.units import *
+import copy
 
 from cxsystem2.neurodynlib.receptor_models import ReceptorModel
 from cxsystem2.neurodynlib.tools import plot_tools, input_factory
@@ -1111,8 +1110,8 @@ class neuron_factory:
                          'IZHIKEVICH': IzhikevichNeuron, 'IzhikevichNeuron': IzhikevichNeuron,
                               'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
 
-    def get_class(self,neuron_model_name):
-        return self.name_to_class[neuron_model_name]()
+    def get_class(self, neuron_model_name):
+        return copy.deepcopy(self.name_to_class[neuron_model_name]())
 
 
 # class FitzhughNagumo:
