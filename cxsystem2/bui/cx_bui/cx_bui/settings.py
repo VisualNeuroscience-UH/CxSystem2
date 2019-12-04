@@ -46,13 +46,13 @@ logging.config.dictConfig({
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'formatter': 'file',
-            'filename': Path.home().joinpath('.cxerror.log').as_posix()
+            'filename': log_path.joinpath('.cxerror.log').as_posix()
         },
         'info_logfile': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'file',
-            'filename': Path.home().joinpath('.cxinfo.log').as_posix()
+            'filename': log_path.joinpath('.cxinfo.log').as_posix()
         }
 
     },
