@@ -21,6 +21,13 @@ from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
 logging.getLogger("requests").setLevel(logging.WARNING)
 infologger = logging.getLogger('info_logger')
 
+def get_workspace_path():
+    cx_folder = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent.parent
+    yaml_path = cx_folder.joinpath('.cxconfig.yaml')
+    with open(yaml_path.as_posix(), 'r') as file:
+        httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
+    return Path(httpsconfig['workspace']['path'])
+
 
 def is_authorized(request):
     session_token = ''
@@ -37,14 +44,15 @@ def index(request):
 
     template = loader.get_template('editor/index.html')
     if request.is_secure():
-        yaml_path = Path().home().joinpath('.cxconfig.yaml')
+        cx_folder = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent.parent
+        yaml_path = cx_folder.joinpath('.cxconfig.yaml')
         with open(yaml_path.as_posix(), 'r') as file:
             oauth_config = yaml.load(file, Loader=yaml.FullLoader)
         context = {
-            'provider_id': oauth_config[0]['oauth2']['provider-id'],
-            'client_id' : oauth_config[0]['oauth2']['client-id'],
-            'redirect_uri': oauth_config[0]['oauth2']['redirect-uri'],
-            'authorization': oauth_config[0]['oauth2']['authorization'],
+            'provider_id': oauth_config['oauth2']['provider-id'],
+            'client_id' : oauth_config['oauth2']['client-id'],
+            'redirect_uri': oauth_config['oauth2']['redirect-uri'],
+            'authorization': oauth_config['oauth2']['authorization'],
             'is_secure' : request.is_secure(),
         }
     else:
@@ -129,9 +137,9 @@ def simulate(request):
         sanitized_receive_data = eval(sanitize_data(received_data))
 
         anatomy = sanitized_receive_data['anatomy']
-        user_workspace_path = Path()
+        cx_workspace_path = get_workspace_path()
         if request.is_secure() and userid != '':
-            user_workspace_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+            user_workspace_path =  cx_workspace_path.joinpath(userid)
             user_workspace_path.mkdir(parents=True, exist_ok=True)
             if workspace_is_full(user_workspace_path):
                 return HttpResponse(json.dumps({"authorized": "true", "response": "Workspace is full. Try downloading your workspace, delete the content, then retry."}))
@@ -202,9 +210,10 @@ def download_workspace(request):
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
 
-        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        cx_workspace_path = get_workspace_path()
+        user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
-        tar_path =  Path().home().joinpath('CxServerWorkspace').joinpath(userid + ".gz")
+        tar_path =  cx_workspace_path.joinpath(userid + ".gz")
         tar = tarfile.open(tar_path.as_posix(), "w:gz")
         tar.add(user_workspace_path.as_posix(), arcname=userid)
         tar.close()
@@ -228,8 +237,8 @@ def download_files(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-
-        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        cx_workspace_path = get_workspace_path()
+        user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
 
         print(request.body.decode('utf-8'))
@@ -291,7 +300,8 @@ def ls_workspace(request):
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         infologger.info("User {} listed workspace files".format(userid))
-        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        cx_workspace_path = get_workspace_path()
+        user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
         dir_list = list_files(user_workspace_path.as_posix())
         dir_list = dir_list[6:]
@@ -308,7 +318,8 @@ def sim_status(request):
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         infologger.info("User {} checked simulation status".format(userid))
-        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        cx_workspace_path = get_workspace_path()
+        user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
         outputfile_path = user_workspace_path.joinpath('cxoutput.out')
         all_lines = []
@@ -328,7 +339,8 @@ def delete_all(request):
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
         infologger.info("User {} cleaned workspace".format(userid))
-        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        cx_workspace_path = get_workspace_path()
+        user_workspace_path = cx_workspace_path.joinpath(userid)
         shutil.rmtree(user_workspace_path.as_posix())
         os.mkdir(user_workspace_path.as_posix())
 
@@ -342,8 +354,8 @@ def visualize(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-
-        user_workspace_path = Path().home().joinpath('CxServerWorkspace').joinpath(userid)
+        cx_workspace_path = get_workspace_path()
+        user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
         if workspace_is_full(user_workspace_path):
             return HttpResponse(json.dumps({"authorized": "true", "response":

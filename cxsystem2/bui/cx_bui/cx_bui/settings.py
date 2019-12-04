@@ -11,11 +11,20 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import yaml
 from pathlib import Path
 import logging.config
 
 # set the logging level to error:
 LOGGING_CONFIG = None
+
+cx_folder = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent.parent
+yaml_path = cx_folder.joinpath('.cxconfig.yaml')
+with open(yaml_path.as_posix(), 'r') as file:
+    httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
+log_path = httpsconfig['log']['path']
+print("Setting log path to {}".format(log_path))
+
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
