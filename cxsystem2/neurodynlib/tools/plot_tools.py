@@ -16,13 +16,14 @@
 # Neuronal Dynamics: From Single Neurons to Networks and Models of Cognition.
 # Cambridge University Press, 2014.
 
+
+
 import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy
 
-
 def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing_threshold=None, legend_location=0):
-    """plots voltage and current .
+    """Not implemented! plots voltage and current .
 
     Args:
         voltage_monitor (StateMonitor): recorded voltage
@@ -83,6 +84,7 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
                           t_min=None, t_max=None, N_highlighted_spiketrains=3, avg_window_width=None,
                           sup_title=None, figure_size=(10, 4)):
     """
+    Not implemented!
     Visualizes the results of a network simulation: spike-train, population activity and voltage-traces.
 
     Args:
@@ -248,6 +250,7 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
 
 def plot_ISI_distribution(spike_stats, hist_nr_bins=50, xlim_max_ISI=None):
     """
+    Not implemented!
     Computes the ISI distribution of the given spike_monitor and displays the distribution in a histogram
 
     Args:
@@ -282,6 +285,7 @@ def plot_ISI_distribution(spike_stats, hist_nr_bins=50, xlim_max_ISI=None):
 def plot_spike_train_power_spectrum(freq, mean_ps, all_ps, max_freq,
                                     nr_highlighted_neurons=2, mean_firing_freqs_per_neuron=None, plot_f0=False):
     """
+    Not implemented!
     Visualizes the power spectrum of the spike trains.
 
     Args:
@@ -338,6 +342,7 @@ def plot_spike_train_power_spectrum(freq, mean_ps, all_ps, max_freq,
 
 def plot_population_activity_power_spectrum(freq, ps, max_freq, average_At=None, plot_f0=False):
     """
+    Not implemented!
     Plots the power spectrum of the population activity A(t)
 
     Args:

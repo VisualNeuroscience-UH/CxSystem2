@@ -57,21 +57,14 @@ def get_step_current(t_start, t_end, unit_time, amplitude, append_zero=True):
 def get_ramp_current(t_start, t_end, unit_time, amplitude_start, amplitude_end, append_zero=True):
     """
     Creates a ramp current. If t_start == t_end, then ALL entries are 0.
-    :param t_start: start of the ramp
-    :type int
-    :param t_end: end of the ramp
-    :type int
-    :param unit_time: unit of t_start and t_end. e.g. 0.1*brian2.ms
-    :type Brian2 unit
-    :param amplitude_start: amplitude of the ramp at t_start. e.g. 3.5*brian2.uamp
-    :type Quantity
-    :param amplitude_end: amplitude of the ramp at t_end. e.g. 4.5*brian2.uamp
-    :type Quantity
-    :param append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0, Brian reads out the last value in the
-    array (=amplitude_end) for all indices > t_end.
-    :type bool, optional
+
+    :param int t_start: start of the ramp
+    :param int t_end: end of the ramp
+    :param unit_time: unit of t_start and t_end. e.g. 0.1*ms
+    :param amplitude_start: amplitude of the ramp at t_start. e.g. 3.5*uamp
+    :param amplitude_end: amplitude of the ramp at t_end. e.g. 4.5*uamp
+    :param bool append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0, Brian reads out the last value in the array (=amplitude_end) for all indices > t_end.
     :return: Brian2.TimedArray
-    :type TimedArray
     """
 
     assert isinstance(t_start, int), "t_start_ms must be of type int"
@@ -98,25 +91,16 @@ def get_sinusoidal_current(t_start, t_end, unit_time,
                            append_zero=True):
     """
     Creates a sinusoidal current. If t_start == t_end, then ALL entries are 0.
-    :param t_start: start of the sine wave
-    :type int
-    :param t_end: end of the sine wave
-    :type int
-    :param unit_time: unit of t_start and t_end. e.g. 0.1*brian2.ms
-    :type Quantity, Time
-    :param amplitude: maximum amplitude of the sinus e.g. 3.5*brian2.uamp
-    :type Quantity, Current
-    :param frequency: Frequency of the sine. e.g. 0.5*brian2.kHz
-    :type Quantity, Hz
-    :param direct_current: DC-component (=offset) of the current
-    :type Quantity, Current
-    :param phase_offset: phase at t_start. Default = 0
-    :type float, Optional
-    :param append_zero:if true, 0Amp is appended at t_end+1. Without that trailing 0,
-    Brian reads out the last value in the array for all indices > t_end.
-    :type bool, optional
+
+    :param int t_start: start of the sine wave
+    :param int t_end: end of the sine wave
+    :param unit_time: unit of t_start and t_end. e.g. 0.1*ms
+    :param amplitude: maximum amplitude of the sinus e.g. 3.0*uamp
+    :param frequency: Frequency of the sine. e.g. 0.5*kHz
+    :param direct_current: DC-component (=offset) of the current, e.g. 1.5*uamp
+    :param float phase_offset: phase at t_start. Default = 0
+    :param bool append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0, Brian reads out the last value in the array for all indices > t_end.
     :return: Brian2.TimedArray
-    :type TimedArray
     """
 
     assert isinstance(t_start, int), "t_start_ms must be of type int"
@@ -160,15 +144,12 @@ def get_spikes_current(t_spikes, unit_time, amplitude, append_zero=True):
     Note: This function is provided to easily insert pulse currents into a cable. For other use of
     spike input, search the Brian2 documentation for SpikeGeneration.
 
-    Args:
-        t_spikes (int): list of spike times
-        unit_time (Quantity, Time): unit of t_spikes . e.g. 1*brian2.ms
-        amplitude (Quantity, Current):  amplitude of the spike. All spikes have the sampe amplitude
-        append_zero (bool, optional): if true, 0Amp is appended at t_end+1. Without that trailing 0,
+    :param int t_spikes: list of spike times
+    :param unit_time: unit of t_spikes . e.g. 1*ms
+    :param amplitude:  amplitude of the spike. All spikes have the same amplitude
+    :param bool append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0,
         Brian reads out the last value in the array for all indices > t_end.
-
-    Returns:
-        TimedArray: Brian2.TimedArray
+    :return: Brian2.TimedArray
     """
     assert isinstance(t_spikes, list), "t_spikes must be of type list"
     assert b2.units.fundamentalunits.have_same_dimensions(amplitude, b2.amp), \
