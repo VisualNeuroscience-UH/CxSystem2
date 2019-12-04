@@ -83,13 +83,15 @@ SECRET_KEY = 'w$2!yh7k3c_io1xs90+*lbogfny2oe%)w-w4gm)s(ttvgqcpe&'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'hbp-bsp-cxsys2.cineca.it',
     'bspg.pa.ibf.cnr.it',
-    '127.0.0.1'
+    '127.0.0.1',
     ]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'cxsystem2',
     'django_extensions',
     'sslserver',
     'editor',
