@@ -22,7 +22,7 @@ cx_folder = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent.paren
 yaml_path = cx_folder.joinpath('.cxconfig.yaml')
 with open(yaml_path.as_posix(), 'r') as file:
     httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
-log_path = httpsconfig['log']['path']
+log_path = Path(httpsconfig['log']['path'])
 print("Setting log path to {}".format(log_path))
 
 logging.config.dictConfig({
