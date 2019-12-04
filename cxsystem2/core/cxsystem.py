@@ -284,6 +284,9 @@ class CxSystem:
                 cluster=cluster_flag,
                 stdout_file=self.array_run_stdout_file
             )
+            shell = os.readlink('/proc/%d/exe' % os.getppid())
+            if sys.platform == 'linux' and 'bash' not in shell:
+                command = '/bin/bash -c "' + command + '"'
             os.system(command)
             self.array_run = 1
             return
