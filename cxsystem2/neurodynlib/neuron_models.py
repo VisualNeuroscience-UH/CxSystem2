@@ -617,6 +617,20 @@ class PointNeuron:
         # Add compartment-specific variable names to the common list
         self.compartment_vars_and_consts.extend(receptor_model.get_compartment_specific_variables())
 
+    def make_neuron_group(self, n):
+        """
+        Makes a Brian2 NeuronGroup
+
+        :param int n: number of neurons
+        :return: b2.NeuronGroup object
+        """
+
+        neuron_pop = b2.NeuronGroup(n, model=self.get_neuron_equations(),
+                                       namespace=self.get_neuron_parameters(),
+                                       reset=self.get_reset_statements(),
+                                       threshold=self.get_threshold_condition(),
+                                       refractory=self.get_refractory_period())
+        return neuron_pop
 
 class LifNeuron(PointNeuron):
     """
