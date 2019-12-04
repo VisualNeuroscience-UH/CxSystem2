@@ -19,8 +19,37 @@ Wulfram Gerstner, Werner M. Kistler, Richard Naud, and Liam Paninski.
 Available neuron models
 -----------------------
 
+The currently supported point neuron models are:
+
+        :code:`LIF`: Leaky integrate-and-fire.
+
+        :code:`EIF`: Exponential integrate-and-fire.
+
+        :code:`ADEX`: Adaptive exponential integrate-and-fire.
+
+        :code:`IZHIKEVICH`: Izhikevich model.
+
+        :code:`LIFASC`: Leaky integrate-and-fire with after-spike currents.
+
+
+In addition, there is a multicompartmental neuron type (PC, pyramidal cell) that follows exponential integrate-and-fire
+dynamics.
 
 .. _receptor_models:
 
 Available receptor models
 -------------------------
+
+The currently supported receptor models are:
+
+        :code:`SIMPLE_E`: Excitatory conductance with exponential decay.
+
+        :code:`SIMPLE_I`: Inhibitory conductance with exponential decay.
+
+        :code:`SIMPLE_E_NMDA`: AMPA and NMDA receptors.
+
+        :code:`SIMPLE_I_GABAB`: GABA-A and GABA-B receptors.
+
+        :code:`E_ALPHA`: Excitatory alpha synapse.
+
+        :code:`I_ALPHA`: Inhibitory alpha synapse.

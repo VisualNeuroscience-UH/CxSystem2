@@ -636,6 +636,8 @@ class LifNeuron(PointNeuron):
     """
     Leaky Intergrate-and-Fire (LIF) model.
     See Neuronal Dynamics, `Chapter 1 Section 3 <http://neuronaldynamics.epfl.ch/online/Ch1.S3.html>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT.
     """
 
     # __OBFUSCATION_FACTORS = [543, 622, 9307, 584, 2029, 211]
@@ -735,6 +737,8 @@ class EifNeuron(PointNeuron):
     """
     Exponential Integrate-and-Fire (EIF) model.
     See Neuronal Dynamics, `Chapter 5 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch5.S2.html>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut.
     """
 
     # The large gL and capacitance come from the original code
@@ -786,6 +790,8 @@ class AdexNeuron(PointNeuron):
     """
     Adaptive Exponential Integrate-and-Fire (ADEX) model.
     See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut, a, b, tau_w.
     """
 
     # Default values (see Table 6.1, Initial Burst)
@@ -854,6 +860,8 @@ class HodgkinHuxleyNeuron(PointNeuron):
     """
     Implementation of a Hodgkin-Huxley neuron with Na, K and leak channels (SIMPLE_HH).
     See Neuronal Dynamics, `Chapter 2 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch2.S2.html>`_
+
+    Requires setting the following parameters: EL, gL, C, EK, ENa, gK, gNa, V_spike.
     """
 
     default_neuron_parameters = {
@@ -956,7 +964,9 @@ class IzhikevichNeuron(PointNeuron):
     See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_
 
     Here, we use the formulation and parameters presented in
-    `Izhikevich & Edelman 2008 PNAS <https://www.pnas.org/content/105/9/3593>`_
+    `Izhikevich & Edelman 2008 PNAS <https://www.pnas.org/content/105/9/3593>`_.
+
+    Requires setting the following parameters: EL, C, V_res, VT, k, a, b, d, Vcut.
     """
 
     # Default parameters give a chattering (CH) neuron
@@ -1017,12 +1027,14 @@ class IzhikevichNeuron(PointNeuron):
 
 class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from plots in cell type atlas
     """
-    Leaky Integrate-and-Fire with After-spike Currents (LIF-ASC).
+    Leaky Integrate-and-Fire with After-spike Currents (LIFASC).
     One of the generalized LIF (GLIF_3) models used in the Allen Brain Institute.
 
     For more information, see http://celltypes.brain-map.org/ ,
     http://help.brain-map.org/display/celltypes/Documentation?_ga=2.31556414.1221863260.1571652272-1994599725.1571652272 ,
-    or Teeter et al. 2018 Nature Comm. https://www.nature.com/articles/s41467-017-02717-4
+    or Teeter et al. 2018 Nature Comm. https://www.nature.com/articles/s41467-017-02717-4.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT, A_asc1, A_asc2, tau_asc1, tau_asc2.
     """
 
     # The default parameters correspond to neuronal_model_id = 637925685 available at
