@@ -547,7 +547,7 @@ class PointNeuron:
         assert 'tonic_current' not in self.neuron_parameters.keys(), \
             "Tonic current is already set, please modify neuron parameters instead of using this method"
 
-        self.set_neuron_parameters(I_tonic=tonic_current, tau_tonic_rampup=tau_rampup)
+        self.set_neuron_parameters(tonic_current=tonic_current, tau_tonic_rampup=tau_rampup)
 
         if tau_rampup is None:
             ext_currents_string = '+ tonic_current $EXT_CURRENTS'
