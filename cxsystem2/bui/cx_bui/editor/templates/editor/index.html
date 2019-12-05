@@ -161,10 +161,14 @@
                 data-step="9"
                 data-intro="Use this tab to configure the physiological parameters of the network ">Physiology
         </button>
+        
+        {% if is_secure %}
         <button class="tabs__button" data-for-tab="7"
                 data-step="9"
                 data-intro="Use this tab to visualize the simulation results on the server ">Rasterplot
         </button>
+        {% endif %}
+
         <button class="tabs__button" data-for-tab="6" style="position: absolute; right: 0px;"
                 data-step="10"
                 data-intro="Description of configurations available for simulating sample networks.">Examples
