@@ -42,72 +42,71 @@ $('.tabs__button').click(function () {
 var imported_data;
 
 
-
 function load_example(example_name) {
-     request_data = {};
-     request_data[example_name] = 'anatomy';
-     $.ajax({
-            type: 'POST',
-            url: 'load_example',
-            headers: {
-                'Authorization': 'Basic '+ session_token
-            },
-            dataType: "json",
-            data: request_data,
-            success: function(anatomy){
-                // console.log(anatomy);
-                if (anatomy['authorized'] !== 'true'){
-                    authenticate();
-                    return;
-                }
-                for (var key in anatomy) {
-                    switch (key) {
-                        case "params":
-                            data = anatomy['params'];
-                            params_editor.setValue(data);
-                            break;
-                        case "IN":
-                            data = anatomy.IN;
-                            inputs_editor.setValue(data);
-                            break;
-                        case "G":
-                            data = anatomy.G;
-                            neurons_editor.setValue(data);
-                            break;
-                        case "S":
-                            data = anatomy['S'];
-                            connections_editor.setValue(data);
-                            break;
-                    }
+    request_data = {};
+    request_data[example_name] = 'anatomy';
+    $.ajax({
+        type: 'POST',
+        url: 'load_example',
+        headers: {
+            'Authorization': 'Basic ' + session_token
+        },
+        dataType: "json",
+        data: request_data,
+        success: function (anatomy) {
+            // console.log(anatomy);
+            if (anatomy['authorized'] !== 'true') {
+                authenticate();
+                return;
+            }
+            for (var key in anatomy) {
+                switch (key) {
+                    case "params":
+                        data = anatomy['params'];
+                        params_editor.setValue(data);
+                        break;
+                    case "IN":
+                        data = anatomy.IN;
+                        inputs_editor.setValue(data);
+                        break;
+                    case "G":
+                        data = anatomy.G;
+                        neurons_editor.setValue(data);
+                        break;
+                    case "S":
+                        data = anatomy['S'];
+                        connections_editor.setValue(data);
+                        break;
                 }
             }
-        });
+        }
+    });
 
-     request_data = {};
-     request_data[example_name] = 'physiology'
-     $.ajax({
-            type: 'POST',
-            url: 'load_example',
-            headers: {
-                'Authorization': 'Basic '+ session_token,
-            },
-            data: request_data,
-            dataType: "json",
-            success: function(physio){
-                // console.log('phys',physio);
-                if (physio['authorized'] !== 'true'){
-                    authenticate();
-                    return;
-                }
-                physio_editor.setValue(physio['physio_data']);
-                Swal.fire(
-                      'Example Loaded',
-                      '',
-                      'success'
-                );
+    request_data = {};
+    request_data[example_name] = 'physiology'
+    $.ajax({
+        type: 'POST',
+        url: 'load_example',
+        headers: {
+            'Authorization': 'Basic ' + session_token,
+        },
+        data: request_data,
+        dataType: "json",
+        success: function (physio) {
+            // console.log('phys',physio);
+            if (physio['authorized'] !== 'true') {
+                authenticate();
+                return;
             }
-     });
-     $("button[data-for-tab='1']").click();
+            physio_editor.setValue(physio['physio_data']);
+            Swal.fire(
+                'Example Loaded',
+                '',
+                'success'
+            );
+        }
+    });
+    $("button[data-for-tab='1']").click();
 }
 
 
@@ -122,6 +121,11 @@ function readSingleFile(e) {
         if (Object.keys(imported_data).includes('physio_data')) { // this means it's a physio file
             data = imported_data['physio_data'];
             physio_editor.setValue(data);
+            Swal.fire(
+                'Physiology Configuration Loaded',
+                '',
+                'success'
+            );
         } else { // this means it's a anatomy file
             for (var key in imported_data) {
                 let data;
@@ -144,6 +148,11 @@ function readSingleFile(e) {
                         break;
                 }
             }
+            Swal.fire(
+                'Anatomy/System Configuration Loaded',
+                '',
+                'success'
+            );
         }
 
     };
