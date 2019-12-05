@@ -33,7 +33,7 @@ var req_simulate = function () {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
                 authenticate(req_download_workspace);
             } else {
-               Swal.fire(
+                Swal.fire(
                     {
                         title: JSON.parse(response)["response"],
                     })
@@ -252,6 +252,21 @@ function download(content, filename, contentType) {
     a.click();
 }
 
+function double_check_delete() {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete everything!'
+    }).then((result) => {
+        if (result.value) {
+            req_delete();
+        }
+    })
+}
 
 $(function () {
     $('#visualize_form').submit(req_visualize);

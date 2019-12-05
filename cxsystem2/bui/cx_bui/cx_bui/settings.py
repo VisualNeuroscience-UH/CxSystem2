@@ -11,11 +11,20 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import yaml
 from pathlib import Path
 import logging.config
 
 # set the logging level to error:
 LOGGING_CONFIG = None
+
+cx_folder = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent.parent
+yaml_path = cx_folder.joinpath('.cxconfig.yaml')
+with open(yaml_path.as_posix(), 'r') as file:
+    httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
+log_path = Path(httpsconfig['log']['path'])
+print("Setting log path to {}".format(log_path))
+
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
@@ -37,13 +46,13 @@ logging.config.dictConfig({
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'formatter': 'file',
-            'filename': Path.home().joinpath('.cxerror.log').as_posix()
+            'filename': log_path.joinpath('.cxerror.log').as_posix()
         },
         'info_logfile': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'file',
-            'filename': Path.home().joinpath('.cxinfo.log').as_posix()
+            'filename': log_path.joinpath('.cxinfo.log').as_posix()
         }
 
     },
@@ -74,13 +83,15 @@ SECRET_KEY = 'w$2!yh7k3c_io1xs90+*lbogfny2oe%)w-w4gm)s(ttvgqcpe&'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'hbp-bsp-cxsys2.cineca.it',
     'bspg.pa.ibf.cnr.it',
-    '127.0.0.1'
+    '127.0.0.1',
     ]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'cxsystem2',
     'django_extensions',
     'sslserver',
     'editor',

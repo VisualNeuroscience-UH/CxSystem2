@@ -284,6 +284,8 @@ class CxSystem:
                 cluster=cluster_flag,
                 stdout_file=self.array_run_stdout_file
             )
+            if sys.platform == 'linux' or sys.platform == 'darwin':
+                command = '/bin/bash -c "' + command + '"'
             os.system(command)
             self.array_run = 1
             return

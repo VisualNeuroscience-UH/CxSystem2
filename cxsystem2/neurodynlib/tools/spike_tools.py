@@ -24,6 +24,8 @@ Relevant book chapters:
 # Neuronal Dynamics: From Single Neurons to Networks and Models of Cognition.
 # Cambridge University Press, 2014.
 
+
+
 import math
 
 import brian2 as b2
@@ -33,6 +35,7 @@ import numpy as np
 def get_spike_time(voltage_monitor,
                    spike_threshold):
     """
+    Not implemented!
     Detects the spike times in the voltage. Here, the spike time is DEFINED as the value in
     voltage_monitor.t for which voltage_monitor.v[idx] is above threshold AND
     voltage_monitor.v[idx-1] is below threshold (crossing from below).
@@ -59,6 +62,7 @@ def get_spike_time(voltage_monitor,
 
 def get_spike_stats(voltage_monitor, spike_threshold):
     """
+    Not implemented!
     Detects spike times and computes ISI, mean ISI and firing frequency.
     Here, the spike time is DEFINED as the value in
     voltage_monitor.t for which voltage_monitor.v[idx] is above threshold AND
@@ -90,6 +94,7 @@ def get_spike_stats(voltage_monitor, spike_threshold):
 
 def pretty_print_spike_train_stats(voltage_monitor, spike_threshold):
     """
+    Not implemented!
     Computes and returns the same values as get_spike_stats. Additionally prints these values to the console.
 
     Args:
@@ -116,7 +121,7 @@ def pretty_print_spike_train_stats(voltage_monitor, spike_threshold):
 
 class PopulationSpikeStats:
     """
-    Wraps a few spike-train related properties.
+    Not implemented! Wraps a few spike-train related properties.
     """
     def __init__(self, nr_neurons, nr_spikes, all_ISI, filtered_spike_trains):
         """
@@ -198,6 +203,7 @@ def filter_spike_trains(spike_trains,
                         window_t_max=None,
                         idx_subset=None):
     """
+    Not implemented!
     creates a new dictionary neuron_idx=>spike_times where all spike_times are in the
         half open interval [window_t_min,window_t_max)
 
@@ -247,6 +253,7 @@ def get_spike_train_stats(spike_monitor,
                           window_t_min=0.*b2.ms,
                           window_t_max=None):
     """
+    Not implemented!
     Analyses the spike monitor and returns a PopulationSpikeStats instance.
 
     Args:
@@ -282,6 +289,7 @@ def _spike_train_2_binary_vector(spike_train,
                                  vector_length,
                                  discretization_dt):
     """
+    Not implemented!
     Convert the time-stamps of the spike_train into a binary vector of the given length.
     Note: if more than one spike fall into the same time bin, only one is counted, surplus spikes are ignored.
 
@@ -320,6 +328,7 @@ def get_averaged_single_neuron_power_spectrum(spike_monitor, sampling_frequency,
                                               window_t_min, window_t_max,
                                               nr_neurons_average=100, subtract_mean=False):
     """
+    Not implemented!
     averaged power-spectrum of spike trains in the time window [window_t_min, window_t_max).
         The power spectrum of every single neuron's spike train is computed. Then the average
         across all single-neuron powers is computed. In order to limit the compuation time, the
@@ -389,6 +398,7 @@ def get_averaged_single_neuron_power_spectrum(spike_monitor, sampling_frequency,
 def get_population_activity_power_spectrum(
         rate_monitor, delta_f, k_repetitions, T_init=100*b2.ms, subtract_mean_activity=False):
     """
+    Not implemented!
     Computes the power spectrum of the population activity A(t) (=rate_monitor.rate)
 
     Args:

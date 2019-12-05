@@ -11,14 +11,13 @@
 # AdEx, passive_cable, exp_IF, HH, LIF, NeuronAbstract, NeuronTypeOne, NeuronTypeTwo, fitzhugh_nagumo
 
 import json
-import random
 from datetime import datetime
 from string import Template
-
 import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy as np
 from brian2.units import *
+import copy
 
 from cxsystem2.neurodynlib.receptor_models import ReceptorModel
 from cxsystem2.neurodynlib.tools import plot_tools, input_factory
@@ -547,7 +546,7 @@ class PointNeuron:
         assert 'tonic_current' not in self.neuron_parameters.keys(), \
             "Tonic current is already set, please modify neuron parameters instead of using this method"
 
-        self.set_neuron_parameters(I_tonic=tonic_current, tau_tonic_rampup=tau_rampup)
+        self.set_neuron_parameters(tonic_current=tonic_current, tau_tonic_rampup=tau_rampup)
 
         if tau_rampup is None:
             ext_currents_string = '+ tonic_current $EXT_CURRENTS'
@@ -617,11 +616,27 @@ class PointNeuron:
         # Add compartment-specific variable names to the common list
         self.compartment_vars_and_consts.extend(receptor_model.get_compartment_specific_variables())
 
+    def make_neuron_group(self, n):
+        """
+        Makes a Brian2 NeuronGroup
+
+        :param int n: number of neurons
+        :return: b2.NeuronGroup object
+        """
+
+        neuron_pop = b2.NeuronGroup(n, model=self.get_neuron_equations(),
+                                       namespace=self.get_neuron_parameters(),
+                                       reset=self.get_reset_statements(),
+                                       threshold=self.get_threshold_condition(),
+                                       refractory=self.get_refractory_period())
+        return neuron_pop
 
 class LifNeuron(PointNeuron):
     """
     Leaky Intergrate-and-Fire (LIF) model.
     See Neuronal Dynamics, `Chapter 1 Section 3 <http://neuronaldynamics.epfl.ch/online/Ch1.S3.html>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT.
     """
 
     # __OBFUSCATION_FACTORS = [543, 622, 9307, 584, 2029, 211]
@@ -721,6 +736,8 @@ class EifNeuron(PointNeuron):
     """
     Exponential Integrate-and-Fire (EIF) model.
     See Neuronal Dynamics, `Chapter 5 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch5.S2.html>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut.
     """
 
     # The large gL and capacitance come from the original code
@@ -772,6 +789,8 @@ class AdexNeuron(PointNeuron):
     """
     Adaptive Exponential Integrate-and-Fire (ADEX) model.
     See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut, a, b, tau_w.
     """
 
     # Default values (see Table 6.1, Initial Burst)
@@ -840,6 +859,8 @@ class HodgkinHuxleyNeuron(PointNeuron):
     """
     Implementation of a Hodgkin-Huxley neuron with Na, K and leak channels (SIMPLE_HH).
     See Neuronal Dynamics, `Chapter 2 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch2.S2.html>`_
+
+    Requires setting the following parameters: EL, gL, C, EK, ENa, gK, gNa, V_spike.
     """
 
     default_neuron_parameters = {
@@ -942,7 +963,9 @@ class IzhikevichNeuron(PointNeuron):
     See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_
 
     Here, we use the formulation and parameters presented in
-    `Izhikevich & Edelman 2008 PNAS <https://www.pnas.org/content/105/9/3593>`_
+    `Izhikevich & Edelman 2008 PNAS <https://www.pnas.org/content/105/9/3593>`_.
+
+    Requires setting the following parameters: EL, C, V_res, VT, k, a, b, d, Vcut.
     """
 
     # Default parameters give a chattering (CH) neuron
@@ -1003,12 +1026,14 @@ class IzhikevichNeuron(PointNeuron):
 
 class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from plots in cell type atlas
     """
-    Leaky Integrate-and-Fire with After-spike Currents (LIF-ASC).
+    Leaky Integrate-and-Fire with After-spike Currents (LIFASC).
     One of the generalized LIF (GLIF_3) models used in the Allen Brain Institute.
 
     For more information, see http://celltypes.brain-map.org/ ,
     http://help.brain-map.org/display/celltypes/Documentation?_ga=2.31556414.1221863260.1571652272-1994599725.1571652272 ,
-    or Teeter et al. 2018 Nature Comm. https://www.nature.com/articles/s41467-017-02717-4
+    or Teeter et al. 2018 Nature Comm. https://www.nature.com/articles/s41467-017-02717-4.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT, A_asc1, A_asc2, tau_asc1, tau_asc2.
     """
 
     # The default parameters correspond to neuronal_model_id = 637925685 available at
@@ -1085,8 +1110,8 @@ class neuron_factory:
                          'IZHIKEVICH': IzhikevichNeuron, 'IzhikevichNeuron': IzhikevichNeuron,
                               'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
 
-    def get_class(self,neuron_model_name):
-        return self.name_to_class[neuron_model_name]()
+    def get_class(self, neuron_model_name):
+        return copy.deepcopy(self.name_to_class[neuron_model_name]())
 
 
 # class FitzhughNagumo:
