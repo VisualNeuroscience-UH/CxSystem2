@@ -2,9 +2,12 @@ import ctypes
 import os
 import socket
 import webbrowser
+import requests
+import threading
+from time import sleep
 from pathlib import Path
 from sys import platform, exit
-
+from requests.exceptions import ConnectionError, SSLError
 
 class disable_file_system_redirection:
     if platform == 'win32':
@@ -46,20 +49,29 @@ class RunServer:
         server_folder = crr_file_folder.joinpath('cx_bui')
 
         os.chdir(server_folder)
-
         if port is None:
             port = find_free_port()
+        self.url = "https://127.0.0.1:{}/".format(port) if ssl else "http://127.0.0.1:{}/".format(port)
+        if not nobrowser:
+            t = threading.Thread(target=self.run_browser_when_ready, args=())
+            t.start()
+        if platform == 'win32':
+            disable_file_system_redirection().__enter__()
         if ssl:
-            if not nobrowser:
-                a_website = "https://127.0.0.1:{}/".format(port)
-                webbrowser.open_new_tab(a_website)
-            if platform == 'win32':
-                disable_file_system_redirection().__enter__()
             os.system("python manage.py runserver_plus {port} --cert server_cert".format(port=port))
         else:
-            if not nobrowser:
-                a_website = "http://127.0.0.1:{}/".format(port)
-                webbrowser.open_new_tab(a_website)
-            if platform == 'win32':
-                disable_file_system_redirection().__enter__()
             os.system("python manage.py runserver {port}".format(port=port))
+
+    def run_browser_when_ready(self):
+        ready = False
+        while not ready:
+            try:
+                r = requests.get(self.url)
+                if r.status_code == 200:
+                    ready = True
+            except SSLError:
+                ready = True
+            except ConnectionError:
+                pass
+            sleep(1)
+        webbrowser.open_new_tab(self.url)
