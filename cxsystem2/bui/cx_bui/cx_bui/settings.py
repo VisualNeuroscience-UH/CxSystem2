@@ -20,53 +20,84 @@ LOGGING_CONFIG = None
 
 cx_folder = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent.parent
 yaml_path = cx_folder.joinpath('.cxconfig.yaml')
-with open(yaml_path.as_posix(), 'r') as file:
-    httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
-log_path = Path(httpsconfig['log']['path'])
-print("Setting log path to {}".format(log_path))
+try:
+    with open(yaml_path.as_posix(), 'r') as file:
+        httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
+    log_path = Path(httpsconfig['log']['path'])
+    print("Setting log path to {}".format(log_path))
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'console': {
+                # exact format is not important, this is the minimum information
+                'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+            },
+            'file': {
+                'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'console',
+            },
+            'error_logfile': {
+                'level': 'ERROR',
+                'class': 'logging.FileHandler',
+                'formatter': 'file',
+                'filename': log_path.joinpath('.cxerror.log').as_posix()
+            },
+            'info_logfile': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'formatter': 'file',
+                'filename': log_path.joinpath('.cxinfo.log').as_posix()
+            }
 
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'console': {
-            # exact format is not important, this is the minimum information
-            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
         },
-        'file': {
-            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-        }
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'console',
+        'loggers': {
+            'error_logger': {
+                'level': 'ERROR',
+                'handlers': ['console', 'error_logfile'],
+            },
+            'info_logger': {
+                'level': 'INFO',
+                'handlers': ['console', 'info_logfile'],
+            },
         },
-        'error_logfile': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'formatter': 'file',
-            'filename': log_path.joinpath('.cxerror.log').as_posix()
+    })
+except FileNotFoundError:
+    print("Server configuration file not found, logging to console only")
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'console': {
+                # exact format is not important, this is the minimum information
+                'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+            },
+            'file': {
+                'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+            }
         },
-        'info_logfile': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'formatter': 'file',
-            'filename': log_path.joinpath('.cxinfo.log').as_posix()
-        }
-
-    },
-    'loggers': {
-        'error_logger': {
-            'level': 'ERROR',
-            'handlers': ['console', 'error_logfile'],
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'console',
+            }
         },
-        'info_logger': {
-            'level': 'INFO',
-            'handlers': ['console', 'info_logfile'],
+        'loggers': {
+            'error_logger': {
+                'level': 'ERROR',
+                'handlers': ['console'],
+            },
+            'info_logger': {
+                'level': 'INFO',
+                'handlers': ['console'],
+            },
         },
-    },
-})
+    })
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
