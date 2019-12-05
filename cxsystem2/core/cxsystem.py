@@ -1887,7 +1887,7 @@ class CxSystem:
         assert np.any(self.current_parameters_list.str.contains('type')), ' -  The type of the input is not defined in the configuration file.'
         input_type_to_method_mapping = {
             # input type : [ columns , obligatory column indices,  sub-routine to call     ]
-            'video': [['idx', 'type', 'path', 'freq', 'monitors'], [0, 1, 2], video],
+            'Video': [['idx', 'type', 'path', 'freq', 'monitors'], [0, 1, 2], video],
             'VPM': [['idx', 'type', 'number_of_neurons', 'radius', 'spike_times', 'net_center', 'monitors'], [0, 1, 2, 3, 4], VPM],
             'spikes': [['idx', 'type', 'input_spikes_filename', 'monitors'], [0, 1, 2], spikes]
         }
