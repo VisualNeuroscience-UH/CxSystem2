@@ -70,7 +70,7 @@ methods and functions to `sphinx` for parsing:
       .. autofunction:: get_spike_stats
 
 The first line of this example defines the file that should be parsed. In this
-case the filename is `spike_tools.py` and it's located at
+case the filename is `spike_tools.py` and it is located at
 `cxsystem2/neurodynlib/tools/spike_tools.py`. The `autoclass` directive defines
 the class that should be parsed from that file and the `automethod` defines the
 method of that class that should be parsed. In this case only `__init__()` will

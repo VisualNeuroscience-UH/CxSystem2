@@ -46,6 +46,7 @@ Temporary Items
 *.pyc
 *.rst~
 docs/_build/
+docs/build/
 
 # Pytest files
 .pytest_cache

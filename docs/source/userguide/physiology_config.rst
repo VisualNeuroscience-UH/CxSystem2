@@ -5,25 +5,26 @@ The physiological configuration consists of
 
 * :ref:`General model parameters <general_params>`
 * :ref:`Cell-type specific parameters <cell_params>`
-* :ref:`Parameters related to connections and synapses <connection_params>`
+* :ref:`Connection- and synapse-type specific parameters <connection_params>`
 * :ref:`Other simulation parameters <other_params>`
 
-The pre-defined structure of the physiology configuration is loose compared to the anatomy configuration.
-It consists of constants (*variable-values*) and dictionaries (*variable-key-values*).
+The physiology configuration consists of constants (*variable-values*) and dictionaries (*variable-key-values*).
 
-There are five hard-coded cell types in CxSystem2 (two excitatory, SS and PC; three inhibitory, BC, MC and L1i),
+There are five hard-coded neuron types in CxSystem2 (two excitatory, SS and PC; three inhibitory, BC, MC and L1i),
 but the user can easily define subtypes, e.g. L4_MC. Subtypes can have arbitrary names (e.g. MyFavouriteBasketCellType, L5_LBC).
+Each 'model' refers to Brian equations, which are explained in the Neurodynlib section <link>.
+Advanced users are able to add new neuron types, including new membrane equation models. See the Developer's guide <link>.
 
 
 .. _general_params:
 
 General model parameters
 ------------------------
-There are some pre-defined parameters that should be defined for every model. In particular, it is important to set
-the desired neuron model here. Currently, PCs are restricted to a single neuron model.
+General model parameters affect all neurons and synapses. 
+They include the point neuron model, compartmental PC neuron model, receptor models, receptor weights and background noise rates.
 Note that the model names must be surrounded by single-quotes.
 
-These parameters are included in the template configuration files.
+These parameters are included in the example configuration files, including some short explanations in comments.
 
 The parameters are:
 
@@ -54,11 +55,11 @@ The parameters are:
 
 .. _cell_params:
 
-Cell type-specific parameters
------------------------------
-Cell type-specific parameters are given as dictionaries. Subtype-specific parameters (e.g. L23_MC, L4_MC) will override
+Neuron type-specific parameters
+-------------------------------
+Neuron type-specific parameters are given as dictionaries. Subtype-specific parameters (e.g. L23_MC, L4_MC) will override
 parameters for the hard-coded types (MC). Parameter names must match those defined in neurodynlib.
-For example, to define parameters for BC cells that are modelled as exponential
+For example, to define parameters for BC neurons that are modelled as exponential
 integrate-and-fire (EIF) neurons, you would write:
 
  .. csv-table::
@@ -88,15 +89,15 @@ As shown in the example, you can refer to parameters (and do computations using 
 
 .. _connection_params:
 
-Parameters related to connections and synapses
-----------------------------------------------
+Connection- and synapse-type specific parameters
+------------------------------------------------
 Connection weights and connections delays are also given as dictionaries (:code:`cw` and :code:`delay`, respectively).
 These are given with reference to the hard-coded cell types. Pathway-specific connection weights can be set in
 the anatomy configuration using the :code:`custom_weight` parameter. If there is no custom_weight defined,
 then values in the :code:`cw` dictionary will be used. Currently there is no way to define pathway- or neuron
 subtype-specific delays.
 
-These dictionaries are included in the template configuration files. Even though you might not have all the
+These dictionaries are included in the example configuration files. Even though you might not have all the
 hard-coded cell types in your model, you don't need to delete the redundant lines.
 
 

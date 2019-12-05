@@ -1,7 +1,10 @@
 Batch simulations
 =================
 
-Array run (Parallel runs) can be set using the curly braces around the target parameter. For instance, to run 3 separate simulations\
+Array run (Parallel runs) can be set using the curly braces around the target parameter. There are two special characters
+indicating either an explicit vector of values (ampersand, \&) or numpy style range with step as the third value (vertical bar, \|).
+
+For instance, to run 3 separate simulations\
 with :code:`scale=1`, :code:`scale=2` and :code:`scale=3`, the parameter scale should be set to:
 
  .. csv-table:: 
@@ -37,4 +40,4 @@ When :code:`multidimension_array_run flag` is set to 0, however, the array_run p
 	{scale=1}, {scale=2}, {scale=3}, {init_vms=0}, {init_vms=1}
 
 One might want to run each of the parallel simulations several times, e.g. to observe an effect of random initialization on a particular parameter set.
-For this purpose the :code:`trials_per_config` should be set to number of runs per configuration.
+For this purpose the :code:`trials_per_config` should be set to the desired number of runs per configuration.

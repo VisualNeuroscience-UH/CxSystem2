@@ -3,16 +3,16 @@
 Anatomy & simulation configuration
 ==================================
 
-The anatomy configuration consists of
+This configuration consists of
 
 * :ref:`Simulation run parameters <sim_params>`
 * :ref:`External inputs <external_input>`
 * :ref:`Neuron groups (cell types) <neuron_groups>`
 * :ref:`Connections (pathways) <connections>`
 
-In the browser user interface (local or in the BSP), these are divided into separate tabs, while in the old-style
-csv file interface, they are all located in the same “anatomy configuration file”. Also monitors -- which state
-variables to record during simulations -- are defined here (:ref:`details on defining monitors <monitors>`).
+In the browser user interface these are divided into separate tabs, while in the
+csv file interface, they are all located in the same “anatomy configuration file”. This configuration includes 
+also :ref:`recording monitors <monitors>` for state variables.
 
 If you are using the csv file interface to construct your model, please start from the anatomy and physiology
 template csv files provided. If you still have trouble defining your model, please see
@@ -29,58 +29,56 @@ The necessary parameters for running simulations locally are:
 
         :code:`device{Python,Cython,Cpp,GeNN}`: Sets the device for Brian2 code generation.
 
-        :code:`sys_mode{local, expanded}`: The system can be run in two modes: **local** and **expanded** mode (?)
+        :code:`sys_mode{local, expanded}`: The system can be run in two modes: **local** and **expanded** mode. Expanded mode applies distance dependence in connection probabilities.
 
-        :code:`scale{int}`: Sets how the network is scaled (?)
+        :code:`scale{int}`: Relative area of cortical surface. 
 
         :code:`grid_radius{float*unit}`: Sets the radius of the 2D circle from which the x-y coordinates are randomized, e.g. 210*um.
 
-        :code:`min_distance{float*unit}`: Sets the minimum distance between neurons, e.g. 1*um.
+        :code:`min_distance{float*unit}`: Sets the minimum distance between neurons inside single layer, e.g. 1*um.
 
         :code:`workspace_path{string}`: The main working directory of CxSystem; other paths are given relative to this path.
 
-        :code:`simulation_title{string}`: Title for the current batch of simulations
+        :code:`simulation_title{string}`: Title for the current batch of simulations.  
 
-        :code:`compression_method{gzip,bzip2,pickle}`: Data compression method
+        :code:`compression_method{gzip,bzip2,pickle}`: Data compression method.
 
-        :code:`import_connections_from`: Path and filename from where connections with synaptic weights are imported (relative to workspace path)
+        :code:`import_connections_from`: Path and filename from where connections with synaptic weights are imported (relative to workspace path).
 
-        :code:`number_of_process`: Number of CPU cores to use in parallel (for batch runs; a single simulation cannot be run in parallel)
+        :code:`number_of_process`: Number of CPU cores to use in parallel. For array runs only. A single simulation cannot be run in parallel.
 
-        :code:`default_clock`: Simulation time step (e.g. 0.1*ms)
+        :code:`default_clock`: Simulation time step (e.g. 0.1*ms).
 
-        :code:`trials_per_config{int}`: Number of trials for each set of parameters
+        :code:`trials_per_config{int}`: Number of trials for each set of parameters.
 
-        :code:`init_vms{0,1}`: Randomize initial membrane voltages (between V_init_min and V_init_max)
+        :code:`init_vms{True, False}`: Randomize initial membrane voltages (between V_init_min and V_init_max).
 
-        :code:`load_positions_only{1,0}`: Import neuron positions from connectivity file but randomize connections
+        :code:`load_positions_only{True, False}`: Import neuron positions from connectivity file but randomize connections.
 
-        :code:`benchmark{1,0}`: Defines whether the full benchmark is to be performed during the simulation. This benchmark, that was used for preparing the data for the CxSystem paper, is high probably not useful for non-developer users since it needs modified copy of brian2 library.
+        :code:`benchmark{True, False}`: Only for development. Needs modified copy of brian2 library.
 
-        :code:`save_input_video{1,0}`: Defines whether the generated video input is to be saved or not. This is essential in case the users wants to use the identical input on different runs, so the input can be saved by setting this to 1 and used later.
+        :code:`save_input_video{True, False}`: Defines whether the generated video input is to be saved or not. This is essential in case the users wants to use the identical input on different runs, so the input can be saved by setting this to 1 and used later.
 
-        :code:`number_of_process{int}`: Defines the number of processes to be spawned for array run.
+        :code:`multidimension_array_run{True, False}`: Defines whether the array run is multi-dimensional or one-dimensional. In one-dimensional array run, each set of parameters is run separately, while the other set is fixed. In multidimensional run, the full matrix of parameter combinations are run.
 
-        :code:`multidimension_array_run{1,0}`: Defines whether the array run is multi-dimensional or one-dimensional. In one-dimensional array run, each set of parameters is run separately, while the other set is fixed. In multidimensional run, the full matrix of parameter combinations are run.
+        :code:`profiling{True, False}` Defines whether CxSystem should report the benchmark using the built-in Brian profiler.
 
-        :code:`profiling{0,1}` Defines whether CxSystem should report the benchmark using the built-in Brian profiler.
-
-        :code:`run_in_cluster{0,1}` Run the simulation on a cluster.
+        :code:`run_in_cluster{True, False}` Run the simulation on a cluster.
 
 
 If you want to run simulations on a cluster, you will also need to define:
 
-    :Simulation:  :code:`cluster_job_file_path{string}`: Absolute path and filename of the local Slurm batch file.
+    :Simulation:  :code:`cluster_job_file_path{string}`: Absolute path and filename of the local batch file. Slurm example provided.
 
         :code:`cluster_number_of_nodes{int}`: Number of nodes to be employed on the HPC server.
 
-        :code:`cluster_address{string}`: Address of the HPC server (e.g. daint.cscs.ch)
+        :code:`cluster_address{string}`: Address of the HPC server (e.g. daint.cscs.ch).
 
-        :code:`cluster_login_node{string}`: Address of the login node in case there is one (e.g. ela.cscs.ch)
+        :code:`cluster_login_node{string}`: Address of the login node in case there is one (e.g. ela.cscs.ch).
 
-        :code:`cluster_username{string}`: Username on the HPC system
+        :code:`cluster_username{string}`: Username on the HPC system.
 
-        :code:`cluster_workspace{string}`: Workspace path on the HPC server
+        :code:`cluster_workspace{string}`: Workspace path on the HPC server.
 
 
 .. _external_input:
@@ -92,11 +90,6 @@ Currently, three types of inputs can be used, namely :code:`VPM` (referring to n
 :code:`video`, and :code:`spikes`. Note that external inputs use common indexing with the neuron groups. We recommend
 using the index 0 for the input group and indexing neuron groups from 1.
 
-?? The stimuli is created using a :code:`.mat` file. This stimuli is in form of spike and is passed \
-to a :code:`SpikeGeneratorGroup()` . This group is then connected to a relay :code:`NeuronGroup()` with a :code:`synapses()` object. \
-The main purpose of the relay neurons is to have positions for input neurons (:code:`SpikeGeneratorGroup` does not support \
-positions). Each of the inputs have their specific parameters in the configuration file: ??
-
     :VPM: :code:`idx{int}`: Index of the neuron group.
 
         :code:`type{VPM}`:
@@ -105,9 +98,9 @@ positions). Each of the inputs have their specific parameters in the configurati
 
         :code:`radius{float*unit}`: Total radius of all thalamocortical fibers, e.g. 60*um.
 
-        :code:`spike_times{float*unit}`: stimulation spike times, e.g. [1.0 3.0]*ms means a stimulation every 0.5ms.
+        :code:`spike_times{float*unit}`: stimulation spike times, e.g. [1.0 3.0]*ms means input spikes at 1.0 and 3.0 ms.
 
-        :code:`net_center`: defines the center of the thalamocortical fibers
+        :code:`net_center`: defines the center of the thalamocortical fibers in complex coordinates float+floatj.
 
         :code:`monitors`: Monitors for recording spikes or state variables. :ref:`More information on monitors <monitors>`
 

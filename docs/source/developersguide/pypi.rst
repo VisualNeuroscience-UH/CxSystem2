@@ -6,7 +6,8 @@ the version. The version of the `cxsystem2` are read from the `__version__`
 variable available in `cxsystem2/__init__.py`. If you update this variable,
 all other references to the version number will be updated globally.
 
-We will use the following versioning format from `software versioning in wiki <https://en.wikipedia.org/wiki/Software_versioning>`__:
+We will use the following versioning format for the 3rd number, from `software
+versioning in wiki <https://en.wikipedia.org/wiki/Software_versioning>`__:
 
 .. code-block:: bash
 
