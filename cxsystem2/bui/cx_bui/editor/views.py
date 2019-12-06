@@ -132,13 +132,14 @@ def simulate(request):
                 userid = auth_response.json()['id']
             else:
                 return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-        infologger.info("User {} started simulation".format(userid))
+            infologger.info("User {} started simulation".format(userid))
+
         received_data = list(request._get_post().keys())[0]
         sanitized_receive_data = eval(sanitize_data(received_data))
 
         anatomy = sanitized_receive_data['anatomy']
-        cx_workspace_path = get_workspace_path()
         if request.is_secure() and userid != '':
+            cx_workspace_path = get_workspace_path()
             user_workspace_path =  cx_workspace_path.joinpath(userid)
             user_workspace_path.mkdir(parents=True, exist_ok=True)
             if workspace_is_full(user_workspace_path):

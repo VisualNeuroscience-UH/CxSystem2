@@ -116,12 +116,14 @@ def main():
             if workspace_path.suffix != '':
                 print("Workspace path should be folder, removing the file name")
                 workspace_path = workspace_path.parent
+            workspace_path.mkdir(parents=True, exist_ok=True)
             httpsconfig['workspace'] = {'path': workspace_path.as_posix()}
         elif arguments['--log-path']:
             log_path = Path(arguments['--log-path'])
             if log_path.suffix != '':
                 print("Log path should be folder, removing the file name")
                 log_path = log_path.parent
+            log_path.mkdir(parents=True, exist_ok=True)
             httpsconfig['log'] = {'path': log_path.as_posix()}
 
         with open(yaml_path.as_posix(), 'w') as file:
