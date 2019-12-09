@@ -51,7 +51,7 @@ The necessary parameters for running simulations locally are:
 
         :code:`trials_per_config{int}`: Number of trials for each set of parameters.
 
-        :code:`init_vms{True, False}`: Randomize initial membrane voltages (between V_init_min and V_init_max).
+        :code:`init_vms{True, False}`: If True, randomize initial membrane voltages between V_init_min and V_init_max. If False, the initial membrane voltage is set as V_init.
 
         :code:`load_positions_only{True, False}`: Import neuron positions from connectivity file but randomize connections.
 

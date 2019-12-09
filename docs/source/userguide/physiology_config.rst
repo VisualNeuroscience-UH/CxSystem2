@@ -28,7 +28,7 @@ These parameters are included in the example configuration files, including some
 
 The parameters are:
 
-    :Physiology:    :code:`model_variation{0,1}`: This should be 1. Value 0 is only for backwards compatibility.
+    :Physiology:    :code:`model_variation{0,1}`: This should be 1. Value 0 is only for backwards compatibility, i.e. old models that use equations hard-coded in CxSystem1.
 
         :code:`neuron_model{'string'}`: Specifies which neuron model to use for point neurons (other cells than PCs). :ref:`Available neuron models <neuron_models>`.
 
