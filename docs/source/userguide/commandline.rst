@@ -37,10 +37,11 @@ This command can be used to run a simulation using anatomy and configuration fil
       cxsystem2 --anatomy ./anatomy.csv --physiology ./physiology.csv
         runs the cxsystem using the anatomy file called anatomy.csv and physiology file called physiology.csv
 
+.. _cxvisualize:
 
 :code:`cxvisualize`
 -------------------
-This command can be used to visualize the result of a simualtion using :code:`ViSimpl` (avaialble `here <https://gmrv.es/gmrvvis/visimpl/>`__
+This command can be used to visualize the result of a simualtion using :code:`ViSimpl` (available `here <https://gmrv.es/gmrvvis/visimpl/>`__
 for download):
 
 .. code-block:: console
@@ -146,6 +147,8 @@ when they are ready, you can use the :code:`cxcluster` command as follows:
       cxcluster ./sample_meta.pkl
         Uses the information in the metadata file to download the results if ready, and otherwise wait for the results.
         User will be prompted for the remote password.
+
+.. _cxserver:
 
 :code:`cxserver`
 ----------------
