@@ -25,7 +25,7 @@ ViSimpl
 ViSimpl allows you to visualize the time course and geometry of spiking in a single simulation. After
 `downloading ViSimpl <http://gmrv.es/gmrvvis/visimpl/>`_ (currently Linux and macOS only),
 you should set the path where the ViSimpl binary is located in your system path. Then, you can visualize
-CxSystem2 spike data in ViSimpl using the :code:`cxvisualize` command (:ref:`more on the command <cxvisualize>`):
+CxSystem2 spike data in ViSimpl using the :code:`cxvisualize` :ref:`command <cxvisualize>`:
 
 .. code-block:: console
 
@@ -33,7 +33,7 @@ CxSystem2 spike data in ViSimpl using the :code:`cxvisualize` command (:ref:`mor
 
 This opens up the ViSimpl main screen. You should be able to rotate the circuit and "play" the simulation
 without further configuration. To learn how you can customize the visualization, please see the
-`ViSimpl website <http://gmrv.es/gmrvvis/visimpl/>`_ (ViSimpl user manual).
+`ViSimpl website <http://gmrv.es/gmrvvis/visimpl/>`_.
 
 Custom visualizations
 ---------------------

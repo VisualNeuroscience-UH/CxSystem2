@@ -10,6 +10,8 @@ manager systems, e.g. Torque.
 Setting up the environment
 ...........................
 
+We assume that you are familiar with and have access to and available resources for a computing cluster, and that your 
+cluster accepts ssh connections.
 Before submitting the batch jobs to the cluster with CxSystem, the cluster environment should be properly set up. 
 This includes finding/copying/assigning the python environment in the Slurm file. In case you are using 
 a custom branch you should as well clone and checkout to that branch otherwise CxSystem will clone itself and try to 

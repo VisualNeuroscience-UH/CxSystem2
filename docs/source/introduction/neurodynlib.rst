@@ -1,3 +1,5 @@
+.. _neurodynlib:
+
 Neurodynlib
 ===========
 
@@ -6,12 +8,15 @@ for example, inside a Jupyter notebook to explore the behaviour of single neuron
 Neurodynlib grew out of the need to understand the behaviour of neuron models before incorporating them
 into a larger network.
 
-Neurodynlib is based on the exercise 'code repository <http://github.com/EPFL-LCN/neuronaldynamics-exercises>' accompanying the book
+Neurodynlib is based on the exercise `code repository <http://github.com/EPFL-LCN/neuronaldynamics-exercises>`_ accompanying the book
 `Neuronal Dynamics <http://neuronaldynamics.epfl.ch>`_.
 
 The book is also published in print:
 Wulfram Gerstner, Werner M. Kistler, Richard Naud, and Liam Paninski.
 *Neuronal Dynamics: From Single Neurons to Networks and Models of Cognition*. Cambridge University Press, 2014.
+
+To install jupyter, type :code:`pip install jupyter`. You can launch a directory view on available notebooks by typing
+:code:`jupyter notebook` at CxSystem2/cxsystem2/neurodynlib/tutorial. To open another notebook, go to File=>Open.
 
 .. _neuron_models:
 
