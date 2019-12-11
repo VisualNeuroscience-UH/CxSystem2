@@ -48,18 +48,17 @@ Adding Neuron Model
 --------------------
 Adding a new neuron group
 `````````````````````````
-Equations for different neuron types are in the class *NeuronReference* in physiology_reference.py. Under this class, there is a separate method for each neuron group containing equation templates. Adding a new neuron group can be done by copy-pasting the method of eg. the BC neuron group and renaming it (ChC for chandelier cell):
+The hard-coded neuron types (L1i, BC, MC, SS, PC) are in the class *NeuronReference* in physiology_reference.py.
+Under this class, there is a separate method for each neuron group containing code that builds the membrane equation(s).
+Adding a new neuron group can be done by copy-pasting the method of eg. the BC neuron group and renaming it (ChC for chandelier cell):
 
 .. code-block:: python
 
    def ChC(self):
-      self.output_neuron['equation'] = Equations('''
-      dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) / C): volt (unless refractory)
-      dge/dt = -ge/tau_e : siemens
-      dgi/dt = -gi/tau_i : siemens
-      ''', ge='ge_soma', gi='gi_soma')
-      self.output_neuron['equation'] += Equations('''x : meter
-                                                     y : meter''')
+        x = neuron_factory().get_class(self.neuron_model)
+        x.set_excitatory_receptors(self.excitation_model)
+        x.set_inhibitory_receptors(self.inhibition_model)
+        ...
 
 You also need to add the neuron type to the list of accepted types under the init of *NeuronReference*:
 
@@ -86,40 +85,69 @@ Note that you might need to add connection weights and delays in physiological c
 After this, the neuron equation parameters should be added to Physiological configuration file.
 
 Adding alternative neuron models to existing groups
-```````````````````````````````````````````````````````
-Typically you want to add an alternative neuron model to an existing neuron group. Suppose you wanted to have the adaptive exponential integrate-and-fire model (AdEx) alongside the regular exponential integrate-and-fire model (EIF). You want to flexibly switch between the models using a 0/1 flag in the physiological configuration file. First, you would add the AdEx equations to :code:`NeuronReference`:
+```````````````````````````````````````````````````
+Instead of adding a hard-coded neuron type, you typically need to add an alternative neuron model.
+Point neuron models are now located in the :code:`cxsystem2.neurodynlib` submodule (soon multicompartment models as well), where
+you can create a class for the new neuron model. Using :code:`PointNeuron` as a base class gives access to
+basic functionalities for exploring the model behavior.
+
+For example, to add the adaptive exponential integrate-and-fire (AdEx) model, we have written:
 
 .. code-block:: python
 
-   def BC(self):
+    class AdexNeuron(PointNeuron):
 
-       self.output_neuron['equation'] = ...default model definition here...
+        default_neuron_parameters = {
+                'EL': -70.0 * mV,
+                'V_res': -51.0 * mV,
+                'VT': -50.0 * mV,
+                'gL': 2 * nS,
+                'C': 10 * pF,
+                'DeltaT': 2 * mV,
+                'a': 0.5 * nS,
+                'b': 7.0 * pA,
+                'tau_w': 100.0 * ms,
+                'refractory_period': 2.0 * ms,
+                'Vcut': -30.0 * mV
+        }
 
-       if self.flag_adex == 1:
-            self.output_neuron['equation'] = Equations('''
-                dvm/dt = ((gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge * (Ee-vm) + gi * (Ei-vm) -w) / C) : volt (unless refractory)
-                dge/dt = -ge/tau_e : siemens
-                dgi/dt = -gi/tau_i : siemens
-                dw/dt = (a*(vm - EL)-w)/tau_w : amp
-                ''', ge='ge_soma', gi='gi_soma')
+        neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) - w + gL * DeltaT * exp((vm-VT) / DeltaT)',
+                              'NEURON_MODEL_EQS': 'dw/dt = (a*(vm-EL) - w) / tau_w : amp'}
+        model_info_url = 'http://neuronaldynamics.epfl.ch/online/Ch6.S1.html'
 
-Make a similar change to all the neuron groups you want to be affected. Then, extract :code:`flag_adex` in the init of :code:`NeuronReference`:
+Then we added the init method:
 
 .. code-block:: python
 
-   try:
-      self.flag_adex = self.value_extractor(self.physio_config_df, 'flag_adex')
-      if self.flag_adex == 1:
-         self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
-   except:
-      self.flag_adex = 0
+    def __init__(self):
 
-It is a good idea to extract any flag under :code:`try` unless you want it to be always explicitly defined (will cause an error if not defined). In the case of AdEx, also the reset condition needs to be modified here as it is not a part of the equation templates. After these changes, you can use :code:`flag_adex` in the physiological CSV file to switch between the two neuron models.
+        super().__init__()
+        self.threshold_condition = 'vm > Vcut'
+        self.reset_statements = 'vm = V_res; w += b'
+        self.initial_values = {'vm': None, 'w': 0*pA}  # None in vm => vm initialized at EL
+        self.states_to_monitor = ['vm', 'w']  # Which state variables to monitor by default
 
+        # Parameters and their units that have not been defined in the base class:
+        new_parameter_units = {'DeltaT': mV, 'Vcut': mV, 'a': nS, 'b': pA, 'tau_w': ms}
+        self.parameter_units.update(new_parameter_units)
+
+After these initial definitions, you can add model-specific methods. Finally, you need to add the neuron model to the
+factory method via which CxSystem accesses neurodynlib:
+
+.. code-block:: python
+
+    class neuron_factory:
+        def __init__(self):
+            self.name_to_class = {...existing models... , 'ADEX': AdexNeuron}
+
+After this you can use change the *neuron_model* parameter to 'ADEX' to use the AdEx equations in your point neurons.
 
 Adding Synapse Model
 ---------------------
-Similarly to adding new neuron groups, you need to add the new synapse types to the lists of accepted types. Suppose you wanted to add a 'Depressing' synapse type (a form of short-term synaptic plasticity). First, in the init of :code:`SynapseReference` (:code:`physiology_reference.py`):
+Synapse models are currently located in :code:`cxsystem2.core` in physiology_reference.py.
+Similarly to adding new neuron groups, you need to add the new synapse types to the lists of accepted types.
+For example, we wanted to add a 'Depressing' synapse type (a form of short-term synaptic plasticity).
+First, in the init of :code:`SynapseReference` (:code:`physiology_reference.py`):
 
 .. code-block:: python
 
@@ -131,7 +159,7 @@ Then similarly in the init of *synapse_parser* (parameter_parser.py):
 
    synapse_parser.type_ref = array ([...existing synapse types..., 'Depressing'])
 
-Equations for the new synapse type can then be added as a method under *SynapseReference*:
+Equations for the new synapse type were then added as a method under *SynapseReference*:
 
 .. code-block:: python
 
@@ -148,5 +176,6 @@ Equations for the new synapse type can then be added as a method under *SynapseR
         R = R - U * R
         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
 
-After these changes, one can use the reference 'Depressing' in the anatomical CSV configuration file when defining connections between neuron groups. Definition of 'Facilitating' synapses could then be added in a similar way.
+After these changes, one can use the reference 'Depressing' in the Anatomy configuration when defining connections
+between neuron groups.
 
