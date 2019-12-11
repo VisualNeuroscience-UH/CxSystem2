@@ -71,8 +71,7 @@ def _convert(filepath):
 def _run_visimpl(structure_csv,
                  spikes_csv,
                  subsets_json):
-    run_visimpl_cmd = VISIMPL_BINARY + ' -csv ' + str(structure_csv) + ' ' + str(spikes_csv) + ' -se ' + str(
-        subsets_json)
+    run_visimpl_cmd = VISIMPL_BINARY + ' -csv ' + str(structure_csv) + ' ' + str(spikes_csv) + ' -se ' + str(subsets_json)
     os.system(run_visimpl_cmd)
 
 
@@ -105,6 +104,7 @@ def main():
             sampling_rate = arguments['--sampling-rate']
         rasterplot_pdf_generator(folder_path, timestamp, sampling_rate)
     else:
+        check_visimpl()
         filepath = Path(arguments['FILEPATH'])
         if not filepath.is_file():
             print("Error: file {} not found".format(filepath.as_posix()))
