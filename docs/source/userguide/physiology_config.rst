@@ -4,7 +4,7 @@ Physiology configuration
 The physiological configuration consists of
 
 * :ref:`General model parameters <general_params>`
-* :ref:`Cell-type specific parameters <cell_params>`
+* :ref:`Neuron-type specific parameters <cell_params>`
 * :ref:`Connection- and synapse-type specific parameters <connection_params>`
 * :ref:`Other simulation parameters <other_params>`
 
@@ -12,8 +12,8 @@ The physiology configuration consists of constants (*variable-values*) and dicti
 
 There are five hard-coded neuron types in CxSystem2 (two excitatory, SS and PC; three inhibitory, BC, MC and L1i),
 but the user can easily define subtypes, e.g. L4_MC. Subtypes can have arbitrary names (e.g. MyFavouriteBasketCellType, L5_LBC).
-Each 'model' refers to Brian equations, which are explained in the Neurodynlib section <link>.
-Advanced users are able to add new neuron types, including new membrane equation models. See the Developer's guide <link>.
+Each 'model' refers to Brian equations, which are explained in the :ref:`neurodynlib` section.
+Advanced users are able to add new neuron types, including new membrane equation models. See the :ref:`developersguide`.
 
 
 .. _general_params:

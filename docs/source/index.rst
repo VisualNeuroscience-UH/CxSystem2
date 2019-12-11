@@ -16,7 +16,7 @@ hard to manage due to the large number of biological details.
 
 We currently provide two interfaces for constructing networks: a browser-based interface (locally or via the BSP),
 and a file-based interface (json or csv). Before incorporating neuron models into a network,
-the user can explore their behavior using the :ref:'neurodynlib <neurodynlib>' submodule. Spike output and 3D structure of network simulations can be
+the user can explore their behavior using the :ref:`neurodynlib` submodule. Spike output and 3D structure of network simulations can be
 visualized using `ViSimpl <http://gmrv.es/gmrvvis/visimpl/>`_, a visualization tool developed by the
 `GMRV Lab <http://gmrv.es/gmrvvis/>`_.
 
@@ -24,9 +24,9 @@ More information on the technical details and our motivation is available `here 
 We have used the simulator to construct `a simplified version of a comprehensive cortical microcircuit
 <https://researchportal.helsinki.fi/files/126265461/Hokkanen_2019_NECO.pdf>`_.
 
-The preliminary version of CxSystem2 was developed at `Aalto University <https://www.aalto.fi/en>` in 2012-2015, and
-the current version was developed at the `University of Helsinki <https://www.helsinki.fi/en>` in 2013-2019.
-The software is distributed under the terms of the GNU GPL v3.
+The preliminary version of CxSystem2 was developed at the `Aalto University <https://www.aalto.fi/en>`_ in 2012-2015, and
+the current version was developed at the `HUS Helsinki University Hospital <https://www.hus.fi/en/Pages/default.aspx>`_ and 
+`University of Helsinki <https://www.helsinki.fi/en>`_ in 2013-2019. The software is distributed under the terms of the GNU GPL v3.
 
 Contents:
 

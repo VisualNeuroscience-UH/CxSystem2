@@ -1,3 +1,5 @@
+.. _developersguide:
+
 Developer's Guide
 ====================
 

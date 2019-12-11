@@ -16,7 +16,7 @@ also :ref:`recording monitors <monitors>` for state variables.
 
 If you are using the csv file interface to construct your model, please start from the anatomy and physiology
 template csv files provided. If you still have trouble defining your model, please see
-`CxSystem1 documentation <https://cxsystem.readthedocs.io/en/master/>` or contact us.
+`CxSystem1 documentation <https://cxsystem.readthedocs.io/en/master/>`_ or contact us.
 
 .. _sim_params:
 
@@ -25,11 +25,12 @@ Simulation run parameters
 
 The necessary parameters for running simulations locally are:
 
-    :Simulation:  :code:`runtime{int*unit}`: Sets the duration of the simulation, e.g. 3000*ms.
+    :Simulation:  :code:`runtime{int*unit}`: Sets the duration of the simulation, e.g. 200*ms.
 
         :code:`device{Python,Cython,Cpp,GeNN}`: Sets the device for Brian2 code generation.
 
-        :code:`sys_mode{local, expanded}`: The system can be run in two modes: **local** and **expanded** mode. Expanded mode applies distance dependence in connection probabilities.
+        :code:`sys_mode{local, expanded}`: The system can be run in two modes: **local** and **expanded** mode. Expanded mode applies distance 
+        dependence of connection probabilities.
 
         :code:`scale{int}`: Relative area of cortical surface. 
 
@@ -105,7 +106,7 @@ using the index 0 for the input group and indexing neuron groups from 1.
         :code:`monitors`: Monitors for recording spikes or state variables. :ref:`More information on monitors <monitors>`
 
 
-    :video: `<idx>{int}`: Index of the NeuronGroup().
+    :video: :code:`idx{int}`: Index of the :code:`NeuronGroup()`.
 
         :code:`type`: videos
 
@@ -137,10 +138,10 @@ In this example an input :code:`NeuronGroup()` with index 0 is created based on 
 Here's another example for :code:`VPM` input for the system:
 
   .. csv-table::
-     :widths: 10, 5, 5, 10, 5, 10, 10, 10 
+     :widths: 10, 5, 5, 10, 5, 10, 10, 10
 
-    row_type,idx,type,number_of_neurons,radius,spike_times,net_center,monitors
-    IN,0, VPM,60,92*um,[0.5]*second, -- ,[Sp]
+     row_type,idx,type,number_of_neurons,radius,spike_times,net_center,monitors
+     IN,0,VPM,60,92*um,[0.5]*second, -- ,[Sp]
 
 
 .. _neuron_groups:
@@ -208,7 +209,7 @@ If the postsynaptic neuron is a multicompartmental neuron, the target compartmen
 Compartmental indexing starts from zero at the soma layer and increases towards the distal apical dendrite. The soma, and the basal
 dendrites and the first apical dendrite compartment are located in the soma layer are distinguished with s, b and a tags, respectively.
 
-For example, if you have PC neuron with a :code:`layer_idx` of [6->1] (soma in layer 4 and apical dendrite extending up to layer 1),
+For example, if you have PC neuron with a :code:`layer_idx` of [6->1] (soma in layer 6 and apical dendrite extending up to layer 1),
 the compartmental indexing is:
 
  .. csv-table::
