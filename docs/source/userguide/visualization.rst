@@ -22,9 +22,17 @@ simple bug in the simulation configuration.
 
 ViSimpl
 -------
-ViSimpl allows you to visualize the time course and geometry of spiking in a single simulation. After
-`downloading ViSimpl <http://gmrv.es/gmrvvis/visimpl/>`_ (currently Linux and macOS only),
-you should set the path where the ViSimpl binary is located in your system path. Then, you can visualize
+ViSimpl allows you to visualize the time course and geometry of spiking in a single simulation. First, download the
+`ViSimpl binary <http://gmrv.es/gmrvvis/visimpl/>`_ (the .AppImage binary is for Linux and the .dmg binary is for macOS).
+Then put the ViSimpl binary in a directory that is located in your system path. Also, remove version
+numbering from the binary and make it executable:
+
+.. code-block:: console
+
+    mv visimpl-0.1.4-x86_64.AppImage visimpl.AppImage
+    chmod +x visimpl.AppImage
+
+After this you can visualize
 CxSystem2 spike data in ViSimpl using the :code:`cxvisualize` :ref:`command <cxvisualize>`:
 
 .. code-block:: console
