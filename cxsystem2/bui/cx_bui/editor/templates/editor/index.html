@@ -219,12 +219,6 @@
                 </div>
 
                 <br>
-                <h3> Examples </h3>
-                <div style="border: solid #e1e1e1 1px; padding: 5px;width: 70%;">
-                    <p>
-                        The following examples are currently available for simulation:
-                    </p>
-                </div>
 
             </div>
         </div>
@@ -278,16 +272,24 @@
                 <h3>Examples</h3>
                 <div style="border: solid #e1e1e1 1px; padding: 5px; width: 70%;">
                     <p>
-                        We have prepared several configurations files for sample networks of different examples:
+                        We have prepared some example networks:
+                    <h4>Template network</h4>
+                    <p>
+                        <a href="#" onclick="load_example('template')">Click here</a> to load the template configuration.
+                        This example has all the obligatory parameters and is useful when starting to build a new model.
+                    </p>
+
                     <h4>Pytest</h4>
                     <p>
                         <a href="#" onclick="load_example('pytest')">Click here</a> to load the configuration for the pytest example which is
-                        basically a generic sample network.
+                        just a dummy example containing all the hard-coded cell types.
                     </p>
 
                     <h4>COBA-EIF</h4>
                     <p>
-                        <a href="#" onclick="load_example('cobaeif')">Click here</a> to load the configuration for the COBA-EIF example.
+                        <a href="#" onclick="load_example('cobaeif')">Click here</a> to load the configuration for the COBA-EIF example. It contains
+                        one excitatory and one inhibitory population of exponential integrate-and-fire (eif) neurons
+                        that are connected by conductance-based (coba) synapses.
                     </p>
 
 
@@ -297,7 +299,7 @@
                         cortex containing ~31 000 neurons divided into 17 neuron groups.
                         Details of the simplification are described in
                         <a href="https://www.mitpressjournals.org/doi/10.1162/neco_a_01188" target="_blank">the article</a>.
-                        Running this model should take ~6 minutes per 1 second of simulation time (device=Python).
+                        Running this model can take up to 15 minutes per 1 second of simulation time (device=Python).
                     </p>
                     <p>
                         <a href="#" onclick="load_example('markram_step2')">Click here</a> to load the configuration of the step 2 simplification.
@@ -306,7 +308,7 @@
                     <p>
                         This model contains all the 55 neuron groups of the Markram et al. (2015) rat somatosensory
                         cortex model. The neuron dynamics have been reduced to exponential integrate-and-fire.
-                        Running this model should take ~17 minutes per 1 second of simulation time (device=Python).
+                        Running this model can take up to 30 minutes per 1 second of simulation time (device=Python).
                     </p>
                     <p>
                         <a href="#" onclick="load_example('markram_step1')">Click here</a> to load the configuration of the step 1 simplification.

@@ -1,0 +1,12 @@
+row_type,runtime,device,sys_mode,scale,grid_radius,min_distance,init_vms,workspace_path,simulation_title,import_connections_from,load_positions_only,benchmark,profiling,save_input_video,multidimension_array_run,number_of_process,trials_per_config,default_clock,run_in_cluster,cluster_job_file_path,cluster_number_of_nodes,cluster_address,cluster_username,cluster_workspace
+params,1*second,Python,local,1,200*um,1*um,1,~/CxWorkspace,my_cortical_model,--,0,0,0,0,1,1,1,0.1*ms,0,./csc_taito.job,1,taito.csc.fi,username,/homeappl/home/username/CxWorkspace
+row_type,idx,type,number_of_neurons,radius,spike_times,net_center,monitors,,,,,,,,,,,,,,,,,
+IN,0,VPM,60,100*um,[99.0]*second,--,[Sp],,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
+row_type,idx,number_of_neurons,neuron_type,neuron_subtype,layer_idx,net_center,monitors,n_background_inputs,n_background_inhibition,,,,,,,,,,,,,,,
+G,1,3200,SS,--,4,--,[Sp],--,--,,,,,,,,,,,,,,,
+G,2,800,BC,--,4,--,[Sp],--,--,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
+row_type,receptor,pre_syn_idx,post_syn_idx,syn_type,p,n,monitors,load_connection,save_connection,custom_weight,,,,,,,,,,,,,,
+S,ge,0,1,Fixed,--,7,--,0-->,0-->,--,,,,,,,,,,,,,,
+S,ge,1,2,Fixed,0.1,7,--,1,1,--,,,,,,,,,,,,,,

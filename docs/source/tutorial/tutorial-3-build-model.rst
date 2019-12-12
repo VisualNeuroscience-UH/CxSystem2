@@ -1,4 +1,4 @@
 3 - Building a new model
 ========================
 
-Text here
+This tutorial is still under construction.
