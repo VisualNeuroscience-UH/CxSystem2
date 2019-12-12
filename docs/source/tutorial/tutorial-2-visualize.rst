@@ -27,8 +27,33 @@ should open up:
 
 When you scroll down the pdf, you can see that there are four pages corresponding to the four simulation files.
 (In networks with more neuron groups to visualize, a single simulation will occupy multiple pages.) You can see that
-with *k=1,2,3* (not that much inhibition) there is little variation in spike rate, but with *k=5* the activity seems
+with *k=1,2,3* (not that much inhibition) there is little variation in spike dynamics, but with *k=5* the activity seems
 more rhythmic.
+
+If you have CxSystem2 :ref:`installed locally <installation>`, you can download the simulation data to visualize it in
+:ref:`ViSimpl <visimpl>`. Just click on the *Download workspace* button. After the download has finished, open up a
+terminal window, unpack the file and use the :code:`cxvisualize` command:
+
+.. code-block:: console
+
+    (CX2) henhok@taz:~: cd Downloads
+    (CX2) henhok@taz:~/Downloads$ tar xvfz workspace.tar.gz
+    304441/
+    304441/cxoutput.out
+    304441/cobaeif/
+    304441/cobaeif/cobaeif_results_20191211_1106288_k1.gz
+    304441/cobaeif/cobaeif_results_20191211_1106288_k2.gz
+    304441/cobaeif/cobaeif_results_20191211_1106288_k3.gz
+    304441/cobaeif/cobaeif_results_20191211_1106288_k5.gz
+    (CX2) henhok@taz:~/Downloads$ cxvisualize 304441/cobaeif/cobaeif_results_20191211_1106288_k5.gz
+    Setting OpenGL context to 4.4
+    ...
+
+If the ViSimpl binary is available in the system path, the :code:`cxvisualize` command should lauch
+ViSimpl with the simulation data (for *k=5* in this case):
 
 .. image:: ../images/tut2-window05-visimpl_1000px.png
   :alt: CxSystem2 main window
+
+Congratulations! If you want to do your own visualizations on the spike data using Python,
+please see the :ref:`user's guide <custom_visualizations>`.

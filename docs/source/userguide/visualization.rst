@@ -43,6 +43,9 @@ This opens up the ViSimpl main screen. You should be able to rotate the circuit 
 without further configuration. To learn how you can customize the visualization, please see the
 `ViSimpl website <http://gmrv.es/gmrvvis/visimpl/>`_.
 
+
+.. _custom_visualizations:
+
 Custom visualizations
 ---------------------
 Simulation data are stored in dictionaries in the results file. For example, to access spike data in a gzipped file,
