@@ -15,8 +15,7 @@ The book is also published in print:
 Wulfram Gerstner, Werner M. Kistler, Richard Naud, and Liam Paninski.
 *Neuronal Dynamics: From Single Neurons to Networks and Models of Cognition*. Cambridge University Press, 2014.
 
-To install jupyter, type :code:`pip install jupyter`. You can launch a directory view on available notebooks by typing
-:code:`jupyter notebook` at CxSystem2/cxsystem2/neurodynlib/tutorial. To open another notebook, go to File=>Open.
+We provide a :ref:`short tutorial <tutorial_neurodynlib>` on Neurodynlib as Jupyter Notebooks.
 
 .. _neuron_models:
 
