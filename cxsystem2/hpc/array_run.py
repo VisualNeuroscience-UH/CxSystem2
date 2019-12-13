@@ -325,7 +325,7 @@ class ArrayRun:
         variables_to_iterate = []
         if '|' in array_variable:
             changing_part = array_variable[opening_braket_idx + 1:closing_braket_idx].replace('|', ',')
-            tmp_str = 'arange(' + changing_part + ')'
+            tmp_str = 'np.arange(' + changing_part + ')'
             variables_to_iterate = eval(tmp_str)
         elif '&' in array_variable:
             variables_to_iterate = eval('["' + array_variable[opening_braket_idx + 1:closing_braket_idx].replace('&', '","') + '"]')
