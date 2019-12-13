@@ -217,36 +217,36 @@ inputs_schema = {
             "keep_oneof_values": false
         },
         oneOf: [
-            {
-                "title": "Video Input",
-                "type": "object",
-                "id": "video",
-                "properties": {
-                    "idx": {
-                        "type": "integer",
-                        "description": "index"
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "Defines path to input video",
-                    },
-                    "type": {
-                        "type": "string",
-                        "description": "Defines path to input video",
-                        "enum": ["Video"]
-                    },
-                    "freq": {
-                        "type": "string",
-                        "format": "text",
-                        "description": "defines the frequency of "
-                    },
-                    "monitors": {
-                        "type": "string",
-                        "format": "text",
-                        "description": "defines noise",
-                    }
-                }
-            },
+            // {
+            //     "title": "Video Input",
+            //     "type": "object",
+            //     "id": "video",
+            //     "properties": {
+            //         "idx": {
+            //             "type": "integer",
+            //             "description": "index"
+            //         },
+            //         "path": {
+            //             "type": "string",
+            //             "description": "Defines path to input video",
+            //         },
+            //         "type": {
+            //             "type": "string",
+            //             "description": "Defines the input type",
+            //             "enum": ["Video"]
+            //         },
+            //         "freq": {
+            //             "type": "string",
+            //             "format": "text",
+            //             "description": "defines the frequency of "
+            //         },
+            //         "monitors": {
+            //             "type": "string",
+            //             "format": "text",
+            //             "description": "defines noise",
+            //         }
+            //     }
+            // },
             {
                 "title": "VPM",
                 "type": "object",
@@ -259,32 +259,33 @@ inputs_schema = {
                     },
                     "type": {
                         "type": "string",
-                        "description": "Defines path to input video",
+                        "description": "Defines the input type",
                         "enum": ["VPM"]
                     },
                     "number_of_neurons": {
                         "type": "integer",
-                        "description": "Defines number of neurons in neuron group ",
+                        "description": "Defines the number of neurons in the input group",
                         "default": 100,
                         "minimum": 1,
                         "maximum": 10000,
                     },
                     "radius": {
                         "type": "string",
-                        "description": "defines",
+                        "description": "Radius of the disc inside which the thalamocortical axons are spread",
                     },
                     "spike_times": {
                         "type": "string",
-                        "description": "Defines the spike times ",
+                        "description": "Defines the times of synchronous spikes",
                     },
                     "net_center": {
                         "type": "string",
-                        "description": "net center ",
+                        "description": "Center of the disc of thalamocortical connections",
                     },
                     "monitors": {
                         "type": "string",
                         "format": "text",
-                        "description": "defines noise",
+                        "default": "[Sp]",
+                        "description": "Sets the monitors",
                     }
                 }
             }
@@ -336,26 +337,31 @@ connections_schema = {
                 },
                 "n": {
                     "type": "string",
+                    "default": "1",
                     "description": "Number of synapses per connection"
                 },
                 "monitors": {
                     "type": "string",
                     "format": "text",
+                    "default": "--",
                     "description": "Monitors for synaptic state variables",
                 },
                 "load_connection": {
                     "type": "string",
                     "format": "text",
+                    "default": "1",
                     "description": "Load connection",
                 },
                 "save_connection": {
                     "type": "string",
                     "format": "text",
+                    "default": "1",
                     "description": "Save connection",
                 },
                 "custom_weight": {
                     "type": "string",
-                    "description": "Synaptic weight for this specific connection (overrides more general weight definitions)"
+                    "description": "Synaptic weight for this specific connection (overrides more general weight definitions)",
+                    "default": "--"
                 }
             }
         }]
