@@ -414,7 +414,10 @@ class NeuronParser:
         cropped_with_root = root_variables.append(cropped_df)
 
         for neural_parameter in cropped_df['Key'].dropna():
-            self.output_namespace[neural_parameter] = self.value_extractor(cropped_with_root, neural_parameter)
+            try:
+                self.output_namespace[neural_parameter] = self.value_extractor(cropped_with_root, neural_parameter)
+            except IndexError:  # otherwise neuron parameters cannot be of the form reversal_potentials['E_nmda']
+                self.output_namespace[neural_parameter] = self.value_extractor(physio_config_df, neural_parameter)
 
         getattr(self, '_' + output_neuron['type'])(output_neuron)
 
