@@ -163,7 +163,7 @@ neurons_schema = {
                     "description": "Number of neurons in the neuron group ",
                     "default": 100,
                     "minimum": 1,
-                    "maximum": 10000,
+                    "maximum": 100000,
                 },
                 "neuron_type": {
                     "type": "string",
