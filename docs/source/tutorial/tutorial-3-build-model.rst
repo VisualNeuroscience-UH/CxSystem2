@@ -100,3 +100,4 @@ workspace:
     my_first_model_results_20191216_0901136_background_rate4H_k7.gz
 
 
+Now you can use the techniques described in Tutorial 3 to visualize the results!
