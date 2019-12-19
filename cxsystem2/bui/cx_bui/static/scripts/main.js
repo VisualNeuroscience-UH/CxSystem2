@@ -361,7 +361,7 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
         var schema_variable = path_[path_last_idx];
         switch (schema_variable) {
             case "monitors":
-                if (!/^(\[Sp\]\s)?(\[St\](vm|test)\[rec\]?\([0-9]+\-[0-9]+\-[0-9]+\))*$|^(\[St\](vm|test)\[rec\]?\([0-9]+\-[0-9]+\-[0-9]+\))*(\s\[Sp\])?$/.test(value)) {
+                if (!/^(\[Sp\])?(\s)?(\[St\](vm|test)\[rec\]?\([0-9]+\-[0-9]+\-[0-9]+\))*$|^(\[St\](vm|test)\[rec\]?\([0-9]+\-[0-9]+\-[0-9]+\))*(\s\[Sp\])?$/.test(value)) {
                     errors.push({
                         path: path,
                         property: 'format',
