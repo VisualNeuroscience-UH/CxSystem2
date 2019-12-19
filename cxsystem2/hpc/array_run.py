@@ -337,12 +337,12 @@ class ArrayRun:
             temp_df.iloc[index_of_array_variable[0][0], index_of_array_variable[0][1]] = var
             if self.multidimension_array_run and len(index_of_array_variable) > 1:
                 tmp_title, tmp_value, tmp_message = self.message_finder(temp_df, index_of_array_variable, df_type)
-                temp_df, messages = self.df_builder_for_array_run(temp_df, index_of_array_variable[1:], df_type, tmp_message,
+                temp_df, messages = self.df_builder_for_array_run(temp_df, index_of_array_variable[1:], df_type, tmp_message.replace(self.suffix,''),
                                                                   recursion_counter=recursion_counter + 1)
             else:
                 temp_df = [self.df_default_finder(temp_df)]
                 tmp_title, tmp_value, tmp_message = self.message_finder(temp_df[0], index_of_array_variable, df_type)
-                messages = [message + tmp_message]
+                messages = [self.suffix + message + tmp_message.replace(self.suffix,'')]
             array_of_dfs.extend(temp_df)
             run_messages.extend(messages)
 
