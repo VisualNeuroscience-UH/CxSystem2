@@ -101,8 +101,8 @@ class ArrayRun:
         except (TypeError, NameError):
             self.cluster_number_of_nodes = 1
 
-        if self.cluster_number_of_nodes > 50:
-            raise Exception(' -  Number of nodes cannot be higher than 20.')
+        if self.cluster_number_of_nodes > 30:
+            raise Exception(' -  Number of nodes cannot be higher than 30 for your own safety.')
 
         anatomy_array_search_result = self.anatomy_df[self.anatomy_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         physio_array_search_result = self.physiology_df[self.physiology_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
@@ -356,7 +356,7 @@ class ArrayRun:
     def df_default_finder(df_):
         df = df_.copy()
         df_search_result = df[df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
-        df_search_result = np.where(df_search_result.isnull().values is False)
+        df_search_result = np.where(df_search_result.notnull())
         arrays_idx_ = [(df_search_result[0][i], df_search_result[1][i]) for i in range(len(df_search_result[0]))]
         for to_default_idx in arrays_idx_:
             value_to_default = df.loc[to_default_idx[0]][to_default_idx[1]]
