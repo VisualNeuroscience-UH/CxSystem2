@@ -95,6 +95,8 @@ class Workspace:
                 self.imported_connections_path = self.workspace_path.joinpath(self.imported_connections_path)
             elif Path.cwd().joinpath(self.imported_connections_path).is_file():
                 self.imported_connections_path = Path.cwd().joinpath(self.imported_connections_path)
+            elif Path.cwd().parent.joinpath(self.imported_connections_path).is_file():
+                self.imported_connections_path = Path.cwd().parent.joinpath(self.imported_connections_path)
             else:
                 raise FileNotFoundError(' -  Connection file not found: {}'.format(self.imported_connections_path.as_posix()))
         return load_from_file(self.imported_connections_path)
