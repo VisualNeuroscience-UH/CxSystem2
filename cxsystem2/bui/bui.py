@@ -48,7 +48,7 @@ class RunServer:
         crr_file_folder = Path(os.path.dirname(__file__))
         server_folder = crr_file_folder.joinpath('cx_bui')
 
-        os.chdir(server_folder)
+        os.chdir(server_folder.as_posix())
         if port is None:
             port = find_free_port()
         self.url = "https://127.0.0.1:{}/".format(port) if ssl else "http://127.0.0.1:{}/".format(port)

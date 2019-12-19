@@ -71,8 +71,8 @@ def cxspawner(anatomy,
     :param root_path:
     :param physiology:
     """
-    print(root_path)
-    os.chdir(root_path)
+    print(root_path.as_posix())
+    os.chdir(root_path.as_posix())
 
     cm = Cx(anatomy, physiology)
     cm.run()

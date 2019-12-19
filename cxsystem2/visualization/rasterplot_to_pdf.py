@@ -29,7 +29,7 @@ class rasterplot_pdf_generator:
         fig_x = 3
         fig_y = 2
         figs_per_page = fig_x * fig_y
-        with PdfPages(self.out_filename) as pdf:
+        with PdfPages(self.out_filename.as_posix()) as pdf:
             f = plt.figure()
             f.set_figheight(pdf_height)
             f.set_figwidth(pdf_width)

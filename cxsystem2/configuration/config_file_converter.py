@@ -43,7 +43,7 @@ class ConfigConverter:
                     self.new_filepath = self.directory.joinpath(new_filename)
                     counter += 1
 
-            with open(self.original_path, 'r') as f:
+            with open(self.original_path.as_posix(), 'r') as f:
                 json_data = json.load(f)
 
             # let's find the total number of rows so that we can save the csv properly otherwise pandas will raise errors
@@ -57,7 +57,7 @@ class ConfigConverter:
                     if len(tmp_row.keys()) > total_number_of_rows:
                         total_number_of_rows = len(tmp_row.keys())
 
-            with open(self.new_filepath, 'w', newline='') as f:
+            with open(self.new_filepath.as_posix(), 'w', newline='') as f:
                 csv_file = csv.writer(f)
                 if 'params' in json_data.keys():
                     column_num = len(json_data['params'].keys())
@@ -172,7 +172,7 @@ class ConfigConverter:
                     self.new_filepath = self.directory.joinpath(new_filename)
                     counter += 1
 
-            with open(self.original_path, 'r') as f:
+            with open(self.original_path.as_posix(), 'r') as f:
                 csv_data = pd.read_csv(f, header=None)
 
             row_type_rows = list(csv_data.loc[csv_data[0] == 'row_type'].index.values.astype(int))
@@ -295,7 +295,7 @@ class ConfigConverter:
                             self.output['physio_data'].append({"Variable": str(var).strip(" "), "Key-Value": tmp_var})
                         json_idx_counter += 1
 
-            with open(self.new_filepath, 'w') as f:
+            with open(self.new_filepath.as_posix(), 'w') as f:
                 json.dump(self.output, f)
 
     def get_path_of_converted_file(self):
@@ -330,18 +330,18 @@ class ConfigConverter:
     def get_json(self, clean=True):
         self.csv_to_json()
         if self.new_filepath.suffix == '.json':
-            with open(self.new_filepath, 'r') as f:
+            with open(self.new_filepath.as_posix(), 'r') as f:
                 json_data = json.load(f)
 
         else:
-            with open(self.original_path, 'r') as f:
+            with open(self.original_path.as_posix(), 'r') as f:
                 json_data = json.load(f)
         if clean:
             self.clean()
         return json_data
 
     def clean(self):
-        os.remove(self.new_filepath)
+        os.remove(self.new_filepath.as_posix())
 
     def save_as_json(self, overwrite=False):
         self.overwrite = overwrite
