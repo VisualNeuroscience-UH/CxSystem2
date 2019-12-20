@@ -33,7 +33,7 @@ Description:
     converts the results file into two CSVs and one JSON for ViSimpl (no visualization)
 
   cxvisualize --rasterplot-pdf ./cobaeif 20191123_1353509
-    Generates a pdf of rasterplots of all groups in the folder with 20191123_1353509 timestamp
+    Generates a pdf of rasterplots of all groups in the folder with 20191123_1353509 timestamp with default sampling rate of 1%
 
   cxvisualize --rasterplot-pdf ./cobaeif 20191123_1353509 --sampling-rate=4%
     Generates a pdf of rasterplots of all groups in the folder with timestamp 20191123_1353509 and sampling rate or 4%
@@ -90,7 +90,7 @@ def main():
         if len(files) == 0:
             print("arrayrun folder does not contain files with that timestamp.")
             return
-        sampling_rate = '5%'
+        sampling_rate = '1%'
         if arguments['--sampling-rate']:
             try:
                 if arguments['--sampling-rate'].count('%') != 1 or \
