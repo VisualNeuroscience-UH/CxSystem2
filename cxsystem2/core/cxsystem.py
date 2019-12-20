@@ -40,7 +40,7 @@ from cxsystem2.bui import bui
 from cxsystem2.core.tools import parameter_finder, read_config_file, load_from_file
 
 b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
-import pdb
+
 
 class CxSystem:
     """

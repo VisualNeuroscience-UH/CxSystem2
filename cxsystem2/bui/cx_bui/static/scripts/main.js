@@ -185,6 +185,7 @@ function downloadanatomy() {
     var container = document.getElementById('export_config_container');
     container.appendChild(a);
     document.getElementById('data_downloader').click();
+    document.getElementById('data_downloader').remove();
 }
 
 

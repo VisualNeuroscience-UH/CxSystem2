@@ -24,7 +24,7 @@ from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import write_to_file, parameter_finder
 from cxsystem2.hpc.cluster_run import ClusterRun
-import pdb
+
 class ArrayRun:
 
     def __init__(self,
