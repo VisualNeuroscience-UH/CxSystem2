@@ -40,7 +40,7 @@ from cxsystem2.bui import bui
 from cxsystem2.core.tools import parameter_finder, read_config_file, load_from_file
 
 b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
-
+import pdb
 
 class CxSystem:
     """
@@ -541,9 +541,9 @@ class CxSystem:
         self.sys_mode = args[0]
 
     def save_input_video(self, *args):
-        assert int(args[0]) == 0 or int(args[0]) == 1, \
+        assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, \
             ' -  The do_init_vm flag should be either 0 or 1 but it is %s .' % args[0]
-        self.save_input_video = int(args[0])
+        self.save_input_video = int(eval(args[0]))
 
     def _set_grid_radius(self, *args):
         assert '*' in args[0], ' -  Please specify the unit for the grid radius parameter, e.g. um , mm '
@@ -574,9 +574,9 @@ class CxSystem:
             print(" -   scale of the system loaded from brian file")
 
     def init_vms(self, *args):
-        assert int(args[0]) == 0 or int(args[0]) == 1, \
+        assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, \
             ' -  The do_init_vm flag should be either 0 or 1 but it is %s .' % args[0]
-        self.init_vms = int(args[0])
+        self.init_vms = int(eval(args[0]))
         if self.init_vms:
             print(' -  Membrane voltages are being randomly initialized.')
         if not self.init_vms:
@@ -589,19 +589,19 @@ class CxSystem:
             print(" -  CxSystem is being build on the scale of %s" % args[0])
 
     def load_positions_only(self, *args):
-        assert int(args[0]) == 0 or int(args[0]) == 1, ' -  The load_positions_only flag should be either 0 or 1 but it is %s .' % args[0]
-        self.load_positions_only = int(args[0])
+        assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, ' -  The load_positions_only flag should be either 0 or 1 but it is %s .' % args[0]
+        self.load_positions_only = int(eval(args[0]))
         if self.load_positions_only:
             self.set_import_connections_path()
             print(" -  only positions are being loaded from the brian_data_file")
 
     def set_benchmark(self, *args):
-        assert int(args[0]) in [0, 1], " -  Do benchmark flag should be either 0 or 1"
-        self.benchmark = int(args[0])
+        assert int(eval(args[0])) in [0, 1], " -  Do benchmark flag should be either 0 or 1"
+        self.benchmark = int(eval(args[0]))
 
     def set_profiling(self, *args):
-        assert int(args[0]) in [0, 1], " -  Profiling flag should be either 0 or 1"
-        self.profiling = int(args[0])
+        assert int(eval(args[0])) in [0, 1], " -  Profiling flag should be either 0 or 1"
+        self.profiling = int(eval(args[0]))
 
     def neuron_group(self):
         """

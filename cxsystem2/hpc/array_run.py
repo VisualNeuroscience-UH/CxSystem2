@@ -24,7 +24,7 @@ from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import write_to_file, parameter_finder
 from cxsystem2.hpc.cluster_run import ClusterRun
-
+import pdb
 class ArrayRun:
 
     def __init__(self,
@@ -63,7 +63,7 @@ class ArrayRun:
         self.anatomy_df = anatomy_dataframe
         self.physiology_df = physiology_dataframe
         try:
-            self.multidimension_array_run = int(parameter_finder(self.anatomy_df, 'multidimension_array_run'))
+            self.multidimension_array_run = int(eval(parameter_finder(self.anatomy_df, 'multidimension_array_run')))
         except TypeError:
             self.multidimension_array_run = 0
         try:
@@ -73,7 +73,7 @@ class ArrayRun:
             print(" -  number_of_process is not defined in the configuration file, the default number of processes are"
                   " 3/4*number of CPU cores: %d processes" % self.number_of_process)
         try:
-            self.benchmark = int(parameter_finder(self.anatomy_df, 'benchmark'))
+            self.benchmark = int(eval(parameter_finder(self.anatomy_df, 'benchmark')))
         except (TypeError, NameError):
             self.benchmark = 0
         try:
