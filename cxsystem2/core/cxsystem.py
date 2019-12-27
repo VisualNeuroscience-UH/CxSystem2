@@ -1134,8 +1134,8 @@ class CxSystem:
                         changes depending on using the [p] and [n] tags in the configuration file.
         """
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
-                        'save_connection', 'custom_weight']
-        _obligatory_params = [0, 1, 2, 3]
+                        'save_connection', 'custom_weight','ilam']
+        _obligatory_params = [0, 1, 2, 3];#pdb.set_trace()
         assert len(self.current_values_list) <= len(_all_columns), \
             ' -  One or more of the obligatory columns for input definition is missing. Obligatory columns are:\n%s\n ' \
             % str([_all_columns[ii] for ii in _obligatory_params])
@@ -1424,6 +1424,7 @@ class CxSystem:
                         syn_con_str += "'%f'" % float(p_arg)
 
                     elif self.sys_mode == 'expanded':
+                        pdb.set_trace()
                         # syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))/(sqrt((x_pre-x_post) \
                         #    **2+(y_pre-y_post)**2)/mm)'   " % (float(p_arg), self.customized_synapses_list[-1]['ilam'])
                         syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))'" % (
