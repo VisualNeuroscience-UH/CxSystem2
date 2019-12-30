@@ -1135,7 +1135,7 @@ class CxSystem:
         """
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
                         'save_connection', 'custom_weight','ilam']
-        _obligatory_params = [0, 1, 2, 3];#pdb.set_trace()
+        _obligatory_params = [0, 1, 2, 3]
         assert len(self.current_values_list) <= len(_all_columns), \
             ' -  One or more of the obligatory columns for input definition is missing. Obligatory columns are:\n%s\n ' \
             % str([_all_columns[ii] for ii in _obligatory_params])
@@ -1166,6 +1166,10 @@ class CxSystem:
             index_of_monitors = int(np.where(self.current_parameters_list.values == 'monitors')[0])
         except TypeError:
             pass
+        try:
+            index_of_ilam = int(np.where(self.current_parameters_list.values == 'ilam')[0])
+        except TypeError:
+            pass 
         current_post_syn_idx = self.current_values_list.values[index_of_post_syn_idx]
         current_pre_syn_idx = self.current_values_list.values[index_of_pre_syn_idx]
         try:
@@ -1424,13 +1428,14 @@ class CxSystem:
                         syn_con_str += "'%f'" % float(p_arg)
 
                     elif self.sys_mode == 'expanded':
-                        pdb.set_trace()
-                        # syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))/(sqrt((x_pre-x_post) \
-                        #    **2+(y_pre-y_post)**2)/mm)'   " % (float(p_arg), self.customized_synapses_list[-1]['ilam'])
-                        syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))'" % (
-                            float(p_arg), self.customized_synapses_list[-1]['ilam'])
-                        # todo the divisoin by the distance is temporarily removed to avoid division by zeros,
-                        #  try to understand what is going on using Hanna's email and if it's needed, add a fixed version
+                        try:
+                            ilam=syn[index_of_ilam]
+                        except (ValueError, NameError):
+                            # If the length constant has not been defined, set it to inf corresponding to local mode, ie no decay with distance
+                            ilam = 'inf'
+                        # ilam is assumed to be in mm. At ilam distance, the connection probability is about 37%
+                        syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))/(%f*mm/meter)))'" % (
+                            float(p_arg), float(ilam))
 
                 # If no connection probability is defined, then use "sparseness" values as connection probability and
                 # possibly scale with distance
@@ -1455,12 +1460,14 @@ class CxSystem:
                         syn_con_str += "'%f'" % p_arg
 
                     elif self.sys_mode == 'expanded':
-                        # syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))/(sqrt((x_pre-x_post)\
-                        # **2+(y_pre-y_post)**2)/mm)'   " % (p_arg, self.customized_synapses_list[-1]['ilam'])
-                        syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))*%f))'" % (
-                            p_arg, self.customized_synapses_list[-1]['ilam'])
-                        # todo the divisoin by the distance is temporarily removed to avoid division by zeros,
-                        #  try to understand what is going on using Hanna's email and if it's needed, add a fixed version
+                        try:
+                            ilam=syn[index_of_ilam]
+                        except (ValueError, NameError):
+                            # If the length constant has not been defined, set it to inf corresponding to local mode, ie no decay with distance
+                            ilam = 'inf'
+                         # ilam is assumed to be in mm. At ilam distance, the connection probability is about 37%
+                        syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))/(%f*mm/meter)))'" % (
+                            float(p_arg), float(ilam))
                 try:
                     syn_con_str += ',n=%d)' % int(n_arg)
                 except ValueError:
