@@ -89,7 +89,7 @@ class ArrayRun:
                   "the default value is 'Python'")
             self.device = 'Python'
         try:
-            self.run_in_cluster = int(parameter_finder(self.anatomy_df, 'run_in_cluster'))
+            self.run_in_cluster = int(eval(parameter_finder(self.anatomy_df, 'run_in_cluster')))
         except (TypeError, NameError):
             self.run_in_cluster = 0
         try:
