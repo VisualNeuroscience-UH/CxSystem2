@@ -248,7 +248,7 @@ The following tags can be used to define a specific monitor:
   This tag defines a :code:`[St]` ate monitor.
 
 
-You can combine a spike monitor with multiple state monitors like this:
+You can combine a spike monitor with multiple state monitors like this (note the space between [Sp] and [St]):
 
   :code:`[Sp] [St]ge_soma+gi_soma+vm`.
 
