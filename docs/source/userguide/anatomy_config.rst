@@ -150,7 +150,8 @@ Neuron groups
 -------------
 
 Neuron groups (cell types) are defined using the following parameters. Note that biophysical parameters of the
-corresponding neuron groups are defined in the :ref:`Physiology configuration <cell_params>`.
+corresponding neuron groups are defined in the :ref:`Physiology configuration <cell_params>`. If you add a subtype,
+you need to add a corresponding entry to the physiology configuration file.
 
 There are five hard-coded (neocortical) cell types in CxSystem2. The two excitatory cell types are spiny stellate (SS) and
 PC (pyramidal cell). The three inhibitory cell types are basket cell (BC), Martinotti cell (MC) and
