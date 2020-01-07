@@ -772,7 +772,7 @@ class SynapseReference:
         * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
 
         """
-        SynapseReference.syntypes = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_calcium', 'Depressing', 'Facilitating'])
+        SynapseReference.syntypes = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_calcium', 'Depressing', 'Facilitating'])
         assert syn_type in SynapseReference.syntypes, " -  Synapse type '%s' is not defined" % syn_type
         self.output_synapse = {'type': syn_type,
                                'receptor': receptor,
@@ -923,6 +923,27 @@ class SynapseReference:
                         '''
 
     def Fixed(self):
+        """
+        The method for implementing the Fixed synaptic connection.
+
+        """
+
+        self.output_synapse['equation'] = b2.Equations('''
+            wght:siemens
+            ''')
+
+        if self.model_variation is False:
+            self.output_synapse['pre_eq'] = '''
+            %s+=wght
+            ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
+
+        else:
+            pre_eq_lines = ['%s += wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
+                            for true_receptor in self.true_receptors]
+            pre_eq = ''.join(pre_eq_lines).rstrip()
+            self.output_synapse['pre_eq'] = pre_eq
+
+    def Fixed_const_wght(self):
         """
         The method for implementing the Fixed synaptic connection.
 
