@@ -1484,9 +1484,6 @@ class CxSystem:
                     syn_con_str += ')'
                 exec(syn_con_str)
 
-                print(f'Synaptic connection {_dyn_syn_name} with') 
-                print(f'spatial decay {spatial_decay} and connection probability {p_arg}')
-
             # Weight set again (overrided) here if connections were loaded
             exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
                                               _dyn_syn_namespace_name))  #
