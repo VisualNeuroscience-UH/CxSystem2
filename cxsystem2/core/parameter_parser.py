@@ -51,13 +51,13 @@ class SynapseParser:
         :param output_synapse: This is the dictionary created in NeuronReference() in brian2_obj_namespaces module. This contains all the
                                information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to
                                it. Following values are set after initialization:
-                               Cp, Cd, sparseness, ilam. Other variables are then set based on the type of the synaptic connection (STDP,Fixed).
+                               Cp, Cd, sparseness, ilam. Other variables are then set based on the type of the synaptic connection (STDP,Fixed, etc).
 
         """
         self.output_synapse = output_synapse
         self.physio_config_df = physio_config_df
 
-        SynapseParser.type_ref = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
+        SynapseParser.type_ref = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
         assert output_synapse['type'] in SynapseParser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
         # Commented Cp and Cd out because not used in this branch /HH
@@ -235,24 +235,41 @@ class SynapseParser:
         The Fixed method for assigning the parameters for Fixed synaptic connection to the customized_synapses() object.
         """
 
-        # Obviously you don't need STDP for a FIXED synapse
-        # stdp_max_strength_coefficient = self.value_extractor(self.physio_config_df, 'stdp_max_strength_coefficient')
-        self.output_namespace['wght_max'] = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (
-            self.output_synapse['pre_group_type'], self.output_synapse['post_group_type']))  # * stdp_max_strength_coefficient
-        std_wght = self.value_extractor(self.physio_config_df,
-                                        'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
-        min_wght = std_wght / 2.
-
-        # NB! This only scales std_wght, not min_wght! Thus commented out
-        # if self.calcium_concentration > 0: # For change_calcium()
-        #     self.cw_baseline_calcium = std_wght
-        #     std_wght = self._scale_cw_by_calcium(self.calcium_concentration)
-
-        self.output_namespace['init_wght'] = '(%f * rand() + %f) * nS' % (std_wght, min_wght)
-        std_delay = self.value_extractor(self.physio_config_df,
+        # Weight
+        try:
+            mean_wght = eval(self.output_synapse['custom_weight']) / nS
+            print(' ! Using custom weight: %f nS' % mean_wght)
+        except:
+            mean_wght = self.value_extractor(self.physio_config_df,
+                                            'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+        min_wght = mean_wght / 2.
+        self.output_namespace['init_wght'] = '(%f * rand() + %f) * nS' % (mean_wght, min_wght)
+ 
+        # Delay
+        mean_delay = self.value_extractor(self.physio_config_df,
                                          'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
-        min_delay = std_delay / 2.
-        self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (std_delay, min_delay)
+        min_delay = mean_delay / 2.
+        self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
+
+    def Fixed_const_wght(self):
+        """
+        The Fixed method with constant weight for assigning the parameters for Fixed synaptic connection to the customized_synapses() object.
+        """
+
+        # Weight
+        try:
+            mean_wght = eval(self.output_synapse['custom_weight']) / nS
+            print(' ! Using custom weight: %f nS' % mean_wght)
+        except:
+            mean_wght = self.value_extractor(self.physio_config_df,
+                                            'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+        self.output_namespace['init_wght'] = '%f * nS' % (mean_wght)
+ 
+        # Delay
+        mean_delay = self.value_extractor(self.physio_config_df,
+                                         'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
+        min_delay = mean_delay / 2.
+        self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
 
     def Fixed_calcium(self):
         """
