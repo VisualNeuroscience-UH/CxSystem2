@@ -51,7 +51,7 @@ class SynapseParser:
         :param output_synapse: This is the dictionary created in NeuronReference() in brian2_obj_namespaces module. This contains all the
                                information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to
                                it. Following values are set after initialization:
-                               Cp, Cd, sparseness, ilam. Other variables are then set based on the type of the synaptic connection (STDP,Fixed, etc).
+                               Cp, Cd, sparseness, spatial_decay. Other variables are then set based on the type of the synaptic connection (STDP,Fixed, etc).
 
         """
         self.output_synapse = output_synapse
@@ -68,9 +68,6 @@ class SynapseParser:
                                                    'sp_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
         except:
             pass
-
-        # Commented ilam out because not used in this branch /HH
-        # self.ilam = self.value_extractor(self.physio_config_df,'ilam_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
 
         try:
             self.calcium_concentration = self.value_extractor(self.physio_config_df, 'calcium_concentration')
