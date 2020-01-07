@@ -768,7 +768,7 @@ class SynapseReference:
 
         * output_synapse: the main dictionary containing all the data about current customized_synapse_group including: synaptic equations
                           (model, pre, post), type of synapse, type of receptor, index and type of pre- and post-synaptic group, namespace
-                          for the Synapses() object, sparseness, ilam (?).
+                          for the Synapses() object, sparseness, spatial_decay.
         * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
 
         """
