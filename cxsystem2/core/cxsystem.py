@@ -1134,7 +1134,7 @@ class CxSystem:
                         changes depending on using the [p] and [n] tags in the configuration file.
         """
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
-                        'save_connection', 'custom_weight','ilam']
+                        'save_connection', 'custom_weight','spatial_decay']
         _obligatory_params = [0, 1, 2, 3]
         assert len(self.current_values_list) <= len(_all_columns), \
             ' -  One or more of the obligatory columns for input definition is missing. Obligatory columns are:\n%s\n ' \
@@ -1167,7 +1167,7 @@ class CxSystem:
         except TypeError:
             pass
         try:
-            index_of_ilam = int(np.where(self.current_parameters_list.values == 'ilam')[0])
+            index_of_spatial_decay = int(np.where(self.current_parameters_list.values == 'spatial_decay')[0])
         except TypeError:
             pass 
         current_post_syn_idx = self.current_values_list.values[index_of_post_syn_idx]
@@ -1421,58 +1421,71 @@ class CxSystem:
             #  - connection probability scaled with distance ("expanded mode")
             #  - custom connection rule
             else:
-                syn_con_str = "%s.connect(condition='i!=j', p= " % _dyn_syn_name
+                def exp_distance_function(p_arg=None, spatial_decay='0'):
+                    if p_arg==None:
+                        print(' !  No predefined connection probability, '
+                            'using custom connection rule')
+                        p_arg = self.customized_synapses_list[-1]['sparseness']
 
-                try:
-                    if self.sys_mode == 'local':
+                    # spatial_decay is assumed to be in 1/mm. At 1/spatial_decay distance, the connection probability is about 37%
+
+                    # Assume spatial_decay = '0', local connectivity, no decay with distance
+                    if spatial_decay=='0':
+                        syn_con_str = "%s.connect(condition='i!=j', p= " % _dyn_syn_name
                         syn_con_str += "'%f'" % float(p_arg)
+                        return syn_con_str
 
-                    elif self.sys_mode == 'expanded':
-                        try:
-                            ilam=syn[index_of_ilam]
-                        except (ValueError, NameError):
-                            # If the length constant has not been defined, set it to inf corresponding to local mode, ie no decay with distance
-                            ilam = 'inf'
-                        # ilam is assumed to be in mm. At ilam distance, the connection probability is about 37%
-                        syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))/(%f*mm/meter)))'" % (
-                            float(p_arg), float(ilam))
+                    # If spatial_decay=='[ij]', connect one to one only. Must be the same N neurons.
+                    if spatial_decay=='[ij]':
+                        syn_con_str = "%s.connect(j='i'" % _dyn_syn_name
+                        return syn_con_str
 
-                # If no connection probability is defined, then use "sparseness" values as connection probability and
-                # possibly scale with distance
-                except ValueError:
-                    print(' !  No predefined connection probability, '
-                          'using custom connection rule')
-                    p_arg = self.customized_synapses_list[-1]['sparseness']
+                    # If spatial_decay includes '[i=j]' but also numerical value, connect one-to-one and lambda
+                    if '[ij]' in spatial_decay and not spatial_decay=='[ij]':
+                        syn_con_str = "%s.connect(p= " % _dyn_syn_name
+                        spatial_decay=spatial_decay.replace('[ij]','') # Strip [ij] away
+                        
+                    # If spatial_decay does not include '[i=j]', exclude autoconnection, use only lambda
+                    elif '[ij]' not in spatial_decay:
+                        syn_con_str = "%s.connect(condition='i!=j', p= " % _dyn_syn_name
 
-                    if '_relay_vpm' in self.neurongroups_list[int(current_pre_syn_idx)]:
-                        syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2)))/(2*0.025**2))'" \
-                                       % (float(p_arg))
+                    syn_con_str += "'%f*exp(-(%f*meter/mm)*(sqrt((x_pre-x_post)**2+(y_pre-y_post)**2)))'" % (
+                        float(p_arg), float(spatial_decay))
+                    return syn_con_str
 
-                    elif '_relay_spikes' in self.neurongroups_list[int(current_pre_syn_idx)]:
+                #Check if p_arg exists, set to None if not
+                if 'p_arg' not in {**locals(), **globals()}:
+                    p_arg=None
 
-                        # Use exponential decay here
-                        print('Exp decay here!')
-                        decay_const = 10 / mm  # Unit important here to remind of scale
-                        syn_con_str += "'%f * exp(-%f * sqrt((x_pre-x_post)**2 + (y_pre-y_post)**2) )'" \
-                                       % (float(p_arg), float(decay_const))
+                # Check mode, catch missing spatial_decay
+                if self.sys_mode == 'local':
+                    spatial_decay = '0'
 
-                    elif self.sys_mode == 'local':
-                        syn_con_str += "'%f'" % p_arg
+                elif self.sys_mode == 'expanded':
+                    try:
+                        spatial_decay=syn[index_of_spatial_decay]
+                    except (ValueError, NameError):
+                        # If the length constant has not been defined, set it to 0 corresponding to local mode, ie no decay with distance
+                        spatial_decay = '0'                        
 
-                    elif self.sys_mode == 'expanded':
-                        try:
-                            ilam=syn[index_of_ilam]
-                        except (ValueError, NameError):
-                            # If the length constant has not been defined, set it to inf corresponding to local mode, ie no decay with distance
-                            ilam = 'inf'
-                         # ilam is assumed to be in mm. At ilam distance, the connection probability is about 37%
-                        syn_con_str += "'%f*exp(-((sqrt((x_pre-x_post)**2+(y_pre-y_post)**2))/(%f*mm/meter)))'" % (
-                            float(p_arg), float(ilam))
+ 
+                if '_relay_vpm' in self.neurongroups_list[int(current_pre_syn_idx)] and p_arg==None:
+                    spatial_decay = str(1/(2*0.025**2))
+
+                elif '_relay_spikes' in self.neurongroups_list[int(current_pre_syn_idx)]:
+                    spatial_decay = '10'
+                # import pdb;pdb.set_trace()
+
+                syn_con_str = exp_distance_function(p_arg=p_arg, spatial_decay=spatial_decay)
+
                 try:
                     syn_con_str += ',n=%d)' % int(n_arg)
                 except ValueError:
                     syn_con_str += ')'
                 exec(syn_con_str)
+
+                print(f'Synaptic connection {_dyn_syn_name} with') 
+                print(f'spatial decay {spatial_decay} and connection probability {p_arg}')
 
             # Weight set again (overrided) here if connections were loaded
             exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
