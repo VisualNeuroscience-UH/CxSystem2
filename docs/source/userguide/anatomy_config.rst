@@ -205,6 +205,8 @@ depressing and facilitating synapses are defined in the :ref:`Physiology configu
 
         :code:`custom_weight{float*unit}`: Synaptic weight for this specific connection, e.g. 1.5*nS. Overrides :ref:`more general weight definitions <connection_params>`.
 
+        :code:`spatial_decay{float,[ij],float[ij]}`: When sys_mode is expanded, provides lambda (spatial decay parameter) for  weight * p * exp(-lambda * d); d is the distance between neurons.
+
 
 If the postsynaptic neuron is a multicompartmental neuron, the target compartment must be defined using the :code:`[C]` tag.
 Compartmental indexing starts from zero at the soma layer and increases towards the distal apical dendrite. The soma, and the basal
