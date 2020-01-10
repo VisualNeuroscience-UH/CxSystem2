@@ -25,6 +25,11 @@ try:
         httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
     log_path = Path(httpsconfig['log']['path'])
     print("Setting log path to {}".format(log_path))
+    # creating a new log file if it exists to prevent losing previous logs after update or reset
+    counter = 1
+    while log_path.joinpath('.cxerror{}.log'.format(counter)).is_file():
+        counter += 1
+
     logging.config.dictConfig({
         'version': 1,
         'disable_existing_loggers': False,
@@ -46,13 +51,13 @@ try:
                 'level': 'ERROR',
                 'class': 'logging.FileHandler',
                 'formatter': 'file',
-                'filename': log_path.joinpath('.cxerror.log').as_posix()
+                'filename': log_path.joinpath('.cxerror{}.log'.format(counter)).as_posix()
             },
             'info_logfile': {
                 'level': 'INFO',
                 'class': 'logging.FileHandler',
                 'formatter': 'file',
-                'filename': log_path.joinpath('.cxinfo.log').as_posix()
+                'filename': log_path.joinpath('.cxinfo{}.log'.format(counter)).as_posix()
             }
 
         },
