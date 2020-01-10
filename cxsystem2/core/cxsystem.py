@@ -1422,7 +1422,7 @@ class CxSystem:
             #  - custom connection rule
             else:
                 def exp_distance_function(p_arg=None, spatial_decay='0'):
-                    if p_arg==None:
+                    if p_arg==None or p_arg == '--':
                         print(' !  No predefined connection probability, '
                             'using custom connection rule')
                         p_arg = self.customized_synapses_list[-1]['sparseness']
