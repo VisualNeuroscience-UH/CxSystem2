@@ -512,7 +512,7 @@ class NeuronParser:
                                     'elements that comprise this syntax are not defined.' % df['Value'][df['Key'] == key_name].item())
 
         except NameError:
-            new_key = df['Value'][df['Key'] == key_name].item().replace("']", "").split("['")
+            new_key = next(iter(df['Value'][df['Key'] == key_name])).replace("']", "").split("['")
             return self.value_extractor(df, new_key)
 
     @staticmethod
