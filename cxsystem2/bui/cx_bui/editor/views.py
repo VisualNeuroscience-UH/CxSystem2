@@ -172,7 +172,7 @@ def simulate(request):
                                               Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()
-        return HttpResponse(json.dumps({"authorized":"true", "response": "Simulation request submitted successfully"}))
+        return HttpResponse(json.dumps({"authorized":"true", "response": "Simulation Started"}))
     except Exception as e:
         print(e)
         return HttpResponse(json.dumps({"authorized":"true", "response": "Something went wrong before simulation"}))

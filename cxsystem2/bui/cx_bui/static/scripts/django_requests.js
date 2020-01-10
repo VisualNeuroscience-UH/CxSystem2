@@ -29,9 +29,16 @@ var req_simulate = function () {
                 .replace(/&/g, encodeURIComponent('&'))
                 .replace(/#/g, encodeURIComponent('#'))),
         }),
+        beforeSend: function() {
+                Swal.fire(
+                       'Simulation Request Submitted',
+                        '',
+                        'success'
+                    )
+        },
         success: function (response) {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
-                authenticate(req_download_workspace);
+                authenticate(req_simulate);
             } else {
                 Swal.fire(
                     {
@@ -96,7 +103,7 @@ var req_download_files = function () {
                 },
                 success: function (response) {
                     if (response['authorized'] != null && response['authorized'] !== 'true') {
-                        authenticate(req_lsworkspace);
+                        authenticate(req_download_files);
                     } else {
                         try {
                             Swal.fire(
@@ -177,7 +184,7 @@ var req_delete = function () {
         },
         success: function (response) {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
-                authenticate(req_simstatus);
+                authenticate(req_delete);
             } else {
                 Swal.fire(
                     {
@@ -215,7 +222,7 @@ var req_visualize = function () {
         },
         success: function (response) {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
-                authenticate(req_simstatus);
+                authenticate(req_visualize);
             } else {
                 try {
                     Swal.fire(
