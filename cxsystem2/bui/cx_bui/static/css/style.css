@@ -163,3 +163,31 @@ button.tabs__button--active{
     font-size: 1em !important;
     padding : 10px !important;
 }
+
+#simulation_status {
+    position:fixed;
+    right: 5px;
+    bottom: 5px;
+    width:600px;
+    height:200px;
+    border:solid #333;
+    z-index:2;
+    resize: both;
+    overflow: auto;
+    background-color:#333 ;
+}
+
+#simulation_status_texts{
+    color:white;
+    padding: 5px;
+
+}
+
+#simulation_statusheader {
+  padding: 5px;
+  cursor: move;
+  z-index: 3;
+    text-align: center;
+  background-color: #2196F3;
+  color: #fff;
+}

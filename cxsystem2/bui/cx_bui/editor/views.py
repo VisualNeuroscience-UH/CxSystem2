@@ -96,6 +96,7 @@ def cxspawner_secure(anatomy,
     cm = Cx(anatomy, physiology,array_run_stdout_file=Path(user_workspace_path).joinpath("cxoutput.out"))
     cm.run()
     print("Process {} finished for user {} ".format(os.getpid(),userid))
+    return HttpResponse(json.dumps({"authorized": "true", "response": "Simulation Started"}))
 
 
 def sanitize_data(received_data):
@@ -172,6 +173,7 @@ def simulate(request):
                                               Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()
+        p.join()
         return HttpResponse(json.dumps({"authorized":"true", "response": "Simulation Started"}))
     except Exception as e:
         print(e)
