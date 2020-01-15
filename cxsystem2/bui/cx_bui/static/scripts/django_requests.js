@@ -188,6 +188,7 @@ window.setInterval(function(){
 }, 10000);
 
 $(document).ready( function(){
+        $('#simulation_status_texts').append("<br>");  // add two blank lines for visibility
         req_simstatus();
     }
 );
