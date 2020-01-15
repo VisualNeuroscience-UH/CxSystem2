@@ -168,7 +168,7 @@ button.tabs__button--active{
     position:fixed;
     right: 5px;
     bottom: 5px;
-    width:600px;
+    width:40%;
     height:200px;
     border:solid #333;
     z-index:2;
@@ -180,14 +180,16 @@ button.tabs__button--active{
 #simulation_status_texts{
     color:white;
     padding: 5px;
-
 }
 
 #simulation_statusheader {
+    display: block;
   padding: 5px;
+    position: fixed;
+    width: calc(40% - 5px);
   cursor: move;
   z-index: 3;
-    text-align: center;
+  text-align: center;
   background-color: #2196F3;
   color: #fff;
 }

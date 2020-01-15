@@ -8,6 +8,7 @@ import sys
 import tarfile
 from getpass import getpass
 from pathlib import Path
+from datetime import datetime
 
 import requests
 import yaml
@@ -81,7 +82,8 @@ def cxspawner_secure(anatomy,
               physiology,
               root_path,
               user_workspace_path,
-              userid):
+              userid,
+              sim_title):
     """
     The function that each spawned process runs and parallel instances of CxSystems are created here.
     :param anatomy:
@@ -90,13 +92,15 @@ def cxspawner_secure(anatomy,
     """
     sys.stdout = open(Path(user_workspace_path).joinpath("cxoutput.out"), "a+")
     print("Process {} started for user {} ".format(os.getpid(), userid))
+    start_time = datetime.now()
+    print("[Started] Simulation \"{}\", timestamp: {}".format(sim_title, datetime.now()))
     print(root_path)
     os.chdir(root_path)
 
     cm = Cx(anatomy, physiology,array_run_stdout_file=Path(user_workspace_path).joinpath("cxoutput.out"))
     cm.run()
     print("Process {} finished for user {} ".format(os.getpid(),userid))
-    return HttpResponse(json.dumps({"authorized": "true", "response": "Simulation Started"}))
+    print("[Done] Simulation \"{}\" started at [{}]".format(sim_title, start_time))
 
 
 def sanitize_data(received_data):
@@ -148,7 +152,7 @@ def simulate(request):
 
             anatomy['params']['workspace_path'] = user_workspace_path.as_posix()
         physiology = {"physio_data": sanitized_receive_data['physiology']}
-
+        sim_title = anatomy['params']['simulation_title']
         # # we can either save the data temporarily as json and use those for simulating,
         # # or pass the data itself and config_file_converter will take care of the save_to_file part
         # with open('.\\tmp_anatomy.json', 'w') as f:
@@ -165,7 +169,8 @@ def simulate(request):
                                               physiology,
                                               Path.cwd().parent.parent,
                                               user_workspace_path.as_posix(),
-                                              userid))
+                                              userid,
+                                              sim_title))
         else:
             p = multiprocessing.Process(target=cxspawner,
                                         args=(anatomy,
@@ -173,7 +178,6 @@ def simulate(request):
                                               Path.cwd().parent.parent))
         p.name = "spawned_CxSystem"
         p.start()
-        p.join()
         return HttpResponse(json.dumps({"authorized":"true", "response": "Simulation Started"}))
     except Exception as e:
         print(e)
@@ -325,11 +329,37 @@ def sim_status(request):
         user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
         outputfile_path = user_workspace_path.joinpath('cxoutput.out')
+        sim_finish_lines = []
+        output = ''
+        if outputfile_path.is_file():
+            with open(outputfile_path.as_posix(),'r') as f:
+                for line in f:
+                    if '[Started]' in line or '[Done]' in line:
+                        sim_finish_lines.append(line)
+            output = '&'.join(sim_finish_lines) # just send the last 30 lines
+        return HttpResponse(output, content_type='text/plain')
+
+
+@csrf_exempt
+def sim_output(request):
+    if request.is_secure():
+        auth_response = is_authorized(request)
+        if auth_response.ok:
+            userid = auth_response.json()['id']
+        else:
+            return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
+        infologger.info("User {} checked simulation status".format(userid))
+        cx_workspace_path = get_workspace_path()
+        user_workspace_path = cx_workspace_path.joinpath(userid)
+        user_workspace_path.mkdir(parents=True, exist_ok=True)
+        outputfile_path = user_workspace_path.joinpath('cxoutput.out')
         all_lines = []
-        with open(outputfile_path.as_posix(),'r') as f:
-            for line in f:
-                all_lines.append(line)
-        output = ''.join(all_lines[-30:]) # just send the last 30 lines
+        output = ''
+        if outputfile_path.is_file():
+            with open(outputfile_path.as_posix(),'r') as f:
+                for line in f:
+                    all_lines.append(line)
+            output = ''.join(all_lines[-30:]) # just send the last 30 lines
 
         return HttpResponse(output, content_type='text/plain')
 

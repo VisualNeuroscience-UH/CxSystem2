@@ -30,11 +30,16 @@ var req_simulate = function () {
                 .replace(/#/g, encodeURIComponent('#'))),
         }),
         beforeSend: function() {
-                Swal.fire(
-                       'Simulation Request Submitted',
-                        '',
-                        'success'
-                    )
+            let params_tmp =  params_editor.getValue()
+
+            $('#simulation_status_texts').append(" [Sent] Request submitted for simulation \"" +params_tmp.simulation_title + "\" <br>");
+            var status_text_div = document.getElementById("simulation_status");
+            status_text_div.scrollTop = status_text_div.scrollHeight;
+                // Swal.fire(
+                //        'Simulation Request Submitted',
+                //         '',
+                //         'success'
+                //     )
         },
         success: function (response) {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
@@ -150,6 +155,7 @@ var req_lsworkspace = function () {
     return false;
 };
 
+var simulation_results = [];
 var req_simstatus = function () {
     $.ajax({
         type: 'POST',
@@ -159,7 +165,43 @@ var req_simstatus = function () {
         },
         success: function (response) {
             if (response['authorized'] != null && response['authorized'] !== 'true') {
-                authenticate(req_simstatus);
+                authenticate(req_simoutput);
+            } else {
+                let splitted = response.split('&');
+                splitted.forEach(
+                    function(element){
+                      if (!simulation_results.includes(element)) {
+                            simulation_results.push(element);
+                            $('#simulation_status_texts').append(element, "<br> ");
+                            var status_text_div = document.getElementById("simulation_status");
+                            status_text_div.scrollTop = status_text_div.scrollHeight;
+                      }
+                    });
+            }
+        }
+    });
+    return false;
+};
+
+window.setInterval(function(){
+    req_simstatus();
+}, 10000);
+
+$(document).ready( function(){
+        req_simstatus();
+    }
+);
+
+var req_simoutput = function () {
+    $.ajax({
+        type: 'POST',
+        url: 'simoutput',
+        headers: {
+            'Authorization': 'Basic ' + session_token
+        },
+        success: function (response) {
+            if (response['authorized'] != null && response['authorized'] !== 'true') {
+                authenticate(req_simoutput);
             } else {
                 // alert(response);
                 Swal.fire(
