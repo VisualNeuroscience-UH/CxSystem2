@@ -27,7 +27,6 @@ pynacl
 pyopenssl
 pyparsing
 python-dateutil
-pycparserpynacl
 pycparser
 pytz
 scipy
