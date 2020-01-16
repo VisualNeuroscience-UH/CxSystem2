@@ -75,10 +75,20 @@ Once you have done all the changes to the BC neuron group, do the same changes t
 
 Now we should have a working simulation config.
 But what's the parameter search we wanted to do? We want to see how changing background input rate and changing the
-ratio of inhibition-to-excitation changes changes network behavior. So let's add search ranges to the
-parameters :code:`background_rate` and :code:`k`.
+ratio of inhibition-to-excitation changes changes network behavior. There are two notations for parameter search in CxSystem. The first notation is
+:code:`{start|end|step}` which has a similar behavior as :code:`numpy.arange(start,end,step)`. For example, setting a parameter to
+:code:`{0|1|0.2}` would create an array of following values: :code:`0.0, 0.2, 0.4, 0.6, 0.8`. The next notation is
+:code:`{value1 & value2 & value3 & ... }` where the user can add multiple desired values manually. For example, setting a parameter
+to :code:`{ 0 & 1 & 100 & 9 }` will create an array of following values:  :code:`0, 1 , 100, 9`. Note that these values can be used at the same time.
+As an example, consider we want to add search ranges to the parameters :code:`background_rate` and :code:`k`.
 Here we use the curly brace syntax: set :code:`background_rate` as {0|5|2}*Hz (corresponding to 0, 2, 4 Hz) and
-:code:`k` as {1 & 3 & 5 & 7}. Now you have defined a 3x4 parameter search.
+:code:`k` as {1 & 3 & 5 & 7}. Now you have defined a 3x4 parameter search of following values:
+
++-----------------+--+--+--+--+--+--+--+--+--+--+--+--+
+| background_rate |0 |0 |0 |0 |2 |2 |2 |2 |4 |4 |4 |4 |
++-----------------+--+--+--+--+--+--+--+--+--+--+--+--+
+|k                |1 |3 | 5| 7| 1| 3| 5| 7| 1| 3| 5|7 |
++-----------------+--+--+--+--+--+--+--+--+--+--+--+--+
 
 Finally you can hit the *Simulate* button. When you simulate this on a single CPU core (:code:`number_of_process` is 1)
 it should take 30 min - 1 hour to finish. Once the simulation is finished you should be able to see 12 files in your
