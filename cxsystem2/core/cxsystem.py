@@ -472,7 +472,6 @@ class CxSystem:
             if self.benchmark:
                 self.benchmarking_data['Extract and Save Result'] = self.end_time - self.saving_start_time
                 self.benchmarking_data['Total Time'] = self.end_time - self.start_time
-                import platform
                 self.benchmarking_data['Computer Name'] = platform.node()
                 write_titles = 1 if not self.workspace.get_simulation_folder().joinpath('benchmark.csv').is_file() else 0
                 with open(self.workspace.get_simulation_folder().joinpath('benchmark.csv').as_posix(), 'ab') as f:
@@ -1477,7 +1476,6 @@ class CxSystem:
 
                 elif '_relay_spikes' in self.neurongroups_list[int(current_pre_syn_idx)]:
                     spatial_decay = '10'
-                # import pdb;pdb.set_trace()
 
                 syn_con_str = exp_distance_function(p_arg=p_arg, spatial_decay=spatial_decay)
 
@@ -1724,34 +1722,60 @@ class CxSystem:
             spike_times_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'spike_times'].index))
             spike_times = self.current_values_list[spike_times_idx].replace(' ', ',')
             spike_times_list = ast.literal_eval(spike_times[0:spike_times.index('*')])
-            spike_times_unit = spike_times[spike_times.index('*') + 1:]
+
+            num_of_neurons_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'number_of_neurons'].index))
+            number_of_neurons = self.current_values_list[num_of_neurons_idx]
+
+            if '[act]' in spike_times:
+                spike_times_unit = spike_times[spike_times.index('*') + 1:spike_times.index('[act]')]
+                active_neurons_str = 'arange' + spike_times[spike_times.index('[act]') + 5:].replace('-',',')
+            else:
+                spike_times_unit = spike_times[spike_times.index('*') + 1:]
+                active_neurons_str='arange(0,%s-1,1)' % (number_of_neurons)
+
             tmp_namespace = {"spike_times_": []}
             exec('tmp_namespace ["spike_times_"] = spike_times_list * %s' % spike_times_unit,
                  locals(), globals())
             spike_times_ = tmp_namespace["spike_times_"]
+
+            num_of_neurons_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'number_of_neurons'].index))
+            number_of_neurons = self.current_values_list[num_of_neurons_idx]
+            number_of_active_neurons =len(eval(active_neurons_str))
+
             try:
                 tmp_net_center_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'net_center'].index), 'no match')
                 net_center = self.current_values_list[tmp_net_center_idx]
                 net_center = complex(net_center)
             except ValueError:
                 net_center = 0 + 0j
-            num_of_neurons_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'number_of_neurons'].index))
-            number_of_neurons = self.current_values_list[num_of_neurons_idx]
 
             radius_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'radius'].index))
             radius = self.current_values_list[radius_idx]
             print(" -  Creating an input based on the central %s neurons "
                   "..." % number_of_neurons)
-            spikes_name = 'GEN_SP'
+            spikes_name = 'GEN_SP' # Not used elsewhere in this namespace?
             time_name = 'GEN_TI'
             sg_name = 'GEN'
-            spikes_str = 'GEN_SP=b2.tile(arange(%s),%d)' % (number_of_neurons, len(spike_times_))
-            times_str = 'GEN_TI = b2.repeat(%s,%s)*%s' % (spike_times[0:spike_times.index('*')], number_of_neurons, spike_times_unit)
-            sg_str = 'GEN = b2.SpikeGeneratorGroup(%s, GEN_SP, GEN_TI)' % number_of_neurons
-            exec(spikes_str, globals(), locals())  # running the string
-            # containing the syntax for Spike indices in the input neuron group.
+            # If spike times unit is Hz, add period keyword for repetitive firing starting at t=half the period.
+            if spike_times_unit=='Hz' :
+                assert b2.asarray(spike_times_list).size==1, "More than one value for unit 'Hz', confused, aborting..."
+                period_str = 'GEN_PE = %s*second' % (1/b2.asarray(spike_times_list))
+                exec(period_str, globals(), locals())  # running the syntax for period of the input neuron group
+                # times give the start of first spike, which must be less than the period, thus the 0.5/[period in Hz] below
+                times_str = 'GEN_TI = b2.repeat(0.5/%s,%s)*%s' % (spike_times_ / eval(spike_times_unit), number_of_active_neurons, "second")
+            else:
+                assert b2.units.is_dimensionless(eval(spike_times_unit) / second), "Unkown unit, should be second, ms etc, or Hz"
+                period_str = 'GEN_PE = 0*second' # default
+                exec(period_str, globals(), locals())  # running the syntax for period of the input neuron group
+                spike_times_array_nodim = spike_times_ / eval(spike_times_unit)
+                array_string = np.array2string(spike_times_array_nodim,separator=',',max_line_width=10000)
+                times_str = 'GEN_TI = b2.repeat(%s,%s)*%s' % (array_string, number_of_active_neurons, spike_times_unit)
             exec(times_str, globals(), locals())  # running the string
             # containing the syntax for time indices in the input neuron group.
+            # spikes_str = 'GEN_SP=b2.tile(%s,%d)' % (active_neurons_str, len(spike_times_)) # len(spike_times_) should be 1 if unit is Hz
+            spikes_str = 'GEN_SP=b2.tile(%s,%d)' % (active_neurons_str, b2.asarray(spike_times_list).size) # len(spike_times_) should be 1 if unit is Hz
+            exec(spikes_str, globals(), locals())  # running the string
+            sg_str = 'GEN = b2.SpikeGeneratorGroup(%s, GEN_SP, GEN_TI, period=GEN_PE)' % number_of_neurons
             exec(sg_str, globals(), locals())  # running the string
             # containing the syntax for creating the b2.SpikeGeneratorGroup() based on the input .mat file.
 
