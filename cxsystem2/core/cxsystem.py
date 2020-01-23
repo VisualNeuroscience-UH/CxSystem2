@@ -1759,7 +1759,15 @@ class CxSystem:
             # If spike times unit is Hz, add period keyword for repetitive firing starting at t=half the period.
             if spike_times_unit=='Hz' :
                 assert b2.asarray(spike_times_list).size==1, "More than one value for unit 'Hz', confused, aborting..."
-                period_str = 'GEN_PE = %s*second' % (1/b2.asarray(spike_times_list))
+                # period must be integer multiple of dt
+                period_init = 1/b2.asarray(spike_times_list)
+                dt_unitless = b2.defaultclock.dt/second
+                if np.mod(period_init, (dt_unitless)) != 0:
+                    period = dt_unitless * round(period_init/dt_unitless)
+                else:
+                    period = period_init
+                period_str = 'GEN_PE = %s*second' % (period)
+                import pdb; pdb.set_trace()
                 exec(period_str, globals(), locals())  # running the syntax for period of the input neuron group
                 # times give the start of first spike, which must be less than the period, thus the 0.5/[period in Hz] below
                 times_str = 'GEN_TI = b2.repeat(0.5/%s,%s)*%s' % (spike_times_ / eval(spike_times_unit), number_of_active_neurons, "second")
