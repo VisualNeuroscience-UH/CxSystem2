@@ -328,7 +328,7 @@ def sim_status(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-        # infologger.info("User {} checked simulation status".format(userid))
+        infologger.info("User {} checked simulation status".format(userid))
         cx_workspace_path = get_workspace_path()
         user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
@@ -352,7 +352,6 @@ def sim_output(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-        infologger.info("User {} checked simulation status".format(userid))
         cx_workspace_path = get_workspace_path()
         user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
