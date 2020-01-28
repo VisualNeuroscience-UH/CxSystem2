@@ -16,6 +16,7 @@ import shutil
 import sys
 import time
 from pathlib import Path
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -48,79 +49,41 @@ class ArrayRun:
         self.cluster_start_idx = cluster_run_start_idx
         self.cluster_step = cluster_run_step
         self.array_run_is_in_cluster = array_run_is_in_cluster
-        if array_run_stdout_file == 'None':
-            self.array_run_stdout_file = None
-        else:
-            self.array_run_stdout_file = array_run_stdout_file
+        self.array_run_stdout_file = None if array_run_stdout_file == 'None' else array_run_stdout_file
+
         if self.cluster_start_idx == -1 and self.cluster_step == -1:
             # this means this instance of array run is actually trying to run a bunch of instances in the cluster
             from cxsystem2.hpc.cluster_run import ClusterRun
-        if self.cluster_start_idx != -1 and self.cluster_step != -1:
-            self.metadata_filename = 'metadata_part_' + str((self.cluster_start_idx / self.cluster_step) + 1) + job_suffix + '.gz'
-        else:
-            self.metadata_filename = 'metadata_' + job_suffix + '.gz'
-        self.array_run_metadata = pd.DataFrame
+
+        self.metadata_filename = self._get_metadata_filename(self.cluster_start_idx, self.cluster_step, job_suffix)
+
+        # these two are the original config files containing the array_run info:
         self.anatomy_df = anatomy_dataframe
         self.physiology_df = physiology_dataframe
-        try:
-            self.multidimension_array_run = int(eval(parameter_finder(self.anatomy_df, 'multidimension_array_run')))
-        except TypeError:
-            self.multidimension_array_run = 0
-        try:
-            self.number_of_process = int(parameter_finder(self.anatomy_df, 'number_of_process'))
-        except TypeError:
-            self.number_of_process = int(multiprocessing.cpu_count() * 3 / 4)
-            print(" -  number_of_process is not defined in the configuration file, the default number of processes are"
-                  " 3/4*number of CPU cores: %d processes" % self.number_of_process)
-        try:
-            self.benchmark = int(eval(parameter_finder(self.anatomy_df, 'benchmark')))
-        except (TypeError, NameError):
-            self.benchmark = 0
-        try:
-            self.trials_per_config = int(parameter_finder(self.anatomy_df, 'trials_per_config'))
-        except TypeError:
-            print(" - trials_per_config is not defined in the configuration "
-                  "file, the default value is 1")
-            self.trials_per_config = 1
-        try:
-            self.device = parameter_finder(self.anatomy_df, 'device')
-        except TypeError:
-            print(" -    device is not defined in the configuration file, "
-                  "the default value is 'Python'")
-            self.device = 'Python'
-        try:
-            self.run_in_cluster = int(eval(parameter_finder(self.anatomy_df, 'run_in_cluster')))
-        except (TypeError, NameError):
-            self.run_in_cluster = 0
-        try:
-            self.cluster_job_file_path = parameter_finder(self.anatomy_df, 'cluster_job_file_path')
-        except (TypeError, NameError):
-            pass
-        try:
-            self.cluster_number_of_nodes = int(parameter_finder(self.anatomy_df, 'cluster_number_of_nodes'))
-        except (TypeError, NameError):
-            self.cluster_number_of_nodes = 1
 
-        if self.cluster_number_of_nodes > 30:
-            raise Exception(' -  Number of nodes cannot be higher than 30 for your own safety.')
+        # finding array-run related parameters:
+        self.multidimension_array_run = self._get_multidim_array_run_flag()
+        self.number_of_process = self._get_num_of_process()
+        self.benchmark = self._get_benchmark_flag()
+        self.trials_per_config = self._get_trials_per_config()
+        self.device = self._get_device()
+        self.run_in_cluster = self._get_run_in_cluster_flag()
+        self.cluster_job_file_path = self._get_cluster_job_file_path()
+        self.cluster_number_of_nodes = self._get_cluster_number_of_nodes()
 
-        anatomy_array_search_result = self.anatomy_df[self.anatomy_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
-        physio_array_search_result = self.physiology_df[self.physiology_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
-        arrays_idx_anatomy = np.where(anatomy_array_search_result.isnull().values != True)
-        arrays_idx_anatomy = [(arrays_idx_anatomy[0][i], arrays_idx_anatomy[1][i]) for i in range(len(arrays_idx_anatomy[0]))]
-        arrays_idx_physio = np.where(physio_array_search_result.isnull().values != True)
-        arrays_idx_physio = [(arrays_idx_physio[0][i], arrays_idx_physio[1][i]) for i in range(len(arrays_idx_physio[0]))]
-        self.df_anat_final_array = []
-        self.df_phys_final_array = []
+        # get indices of pandas cells containing the arrayruns
+        self.anatomy_arrun_cell_indices = self._get_arrun_cell_indices_from_df(self.anatomy_df)
+        self.physio_arrun_cell_indices = self._get_arrun_cell_indices_from_df(self.physiology_df)
+
+        # lists containing final dataframes and experiment names
+        self.list_of_anatomy_dfs = []
+        self.list_of_physio_dfs = []
         self.final_messages = []
 
-        self.sum_of_array_runs = len(arrays_idx_anatomy) + len(arrays_idx_physio)
-        if self.sum_of_array_runs > 1 and not self.multidimension_array_run:
-            anatomy_default = self.df_default_finder(self.anatomy_df)
-            physio_default = self.df_default_finder(self.physiology_df)
-        else:
-            anatomy_default = anatomy_dataframe
-            physio_default = physiology_dataframe
+        self.param_search_num_of_params = len(self.anatomy_arrun_cell_indices) + len(self.physio_arrun_cell_indices)
+        self.default_anatomy_df = self.df_default_finder(self.anatomy_df)
+        self.default_physio_df = self.df_default_finder(self.physiology_df)
+
         # creating the array of dataframes for array run
         self.anat_titles = []
         self.physio_titles = []
@@ -128,7 +91,7 @@ class ArrayRun:
         if self.multidimension_array_run:
             # initializing the metadata :
             meta_columns = []
-            for meta_col_idx in range(1, 1 + len(arrays_idx_anatomy) + len(arrays_idx_physio)):
+            for meta_col_idx in range(1, 1 + len(self.anatomy_arrun_cell_indices) + len(self.physio_arrun_cell_indices)):
                 meta_columns.append('Dimension-%d Parameter' % meta_col_idx)
                 meta_columns.append('Dimension-%d Value' % meta_col_idx)
             meta_columns.extend(['Full path'])
@@ -137,25 +100,25 @@ class ArrayRun:
             physio_variations = []
             anat_messages = []
             physio_messages = []
-            if arrays_idx_anatomy:
-                anat_variations, anat_messages = self.df_builder_for_array_run(anatomy_dataframe, arrays_idx_anatomy, df_type='anatomy')
-            if arrays_idx_physio:
-                physio_variations, physio_messages = self.df_builder_for_array_run(physiology_dataframe, arrays_idx_physio, df_type='physiology')
-            if arrays_idx_anatomy and arrays_idx_physio:
+            if self.anatomy_arrun_cell_indices:
+                anat_variations, anat_messages = self.df_builder_for_array_run(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
+            if self.physio_arrun_cell_indices:
+                physio_variations, physio_messages = self.df_builder_for_array_run(self.physiology_df, self.physio_arrun_cell_indices, df_type='physiology')
+            if self.anatomy_arrun_cell_indices and self.physio_arrun_cell_indices:
                 for anat_idx, anat_df in enumerate(anat_variations):
                     for physio_idx, physio_df in enumerate(physio_variations):
-                        self.df_anat_final_array.append(anat_df)
-                        self.df_phys_final_array.append(physio_df)
+                        self.list_of_anatomy_dfs.append(anat_df)
+                        self.list_of_physio_dfs.append(physio_df)
                         self.final_messages.append(anat_messages[anat_idx] + physio_messages[physio_idx])
-            elif arrays_idx_anatomy:
+            elif self.anatomy_arrun_cell_indices:
                 for anat_idx, anat_df in enumerate(anat_variations):
-                    self.df_anat_final_array.append(anat_df)
-                    self.df_phys_final_array.append(physio_default)
+                    self.list_of_anatomy_dfs.append(anat_df)
+                    self.list_of_physio_dfs.append(self.default_physio_df)
                     self.final_messages.append(anat_messages[anat_idx])
-            elif arrays_idx_physio:
+            elif self.physio_arrun_cell_indices:
                 for physio_idx, physio_df in enumerate(physio_variations):
-                    self.df_phys_final_array.append(physio_df)
-                    self.df_anat_final_array.append(anatomy_default)
+                    self.list_of_physio_dfs.append(physio_df)
+                    self.list_of_anatomy_dfs.append(self.default_anatomy_df)
                     self.final_messages.append(physio_messages[physio_idx])
 
         else:
@@ -163,27 +126,27 @@ class ArrayRun:
             meta_columns = []
             meta_columns.extend(['Dimension-1 Parameter', 'Dimension-1 Value', 'Full path'])
             self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
-            if arrays_idx_anatomy:
-                df_anat_array, anat_messages = self.df_builder_for_array_run(anatomy_dataframe, arrays_idx_anatomy, df_type='anatomy')
-                self.df_anat_final_array.extend(df_anat_array)
-                self.df_phys_final_array.extend([physio_default for _ in range(len(self.df_anat_final_array))])
+            if self.anatomy_arrun_cell_indices:
+                df_anat_array, anat_messages = self.df_builder_for_array_run(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
+                self.list_of_anatomy_dfs.extend(df_anat_array)
+                self.list_of_physio_dfs.extend([self.default_physio_df for _ in range(len(self.list_of_anatomy_dfs))])
                 self.final_messages.extend(anat_messages)
-            if arrays_idx_physio:
-                df_phys_array, physio_messages = self.df_builder_for_array_run(physiology_dataframe, arrays_idx_physio, df_type='physiology')
-                self.df_phys_final_array.extend(df_phys_array)
-                self.df_anat_final_array.extend([anatomy_default for _ in range(len(self.df_phys_final_array))])
+            if self.physio_arrun_cell_indices:
+                df_phys_array, physio_messages = self.df_builder_for_array_run(self.physiology_df, self.physio_arrun_cell_indices, df_type='physiology')
+                self.list_of_physio_dfs.extend(df_phys_array)
+                self.list_of_anatomy_dfs.extend([self.default_anatomy_df for _ in range(len(self.list_of_physio_dfs))])
                 self.final_messages.extend(physio_messages)
 
         self.all_titles = self.anat_titles + self.physio_titles
 
-        if not self.df_anat_final_array and not self.df_phys_final_array:
+        if not self.list_of_anatomy_dfs and not self.list_of_physio_dfs:
             print(" -  no ArrayRun variable found, the default "
                   "configurations are going to be simulated %d "
                   "times" % self.trials_per_config)
-            # trial_per_conf_idx = np.where(anatomy_default.values == 'trials_per_config')
-            # anatomy_default[int(trial_per_conf_idx[1])][int(trial_per_conf_idx[0])] = ''
-            self.df_anat_final_array = [anatomy_default] * self.trials_per_config
-            self.df_phys_final_array = [physio_default] * self.trials_per_config
+            # trial_per_conf_idx = np.where(self.default_anatomy_df.values == 'trials_per_config')
+            # self.default_anatomy_df[int(trial_per_conf_idx[1])][int(trial_per_conf_idx[0])] = ''
+            self.list_of_anatomy_dfs = [self.default_anatomy_df] * self.trials_per_config
+            self.list_of_physio_dfs = [self.default_physio_df] * self.trials_per_config
             self.final_messages = ['_default_config']
             self.metadata_dict['default_config'] = ['default_config']
             self.all_titles = ['default_config']
@@ -208,7 +171,7 @@ class ArrayRun:
 
         print(" -  array of Dataframes for anatomical and physiological configuration are ready")
         if self.run_in_cluster == 1 and self.cluster_start_idx == -1 and self.cluster_step == -1:  # to run the Cxsystems on the cluster
-            self.total_configs = len(self.df_anat_final_array) * self.trials_per_config
+            self.total_configs = len(self.list_of_anatomy_dfs) * self.trials_per_config
             self.config_per_node = math.ceil(self.total_configs / self.cluster_number_of_nodes)
             self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)
             ClusterRun(self, Path(anatomy_file_path), Path(physio_file_path), self.suffix)
@@ -223,6 +186,56 @@ class ArrayRun:
             self.spawner(self.cluster_start_idx, self.cluster_step)
             return
         self.spawner(0, len(self.final_messages) * self.trials_per_config)  # this runs when not in cluster
+
+    def _prepare_multi_dim_arrun_metadata(self):
+        meta_columns = []
+        for meta_col_idx in range(1, 1 + len(self.anatomy_arrun_cell_indices) + len(self.physio_arrun_cell_indices)):
+            meta_columns.append('Dimension-%d Parameter' % meta_col_idx)
+            meta_columns.append('Dimension-%d Value' % meta_col_idx)
+        meta_columns.extend(['Full path'])
+        self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
+        anat_variations = []
+        physio_variations = []
+        anat_messages = []
+        physio_messages = []
+        if self.anatomy_arrun_cell_indices:
+            anat_variations, anat_messages = self.df_builder_for_array_run(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
+        if self.physio_arrun_cell_indices:
+            physio_variations, physio_messages = self.df_builder_for_array_run(self.physiology_df, self.physio_arrun_cell_indices,
+                                                                               df_type='physiology')
+        if self.anatomy_arrun_cell_indices and self.physio_arrun_cell_indices:
+            for anat_idx, anat_df in enumerate(anat_variations):
+                for physio_idx, physio_df in enumerate(physio_variations):
+                    self.list_of_anatomy_dfs.append(anat_df)
+                    self.list_of_physio_dfs.append(physio_df)
+                    self.final_messages.append(anat_messages[anat_idx] + physio_messages[physio_idx])
+        elif self.anatomy_arrun_cell_indices:
+            for anat_idx, anat_df in enumerate(anat_variations):
+                self.list_of_anatomy_dfs.append(anat_df)
+                self.list_of_physio_dfs.append(self.default_physio_df)
+                self.final_messages.append(anat_messages[anat_idx])
+        elif self.physio_arrun_cell_indices:
+            for physio_idx, physio_df in enumerate(physio_variations):
+                self.list_of_physio_dfs.append(physio_df)
+                self.list_of_anatomy_dfs.append(self.default_anatomy_df)
+                self.final_messages.append(physio_messages[physio_idx])
+
+    def _prepare_one_dim_arrun_metadata(self):
+        # since we are running the experiments in one dimension,
+        # initializing the metadata :
+        meta_columns = []
+        meta_columns.extend(['Dimension-1 Parameter', 'Dimension-1 Value', 'Full path'])
+        self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
+        if self.anatomy_arrun_cell_indices:
+            df_anat_array, anat_messages = self.df_builder_for_array_run(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
+            self.list_of_anatomy_dfs.extend(df_anat_array)
+            self.list_of_physio_dfs.extend([self.default_physio_df for _ in range(len(self.list_of_anatomy_dfs))])
+            self.final_messages.extend(anat_messages)
+        if self.physio_arrun_cell_indices:
+            df_phys_array, physio_messages = self.df_builder_for_array_run(self.physiology_df, self.physio_arrun_cell_indices, df_type='physiology')
+            self.list_of_physio_dfs.extend(df_phys_array)
+            self.list_of_anatomy_dfs.extend([self.default_anatomy_df for _ in range(len(self.list_of_physio_dfs))])
+            self.final_messages.extend(physio_messages)
 
     def arr_run(self, idx, working, paths, stdout_file):
         """
@@ -240,7 +253,7 @@ class ArrayRun:
         np.random.seed(idx)
         tr = idx % self.trials_per_config
         idx = int(idx / self.trials_per_config)
-        device = parameter_finder(self.df_anat_final_array[idx], 'device')
+        device = parameter_finder(self.list_of_anatomy_dfs[idx], 'device')
         if self.number_of_process == 1 and self.benchmark == 1 and device == 'Python':
             # this should be used to clear the cache of weave for benchmarking. otherwise weave will mess it up
             if sys.platform == 'win32':
@@ -251,7 +264,7 @@ class ArrayRun:
         print("################### Trial %d/%d started running for "
               "simulation number %d: %s ##########################" % (tr + 1,
                                                                        self.trials_per_config, idx, self.final_messages[idx][1:]))
-        cm = cx.CxSystem(self.df_anat_final_array[idx], self.df_phys_final_array[idx], output_file_suffix=self.final_messages[idx],
+        cm = cx.CxSystem(self.list_of_anatomy_dfs[idx], self.list_of_physio_dfs[idx], output_file_suffix=self.final_messages[idx],
                          instantiated_from_array_run=1, array_run_in_cluster=self.array_run_is_in_cluster)
         cm.run()
         paths[orig_idx] = cm.workspace.results['Full path']
@@ -309,7 +322,7 @@ class ArrayRun:
         run_messages = []
         array_variable = original_df.loc[index_of_array_variable[0][0]][index_of_array_variable[0][1]]
         opening_braket_idx = array_variable.index('{')
-        if (not self.multidimension_array_run and self.sum_of_array_runs > 1) or (self.sum_of_array_runs == 1 and ':' in array_variable):
+        if (not self.multidimension_array_run and self.param_search_num_of_params > 1) or (self.param_search_num_of_params == 1 and ':' in array_variable):
             colon_idx = array_variable.index(':')
             array_variable = array_variable.replace(array_variable[opening_braket_idx + 1:colon_idx + 1], '')  # removing default value
         elif ':' in array_variable:
@@ -352,16 +365,17 @@ class ArrayRun:
             run_messages.extend(messages)
         return array_of_dfs, run_messages
 
-    @staticmethod
-    def df_default_finder(df_):
+    def df_default_finder(self, df_):
+        if self.param_search_num_of_params == 1: 
+            return df_ 
         df = df_.copy()
         df_search_result = df[df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         df_search_result = np.where(df_search_result.notnull())
         arrays_idx_ = [(df_search_result[0][i], df_search_result[1][i]) for i in range(len(df_search_result[0]))]
         for to_default_idx in arrays_idx_:
             value_to_default = df.loc[to_default_idx[0]][to_default_idx[1]]
-            assert ':' in value_to_default, " -  The default value should be defined for %s , or make sure multidimension_array_run in" \
-                                            " configuration file is set to 1." % value_to_default
+            assert ':' in value_to_default, \
+                " -  The default value should be defined for %s if the system is running for one-dimensional parameter search" % value_to_default
             default = value_to_default[value_to_default.index('{') + 1:value_to_default.index(':')]
             df.loc[to_default_idx[0]][to_default_idx[1]] = df.loc[to_default_idx[0]][to_default_idx[1]].replace(
                 value_to_default[value_to_default.index('{'):value_to_default.index('}') + 1], default)
@@ -412,6 +426,87 @@ class ArrayRun:
             self.metadata_dict[title] = [value]
         return title, value, message
 
+    def _get_multidim_array_run_flag(self):
+        multi_dim_flag = 0
+        try:
+            multi_dim_flag = int(eval(parameter_finder(self.anatomy_df, 'multidimension_array_run')))
+        except TypeError:
+            pass
+        return multi_dim_flag
+
+    def _get_num_of_process(self):
+        number_of_process = int(multiprocessing.cpu_count() * 3 / 4)
+        try:
+            number_of_process = int(parameter_finder(self.anatomy_df, 'number_of_process'))
+        except TypeError:
+            print(" -  number_of_process is not defined in the configuration file, the default number of processes are"
+                  " 3/4*number of CPU cores: %d processes" % self.number_of_process)
+        return number_of_process
+
+    def _get_benchmark_flag(self):
+        benchmark = 0
+        try:
+            benchmark = int(eval(parameter_finder(self.anatomy_df, 'benchmark')))
+        except (TypeError, NameError):
+            pass
+        return benchmark
+
+    def _get_trials_per_config(self):
+        trials_per_config = 1
+        try:
+            trials_per_config = int(parameter_finder(self.anatomy_df, 'trials_per_config'))
+        except TypeError:
+            print(" - trials_per_config is not defined in the configuration "
+                  "file, the default value is 1")
+        return trials_per_config
+
+    def _get_device(self):
+        device = 'Python'
+        try:
+            device = parameter_finder(self.anatomy_df, 'device')
+        except TypeError:
+            print(" -    device is not defined in the configuration file, the default device is 'Python'")
+        return device
+
+    def _get_run_in_cluster_flag(self):
+        run_in_cluster = 0
+        try:
+            run_in_cluster = int(eval(parameter_finder(self.anatomy_df, 'run_in_cluster')))
+        except (TypeError, NameError):
+            pass
+        return run_in_cluster
+
+    def _get_cluster_job_file_path(self):
+        cluster_job_file_path = None
+        try:
+            cluster_job_file_path = parameter_finder(self.anatomy_df, 'cluster_job_file_path')
+        except (TypeError, NameError):
+            pass
+        return cluster_job_file_path
+
+    def _get_cluster_number_of_nodes(self):
+        cluster_number_of_nodes = 1
+        try:
+            cluster_number_of_nodes = int(parameter_finder(self.anatomy_df, 'cluster_number_of_nodes'))
+        except (TypeError, NameError):
+            pass
+        if cluster_number_of_nodes > 30:
+            raise Exception(' -  Number of nodes cannot be higher than 30 for your own safety.')
+        return cluster_number_of_nodes
+
+    def _get_metadata_filename(self,cluster_start_idx, cluster_step, job_suffix):
+        metadata_filename = 'metadata_' + job_suffix + '.gz'
+        if cluster_start_idx != -1 and cluster_step != -1:
+            metadata_filename = 'metadata_part_' + str((cluster_start_idx / cluster_step) + 1) + job_suffix + '.gz'
+        return metadata_filename
+
+    def _get_arrun_cell_indices_from_df (self, df):
+        arrun_search_result = df[df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
+        arrays_indices = np.where(arrun_search_result.isnull().values != True)
+        arrays_indices = [(arrays_indices[0][i], arrays_indices[1][i]) for i in range(len(arrays_indices[0]))]
+        return arrays_indices
+        
+        
 
 if __name__ == '__main__':
     if len(sys.argv) != 10:
