@@ -172,7 +172,7 @@ button.tabs__button--active {
     height: 200px;
     border: solid #333;
     z-index: 2;
-    resize: both;
+    /*resize: both;*/
     overflow: auto;
     background-color: #f2f2f2;
 }
