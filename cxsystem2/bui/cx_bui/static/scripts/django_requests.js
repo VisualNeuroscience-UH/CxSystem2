@@ -30,7 +30,7 @@ var req_simulate = function () {
                 .replace(/#/g, encodeURIComponent('#'))),
         }),
         beforeSend: function() {
-            Show(simulation_status); 
+            Show(simulation_status);
             let params_tmp =  params_editor.getValue();
 
             $('#simulation_status_texts').append(" [Sent] Request submitted for simulation \"" +params_tmp.simulation_title + "\" <br>");
