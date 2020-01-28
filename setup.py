@@ -107,7 +107,8 @@ setup(
             'cxconfig = cxsystem2.cmd.cxconfig_cmd:main',
             'cxcluster = cxsystem2.cmd.cxcluster_cmd:main',
             'cxvisualize = cxsystem2.cmd.cxvisualize_cmd:main',
-            'cxserver = cxsystem2.cmd.cxserver_cmd:main'
+            'cxserver = cxsystem2.cmd.cxserver_cmd:main',
+            'cxmetadata = cxsystem2.cmd.cxmetadata_cmd:main'
         ],
     }
 )
