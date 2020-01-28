@@ -86,10 +86,10 @@
             <li class="active"><a href="javascript:void(0);" onclick="javascript:introJs().start();">Help</a></li>
         </ul>
         <ul class="right">
-                {% csrf_token %}
-                <a class="button alert" href="javascript:void(0);" onclick="req_simulate()"
-                   data-step="4"
-                   data-intro="Use this button to initiate a simulation on the server">Simulate</a>
+            {% csrf_token %}
+            <a class="button alert" href="javascript:void(0);" onclick="req_simulate()"
+               data-step="4"
+               data-intro="Use this button to initiate a simulation on the server">Simulate</a>
         </ul>
 
         {% if is_secure %}
@@ -109,23 +109,29 @@
     </ul>
 
     <ul class="right">
-            {% csrf_token %}
-            <a class="button success large-expanded" href="javascript:void(0);" onclick="req_download_workspace()">Download Workspace</a>
+        {% csrf_token %}
+        <a class="button success large-expanded" href="javascript:void(0);" onclick="req_download_workspace()">Download Workspace</a>
     </ul>
 
     <ul class="right">
-            {% csrf_token %}
-            <a class="button secondary" href="javascript:void(0);" onclick="req_lsworkspace()">Show Workspace</a>
+        {% csrf_token %}
+        <a class="button secondary" href="javascript:void(0);" onclick="req_lsworkspace()">Show Workspace</a>
     </ul>
 
     <ul class="right">
-            {% csrf_token %}
-            <a class="button secondary" href="javascript:void(0);" onclick="req_simoutput()">Simulations Output</a>
+        {% csrf_token %}
+        <a class="button secondary" href="javascript:void(0);" onclick="req_simoutput()">Simulations Output</a>
+    </ul>
+
+
+    <ul class="right">
+        {% csrf_token %}
+        <a class="button secondary" href="javascript:void(0);" onclick="Show(simulation_status)">Simulations Status</a>
     </ul>
 
     <ul class="right">
-            {% csrf_token %}
-            <a class="button alert" href="javascript:void(0);" onclick="double_check_delete()">Clear Workspace</a>
+        {% csrf_token %}
+        <a class="button alert" href="javascript:void(0);" onclick="double_check_delete()">Clear Workspace</a>
     </ul>
 
 </nav>
@@ -205,8 +211,10 @@
                     </p>
                     <h4> Documentation and Tutorial</h4>
                     <p>
-                        CxSystem's documentation is available at <a target="_blank" href="https://cxsystem2.readthedocs.io/en/latest">readthedocs</a>. A good place
-                        to start learning how to use CxSystem is the <a target="_blank" href="https://cxsystem2.readthedocs.io/en/latest/tutorials.html">tutorial
+                        CxSystem's documentation is available at <a target="_blank" href="https://cxsystem2.readthedocs.io/en/latest">readthedocs</a>.
+                        A good place
+                        to start learning how to use CxSystem is the <a target="_blank"
+                                                                        href="https://cxsystem2.readthedocs.io/en/latest/tutorials.html">tutorial
                         page</a>.
                     </p>
                     <br>
@@ -264,7 +272,8 @@
                     <br>
                 </form>
                 <div style="width: 80% !important;">
-                    <iframe id='pdf_holder' src="" type="application/pdf" style="width: 100% !important;height: 50vw !important; overflow: auto !important; display:none"></iframe>
+                    <iframe id='pdf_holder' src="" type="application/pdf"
+                            style="width: 100% !important;height: 50vw !important; overflow: auto !important; display:none"></iframe>
                 </div>
             </div>
 
@@ -327,10 +336,17 @@
 </div>
 
 {% if is_secure %}
-<div id="export_config_container" style="display:none;"> </div>
+<div id="export_config_container" style="display:none;"></div>
 
 <div id="simulation_status">
-    <div id="simulation_statusheader"> Status of Simulations</div>
+    <div class="ShowHide" id="Bar">
+        <div id="right">
+            <a href="#" onclick="Hide(simulation_status);">X</a>
+        </div>
+        <div id="left">
+            Status of Simulations
+        </div>
+    </div>
     <div id="simulation_status_texts"></div>
 </div>
 {% endif %}

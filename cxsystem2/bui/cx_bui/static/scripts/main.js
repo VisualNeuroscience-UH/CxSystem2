@@ -573,3 +573,13 @@ function dragElement(elmnt) {
     document.onmousemove = null;
   }
 }
+
+function Hide(HideID)
+{
+  HideID.style.display = "none";
+}
+
+function Show(HideID)
+{
+  HideID.style.display = "block";
+}
