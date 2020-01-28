@@ -33,7 +33,11 @@ def get_workspace_path():
 def is_authorized(request):
     session_token = ''
     if "Authorization" in request.headers.keys():
-        session_token = request.headers['Authorization'].split(' ')[1]
+        session_token = request.headers['Authorization'].split(' ')
+        if len(session_token) == 1:
+            session_token = ''
+        else:
+            session_token = session_token[1]
     user_api = "https://services.humanbrainproject.eu/idm/v1/api/user/me"
     headers = {"Authorization": 'Bearer ' + session_token}
     reply = requests.get(user_api, headers=headers)
@@ -324,7 +328,7 @@ def sim_status(request):
             userid = auth_response.json()['id']
         else:
             return HttpResponse(json.dumps({'authorized': 'false'}), content_type="application/json")
-        infologger.info("User {} checked simulation status".format(userid))
+        # infologger.info("User {} checked simulation status".format(userid))
         cx_workspace_path = get_workspace_path()
         user_workspace_path = cx_workspace_path.joinpath(userid)
         user_workspace_path.mkdir(parents=True, exist_ok=True)
