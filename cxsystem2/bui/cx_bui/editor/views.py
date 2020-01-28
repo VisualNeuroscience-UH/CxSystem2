@@ -97,14 +97,14 @@ def cxspawner_secure(anatomy,
     sys.stdout = open(Path(user_workspace_path).joinpath("cxoutput.out"), "a+")
     print("Process {} started for user {} ".format(os.getpid(), userid))
     start_time = datetime.now()
-    print("[Started] Simulation \"{}\", timestamp: {}".format(sim_title, datetime.now()))
+    print("[Started] Simulation \"{}\", timestamp: {}".format(sim_title, datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]))
     print(root_path)
     os.chdir(root_path)
 
     cm = Cx(anatomy, physiology,array_run_stdout_file=Path(user_workspace_path).joinpath("cxoutput.out"))
     cm.run()
     print("Process {} finished for user {} ".format(os.getpid(),userid))
-    print("[Done] Simulation \"{}\" started at [{}]".format(sim_title, start_time))
+    print("[Done] Simulation \"{}\" previously started at [{}] is now finished".format(sim_title, start_time.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]))
 
 
 def sanitize_data(received_data):
