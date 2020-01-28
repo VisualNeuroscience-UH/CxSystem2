@@ -19,6 +19,7 @@ import shutil
 import sys
 import threading
 import time
+import platform
 from datetime import datetime
 from pathlib import Path
 
@@ -284,6 +285,8 @@ class CxSystem:
                 cluster=cluster_flag,
                 stdout_file=self.array_run_stdout_file
             )
+            if platform.node() == 'hbp-bsp-cxsys2': # this is for hbp vm to activate the virtuanenv before running array run
+                command = "source /webapp/cxsys2/CxSystem2/venv_cxsys2/bin/activate &&" + command
             if sys.platform == 'linux' or sys.platform == 'darwin':
                 command = '/bin/bash -c "' + command + '"'
             os.system(command)
