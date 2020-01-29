@@ -88,7 +88,7 @@ class Workspace:
         return self.results_export_path.as_posix()
 
     def set_imported_connection_path(self, path):
-        self.imported_connections_path = Path(path)
+        self.imported_connections_path = Path(path).expanduser()
 
     def import_connections(self):
         assert self.imported_connections_path.suffix in self.compression_to_extension.values(), \
