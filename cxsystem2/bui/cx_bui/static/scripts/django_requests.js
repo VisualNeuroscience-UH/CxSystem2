@@ -186,7 +186,7 @@ var req_simstatus = function () {
 
 window.setInterval(function(){
     req_simstatus();
-}, 10000);
+}, 5000);
 
 $(document).ready( function(){
         $('#simulation_status_texts').append("<br>");  // add two blank lines for visibility
