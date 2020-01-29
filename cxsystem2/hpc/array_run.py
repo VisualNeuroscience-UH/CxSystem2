@@ -160,10 +160,8 @@ class ArrayRun:
 
         self._check_single_experiment_multi_trials()
         self.all_titles = self.anat_titles + self.physio_titles
-
-        self.tmp_df = pd.DataFrame(list(itertools.product(*list(self.metadata_dict.values()))), columns=list(self.metadata_dict.keys()))
-        self.tmp_df = self.tmp_df[self.all_titles]
-        self.tmp_df = self.tmp_df.sort_values(by=self.all_titles).reset_index(drop=True)
+        product_of_parameters = list(itertools.product(*list(self.metadata_dict.values())))
+        self.tmp_df = pd.DataFrame(product_of_parameters, columns=list(self.metadata_dict.keys()))
         self.final_metadata_df = self.final_metadata_df.reindex(self.tmp_df.index)
         for col_idx, col_title in enumerate(self.all_titles):
             self.final_metadata_df['Dimension-%d Parameter' % (col_idx + 1)] = col_title
@@ -237,7 +235,7 @@ class ArrayRun:
         tr_suffix = ''
         if self.trials_per_config > 1:
              tr_suffix = '_' + str(tr).zfill(3)
-        cm = cx.CxSystem(self.df_anat_final_array[idx], self.df_phys_final_array[idx], output_file_suffix=self.final_messages[idx]
+        cm = cx.CxSystem(self.list_of_anatomy_dfs[idx], self.list_of_physio_dfs[idx], output_file_suffix=self.final_namings[idx]
                          + tr_suffix, instantiated_from_array_run=1, array_run_in_cluster=self.array_run_is_in_cluster)
         cm.run()
         paths[orig_idx] = cm.workspace.get_results_export_path()
