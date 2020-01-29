@@ -46,16 +46,16 @@ class ArrayRun:
         :param job_suffix: The job_suffix for the metadata file containing the filename and changing parameters in each of the simulations.
         """
         self.suffix = job_suffix
-        self.cluster_start_idx = cluster_start_idx
-        self.cluster_step = cluster_step
+        self.cluster_start_idx = int(cluster_start_idx)
+        self.cluster_step = int(cluster_step)
         self.array_run_is_in_cluster = array_run_is_in_cluster
         self.array_run_stdout_file = None if array_run_stdout_file == 'None' else array_run_stdout_file
 
         self.metadata_filename = self._get_metadata_filename(self.cluster_start_idx, self.cluster_step, job_suffix)
 
         # these two are the original config files containing the array_run info:
-        self.anatomy_df = anatomy_dataframe
-        self.physiology_df = physiology_dataframe
+        self.anatomy_df = pd.read_csv(anatomy_dataframe, header=None) if type(anatomy_dataframe) == str else anatomy_dataframe
+        self.physiology_df = pd.read_csv(physiology_dataframe) if type(physiology_dataframe)==str else physiology_dataframe
 
         # finding array-run related parameters:
         self.multidimension_array_run = self._get_multidim_array_run_flag()
@@ -133,16 +133,20 @@ class ArrayRun:
         anatomy_namings = []
         physio_namings = []
         if self.anatomy_arrun_cell_indices:
-            anat_variations, anatomy_namings = self.generate_dataframes_for_param_search(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
+            anat_variations, anatomy_namings = self.generate_dataframes_for_param_search(self.anatomy_df,
+                                                                                         self.anatomy_arrun_cell_indices,
+                                                                                         df_type='anatomy')
         if self.physio_arrun_cell_indices:
-            physio_variations, physio_namings = self.generate_dataframes_for_param_search(self.physiology_df, self.physio_arrun_cell_indices,
-                                                                                           df_type='physiology')
+            physio_variations, physio_namings = self.generate_dataframes_for_param_search(self.physiology_df,
+                                                                                          self.physio_arrun_cell_indices,
+                                                                                          df_type='physiology')
         if self.anatomy_arrun_cell_indices and self.physio_arrun_cell_indices:
             for anat_idx, anat_df in enumerate(anat_variations):
                 for physio_idx, physio_df in enumerate(physio_variations):
                     self.list_of_anatomy_dfs.append(anat_df)
                     self.list_of_physio_dfs.append(physio_df)
-                    self.final_namings.append(anatomy_namings[anat_idx] + physio_namings[physio_idx])
+                    physio_without_timeline = '_' + '_'.join(physio_namings[physio_idx].split('_')[3:])
+                    self.final_namings.append(anatomy_namings[anat_idx] + physio_without_timeline)
         elif self.anatomy_arrun_cell_indices:
             for anat_idx, anat_df in enumerate(anat_variations):
                 self.list_of_anatomy_dfs.append(anat_df)
@@ -361,7 +365,8 @@ class ArrayRun:
 
         if np.any(df.iloc[:, 0].str.contains('row_type')):
             definition_rows_indices = np.array(df[0][df[0] == 'row_type'].index.tolist())
-            target_row = max(np.where(definition_rows_indices < idx[0])[0])
+            target_row_ix  = max(np.where(definition_rows_indices < idx[0])[0]) # get the index of the row containing the column info
+            target_row = definition_rows_indices[target_row_ix]
             title = str(df.loc[target_row][idx[1]])
             value = str(df.loc[idx[0]][idx[1]])
             naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
