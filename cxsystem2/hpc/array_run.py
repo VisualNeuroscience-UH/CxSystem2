@@ -51,10 +51,6 @@ class ArrayRun:
         self.array_run_is_in_cluster = array_run_is_in_cluster
         self.array_run_stdout_file = None if array_run_stdout_file == 'None' else array_run_stdout_file
 
-        # if self.cluster_start_idx == -1 and self.cluster_step == -1:
-        #     # this means this instance of array run is actually trying to run a bunch of instances in the cluster
-        #     from cxsystem2.hpc.cluster_run import ClusterRun
-
         self.metadata_filename = self._get_metadata_filename(self.cluster_start_idx, self.cluster_step, job_suffix)
 
         # these two are the original config files containing the array_run info:
