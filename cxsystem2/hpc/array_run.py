@@ -74,7 +74,7 @@ class ArrayRun:
         # lists containing final dataframes and experiment names
         self.list_of_anatomy_dfs = []
         self.list_of_physio_dfs = []
-        self.final_messages = []
+        self.final_namings = []
 
         self.param_search_num_of_params = len(self.anatomy_arrun_cell_indices) + len(self.physio_arrun_cell_indices)
         self.default_anatomy_df = self.default_df_extractor(self.anatomy_df)
@@ -109,7 +109,7 @@ class ArrayRun:
             self.spawn_processes(self.cluster_start_idx, self.cluster_step)
 
         elif self._is_running_locally():
-            self.spawn_processes(0, len(self.final_messages) * self.trials_per_config)  # this runs when not in cluster
+            self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)  # this runs when not in cluster
 
 
     def _should_submit_to_cluster(self):
@@ -130,29 +130,29 @@ class ArrayRun:
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
         anat_variations = []
         physio_variations = []
-        anat_messages = []
-        physio_messages = []
+        anatomy_namings = []
+        physio_namings = []
         if self.anatomy_arrun_cell_indices:
-            anat_variations, anat_messages = self.generate_dataframes_for_param_search(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
+            anat_variations, anatomy_namings = self.generate_dataframes_for_param_search(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
         if self.physio_arrun_cell_indices:
-            physio_variations, physio_messages = self.generate_dataframes_for_param_search(self.physiology_df, self.physio_arrun_cell_indices,
+            physio_variations, physio_namings = self.generate_dataframes_for_param_search(self.physiology_df, self.physio_arrun_cell_indices,
                                                                                            df_type='physiology')
         if self.anatomy_arrun_cell_indices and self.physio_arrun_cell_indices:
             for anat_idx, anat_df in enumerate(anat_variations):
                 for physio_idx, physio_df in enumerate(physio_variations):
                     self.list_of_anatomy_dfs.append(anat_df)
                     self.list_of_physio_dfs.append(physio_df)
-                    self.final_messages.append(anat_messages[anat_idx] + physio_messages[physio_idx])
+                    self.final_namings.append(anatomy_namings[anat_idx] + physio_namings[physio_idx])
         elif self.anatomy_arrun_cell_indices:
             for anat_idx, anat_df in enumerate(anat_variations):
                 self.list_of_anatomy_dfs.append(anat_df)
                 self.list_of_physio_dfs.append(self.default_physio_df)
-                self.final_messages.append(anat_messages[anat_idx])
+                self.final_namings.append(anatomy_namings[anat_idx])
         elif self.physio_arrun_cell_indices:
             for physio_idx, physio_df in enumerate(physio_variations):
                 self.list_of_physio_dfs.append(physio_df)
                 self.list_of_anatomy_dfs.append(self.default_anatomy_df)
-                self.final_messages.append(physio_messages[physio_idx])
+                self.final_namings.append(physio_namings[physio_idx])
 
         self._check_single_experiment_multi_trials()
         self.all_titles = self.anat_titles + self.physio_titles
@@ -172,15 +172,15 @@ class ArrayRun:
         meta_columns.extend(['Dimension-1 Parameter', 'Dimension-1 Value', 'Full path'])
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
         if self.anatomy_arrun_cell_indices:
-            df_anat_array, anat_messages = self.generate_dataframes_for_param_search(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
+            df_anat_array, anatomy_namings = self.generate_dataframes_for_param_search(self.anatomy_df, self.anatomy_arrun_cell_indices, df_type='anatomy')
             self.list_of_anatomy_dfs.extend(df_anat_array)
             self.list_of_physio_dfs.extend([self.default_physio_df for _ in range(len(self.list_of_anatomy_dfs))])
-            self.final_messages.extend(anat_messages)
+            self.final_namings.extend(anatomy_namings)
         if self.physio_arrun_cell_indices:
-            df_phys_array, physio_messages = self.generate_dataframes_for_param_search(self.physiology_df, self.physio_arrun_cell_indices, df_type='physiology')
+            df_phys_array, physio_namings = self.generate_dataframes_for_param_search(self.physiology_df, self.physio_arrun_cell_indices, df_type='physiology')
             self.list_of_physio_dfs.extend(df_phys_array)
             self.list_of_anatomy_dfs.extend([self.default_anatomy_df for _ in range(len(self.list_of_physio_dfs))])
-            self.final_messages.extend(physio_messages)
+            self.final_namings.extend(physio_namings)
 
         self._check_single_experiment_multi_trials()
         self.all_titles = self.anat_titles + self.physio_titles
@@ -199,7 +199,7 @@ class ArrayRun:
             print(" -  No parameter for array run found, the default configurations are going to be simulated %d times" % self.trials_per_config)
             self.list_of_anatomy_dfs = [self.default_anatomy_df] * self.trials_per_config
             self.list_of_physio_dfs = [self.default_physio_df] * self.trials_per_config
-            self.final_messages = ['_default_config']
+            self.final_namings = ['_default_config']
             self.metadata_dict['default_config'] = ['default_config']
             self.all_titles = ['default_config']
 
@@ -229,11 +229,11 @@ class ArrayRun:
             print(" -  scipy cache deleted to prevent benchmarking issues.")
         print("################### Trial %d/%d started running for "
               "simulation number %d: %s ##########################" % (tr + 1,
-                                                                       self.trials_per_config, idx, self.final_messages[idx][1:]))
-        cm = cx.CxSystem(self.list_of_anatomy_dfs[idx], self.list_of_physio_dfs[idx], output_file_suffix=self.final_messages[idx],
+                                                                       self.trials_per_config, idx, self.final_namings[idx][1:]))
+        cm = cx.CxSystem(self.list_of_anatomy_dfs[idx], self.list_of_physio_dfs[idx], output_file_suffix=self.final_namings[idx],
                          instantiated_from_array_run=1, array_run_in_cluster=self.array_run_is_in_cluster)
         cm.run()
-        paths[orig_idx] = cm.workspace.results['Full path']
+        paths[orig_idx] = cm.workspace.get_results_export_path()
         working.value -= 1
 
     def spawn_processes(self, start_idx, steps_from_start):
@@ -243,7 +243,7 @@ class ArrayRun:
         print(" -  Following configurations are going to be simulated with "
               "%d processes using %s device (printed only in letters and numbers): "
               "\n %s" % (self.number_of_process, self.device,
-                         str(self.final_messages).replace('_', '')))
+                         str(self.final_namings).replace('_', '')))
         manager = multiprocessing.Manager()
         jobs = []
         working = manager.Value('i', 0)
@@ -251,7 +251,7 @@ class ArrayRun:
         # number_of_runs = len(self.final_messages) * self.trials_per_config
         self.final_metadata_df = self.final_metadata_df.loc[np.repeat(self.final_metadata_df.index.values, self.trials_per_config)].reset_index(
             drop=True)
-        assert len(self.final_messages) < 1000, ' -  The array run is trying to run more than 1000 simulations, this is not allowed unless you' \
+        assert len(self.final_namings) < 1000, ' -  The array run is trying to run more than 1000 simulations, this is not allowed unless you' \
                                                 ' REALLY want it and if you REALLY want it you should konw what to do.'
         # while len(jobs) < number_of_runs:
         while len(jobs) < steps_from_start:
@@ -274,18 +274,18 @@ class ArrayRun:
         print("cleaning tmp folders " + tmp_folder_path)
         shutil.rmtree(tmp_folder_path)
 
-    def generate_dataframes_for_param_search(self, original_df, index_of_array_variable, df_type, message='', recursion_counter=1):
+    def generate_dataframes_for_param_search(self, original_df, index_of_array_variable, df_type, naming_prefix='', recursion_counter=1):
         """
         Generates new configuration dataframes for each of the scenarios from the original dataframe.
 
         :param original_df: original dataframe.
         :param index_of_array_variable: index of the cell with array variable.
         :param df_type: type of the dataframe (anatomy_and_system/physiology)
-        :param message: generated message from previous iteration (when recursion is needed)
+        :param naming_prefix: generated name from previous iteration (when recursion is needed)
         :param recursion_counter: counting the iteration (when recursion is needed)
         """
         array_of_dfs = []
-        run_messages = []
+        run_namings = []
         array_variable = original_df.loc[index_of_array_variable[0][0]][index_of_array_variable[0][1]]
         opening_braket_idx = array_variable.index('{')
         if (not self.multidimension_array_run and self.param_search_num_of_params > 1) or (self.param_search_num_of_params == 1 and ':' in array_variable):
@@ -315,21 +315,21 @@ class ArrayRun:
             temp_df = original_df.copy()
             temp_df.iloc[index_of_array_variable[0][0], index_of_array_variable[0][1]] = var
             if self.multidimension_array_run and len(index_of_array_variable) > 1:
-                tmp_title, tmp_value, tmp_message = self.filename_generator(temp_df, index_of_array_variable, df_type)
-                temp_df, messages = self.generate_dataframes_for_param_search(temp_df, index_of_array_variable[1:], df_type, tmp_message.replace(self.suffix, ''),
+                tmp_title, tmp_value, tmp_naming = self.filename_generator(temp_df, index_of_array_variable, df_type)
+                temp_df, namings = self.generate_dataframes_for_param_search(temp_df, index_of_array_variable[1:], df_type, tmp_naming.replace(self.suffix, ''),
                                                                               recursion_counter=recursion_counter + 1)
             else:
                 temp_df = [self.default_df_extractor(temp_df)]
-                tmp_title, tmp_value, tmp_message = self.filename_generator(temp_df[0], index_of_array_variable, df_type)
-                messages = [self.suffix + message + tmp_message.replace(self.suffix,'')]
+                tmp_title, tmp_value, tmp_naming = self.filename_generator(temp_df[0], index_of_array_variable, df_type)
+                namings = [self.suffix + naming_prefix + tmp_naming.replace(self.suffix, '')]
             array_of_dfs.extend(temp_df)
-            run_messages.extend(messages)
+            run_namings.extend(namings)
 
         if not self.multidimension_array_run and len(index_of_array_variable) > 1:
-            temp_df, messages = self.generate_dataframes_for_param_search(original_df, index_of_array_variable[1:], df_type, message='')
+            temp_df, namings = self.generate_dataframes_for_param_search(original_df, index_of_array_variable[1:], df_type, naming_prefix='')
             array_of_dfs.extend(temp_df)
-            run_messages.extend(messages)
-        return array_of_dfs, run_messages
+            run_namings.extend(namings)
+        return array_of_dfs, run_namings
 
     def default_df_extractor(self, df_):
         if self.param_search_num_of_params == 1 or self.multidimension_array_run:
@@ -350,10 +350,10 @@ class ArrayRun:
 
     def filename_generator(self, df, idx, df_type):
         """
-        Generates messages for each of the runs in ArrayRun.
+        Generates filanems for each of the runs in ArrayRun.
 
         :param df: input dataframe.
-        :param idx: index of the cell based on which the message is going to be generated.
+        :param idx: index of the cell based on which the name is going to be generated.
         :param df_type: type of dataframe.
         """
         idx = idx[0]
@@ -364,7 +364,7 @@ class ArrayRun:
             target_row = max(np.where(definition_rows_indices < idx[0])[0])
             title = str(df.loc[target_row][idx[1]])
             value = str(df.loc[idx[0]][idx[1]])
-            message = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+            naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
         elif 'Variable' in df.columns:
             try:
                 if not math.isnan(df['Key'][idx[0]]):
@@ -376,7 +376,7 @@ class ArrayRun:
             except TypeError:
                 title = str(df['Key'][idx[0]])
                 value = str(df.loc[idx[0]][idx[1]])
-            message = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+            naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
         else:
             raise InvalidConfigurationError("Configuration file format is not valid")
         # for metadata
@@ -391,7 +391,7 @@ class ArrayRun:
                 self.metadata_dict[title].append(value)
         else:
             self.metadata_dict[title] = [value]
-        return title, value, message
+        return title, value, naming
 
     def _get_multidim_array_run_flag(self):
         multi_dim_flag = 0
