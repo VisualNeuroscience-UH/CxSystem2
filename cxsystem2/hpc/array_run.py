@@ -234,8 +234,11 @@ class ArrayRun:
         print("################### Trial %d/%d started running for "
               "simulation number %d: %s ##########################" % (tr + 1,
                                                                        self.trials_per_config, idx, self.final_namings[idx][1:]))
-        cm = cx.CxSystem(self.list_of_anatomy_dfs[idx], self.list_of_physio_dfs[idx], output_file_suffix=self.final_namings[idx],
-                         instantiated_from_array_run=1, array_run_in_cluster=self.array_run_is_in_cluster)
+        tr_suffix = ''
+        if self.trials_per_config > 1:
+             tr_suffix = '_' + str(tr).zfill(3)
+        cm = cx.CxSystem(self.df_anat_final_array[idx], self.df_phys_final_array[idx], output_file_suffix=self.final_messages[idx]
+                         + tr_suffix, instantiated_from_array_run=1, array_run_in_cluster=self.array_run_is_in_cluster)
         cm.run()
         paths[orig_idx] = cm.workspace.get_results_export_path()
         working.value -= 1
