@@ -1731,7 +1731,7 @@ class CxSystem:
                 active_neurons_str = 'arange' + spike_times[spike_times.index('[act]') + 5:].replace('-',',')
             else:
                 spike_times_unit = spike_times[spike_times.index('*') + 1:]
-                active_neurons_str='arange(0,%s-1,1)' % (number_of_neurons)
+                active_neurons_str='arange(0,%s,1)' % (number_of_neurons)
 
             tmp_namespace = {"spike_times_": []}
             exec('tmp_namespace ["spike_times_"] = spike_times_list * %s' % spike_times_unit,
