@@ -12,6 +12,10 @@ for exporting and importing configuration files. The row in the middle has butt
 for managing files. The last row is mainly for building the network and configuring the simulation. The *Simulate*
 in the top-right corner launches the simulation(s).
 
+On lower left part of the browser, you can see a small windows entitled "Status of Simulations". As the name implies, this
+window will print out information about the simulation you've submitted the request for. You can temporarily close this
+window and open it later on by clicking on the "Simulation Status" button on the top menu.
+
 Now, to run a simple example, let's open up the *Examples* tab:
 
 .. image:: ../images/tut1-window02-examples_window_1000px.png
