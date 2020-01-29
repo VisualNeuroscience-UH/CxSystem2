@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #SBATCH --account=svanni
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=2
