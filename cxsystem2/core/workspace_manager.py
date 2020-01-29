@@ -84,12 +84,16 @@ class Workspace:
     def get_imported_connection_path(self):
         return self.imported_connections_path.as_posix()
 
+    def get_results_export_path(self):
+        return self.results_export_path.as_posix()
+
     def set_imported_connection_path(self, path):
         self.imported_connections_path = Path(path)
 
     def import_connections(self):
         assert self.imported_connections_path.suffix in self.compression_to_extension.values(), \
-            ' -  Compression method {} is not supported. Supported methods are gz, bz2 or pickle'.format(self.imported_connections_path.suffix)
+            ' -  Compression method {} is not supported. Supported methods are gzip (gz), bzip2 (bz2) or pickle (pkl)'.format(
+                self.imported_connections_path.suffix)
         if not self.imported_connections_path.is_absolute():
             if self.workspace_path.joinpath(self.imported_connections_path).is_file():
                 self.imported_connections_path = self.workspace_path.joinpath(self.imported_connections_path)
