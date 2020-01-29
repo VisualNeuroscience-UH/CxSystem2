@@ -29,7 +29,10 @@
 <script src="/static/scripts/jquery-3.4.1.min.js"></script>
 <script src="/static/scripts/schema.js"></script>
 <script src="/static/scripts/django_requests.js"></script>
-<!--<script src="/static/css/foundation-5.5.3/js/foundation.min.js"></script>-->
+<script src="/static/css/foundation-5.5.3/js/foundation.min.js"></script>
+<script>
+    $(document).ready(function(){$(document).foundation();});
+</script>
 
 <script src="/static/scripts/jso.js"></script>
 <script src="/static/scripts/auth.js"></script>
@@ -52,10 +55,12 @@
     JSONEditor.defaults.iconlib = 'fontawesome4';
 </script>
 
+
+
 <body style="background-color: #f2f2f2">
 
 
-<nav class="top-bar" data-topbar role="navigation">
+<nav class="top-bar hide-for-small hide-for-medium" data-topbar role="navigation">
     <ul class="title-area">
         <li class="name">
             <h1><a href="#" class="disable">
@@ -89,7 +94,7 @@
             {% csrf_token %}
             <a class="button alert" href="javascript:void(0);" onclick="req_simulate()"
                data-step="4"
-               data-intro="Use this button to initiate a simulation on the server">Simulate</a>
+               data-intro="Use this button to initiate a simulation on the server" style="padding-left: 10px !important; padding-right: 10px !important;">Simulate</a>
         </ul>
 
         {% if is_secure %}
@@ -101,37 +106,34 @@
     </section>
 </nav>
 {% if is_secure %}
-<nav class="top-bar" data-topbar role="navigation">
+<nav class="top-bar hide-for-small hide-for-medium" data-topbar role="navigation">
 
     <ul class="right">
         {% csrf_token %}
-        <a class="button success large-expanded" href="javascript:void(0);" onclick="req_download_files()">Download Files</a>
-    </ul>
-
-    <ul class="right">
-        {% csrf_token %}
-        <a class="button success large-expanded" href="javascript:void(0);" onclick="req_download_workspace()">Download Workspace</a>
-    </ul>
-
-    <ul class="right">
-        {% csrf_token %}
-        <a class="button secondary" href="javascript:void(0);" onclick="req_lsworkspace()">Show Workspace</a>
-    </ul>
-
-    <ul class="right">
-        {% csrf_token %}
-        <a class="button secondary" href="javascript:void(0);" onclick="req_simoutput()">Simulations Output</a>
+        <a class="button alert" href="javascript:void(0);" onclick="double_check_delete()"  style="padding-left: 10px !important; padding-right: 10px !important;">Clear Workspace</a>
     </ul>
 
 
     <ul class="right">
         {% csrf_token %}
-        <a class="button secondary" href="javascript:void(0);" onclick="Show(simulation_status)">Simulations Status</a>
+        <a class="button secondary" href="javascript:void(0);" onclick="req_lsworkspace()"  style="padding-left: 10px !important; padding-right: 10px !important;">Show Workspace</a>
     </ul>
 
     <ul class="right">
         {% csrf_token %}
-        <a class="button alert" href="javascript:void(0);" onclick="double_check_delete()">Clear Workspace</a>
+        <a class="button secondary" href="javascript:void(0);" onclick="req_simoutput()"  style="padding-left: 10px !important; padding-right: 10px !important;">Simulations Output</a>
+    </ul>
+
+
+    <ul class="right">
+        {% csrf_token %}
+        <a class="button secondary" href="javascript:void(0);" onclick="Show(simulation_status)" style="padding-left: 10px !important; padding-right: 10px !important;">Simulations Status</a>
+    </ul>
+
+    <button href="#" data-dropdown="drop1" aria-controls="drop1" aria-expanded="false" class="right button dropdown success" style="margin-right: 10px !important;  padding-left: 10px !important; ">Download</button>
+    <ul id="drop1" data-dropdown-content class="f-dropdown" aria-hidden="true">
+    <li><a class="" href="javascript:void(0);" onclick="req_download_files()">Download Files</a></li>
+    <li><a class="" href="javascript:void(0);" onclick="req_download_workspace()">Download Workspace</a></li>
     </ul>
 
 </nav>
@@ -142,7 +144,7 @@
 </div>
 
 
-<div class="tabsdiv">
+<div class="tabsdiv hide-for-small hide-for-medium">
     <div class="tabs__topbar">
         <button id="home-button" class="tabs__button" data-for-tab="0" style="display: none;">Home
         </button>
@@ -335,10 +337,12 @@
     </div>
 </div>
 
+<div style="text-align: center;  padding: 20px; background-color: #f44336;  color: white;"><strong>Your screen resolution is too low or your browser size is too small!</strong> </div>
+
 {% if is_secure %}
 <div id="export_config_container" style="display:none;"></div>
 
-<div id="simulation_status">
+<div id="simulation_status" class="hide-for-small hide-for-medium">
     <div class="ShowHide" id="Bar">
         <div id="right">
             <a href="#" onclick="Hide(simulation_status);">X</a>
