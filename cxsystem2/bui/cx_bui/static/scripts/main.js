@@ -576,10 +576,13 @@ function dragElement(elmnt) {
 
 function Hide(HideID)
 {
-  HideID.style.display = "none";
+  HideID.classList.remove("hide-for-medium-down");
+  HideID.classList.add("hide");
 }
 
-function Show(HideID)
+function Show(ShowID)
 {
-  HideID.style.display = "block";
+  ShowID.classList.remove("hide");
+  ShowID.classList.add("hide-for-medium-down");
+
 }

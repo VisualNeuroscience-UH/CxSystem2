@@ -60,7 +60,7 @@
 <body style="background-color: #f2f2f2">
 
 
-<nav class="top-bar hide-for-small hide-for-medium" data-topbar role="navigation">
+<nav class="top-bar hide-for-medium-down" data-topbar role="navigation">
     <ul class="title-area">
         <li class="name">
             <h1><a href="#" class="disable">
@@ -106,7 +106,7 @@
     </section>
 </nav>
 {% if is_secure %}
-<nav class="top-bar hide-for-small hide-for-medium" data-topbar role="navigation">
+<nav class="top-bar hide-for-medium-down" data-topbar role="navigation">
 
     <ul class="right">
         {% csrf_token %}
@@ -144,7 +144,7 @@
 </div>
 
 
-<div class="tabsdiv hide-for-small hide-for-medium">
+<div class="tabsdiv hide-for-medium-down">
     <div class="tabs__topbar">
         <button id="home-button" class="tabs__button" data-for-tab="0" style="display: none;">Home
         </button>
@@ -337,12 +337,12 @@
     </div>
 </div>
 
-<div style="text-align: center;  padding: 20px; background-color: #f44336;  color: white;"><strong>Your screen resolution is too low or your browser size is too small!</strong> </div>
+<div class="show-for-medium-down" style="text-align: center;  padding: 20px; background-color: #f44336;  color: white;"><strong>Your screen resolution is too low or your browser size is too small!</strong> </div>
 
 {% if is_secure %}
 <div id="export_config_container" style="display:none;"></div>
 
-<div id="simulation_status" class="hide-for-small hide-for-medium">
+<div id="simulation_status" class="hide-for-medium-down hide">
     <div class="ShowHide" id="Bar">
         <div id="right">
             <a href="#" onclick="Hide(simulation_status);">X</a>
