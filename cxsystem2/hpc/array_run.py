@@ -120,7 +120,7 @@ class ArrayRun:
         return self.run_in_cluster == 1 and self.cluster_start_idx == -1 and self.cluster_step == -1
 
     def _is_running_in_cluster(self):
-        return self.run_in_cluster != 1 and self.cluster_start_idx != -1 and self.cluster_step != -1
+        return self.cluster_start_idx != -1 and self.cluster_step != -1
 
     def _is_running_locally(self):
         return self.run_in_cluster != 1 and self.cluster_start_idx == -1 and self.cluster_step == -1
