@@ -1767,7 +1767,6 @@ class CxSystem:
                 else:
                     period = period_init
                 period_str = 'GEN_PE = %s*second' % (period)
-                import pdb; pdb.set_trace()
                 exec(period_str, globals(), locals())  # running the syntax for period of the input neuron group
                 # times give the start of first spike, which must be less than the period, thus the 0.5/[period in Hz] below
                 times_str = 'GEN_TI = b2.repeat(0.5/%s,%s)*%s' % (spike_times_ / eval(spike_times_unit), number_of_active_neurons, "second")
