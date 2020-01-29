@@ -41,7 +41,7 @@ cluster_metadata_path = cluster_simulation_path.joinpath('cluster_metadata{}.pkl
 @pytest.fixture(scope='module')
 def cxsystem_run_fixture3():
     # Executing setup code
-    cluster.ClusterDownloader(cluster_metadata_path.as_posix(),clean_remote=True)
+    cluster.ClusterDownloader(cluster_metadata_path.as_posix(),clean_remote=False)
 
     yield  # Run the tests here
 
