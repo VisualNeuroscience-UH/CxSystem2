@@ -273,23 +273,27 @@ class CxSystem:
                     json.dump(physiology_config, f)
                 physiology_config = tmp_physio_path2
             # this is vulnerable to code injection
-            command = 'python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}'.format(
-                array_run=array_run_path,
-                anat_df=tmp_anat_path,
-                physio_df=tmp_physio_path,
-                suffix=suffix,
-                start=int(cluster_run_start_idx),
-                step=int(cluster_run_step),
-                anat_path=anatomy_and_system_config,
-                physio_path=physiology_config,
-                cluster=cluster_flag,
-                stdout_file=self.array_run_stdout_file
-            )
-            if platform.node() == 'hbp-bsp-cxsys2': # this is for hbp vm to activate the virtuanenv before running array run
-                command = "source /webapp/cxsys2/CxSystem2/venv_cxsys2/bin/activate &&" + command
-            if sys.platform == 'linux' or sys.platform == 'darwin':
-                command = '/bin/bash -c "' + command + '"'
-            os.system(command)
+            if sys.platform == 'linux':
+                from cxsystem2.hpc.array_run import ArrayRun
+                ArrayRun(tmp_anat_path, tmp_physio_path,suffix,int(cluster_run_start_idx),int(cluster_run_step),anatomy_and_system_config,physiology_config,cluster_flag,self.array_run_stdout_file)
+            else:
+                command = 'python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}'.format(
+                    array_run=array_run_path,
+                    anat_df=tmp_anat_path,
+                    physio_df=tmp_physio_path,
+                    suffix=suffix,
+                    start=int(cluster_run_start_idx),
+                    step=int(cluster_run_step),
+                    anat_path=anatomy_and_system_config,
+                    physio_path=physiology_config,
+                    cluster=cluster_flag,
+                    stdout_file=self.array_run_stdout_file
+                )
+                if platform.node() == 'hbp-bsp-cxsys2': # this is for hbp vm to activate the virtuanenv before running array run
+                    command = "source /webapp/cxsys2/CxSystem2/venv_cxsys2/bin/activate &&" + command
+                if sys.platform == 'linux' or sys.platform == 'darwin':
+                    command = '/bin/bash -c "' + command + '"'
+                os.system(command)
             self.array_run = 1
             return
         try:
