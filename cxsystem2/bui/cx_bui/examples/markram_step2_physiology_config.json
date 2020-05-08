@@ -2227,11 +2227,6 @@
           "Key": "V_init_max",
           "Value": "VT",
           "Comment": ""
-        },
-        {
-          "Key": "C",
-          "Value": "50*ms",
-          "Comment": ""
         }
       ]
     },
