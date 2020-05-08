@@ -413,6 +413,14 @@ class NeuronParser:
             neuron_type_to_find = output_neuron['type']
         else:
             neuron_type_to_find = output_neuron['subtype']
+            # ...but fall back to neuron_type if subtype parameters are not defined
+            try:
+                variable_start_idx = \
+                self.physio_config_df['Variable'][self.physio_config_df['Variable'] == neuron_type_to_find].index[0]
+            except IndexError:
+                print(' !  No parameters for %s found, using %s parameters instead' % (output_neuron['subtype'], output_neuron['type']))
+                neuron_type_to_find = output_neuron['type']
+
 
         self.output_namespace = {}
         variable_start_idx = self.physio_config_df['Variable'][self.physio_config_df['Variable'] == neuron_type_to_find].index[0]
