@@ -77,12 +77,8 @@ class NeuronReference:
                               'type': cell_type,
                               'subtype': cell_subtype,
                               'soma_layer': int(layers_idx[0])}
-        # _comparts_tmp1 & 2 are for extracting the layer of the compartments if applicable
         if self.output_neuron['type'] == 'PC':
-            self._comparts_tmp1 = np.array(list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1)))
-            self._comparts_tmp2 = np.delete(self._comparts_tmp1,
-                                            np.where(self._comparts_tmp1 == 3)) if 3 in self._comparts_tmp1 else self._comparts_tmp1
-            self.output_neuron['dends_layer'] = self._comparts_tmp2
+            self.output_neuron['dends_layer'] = np.array(list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1)))
             self.output_neuron['dend_comp_num'] = len(self.output_neuron['dends_layer'])
             self.output_neuron['total_comp_num'] = self.output_neuron['dend_comp_num'] + 3
 
