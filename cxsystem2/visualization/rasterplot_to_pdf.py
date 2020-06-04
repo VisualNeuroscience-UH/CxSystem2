@@ -61,7 +61,7 @@ class rasterplot_pdf_generator:
                         s = spike_dat['t']/b2.units.ms
                         t = spike_dat['i']
                         all_axes[-1].plot(s[::step], t[::step],'.k',markersize=1)
-                    if idx_in_fig > 0:
+                    if idx_in_fig >= 0:
                         plt.tight_layout()
                         plt.text(0.4, 0.01, file.name, transform=f.transFigure, size=8, weight="bold")
                         pdf.savefig(f)
