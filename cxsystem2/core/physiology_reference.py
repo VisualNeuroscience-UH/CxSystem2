@@ -77,12 +77,8 @@ class NeuronReference:
                               'type': cell_type,
                               'subtype': cell_subtype,
                               'soma_layer': int(layers_idx[0])}
-        # _comparts_tmp1 & 2 are for extracting the layer of the compartments if applicable
         if self.output_neuron['type'] == 'PC':
-            self._comparts_tmp1 = np.array(list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1)))
-            self._comparts_tmp2 = np.delete(self._comparts_tmp1,
-                                            np.where(self._comparts_tmp1 == 3)) if 3 in self._comparts_tmp1 else self._comparts_tmp1
-            self.output_neuron['dends_layer'] = self._comparts_tmp2
+            self.output_neuron['dends_layer'] = np.array(list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1))) # N layers above soma. Only main layers 1, 2, 3, 4, 5 and 6 count.  
             self.output_neuron['dend_comp_num'] = len(self.output_neuron['dends_layer'])
             self.output_neuron['total_comp_num'] = self.output_neuron['dend_comp_num'] + 3
 
@@ -252,7 +248,7 @@ class NeuronReference:
             ::
 
                 dvm/dt = (gL*(EL-vm) + gealpha * (Ee-vm) + gealphaX * (Ee-vm) + gialpha * (Ei-vm)
-                        + gL * DeltaT * exp((vm-VT) / DeltaT) +I_dendr) / C : volt (unless refractory)
+                         + I_dendr) / C : volt (unless refractory)
                 dge/dt = -ge/tau_e : siemens
                 dgealpha/dt = (ge-gealpha)/tau_e : siemens
                 dgeX/dt = -geX/tau_eX : siemens
@@ -266,7 +262,7 @@ class NeuronReference:
 
             assert 'noise_sigma' in self.output_neuron['namespace'].keys(), \
                 "Noise sigma is used in model_variation model, but it is not defined in the configuration file. " \
-                "Did you mean to set model_variation  in physiologyi configuration to 1? "
+                "Did you mean to set model_variation  in physiology configuration to 1? "
             # <editor-fold desc="...Fixed equations">
             eq_template_soma = '''
             dvm/dt = ((gL*(EL-vm) + gealpha * (Ee-vm) + gialpha * (Ei-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) 
@@ -277,7 +273,7 @@ class NeuronReference:
             dgialpha/dt = (gi-gialpha)/tau_i : siemens
             '''
             eq_template_dend = '''
-            dvm/dt = (gL*(EL-vm) + gealpha * (Ee-vm) + gialpha * (Ei-vm) +I_dendr) / C : volt
+            dvm/dt = (gL*(EL-vm) + gealpha * (Ee-vm) + gialpha * (Ei-vm) + I_dendr) / C : volt
             dge/dt = -ge/tau_e : siemens
             dgealpha/dt = (ge-gealpha)/tau_e : siemens
             dgi/dt = -gi/tau_i : siemens
@@ -324,17 +320,19 @@ class NeuronReference:
                                                            I_dendr="Idendr_a0", vmself="vm_a0", vmpre="vm_a1", vmpost="vm")
 
             # Defining decay between apical dendrite compartments
+            Ra_idx_add = 2 # Ra idx 0 is btw basal and soma, Ra idx 1 is btw soma and a0, so we start from Ra idx 2
             for _ii in arange(1, self.output_neuron['dend_comp_num']):
                 self.output_neuron['equation'] += b2.Equations(
                     'I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
-                    gapre=1 / (self.output_neuron['namespace']['Ra'][_ii]),
-                    gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1]),
+                    gapre=1 / (self.output_neuron['namespace']['Ra'][_ii + Ra_idx_add]),
+                    gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1 + Ra_idx_add]),
                     I_dendr="Idendr_a%d" % _ii, vmself="vm_a%d" % _ii,
                     vmpre="vm_a%d" % (_ii + 1), vmpost="vm_a%d" % (_ii - 1))
 
+            # Last compartment
             self.output_neuron['equation'] += b2.Equations('I_dendr = gapost*(vmpost-vmself) : amp',
                                                            I_dendr="Idendr_a%d" % self.output_neuron['dend_comp_num'],
-                                                           gapost=1 / (self.output_neuron['namespace']['Ra'][-1]),
+                                                           gapost=1 / (self.output_neuron['namespace']['Ra'][-1 + Ra_idx_add]),
                                                            vmself="vm_a%d" % self.output_neuron['dend_comp_num'],
                                                            vmpost="vm_a%d" % (self.output_neuron['dend_comp_num'] - 1))
             # </editor-fold>
@@ -461,17 +459,19 @@ class NeuronReference:
                                                                I_dendr="Idendr_a0", vmself="vm_a0", vmpre="vm_a1", vmpost="vm")
 
                 # Defining decay between apical dendrite compartments
+                Ra_idx_add = 2 # Ra idx 0 is btw basal and soma, Ra idx 1 is btw soma and a0, so we start from Ra idx 2
                 for _ii in arange(1, self.output_neuron['dend_comp_num']):
                     self.output_neuron['equation'] += b2.Equations(
                         'I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
-                        gapre=1 / (self.output_neuron['namespace']['Ra'][_ii]),
-                        gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1]),
+                        gapre=1 / (self.output_neuron['namespace']['Ra'][_ii + Ra_idx_add]),
+                        gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1 + Ra_idx_add]),
                         I_dendr="Idendr_a%d" % _ii, vmself="vm_a%d" % _ii,
                         vmpre="vm_a%d" % (_ii + 1), vmpost="vm_a%d" % (_ii - 1))
 
+                # Last compartment
                 self.output_neuron['equation'] += b2.Equations('I_dendr = gapost*(vmpost-vmself) : amp',
                                                                I_dendr="Idendr_a%d" % self.output_neuron['dend_comp_num'],
-                                                               gapost=1 / (self.output_neuron['namespace']['Ra'][dendritic_extent - 1]),
+                                                               gapost=1 / (self.output_neuron['namespace']['Ra'][dendritic_extent - 1 + Ra_idx_add]),
                                                                vmself="vm_a%d" % self.output_neuron['dend_comp_num'],
                                                                vmpost="vm_a%d" % (self.output_neuron['dend_comp_num'] - 1))
 

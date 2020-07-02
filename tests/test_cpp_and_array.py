@@ -99,14 +99,14 @@ def test_spikecount_strict(cxsystem_run_fixture2,
 		spike_count_proportion = new_spikes_all[key]['N'] / spikes_all[key]['N']
 		assert spike_count_proportion == 1.0
 
-@pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')
-def test_spiketiming_strict(cxsystem_run_fixture2,
-							get_spike_data):
-	spikes_all, new_spikes_all = get_spike_data
-	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
-	for key in keys:
-		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
-		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
+# @pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')
+# def test_spiketiming_strict(cxsystem_run_fixture2,
+# 							get_spike_data):
+# 	spikes_all, new_spikes_all = get_spike_data
+# 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
+# 	for key in keys:
+# 		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
+# 		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
 
 def test_spikecount_report(cxsystem_run_fixture2,
 						   capsys,
