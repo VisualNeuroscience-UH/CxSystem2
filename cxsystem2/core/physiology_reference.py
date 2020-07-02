@@ -320,17 +320,19 @@ class NeuronReference:
                                                            I_dendr="Idendr_a0", vmself="vm_a0", vmpre="vm_a1", vmpost="vm")
 
             # Defining decay between apical dendrite compartments
+            Ra_idx_add = 2 # Ra idx 0 is btw basal and soma, Ra idx 1 is btw soma and a0, so we start from Ra idx 2
             for _ii in arange(1, self.output_neuron['dend_comp_num']):
                 self.output_neuron['equation'] += b2.Equations(
                     'I_dendr = gapre*(vmpre-vmself) + gapost*(vmpost-vmself) : amp',
-                    gapre=1 / (self.output_neuron['namespace']['Ra'][_ii]),
-                    gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1]),
+                    gapre=1 / (self.output_neuron['namespace']['Ra'][_ii + Ra_idx_add]),
+                    gapost=1 / (self.output_neuron['namespace']['Ra'][_ii - 1 + Ra_idx_add]),
                     I_dendr="Idendr_a%d" % _ii, vmself="vm_a%d" % _ii,
                     vmpre="vm_a%d" % (_ii + 1), vmpost="vm_a%d" % (_ii - 1))
 
+            # Last compartment
             self.output_neuron['equation'] += b2.Equations('I_dendr = gapost*(vmpost-vmself) : amp',
                                                            I_dendr="Idendr_a%d" % self.output_neuron['dend_comp_num'],
-                                                           gapost=1 / (self.output_neuron['namespace']['Ra'][-1]),
+                                                           gapost=1 / (self.output_neuron['namespace']['Ra'][-1 + Ra_idx_add]),
                                                            vmself="vm_a%d" % self.output_neuron['dend_comp_num'],
                                                            vmpost="vm_a%d" % (self.output_neuron['dend_comp_num'] - 1))
             # </editor-fold>
