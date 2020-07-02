@@ -86,6 +86,24 @@ basket cell) and setting the :code:`neuron_subtype` as L23_NBC for the correspon
 
 As shown in the example, you can refer to parameters (and do computations using them!) defined earlier in the Physiology configuration.
 
+For pyramidal cell type (PC) you have additional parameters:
+
+ .. csv-table::
+   :widths: 2, 5, 5
+
+    PC  ,Cm ,1.0 * ufarad * cm ** -2
+    ,Area_tot_pyram   ,10000 * um**2
+    ,fract_areas,   "{3: array([0.58, 0.052, 0.20, 0.15, 0.01, 0.01])}"
+    ,Ra ,"[100,100,150,150,150] * Mohm"
+    ,spine_factor,  2
+
+Here, capacitance is defined per area unit, and total area of the PC is defined. The fract_areas provide the 
+area fractions for each compartment as follows {N apical dendrite compartments above soma layer : 
+array([basal_dendr, soma, apical d comp 0 at soma layer, a1 at the 1st-, a2 at the 2nd-, a3 at the 3rd layer above soma])}
+Ra provides the resistances between aforementioned compartments, thus len(Ra) = len(fract_areas array) - 1. The spine factor
+provides multiplier for capacitance for accounting the membrane surface addition by the dendritic spines.
+
+We also use rheobase parameter to allow tonic current injections in relation to rheobase.
 
 .. _connection_params:
 

@@ -165,7 +165,10 @@ L1 inhibitory cell (L1i). The user can easily define subtypes, e.g. L4_MC. Subty
 
         :code:`neuron_subtype{string}`: Neuron subtype (can be an arbitrary string, or -- if no subtype is needed).
 
-        :code:`layer_idx`: Layer where the neuron population is located (layer 2/3 = 2). For PCs, please use the [X->Y] syntax, where X is soma layer and Y is the most distal apical compartment.
+        :code:`layer_idx`: Layer where the neuron population is located (layer 2/3 = 2). For PCs, please use the [X->Y] syntax, where 
+        X is soma layer and Y is the most distal apical compartment. Note that PC the [X->Y] syntax creates X minus Y compartments above soma layer.
+        E.g. for [4->1], the PC will have 3 compartments at soma layer [basal (b), soma (s) and apical0 (a)] and 3 apical dendrite
+        compartments above soma layer [a1 at layer idx 3, a2 at layer idx 2 and a3 at layer idx 1]
 
         :code:`net_center{float+floatj}`: Center point of the neuron population in complex coordinates (e.g. 0+0j).
 
