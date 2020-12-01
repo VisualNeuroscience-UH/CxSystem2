@@ -57,7 +57,10 @@ class rasterplot_pdf_generator:
                         all_axes[-1].set_title(ng)
                         all_axes[-1].set_xlabel('Time (ms)')
                         all_axes[-1].set_ylabel('Neuron index')
-                        step = int((1 // self.sampling_rate) + 1)
+                        if self.sampling_rate <= 0.01:
+                            step = int((1 // self.sampling_rate) + 1)
+                        else:
+                            step = int((.99 // self.sampling_rate) + 1)
                         s = spike_dat['t']/b2.units.ms
                         t = spike_dat['i']
                         all_axes[-1].plot(s[::step], t[::step],'.k',markersize=1)
@@ -67,6 +70,7 @@ class rasterplot_pdf_generator:
                         pdf.savefig(f)
                 except KeyError:
                     print("The file '{}' is not a brian data file, skipping ...".format(file.name))
+            print(f'Requested sampling rate of {int(self.sampling_rate * 100)}%. Rasterplots at steps of {step} between spikes. True sampling rate is {100/step:.1f}%')
 
     def get_output_file_path(self):
         return self.out_filename.as_posix()
