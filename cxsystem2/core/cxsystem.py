@@ -825,7 +825,7 @@ class CxSystem:
 
             if neuron_type in ['L1i', 'BC', 'MC']:
                 background_weight = self.value_extractor(self.physio_config_df, 'background_E_I_weight')
-                background_weight_inhibition = self.value_extractor(self.physio_config_df, 'background_E_I_weight')
+                background_weight_inhibition = self.value_extractor(self.physio_config_df, 'background_I_I_weight')
 
                 if flag_bg_calcium_scaling == 1:
                     background_weight = repr(bg_synapse.scale_by_calcium(ca, background_weight))
@@ -1454,8 +1454,7 @@ class CxSystem:
                     # If spatial_decay does not include '[i=j]', exclude autoconnection, use only lambda
                     elif '[ij]' not in spatial_decay:
                         syn_con_str = "%s.connect(condition='i!=j', p= " % _dyn_syn_name
-
-                    syn_con_str += "'%f*exp(-(%f*meter/mm)*(sqrt((x_pre-x_post)**2+(y_pre-y_post)**2)))'" % (
+                    syn_con_str += "'%f*exp(-(%f/mm)*(sqrt((x_pre-x_post)**2+(y_pre-y_post)**2)))'" % (
                         float(p_arg), float(spatial_decay))
                     return syn_con_str
 
@@ -1479,7 +1478,8 @@ class CxSystem:
                     spatial_decay = str(1/(2*0.025**2))
 
                 elif '_relay_spikes' in self.neurongroups_list[int(current_pre_syn_idx)]:
-                    spatial_decay = '10'
+                    # spatial_decay = '10'
+                    spatial_decay = '0'
 
                 syn_con_str = exp_distance_function(p_arg=p_arg, spatial_decay=spatial_decay)
 
