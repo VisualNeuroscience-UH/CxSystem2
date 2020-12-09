@@ -345,6 +345,7 @@ def sim_status(request):
                         sim_finish_lines.append(line)
             output = '&'.join(sim_finish_lines) # just send the last 30 lines
         return HttpResponse(output, content_type='text/plain')
+    return HttpResponse("Error: Insecure non-HTTPS connection", content_type='text/plain')
 
 
 @csrf_exempt
