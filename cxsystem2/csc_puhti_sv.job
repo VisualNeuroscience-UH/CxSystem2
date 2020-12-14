@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --account=svanni
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4 ##tmp was 40
+#SBATCH --partition=test
+#SBATCH --time=00:10:00 ## was 30, but puhti test max is 15 min
+#SBATCH --mem-per-cpu=10G
+#SBATCH --job-name=auto_cluster_job
+#SBATCH --output=auto_cluster_job.out.%j
+#SBATCH --error=auto_cluster_job.er.%j
+
+module purge
+##module load python-env
+##module list
+
+source ~/.bashrc
+sim39
+
+set -xe
+
+cd ${SLURM_SUBMIT_DIR:-.}
+pwd
+
