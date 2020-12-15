@@ -241,7 +241,7 @@ class CxSystem:
             trials_per_config = 0
         # check for array_run and return
         if np.any(check_array_run_anatomy) or np.any(check_array_run_physiology) or (trials_per_config > 1 and not instantiated_from_array_run):
-            self.workspace = Workspace(parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'), self.suffix)
+            self.set_workspace(parameter_finder(self.anat_and_sys_conf_df, 'workspace_path'), self.suffix)
             self.workspace.create_simulation(parameter_finder(self.anat_and_sys_conf_df, 'simulation_title'))
             suffix = self.suffix
             tmp_folder_path = self.workspace.get_workspace_folder().joinpath('.tmp' + suffix)
