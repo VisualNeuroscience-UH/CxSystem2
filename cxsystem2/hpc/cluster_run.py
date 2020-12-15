@@ -331,7 +331,9 @@ class ClusterDownloader:
                 # here it means there is no folder in result folder and therefore all simulations are done
                 # so we copy back the result and remove the files on cluster
 
-                # waiting another 10 seconds to make sure everythign's copied back in the cluster
+                # waiting another 10 seconds to make sure everything's copied back in the cluster
+                # Note that this does not check for JOBID, if the same user has another process ongoing
+                # waiting_flag will remain true
                 time.sleep(10)
 
                 print(" -  Downloading the results from cluster...")
