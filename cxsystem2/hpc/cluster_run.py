@@ -228,21 +228,49 @@ class ClusterRun:
         remote_workspace = Path(remote_workspace)
         module_name = self.find_remote_python_module(slurm_path)
         self.ssh_commander('mkdir -p {}'.format(self.cluster_workspace.as_posix()))
-        print(" -  Updating CxSystem2 on cluster")
-        print(self.ssh_commander('source ~/.bash_profile ; '
+
+        # Query for valid cxsystem, install/update if necessary, report
+        print(" -  Checking CxSystem2 on cluster")
+
+        # Should be empty string for existing git repo
+        git_repo_error_message = self.ssh_commander('source ~/.bash_profile ; '
                                  'source ~/.bashrc ; '
                                  'cd {workspace} ; '
-                                 'git clone https://github.com/VisualNeuroscience-UH/CxSystem2 ; '
                                  'cd CxSystem2 ; '
-                                 'git pull ; '.format(workspace=remote_workspace.as_posix())).decode('utf-8'))
-        print(self.ssh_commander('bash -lc \''
-                                 'source ~/.bash_profile ; '
-                                 'source ~/.bashrc ; '
-                                 'echo $PATH; '
-                                 'module load {module} ;'
-                                 'cd {cxfolder} ; '
-                                 'python -m pip install -Ue . --user\''
-                                 .format(module=module_name, cxfolder=remote_workspace.joinpath('CxSystem2').as_posix())).decode('utf-8'))
+                                 'git -C . rev-parse'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
+        
+        if not git_repo_error_message:
+            git_basename = self.ssh_commander(
+                                    'cd {workspace}/CxSystem2 ; '
+                                    'git rev-parse --show-toplevel'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
+            commit_HEAD_hash = self.ssh_commander('source ~/.bash_profile ; '
+                                    'source ~/.bashrc ; '
+                                    'cd {workspace} ; '
+                                    'cd CxSystem2 ; '
+                                    'git rev-parse --short HEAD'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
+            git_branch = self.ssh_commander('source ~/.bash_profile ; '
+                                    'source ~/.bashrc ; '
+                                    'cd {workspace} ; '
+                                    'cd CxSystem2 ; '
+                                    'git rev-parse --abbrev-ref HEAD'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
+            print(f" -  The git repo is {git_basename}    branch is {git_branch}    commit HEAD hash is {commit_HEAD_hash}")
+            print(f" -  No need to download/install")
+        else:
+            print(" -  Updating CxSystem2 on cluster")
+            print(self.ssh_commander('source ~/.bash_profile ; '
+                                    'source ~/.bashrc ; '
+                                    'cd {workspace} ; '
+                                    'git clone https://github.com/VisualNeuroscience-UH/CxSystem2 ; '
+                                    'cd CxSystem2 ; '
+                                    'git pull ; '.format(workspace=remote_workspace.as_posix())).decode('utf-8'))
+            print(self.ssh_commander('bash -lc \''
+                                    'source ~/.bash_profile ; '
+                                    'source ~/.bashrc ; '
+                                    'echo $PATH; '
+                                    'module load {module} ;'
+                                    'cd {cxfolder} ; '
+                                    'python -m pip install -Ue . --user\''
+                                    .format(module=module_name, cxfolder=remote_workspace.joinpath('CxSystem2').as_posix())).decode('utf-8'))
 
     def find_remote_python_module(self,
                                   slurm_path):
