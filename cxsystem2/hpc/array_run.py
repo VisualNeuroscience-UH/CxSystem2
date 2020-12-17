@@ -464,8 +464,8 @@ class ArrayRun:
             cluster_number_of_nodes = int(parameter_finder(self.anatomy_df, 'cluster_number_of_nodes'))
         except (TypeError, NameError):
             pass
-        if cluster_number_of_nodes > 30:
-            raise Exception(' -  Number of nodes cannot be higher than 30 for your own safety.')
+        if cluster_number_of_nodes > 40:
+            raise Exception(' -  Number of nodes cannot be higher than 40 for your own safety.')
         return cluster_number_of_nodes
 
     def _get_metadata_filename(self,cluster_start_idx, cluster_step, job_suffix):
