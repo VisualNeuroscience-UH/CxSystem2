@@ -279,6 +279,11 @@ class ArrayRun:
             tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
             print("cleaning tmp folders " + tmp_folder_path)
             shutil.rmtree(tmp_folder_path)
+        elif self._is_running_in_cluster() is True:
+            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'cluster_workspace')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
+            print("cleaning tmp folders " + tmp_folder_path)
+            shutil.rmtree(tmp_folder_path)
+
 
     def generate_dataframes_for_param_search(self, original_df, index_of_array_variable, df_type, naming_prefix='', recursion_counter=1):
         """
