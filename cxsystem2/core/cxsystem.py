@@ -548,7 +548,7 @@ class CxSystem:
 
     def save_input_video(self, *args):
         assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, \
-            ' -  The do_init_vm flag should be either 0 or 1 but it is %s .' % args[0]
+            ' -  The save_input_video flag should be either 0 or 1 but it is %s .' % args[0]
         self.save_input_video = int(eval(args[0]))
 
     def _set_grid_radius(self, *args):
@@ -1598,7 +1598,7 @@ class CxSystem:
             input_mat_path = self.current_values_list[self.current_parameters_list[self.current_parameters_list == 'path'].index.item()]
             freq = self.current_values_list[self.current_parameters_list[self.current_parameters_list == 'freq'].index.item()]
             inp = Stimuli(duration=self.runtime, input_mat_path=input_mat_path, output_folder=self.workspace.get_simulation_folder_as_posix(),
-                          output_file_suffix=self.StartTime_str, output_file_extension=self.workspace.get_output_extension())
+                          output_file_suffix=self.suffix, output_file_extension=self.workspace.get_output_extension() )
             proc = multiprocessing.Process(target=inp.generate_inputs, args=(freq,))
             proc.start()
             self.video_input_idx = len(self.neurongroups_list)
@@ -1612,7 +1612,7 @@ class CxSystem:
                 if not self.save_input_video:
                     print(" - :  generated video output is NOT saved.")
                     os.remove(self.workspace.get_simulation_folder().joinpath(
-                        'input' + self.StartTime_str + self.workspace.get_output_extension()).as_posix())
+                        'input' + self.suffix + self.workspace.get_output_extension()).as_posix())
                 spk_generator = b2.SpikeGeneratorGroup(thread_number_of_neurons, spk_generator_sp, spk_generator_ti)
                 setattr(self.main_module, 'spk_generator', spk_generator)
                 try:

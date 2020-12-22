@@ -25,7 +25,7 @@ class Stimuli:
     Currently only video input is supported.
     """
 
-    def __init__(self, duration, input_mat_path, output_folder, output_file_suffix, output_file_extension):
+    def __init__(self, duration, input_mat_path, output_folder, output_file_extension, output_file_suffix=''):
         """
         Initializes the input module for and instance of CxSystem.
 
@@ -97,9 +97,10 @@ class Stimuli:
         # inputdt = b2.defaultclock.dt
         spikemons = []
         n0 = len(self.i_patterns[0].T)
-        # frames = self.frames
-        # factor = self.factor
-        tmp_group = b2.NeuronGroup(n0, 'rate = frames(t,i)*factor : Hz', threshold='b2.rand()<rate*dt')
+        frames = self.frames
+        factor = self.factor
+        # tmp_group = b2.NeuronGroup(n0, 'rate = frames(t,i)*factor : Hz', threshold='b2.rand()<rate*dt')
+        tmp_group = b2.NeuronGroup(n0, 'rate = frames(t,i)*factor : Hz', threshold='rand()<rate*dt')
         tmp_network = b2.Network()
         tmp_network.add(tmp_group)
         tmp_mon = b2.SpikeMonitor(tmp_group)
