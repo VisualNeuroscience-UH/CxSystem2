@@ -88,7 +88,7 @@ External input
 --------------
 
 Currently, three types of inputs can be used, namely :code:`VPM` (referring to nucleus ventralis posteromedialis; produces synchronous spikes), \
-:code:`video`, and :code:`spikes`. Note that external inputs use common indexing with the neuron groups. We recommend
+:code:`Video`, and :code:`spikes`. Note that external inputs use common indexing with the neuron groups. We recommend
 using the index 0 for the input group and indexing neuron groups from 1.
 
     :VPM: :code:`idx{int}`: Index of the neuron group.
@@ -106,7 +106,7 @@ using the index 0 for the input group and indexing neuron groups from 1.
         :code:`monitors`: Monitors for recording spikes or state variables. :ref:`More information on monitors <monitors>`
 
 
-    :video: :code:`idx{int}`: Index of the :code:`NeuronGroup()`.
+    :Video: :code:`idx{int}`: Index of the :code:`NeuronGroup()`.
 
         :code:`type`: videos
 
