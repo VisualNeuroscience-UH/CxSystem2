@@ -529,12 +529,10 @@ class CxSystem:
                   "should be configured to use benchmarking.")
         target_directory = self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix()
         if self.device.lower() == 'genn':
-            # b2.set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
             b2.set_device('genn', directory=target_directory)
             b2.prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
             print(f'\nTarget directory is {target_directory}')
-            # b2.set_device('cpp_standalone', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
             b2.set_device('cpp_standalone', directory=target_directory)
 
     #            if 'linux' in sys.platform and self.device.lower() == 'cpp':
