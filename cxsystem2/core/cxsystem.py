@@ -439,7 +439,7 @@ class CxSystem:
         if not self.array_run:
 
             if self.device != 'genn':
-                b2.run(self.runtime, report='text', profile=True)
+                b2.run(self.runtime, report='text', profile=False)
             else:
                 b2.run(self.runtime, report='text')  # genn doesn't support detailed profiling
 
@@ -506,7 +506,7 @@ class CxSystem:
 
         if not np.any(self.current_parameters_list.str.contains('compression_method')):
             # gzip is default of workspace manager
-            print(" -  compresison_method is not defined in the configuration file. Default compression method is gzip")
+            print(" -  compression_method is not defined in the configuration file. Default compression method is gzip")
 
         for ParamIdx, parameter in self.current_parameters_list.items():
             if parameter not in list(self.parameter_to_method_mapping.keys()):
@@ -527,11 +527,15 @@ class CxSystem:
         if self.benchmark:
             print(" -  CxSystem is performing benchmarking. The Brian2 "
                   "should be configured to use benchmarking.")
+        target_directory = self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix()
         if self.device.lower() == 'genn':
-            b2.set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
+            # b2.set_device('genn', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
+            b2.set_device('genn', directory=target_directory)
             b2.prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
         elif self.device.lower() == 'cpp':
-            b2.set_device('cpp_standalone', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
+            print(f'\nTarget directory is {target_directory}')
+            # b2.set_device('cpp_standalone', directory=self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
+            b2.set_device('cpp_standalone', directory=target_directory)
 
     #            if 'linux' in sys.platform and self.device.lower() == 'cpp':
     #                print(" -  parallel compile flag set")
