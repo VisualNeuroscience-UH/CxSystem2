@@ -1599,6 +1599,9 @@ class CxSystem:
             freq = self.current_values_list[self.current_parameters_list[self.current_parameters_list == 'freq'].index.item()]
             inp = Stimuli(duration=self.runtime, input_mat_path=input_mat_path, output_folder=self.workspace.get_simulation_folder_as_posix(),
                           output_file_suffix=self.suffix, output_file_extension=self.workspace.get_output_extension() )
+            # # Next two lines are for debugging, bypassing multiprocessing
+            # inp.generate_inputs(freq)
+            # spk_generator_sp, spk_generator_ti, thread_number_of_neurons = inp.load_input_seq(self.workspace.get_simulation_folder_as_posix())
             proc = multiprocessing.Process(target=inp.generate_inputs, args=(freq,))
             proc.start()
             self.video_input_idx = len(self.neurongroups_list)
