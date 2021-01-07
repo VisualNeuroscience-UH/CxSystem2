@@ -438,8 +438,8 @@ class CxSystem:
     def run(self):
         if not self.array_run:
 
-            if self.device != 'genn':
-                b2.run(self.runtime, report='text', profile=False)
+            if self.device not in ['cpp', 'genn']:
+                b2.run(self.runtime, report='text', profile=True)
             else:
                 b2.run(self.runtime, report='text')  # genn doesn't support detailed profiling
 
