@@ -3,6 +3,10 @@ os:
 - linux
 python:
 - '3.9'
+- '3.7'
+git:
+  depth: 3
+  quiet: true
 install:
 - pip install -r requirements.txt
 - pip install .
