@@ -25,7 +25,7 @@ class Stimuli:
     Currently only video input is supported.
     """
 
-    def __init__(self, duration, input_mat_path, output_folder, output_file_suffix, output_file_extension):
+    def __init__(self, duration, input_mat_path, output_folder, output_file_extension, output_file_suffix=''):
         """
         Initializes the input module for and instance of CxSystem.
 
@@ -66,21 +66,22 @@ class Stimuli:
         self.w_coord = _V1_mats['w_coord']
         self.z_coord = _V1_mats['z_coord']
         # Fill ISI with N-1 times frameduration of zeros
-        soa = 60  # in ms
-        stimulus_epoch_duration = 15  # in ms, duration of Burbank whole stimulus
-        assert np.mod(soa, stimulus_epoch_duration) == 0, ' -  Stimulus onset asynchrony (soa) must be an integer times frameduration.'
-        soa_in_n_frames = int(soa / stimulus_epoch_duration)
         dense_stimulus = _V1_mats['stimulus']
-        sparse_stimulus = np.tile(np.zeros_like(dense_stimulus), (1, soa_in_n_frames))
-        sparse_stimulus[:, 0::soa_in_n_frames] = dense_stimulus
 
         try:
             frameduration = b2.double(_V1_mats['frameduration'])
-            raise NotImplementedError('Frameduration coming from actual video frame rate. This is not implemented yet for CxSystem')
+            # Assuming different stimulus at every frame
+            sparse_stimulus = dense_stimulus
         except:
+            # Assuming frameduration = 15 ms and different stimulus at 60 ms intervals
+            soa = 60  # in ms
+            stimulus_epoch_duration = 15  # in ms, duration of Burbank whole stimulus
+            soa_in_n_frames = int(soa / stimulus_epoch_duration)
+            sparse_stimulus = np.tile(np.zeros_like(dense_stimulus), (1, soa_in_n_frames))
+            sparse_stimulus[:, 0::soa_in_n_frames] = dense_stimulus
             frameduration = stimulus_epoch_duration
         frames = b2.TimedArray(np.transpose(sparse_stimulus),
-                               dt=frameduration * ms)  # video_data has to be shape (frames, neurons), dt=frame rate
+                               dt=frameduration * ms)  # video_data has to be shape (frames, neurons), dt=frame duration
         self.frames = frames
         exec('self.factor = %s' % freq)
         self.i_patterns[len(self.i_patterns)] = frames.values * self.factor  # These must be final firing rates
@@ -97,9 +98,10 @@ class Stimuli:
         # inputdt = b2.defaultclock.dt
         spikemons = []
         n0 = len(self.i_patterns[0].T)
-        # frames = self.frames
-        # factor = self.factor
-        tmp_group = b2.NeuronGroup(n0, 'rate = frames(t,i)*factor : Hz', threshold='b2.rand()<rate*dt')
+        frames = self.frames
+        factor = self.factor
+        # tmp_group = b2.NeuronGroup(n0, 'rate = frames(t,i)*factor : Hz', threshold='b2.rand()<rate*dt')
+        tmp_group = b2.NeuronGroup(n0, 'rate = frames(t,i)*factor : Hz', threshold='rand()<rate*dt')
         tmp_network = b2.Network()
         tmp_network.add(tmp_group)
         tmp_mon = b2.SpikeMonitor(tmp_group)

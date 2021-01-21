@@ -128,9 +128,6 @@ def test_spiketiming_report(cxsystem_run_fixture2,
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 
 	time_resolution = 0.1 * msecond
-#	run_time = CM.runtime
-#	time_vector_length = run_time / time_resolution
-
 	time_vector_length = 2000
 
 	with capsys.disabled():
@@ -155,20 +152,20 @@ def test_spiketiming_report(cxsystem_run_fixture2,
 		new_spikes_index_time_matrix[new_spikes_all[key]['i'],new_spikes_time_indeces_float.astype(int)] = 1
 		new_spikes_index_time_matrix = new_spikes_index_time_matrix[all_spiking_neurons,:]
 
-		cumulative_ks = 0
+		# cumulative_ks = 0
 		cumulative_wd = 0
 		for idx, neuron_idx in enumerate(all_spiking_neurons):
 
 			spike_data = np.nonzero(spikes_index_time_matrix[idx,:])[0]
 			new_spike_data = np.nonzero(new_spikes_index_time_matrix[idx,:])[0]
 
-			ksstat = ks_2samp(spike_data,new_spike_data)
+			# ksstat = ks_2samp(spike_data,new_spike_data)
 			wass_dist = wasserstein_distance(spike_data,new_spike_data)
 
-			cumulative_ks += ksstat[0]
+			# cumulative_ks += ksstat[0]
 			cumulative_wd += wass_dist
 
-		mean_ks = cumulative_ks/len(all_spiking_neurons)
+		# mean_ks = cumulative_ks/len(all_spiking_neurons)
 		mean_wd = (time_resolution / msecond ) * cumulative_wd/len(all_spiking_neurons)
 
 		# report mean of these stats

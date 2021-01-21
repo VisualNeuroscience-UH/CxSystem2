@@ -315,8 +315,7 @@ def test_spiketiming_report(cxsystem_run_fixture,
 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
 
 	time_resolution = 0.1 * msecond
-	run_time = CM.runtime
-	time_vector_length = run_time / time_resolution
+	time_vector_length = 2000
 	
 	with capsys.disabled():
 			print('\n')
@@ -340,31 +339,23 @@ def test_spiketiming_report(cxsystem_run_fixture,
 		new_spikes_index_time_matrix[new_spikes_all[key]['i'],new_spikes_time_indeces_float.astype(int)] = 1
 		new_spikes_index_time_matrix = new_spikes_index_time_matrix[all_spiking_neurons,:]
 				
-		cumulative_ks = 0
+		# cumulative_ks = 0
 		cumulative_wd = 0
 		for idx, neuron_idx in enumerate(all_spiking_neurons):
 
 			spike_data = np.nonzero(spikes_index_time_matrix[idx,:])[0]
 			new_spike_data = np.nonzero(new_spikes_index_time_matrix[idx,:])[0]
 			
-			ksstat = ks_2samp(spike_data,new_spike_data)
+			# ksstat = ks_2samp(spike_data,new_spike_data)
 			wass_dist = wasserstein_distance(spike_data,new_spike_data)
 			
-			cumulative_ks += ksstat[0]
+			# cumulative_ks += ksstat[0]
 			cumulative_wd += wass_dist
 			
-		mean_ks = cumulative_ks/len(all_spiking_neurons)
+		# mean_ks = cumulative_ks/len(all_spiking_neurons)
 		mean_wd = (time_resolution / msecond ) * cumulative_wd/len(all_spiking_neurons)
 		
 		# report mean of these stats
 		with capsys.disabled():
 			# print('Mean KS statistics for {0} is {1:.2f}'.format(key,mean_ks)) # Quantified spiketiming similarity
 			print('Mean Wasserstein Distance (spike shift) for {0} is {1:.2f} ms'.format(key,mean_wd)) # Quantified spiketiming similarity
-
-		# np.save(key, spikes_index_time_matrix)
-		# np.save('New_' + key, new_spikes_index_time_matrix)
-		# if key == 'NG1_L4_PC1_L4toL1': # Put here the cell group whose spikes u want to see, and remove the comment marks
-			# import matplotlib.pyplot as plt
-			# plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
-			# plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
-			# plt.show()

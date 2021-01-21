@@ -3,16 +3,27 @@ os:
 - linux
 python:
 - '3.7'
+- '3.9'
+git:
+  depth: 3
+  quiet: true
 install:
 - pip install -r requirements.txt
 - pip install .
-matrix:
-  - script: pytest tests/test_basic_cxsystem.py
-  - script: pytest tests/test_cpp_and_array.py
-  - script: pytest tests/test_python_array_clusterrun.py
+script:
+- pytest tests/test_basic_cxsystem.py
+- pytest tests/test_cpp_and_array.py
+jobs:
+  include:
+    - stage: py37 array and cluster 
+      python: 3.7
+      script: pytest tests/test_python_array_clusterrun.py
+    - stage: py39 array and cluster
+      python: 3.9
+      script: pytest tests/test_python_array_clusterrun.py
 notifications:
   slack:
     secure: rlLWtxBUFu+o3mCcz1FnKi5Ylmsy9ZtaSG5Ex0c45oZpGWOidRdpoqJqgZO+nBpVgAcmupKmEjRHvOl2waPMgP2Xbyh++FOPCdEM+WB1R4cGPOVrAv+8H+m3A6oKSX+fRXjZM5rqEDgaV4LVlTQPkFfdcGX+tSwrlpHV5xeMRp2hhRJ4LZ/VvnzV/Y7B+Z1wSFyidiOflhGwzdp2todqIFt87ZpfJ7FEj3oPBtnvquGY0Yq3GoMgBDcRddFdo7UMk582H2FyEUdOk6v7Qnie9BBooSaA9tPlY4m5rBzD/hP47qXo3x7mOZaGQnl/TeItIVe9eJFesANStQKevgkeg/rK/iq4xM+7dMa+SQIu2AOShF1auwnVN/2nKPUlbgV4Idi3CQb6uH9lcFp7p9gRA3TXBj4+VUsP/74PMC2blR07G7s/r9+QGpYQLD+5ODZ9wNG9K+sOCB18hs3ZeuY94B+GDTWnsjZtFsV73OLy/+EfSyY4W9R+Vv5KdDDVd4ldkVx8QPQNSljska90GbA1M5Rspj78FdLDvCz4TqH5AsqavFmSyqshRrICVFJQS1H2z12kF4K5SKMbxcDMWYxqDUK34cqjefXfz2HPrJWtDCN23jFxa+4OBplMoUJxow4Al0Qu3SZnDKnRIoM17ILxb75mJODYo6f5Wd4TLhrqgpI=
 env:
   global:
-    secure: M50RPjwxrZFN6JXqYBebhUEystOhcGcV7UJJ4pJeSvRsTgPm4/JuFt7AKK/1IuELAlkfXDq4qKEvd1qE5yrUC6DKe0m0tPc7mkZAKJTp4WyEumt1YWpP8ALmMul54E43R2MBJhDrfzZlE8mKFRKQs+0FkIq2wV156HiS/y5sfQQ3HxO4B77MjAVuNUv2nKwGxx5Yn4MhHq+og9aXcSk9YznokIy1u0fLs2YsgRwMkfoOCZUGEgh4sMF+zNSfVgq2c9GEEe2lekUrbInJsIybnGKtt+rmPMLUaF8TRXbfYKDTpynkDhNCYO4lPqsOC+8f9xVDp9TthNPcuWOsnA0QRvBcN1SGRDHrMTeBHYp/ZO5HC1USajZcG7OQzeSnPjVZoTZnp9WkJUbBMSZ0jAOLF6qz0FhNAyURJiq68XPJP8uf+XXWUnD/Vl2ucyZz8Z9jwBN9RHCd0q/JVs2Dt5zz5sE3hasZTCLFJfyzY35ig2IUNU/MX0IuGQxVnYeY1CGXbBNiGXE/DhPY5o181rr3Q35y2/HdPYFayY6j5cdCz8vM4XCNbf8EwFiDOPy9zFu9o45qIF1yxfWH47qpyb4Jn7fzbvRVs2uDIzQCeOWf5ZxXkCCriOo3SgUCVB0OB7Fy1UCR3fz6iMaHt8UwXPC/5ZjJpOWt8lmOP8sCKODUl0k=
+  - secure: QOWpVOnWep3NCbjULtrGGu2+EQomKGhiWdZM+J7DKPWL+RWyiNwZiJkfDnAYvt4Z/a/TP8eNZs0WURQ+sSgOQVNVgmnshiQdFZ9kcRo+DQemydoq/nWJO4CLphTsZVsi1UJUFcI4n4q+en1JtjiyoonKRlm8p8jdA+ep+DUp0EIOCrDy1KZ3evtZQP20oaErYg779gbUz0PHAiOh6CoSUBVx/FJ+4FWLjd7xTk2HQ4A+W1OnWxtvM74abrZo7LkqzDqA6YA+BKx0Zd39q9VUH+xLfRngviElwDvckQKpfbRl7cnvNyGwjULisahsaDAKsfec+iano6QfnI3D1TyRvcQ3l1YFaYgCuIB48AqkspeKHYeGrRCTNZBOW737dfx0tGfxkHC2VdUkIQigKjNE+gAFNUKtCu5/JlgrdQhI+4UZrJin9h9YXcZEaBTCuP3tXtswl2qnPBTDKNA2Z6445uhsWzkfQzJoR++ZoX0NA9zYzBQS7Vngr+Y7VrKL64TzMy2UhEEoV3AfVDhKobN1LVdL0KRwiQX4QKp4VxQDOF5YZx4YvFlPxDDjm02m+N+iebpzKFg7zOYlHNyq7IXYfwrt6E87mvy1pPO5U/UFkkzPPq2MquhdEJIQFZZ+7wg2M1LWtv7YgE0vMuwt38fPkU59vcje+Olw0GMPgCGYSbw=

@@ -275,9 +275,15 @@ class ArrayRun:
         print(" -  Array run metadata saved at: %s" % os.path.join(
             os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename))
 
-        tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
-        print("cleaning tmp folders " + tmp_folder_path)
-        shutil.rmtree(tmp_folder_path)
+        if self._is_running_locally() is True:
+            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
+            print("cleaning tmp folders " + tmp_folder_path)
+            shutil.rmtree(tmp_folder_path)
+        elif self._is_running_in_cluster() is True:
+            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'cluster_workspace')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
+            print("cleaning tmp folders " + tmp_folder_path)
+            shutil.rmtree(tmp_folder_path)
+
 
     def generate_dataframes_for_param_search(self, original_df, index_of_array_variable, df_type, naming_prefix='', recursion_counter=1):
         """
@@ -463,8 +469,8 @@ class ArrayRun:
             cluster_number_of_nodes = int(parameter_finder(self.anatomy_df, 'cluster_number_of_nodes'))
         except (TypeError, NameError):
             pass
-        if cluster_number_of_nodes > 30:
-            raise Exception(' -  Number of nodes cannot be higher than 30 for your own safety.')
+        if cluster_number_of_nodes > 40:
+            raise Exception(' -  Number of nodes cannot be higher than 40 for your own safety.')
         return cluster_number_of_nodes
 
     def _get_metadata_filename(self,cluster_start_idx, cluster_step, job_suffix):
