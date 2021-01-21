@@ -60,7 +60,7 @@ class NeuronReference:
 
         # <editor-fold desc="...General neuron model initialization">
         self.physio_config_df = physio_config_df
-        NeuronReference._celltypes = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_I', 'HH_E', 'NDNEURON'])
+        NeuronReference._celltypes = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_I', 'HH_E', 'NDNEURON', 'CI_SS'])
         assert general_grid_radius > min_distance, ' -  The distance between cells should be less than the grid radius'
         assert cell_type in NeuronReference._celltypes, " -  Cell type '%s' is not defined" % cell_type  # check cell type
         assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"  # check layer index
@@ -676,6 +676,48 @@ class NeuronReference:
             # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
             #                                                     exc_model=self.excitation_model,
             #                                                     inh_model=self.inhibition_model).get_membrane_equation()
+            x = neuron_factory().get_class(self.neuron_model)
+            x.set_excitatory_receptors(self.excitation_model)
+            x.set_inhibitory_receptors(self.inhibition_model)
+
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
+
+            if 'tonic_current' in self.output_neuron['namespace'].keys():
+                tonic_current = self.output_neuron['namespace']['tonic_current']
+                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            self.output_neuron['equation'] = x.get_compartment_equations('soma')
+            self.output_neuron['threshold'] = x.get_threshold_condition()
+            self.output_neuron['reset'] = x.get_reset_statements()
+            self.output_neuron['refractory'] = x.get_refractory_period()
+
+        self.output_neuron['equation'] += b2.Equations('''x : meter
+            y : meter''')
+
+    def CI_SS(self):
+        """
+            This method build up the equation for CI_SS neurons. CI stands for current injection as timed array directly to neuron model. 
+            The final equation is then saved in output_neuron['equation'].
+
+            * The equation of the neuron is as follows:
+
+                ::
+
+                    dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) + I_input / C : volt (unless refractory)
+                    dge_soma/dt = -ge_soma/tau_e : siemens
+                    dgi_soma/dt = -gi_soma/tau_i : siemens
+                    x : meter
+                    y : meter
+                    I_input : amp
+            """
+
+        if self.model_variation is False:
+            raise NotImplementedError('CI_SS neuron type is not defined for model_variation = 0 (i.e. False)')
+
+        else:
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)

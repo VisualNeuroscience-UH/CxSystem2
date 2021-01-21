@@ -36,7 +36,7 @@ class SynapseParser:
     """
 
     # For _change_calcium()
-    _excitatory_groups = ['PC', 'SS']
+    _excitatory_groups = ['PC', 'SS', 'CI_SS']
     _steep_post_inhibitory_groups = ['MC']
     _shallow_post_inhibitory_groups = ['BC']
     _steep_post = _excitatory_groups + _steep_post_inhibitory_groups
@@ -114,7 +114,7 @@ class SynapseParser:
         # NB! It's not only E->E and E->I connections that get scaled. Goes both ways. See Markram suppl p16.
         """
 
-        excitatory_groups = ['PC', 'SS', 'VPM']
+        excitatory_groups = ['PC', 'SS', 'CI_SS', 'VPM']
         steep_inhibitory_groups = ['MC']
         shallow_inhibitory_groups = ['BC']
         steep_post = excitatory_groups + steep_inhibitory_groups
@@ -155,7 +155,7 @@ class SynapseParser:
         return final_synapse_strength
 
     def _set_utilization_factor(self, is_facilitating=False, ca=2.0):
-        excitatory_groups = ['PC', 'SS', 'in']
+        excitatory_groups = ['PC', 'SS', 'CI_SS', 'in']
         inhibitory_groups = ['BC', 'MC', 'L1i']
 
         if is_facilitating is False:
@@ -405,7 +405,7 @@ class NeuronParser:
 
     def __init__(self, output_neuron, physio_config_df):
         self.physio_config_df = physio_config_df
-        NeuronParser.type_ref = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_E', 'HH_I', 'NDNEURON'])
+        NeuronParser.type_ref = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_E', 'HH_I', 'NDNEURON', 'CI_SS'])
         assert output_neuron['type'] in NeuronParser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['type']
 
         # Handling of "neuron subtype" parameters; new since Aug 2018
@@ -444,6 +444,9 @@ class NeuronParser:
         getattr(self, '_' + output_neuron['type'])(output_neuron)
 
     def _NDNEURON(self, output_neuron):
+        pass
+
+    def _CI_SS(self, output_neuron):
         pass
 
     def _PC(self, output_neuron):
