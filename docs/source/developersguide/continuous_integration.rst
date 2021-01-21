@@ -26,7 +26,7 @@ configuration file. Install the client using:
 
 .. code-block:: bash
 
-    sudo gem uninstall travis
+    sudo gem install travis
 
 Then log into the client:
 
