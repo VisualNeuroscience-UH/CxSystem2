@@ -569,10 +569,10 @@ class PointNeuron:
         :return:
         """
         self.add_model_definition('EXT_CURRENTS', '+ '+current_name)
-        if current_eqs is None:
-            self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_name + ': amp')
-        else:
-            self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_eqs)
+        # if current_eqs is None:
+        #     self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_name + ': amp')
+        # else:
+        #     self.add_model_definition('EXT_CURRENTS_EQS', '\n' + current_eqs)
 
     def add_vm_noise(self, noise_sigma=2*mV):
         """

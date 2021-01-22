@@ -706,12 +706,12 @@ class NeuronReference:
 
                 ::
 
-                    dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) + I_input / C : volt (unless refractory)
+                    dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) + I_ext / C : volt (unless refractory)
                     dge_soma/dt = -ge_soma/tau_e : siemens
                     dgi_soma/dt = -gi_soma/tau_i : siemens
                     x : meter
                     y : meter
-                    I_input : amp
+                    I_ext : amp
             """
 
         if self.model_variation is False:
@@ -726,16 +726,49 @@ class NeuronReference:
                 noise_sigma = self.output_neuron['namespace']['noise_sigma']
                 x.add_vm_noise(noise_sigma)
 
-            if 'tonic_current' in self.output_neuron['namespace'].keys():
-                tonic_current = self.output_neuron['namespace']['tonic_current']
-                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
-                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+            # if 'tonic_current' in self.output_neuron['namespace'].keys():
+            #     tonic_current = self.output_neuron['namespace']['tonic_current']
+            #     tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+            #     x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            # This part is not nicely integrated to the rest of the code, and not even trying to be.
+            # It reads current injection from external file. Filepath and filenames are set in the 
+            # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename
+            if 'cibasepath' in self.output_neuron['namespace'].keys():
+                import scipy.io as sio
+                import os
+
+                cibasepath = self.output_neuron['namespace']['cibasepath'] 
+                cifilename = self.output_neuron['namespace']['cifilename'] 
+                civalue = self.output_neuron['namespace']['civalue'] 
+                cidata_dict = {}
+                cidata_fullpath_filename = os.path.join(cibasepath, cifilename)
+                sio.loadmat(cidata_fullpath_filename, cidata_dict) 
+
+                cidata = cidata_dict['injected_current']
+                framedurations = cidata_dict['dt']
+                # NOTE scaling to picoamperes here
+                I_ext = b2.TimedArray(  civalue * cidata * b2.pA,
+                                        dt=framedurations * b2.ms)
+                # I_ext = b2.TimedArray(  cidata,
+                #                         dt=framedurations * b2.ms)
+                # import pdb; pdb.set_trace()
+                # Add I_ext to namespace
+                self.output_neuron['namespace']['I_ext'] = I_ext
+
+                # Add external current to equations here
+                x.add_external_current(current_name='I_ext(t,i)', current_eqs='I_ext: amp')
+                # x.add_external_current(current_name='I_ext(t,i)', current_eqs=None)
+                # x.add_external_current()
+
+                # Change equations: remove driving force / replicate deneve dynamics
+                # import pdb; pdb.set_trace()
+
 
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
             self.output_neuron['refractory'] = x.get_refractory_period()
-
         self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 

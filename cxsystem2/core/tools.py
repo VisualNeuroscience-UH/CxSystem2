@@ -15,7 +15,13 @@ def write_to_file(save_path,
         save_path = pl.Path(save_path)
     if save_path.suffix == '.gz':
         with open(save_path.as_posix(), 'wb') as fb:
-            fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
+            # fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9)) # master branch version
+            try:
+                fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
+            except:
+                # import pdb; pdb.set_trace()
+                data['Neuron_Groups_Parameters']['NG1_L4_CI_SS_L4']['namespace']['I_ext']=''
+                fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
     elif save_path.suffix == '.bz2':
         with bz2.BZ2File(save_path.as_posix(), 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
