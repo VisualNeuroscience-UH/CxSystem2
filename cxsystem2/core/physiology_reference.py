@@ -718,13 +718,19 @@ class NeuronReference:
             raise NotImplementedError('CI_SS neuron type is not defined for model_variation = 0 (i.e. False)')
 
         else:
-            x = neuron_factory().get_class(self.neuron_model)
-            x.set_excitatory_receptors(self.excitation_model)
-            x.set_inhibitory_receptors(self.inhibition_model)
+            # x = neuron_factory().get_class(self.neuron_model)
+            # x.set_excitatory_receptors(self.excitation_model)
+            # x.set_inhibitory_receptors(self.inhibition_model)
 
-            if 'noise_sigma' in self.output_neuron['namespace'].keys():
-                noise_sigma = self.output_neuron['namespace']['noise_sigma']
-                x.add_vm_noise(noise_sigma)
+            # Change equations: remove driving force / replicate deneve dynamics
+            x = neuron_factory().get_class('LIF')
+            x.set_excitatory_receptors('E_NDF')
+            x.set_inhibitory_receptors('I_NDF')
+            # import pdb; pdb.set_trace()
+
+            # if 'noise_sigma' in self.output_neuron['namespace'].keys():
+            #     noise_sigma = self.output_neuron['namespace']['noise_sigma']
+            #     x.add_vm_noise(noise_sigma)
 
             # if 'tonic_current' in self.output_neuron['namespace'].keys():
             #     tonic_current = self.output_neuron['namespace']['tonic_current']
@@ -733,7 +739,8 @@ class NeuronReference:
 
             # This part is not nicely integrated to the rest of the code, and not even trying to be.
             # It reads current injection from external file. Filepath and filenames are set in the 
-            # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename
+            # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename. The
+            # civalue is used to multiply the current injection in an array run.
             if 'cibasepath' in self.output_neuron['namespace'].keys():
                 import scipy.io as sio
                 import os
@@ -750,19 +757,19 @@ class NeuronReference:
                 # NOTE scaling to picoamperes here
                 I_ext = b2.TimedArray(  civalue * cidata * b2.pA,
                                         dt=framedurations * b2.ms)
-                # I_ext = b2.TimedArray(  cidata,
-                #                         dt=framedurations * b2.ms)
-                # import pdb; pdb.set_trace()
+                # # pickle cannot save the pyfunc. I dont know why, but it does not seem to be a critical
+                # # parameter for the simulation, and thus I remove it here.
+                # I_ext.pyfunc = None
+                # I_ext._init_2d = None
+
                 # Add I_ext to namespace
                 self.output_neuron['namespace']['I_ext'] = I_ext
 
                 # Add external current to equations here
-                x.add_external_current(current_name='I_ext(t,i)', current_eqs='I_ext: amp')
-                # x.add_external_current(current_name='I_ext(t,i)', current_eqs=None)
-                # x.add_external_current()
+                x.add_external_current(current_name='I_ext(t,i)', current_eqs='timedarray')
 
-                # Change equations: remove driving force / replicate deneve dynamics
                 # import pdb; pdb.set_trace()
+
 
 
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
