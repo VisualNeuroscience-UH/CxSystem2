@@ -821,6 +821,7 @@ class CxSystem:
             except ValueError:
                 flag_bg_calcium_scaling = 0
 
+            # NOTE Hard coded Fixed receptor type to bg input
             bg_synapse = SynapseParser({'type': 'Fixed', 'pre_group_type': 'SS', 'post_group_type': neuron_type},
                                        self.physio_config_df)
             bg_synapse_inh = SynapseParser({'type': 'Fixed', 'pre_group_type': 'BC', 'post_group_type': neuron_type},
@@ -1142,6 +1143,7 @@ class CxSystem:
         * syn_con_str: The string containing the syntax for connect() method of a current Synapses() object. This string
                         changes depending on using the [p] and [n] tags in the configuration file.
         """
+
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
                         'save_connection', 'custom_weight','spatial_decay']
         _obligatory_params = [0, 1, 2, 3]
@@ -1158,6 +1160,7 @@ class CxSystem:
         _options = {
             '[C]': self.neuron_group,
         }
+
         # getting the connection probability gain from the namespace and apply it on all the connections:
         index_of_receptor = int(np.where(self.current_parameters_list.values == 'receptor')[0])
         index_of_post_syn_idx = int(np.where(self.current_parameters_list.values == 'post_syn_idx')[0])
@@ -1189,6 +1192,7 @@ class CxSystem:
             _current_ns = self.current_values_list.values[index_of_n]
         except (ValueError, NameError):
             pass
+
         # When the post-synaptic neuron is a multi-compartmental PC neuron:
         if len(current_post_syn_idx) > 1 and '[' in current_post_syn_idx:
             try:
@@ -1282,6 +1286,7 @@ class CxSystem:
             self.current_parameters_list = self.current_parameters_list.append(pd.Series(['pre_type', 'post_type', 'post_comp_name']),
                                                                                ignore_index=True)
             self.current_values_list = [self.current_values_list]
+
         for syn in self.current_values_list:
             receptor = syn[index_of_receptor]
             pre_syn_idx = syn[index_of_pre_syn_idx]
@@ -1668,7 +1673,7 @@ class CxSystem:
                           thread_ng_name)
                 else:  # load the positions:
                     self.customized_neurons_list[self.video_input_idx]['z_positions'] = np.squeeze(inp.get_input_positions())
-                    self.customized_neurons_list[self.video_input_idx]['w_positions'] = 17 * log(relay_group['z_positions'] + 1)
+                    self.customized_neurons_list[self.video_input_idx]['w_positions'] = 17 * log(relay_group['z_positions'] + 1) # NOTE Hard coded scaling from z to w
 
                 # setting the position of the neurons based on the positions in the .mat input file:
                 exec("%s.x=b2.real(self.customized_neurons_list[%d]["

@@ -706,7 +706,7 @@ class NeuronReference:
 
                 ::
 
-                    dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) + I_ext / C : volt (unless refractory)
+                    dvm/dt = (gL*(EL-vm)  + ge_soma  + gi_soma + I_ext / C : volt (unless refractory)
                     dge_soma/dt = -ge_soma/tau_e : siemens
                     dgi_soma/dt = -gi_soma/tau_i : siemens
                     x : meter
@@ -726,7 +726,6 @@ class NeuronReference:
             x = neuron_factory().get_class('LIF')
             x.set_excitatory_receptors('E_NDF')
             x.set_inhibitory_receptors('I_NDF')
-            # import pdb; pdb.set_trace()
 
             # if 'noise_sigma' in self.output_neuron['namespace'].keys():
             #     noise_sigma = self.output_neuron['namespace']['noise_sigma']
@@ -768,7 +767,6 @@ class NeuronReference:
                 # Add external current to equations here
                 x.add_external_current(current_name='I_ext(t,i)', current_eqs='timedarray')
 
-                # import pdb; pdb.set_trace()
 
 
 
