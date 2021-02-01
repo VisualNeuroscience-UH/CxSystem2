@@ -830,7 +830,7 @@ class SynapseReference:
     """
 
     def __init__(self, receptor, pre_group_idx, post_group_idx, syn_type, pre_type, post_type, physio_config_df, post_comp_name='_soma',
-                 custom_weight='--'):
+                 custom_weight='--', multiply_weight=1):
         """
         initializes the SynapseReference based on its arguments.
 
@@ -852,7 +852,7 @@ class SynapseReference:
         * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
 
         """
-        SynapseReference.syntypes = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_calcium', 'Depressing', 'Facilitating'])
+        SynapseReference.syntypes = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_multiply', 'Fixed_calcium', 'Depressing', 'Facilitating'])
         assert syn_type in SynapseReference.syntypes, " -  Synapse type '%s' is not defined" % syn_type
         self.output_synapse = {'type': syn_type,
                                'receptor': receptor,
@@ -861,8 +861,9 @@ class SynapseReference:
                                'post_group_idx': int(post_group_idx),
                                'post_group_type': post_type,
                                'post_comp_name': post_comp_name,
-                               'custom_weight': custom_weight}
-        # self.output_synapse['namespace_type'] = namespace_type
+                               'custom_weight': custom_weight,
+                               'multiply_weight': multiply_weight}
+        # self.output_synapse['namespace_type'] = namespace_type 
         # self.output_synapse['pre_type'] = pre_group_type
         # self.output_synapse['post_type'] = post_group_type
         _name_space = SynapseParser(self.output_synapse, physio_config_df)
@@ -1039,8 +1040,28 @@ class SynapseReference:
             ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
 
         else:
-            pre_eq_lines = ['%s += 1e-6 * wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
+            pre_eq_lines = ['%s += wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
                             for true_receptor in self.true_receptors]
+            pre_eq = ''.join(pre_eq_lines).rstrip()
+            self.output_synapse['pre_eq'] = pre_eq
+
+    def Fixed_multiply(self):
+        """
+        The method for implementing the Fixed synaptic connection which is multiplied with factor coming from Anatomy csv.
+
+        """
+
+        self.output_synapse['equation'] = b2.Equations('''
+            wght:siemens
+            ''')
+
+        # Assigning the multiplier here enables later addition of wght equation into this method .
+        if self.model_variation is False:
+            raise NotImplementedError('Fixed_multiply is only defined for model_variation = True (or 1)')
+        else:
+            # pre_eq_lines = ['%s += wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
+            #                 for true_receptor in self.true_receptors]
+            pre_eq_lines = ['%s += %s * wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post', str(self.output_synapse['multiply_weight'])) for true_receptor in self.true_receptors]
             pre_eq = ''.join(pre_eq_lines).rstrip()
             self.output_synapse['pre_eq'] = pre_eq
 

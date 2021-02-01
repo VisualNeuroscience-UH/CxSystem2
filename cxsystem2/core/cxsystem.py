@@ -1145,7 +1145,7 @@ class CxSystem:
         """
 
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
-                        'save_connection', 'custom_weight','spatial_decay']
+                        'save_connection', 'custom_weight','spatial_decay', 'multiply_weight']
         _obligatory_params = [0, 1, 2, 3]
         assert len(self.current_values_list) <= len(_all_columns), \
             ' -  One or more of the obligatory columns for input definition is missing. Obligatory columns are:\n%s\n ' \
@@ -1318,13 +1318,22 @@ class CxSystem:
             except (ValueError, NameError):
                 custom_weight = '--'
 
+            # Get multiplier if defined
+            try:
+                multiply_weight_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'multiply_weight'].index))
+                multiply_weight = syn[multiply_weight_idx]
+                if multiply_weight == '--':
+                    multiply_weight = '1'
+            except (ValueError, NameError):
+                multiply_weight = '1'
+
             # check monitors in line:
             current_idx = len(self.customized_synapses_list)
             # creating a SynapseReference object and passing the positional arguments to it. The main member of
             # the class called output_synapse is then appended to customized_synapses_list:
             self.customized_synapses_list.append(SynapseReference(receptor, pre_syn_idx, post_syn_idx, syn_type,
                                                                   pre_type, post_type, self.physio_config_df, post_comp_name,
-                                                                  custom_weight).output_synapse)
+                                                                  custom_weight, multiply_weight).output_synapse)
             _pre_group_idx = self.neurongroups_list[self.customized_synapses_list[-1]['pre_group_idx']]
             _post_group_idx = self.neurongroups_list[self.customized_synapses_list[-1]['post_group_idx']]
             # Generated variable name for the Synapses(), equation, pre_synaptic and post_synaptic equation and Namespace
@@ -1384,7 +1393,7 @@ class CxSystem:
                 pass
 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and not hasattr(self, 'imported_connections'):
-                # only load the file if it's not loaded already, and if the connections are supposed to tbe loaded frmo the file
+                # only load the file if it's not loaded already, and if the connections are supposed to tbe loaded from the file
                 self.set_import_connections_path()
 
             try:
@@ -1500,6 +1509,7 @@ class CxSystem:
             # Weight set again (overrided) here if connections were loaded
             exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
                                               _dyn_syn_namespace_name))  #
+            import pdb; pdb.set_trace()
             # set the weights
             if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
                 exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,

@@ -66,8 +66,8 @@ class EquationHelper:
     # <editor-fold desc="SYNAPTIC EXC/INH MODEL COMPONENTS">
     default_synaptic_excinh_strings = {}
 
-    ExcModelNames = ['SIMPLE_E', 'E_ALPHA', 'E_ALPHA_NONSCALED', 'AMPA_NMDA', 'AMPA_NMDA_BIEXP', 'SIMPLE_E_NMDA', 'E_ALPHA_NMDA']
-    InhModelNames = ['SIMPLE_I', 'I_ALPHA', 'I_ALPHA_NONSCALED', 'GABAA_GABAB', 'GABAA_GABAB_BIEXP', 'SIMPLE_I_GABAB', 'I_ALPHA_GABAB']
+    ExcModelNames = ['SIMPLE_E', 'E_ALPHA', 'E_ALPHA_NONSCALED', 'AMPA_NMDA', 'AMPA_NMDA_BIEXP', 'SIMPLE_E_NMDA', 'E_ALPHA_NMDA', 'E_NDF']
+    InhModelNames = ['SIMPLE_I', 'I_ALPHA', 'I_ALPHA_NONSCALED', 'GABAA_GABAB', 'GABAA_GABAB_BIEXP', 'SIMPLE_I_GABAB', 'I_ALPHA_GABAB', 'I_NDF']
 
     SynapticExcInhModels = dict()
 
@@ -78,6 +78,12 @@ class EquationHelper:
                                         'SYNAPTIC_EXC_EQ': 'dge/dt = -ge/tau_e : siemens'}
     SynapticExcInhModels['SIMPLE_I'] = {'I_SYNAPTIC_INH': 'gi * (Ei - vm)',
                                         'SYNAPTIC_INH_EQ': 'dgi/dt = -gi/tau_i : siemens'}
+
+    # No driving force current models, will be connection weight x conductance change, exponential synapse
+    SynapticExcInhModels['E_NDF'] = {'I_SYNAPTIC_EXC': '+ ge * mV',
+                                        'SYNAPTIC_EXC_EQS': 'dge/dt = -ge/tau_e : siemens'} 
+    SynapticExcInhModels['I_NDF'] = {'I_SYNAPTIC_INH': '+ gi * mV',
+                                        'SYNAPTIC_INH_EQS': 'dgi/dt = -gi/tau_i : siemens'}
 
     # Alpha synapses
     # Non-scaled versions provided for backwards compatibility (were used in VCX model);
@@ -192,6 +198,8 @@ class EquationHelper:
     # Variables that are compartment-specific; will have compartment name attached to them
     CompSpecificVariables = {'SIMPLE_E': ['ge'],
                              'SIMPLE_I': ['gi'],
+                             'E_NDF': ['ge'],
+                             'I_NDF': ['gi'],
                              'E_ALPHA': ['ge', 'gealpha', 'gealpha1'],
                              'I_ALPHA': ['gi', 'gialpha', 'gialpha1'],
                              'E_ALPHA_NONSCALED': ['ge', 'gealpha'],
@@ -208,6 +216,8 @@ class EquationHelper:
     # Receptors that need to be incremented in response to presynaptic spikes
     Receptors = {'SIMPLE_E': ['ge'],
                  'SIMPLE_I': ['gi'],
+                 'E_NDF': ['ge'],
+                 'I_NDF': ['gi'],
                  'E_ALPHA': ['ge'],
                  'I_ALPHA': ['gi'],
                  'E_ALPHA_NONSCALED': ['ge'],
@@ -222,21 +232,23 @@ class EquationHelper:
                  'I_ALPHA_GABAB': ['gi', 'g_gabab']
                  }
 
-    BackgroundReceptors = {'SIMPLE_E': ['ge'],
-                           'SIMPLE_I': ['gi'],
-                           'E_ALPHA': ['ge'],
-                           'I_ALPHA': ['gi'],
-                           'E_ALPHA_NONSCALED': ['ge'],
-                           'I_ALPHA_NONSCALED': ['gi'],
-                           'AMPA_NMDA': ['g_ampa', 'g_nmda'],
-                           'GABAA_GABAB': ['g_gabaa', 'g_gabab'],
-                           'AMPA_NMDA_BIEXP': ['g_ampa', 'g_nmda'],
-                           'GABAA_GABAB_BIEXP': ['g_gabaa', 'g_gabab'],
-                           'SIMPLE_E_NMDA': ['ge'],
-                           'SIMPLE_I_GABAB': ['gi'],
-                           'E_ALPHA_NMDA': ['ge'],
-                           'I_ALPHA_GABAB': ['gi']
-                           }
+    BackgroundReceptors = { 'SIMPLE_E': ['ge'],
+                            'SIMPLE_I': ['gi'],
+                            'E_NDF': ['ge'],
+                            'I_NDF': ['gi'],
+                            'E_ALPHA': ['ge'],
+                            'I_ALPHA': ['gi'],
+                            'E_ALPHA_NONSCALED': ['ge'],
+                            'I_ALPHA_NONSCALED': ['gi'],
+                            'AMPA_NMDA': ['g_ampa', 'g_nmda'],
+                            'GABAA_GABAB': ['g_gabaa', 'g_gabab'],
+                            'AMPA_NMDA_BIEXP': ['g_ampa', 'g_nmda'],
+                            'GABAA_GABAB_BIEXP': ['g_gabaa', 'g_gabab'],
+                            'SIMPLE_E_NMDA': ['ge'],
+                            'SIMPLE_I_GABAB': ['gi'],
+                            'E_ALPHA_NMDA': ['ge'],
+                            'I_ALPHA_GABAB': ['gi']
+                            }
 
     # </editor-fold>
 

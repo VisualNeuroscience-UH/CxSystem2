@@ -57,7 +57,7 @@ class SynapseParser:
         self.output_synapse = output_synapse
         self.physio_config_df = physio_config_df
 
-        SynapseParser.type_ref = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
+        SynapseParser.type_ref = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght',  'Fixed_multiply', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
         assert output_synapse['type'] in SynapseParser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
         # Commented Cp and Cd out because not used in this branch /HH
@@ -267,6 +267,13 @@ class SynapseParser:
                                          'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
         min_delay = mean_delay / 2.
         self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
+
+    def Fixed_multiply(self):
+        """
+        The Fixed multiply method using constant weight but assigning multiplier further on to synaptic weight. This enables array search for
+        loaded connection strengths.
+        """
+        self.Fixed_const_wght()
 
     def Fixed_calcium(self):
         """
