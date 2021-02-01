@@ -1039,10 +1039,16 @@ class SynapseReference:
             ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
 
         else:
-            pre_eq_lines = ['%s += wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
+            pre_eq_lines = ['%s += 1e-6 * wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
                             for true_receptor in self.true_receptors]
             pre_eq = ''.join(pre_eq_lines).rstrip()
             self.output_synapse['pre_eq'] = pre_eq
+
+        # import pdb; pdb.set_trace()
+        # TÄHÄN JÄIT:
+        # KOPIOI FIXED CONSTANT WEIGHT TOISELLE NIMELLE 
+        # TEE JOKO UUSI MUUTTUJA ANATOMY FILEEN, TAI ASETA CUSTOM WEIGHT -MUUTTUJAAN KERROIN, JOKA NAPATAAN TÄSSÄ. 
+        # KORVAA 1E-6 KO KERTOIMELLA. TARKISTA ETTÄ TOIMII OIKEIN JA TARKISTA ETTÄ TRAVIS MENEE LÄPI.
 
     def Fixed_calcium(self):
         """
