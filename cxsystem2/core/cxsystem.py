@@ -1315,16 +1315,16 @@ class CxSystem:
             try:
                 custom_weight_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'custom_weight'].index))
                 custom_weight = syn[custom_weight_idx]
-            except (ValueError, NameError):
+            except (ValueError, NameError, IndexError):
                 custom_weight = '--'
 
-            # Get multiplier if defined
+            # Get multiplier if defined 
             try:
-                multiply_weight_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'multiply_weight'].index))
+                multiply_weight_idx = self.current_parameters_list[self.current_parameters_list=='multiply_weight'].index.values[0]
                 multiply_weight = syn[multiply_weight_idx]
                 if multiply_weight == '--':
                     multiply_weight = '1'
-            except (ValueError, NameError):
+            except (ValueError, NameError, IndexError):
                 multiply_weight = '1'
 
             # check monitors in line:
