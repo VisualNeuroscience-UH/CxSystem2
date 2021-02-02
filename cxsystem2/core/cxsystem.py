@@ -1513,7 +1513,8 @@ class CxSystem:
                                                     _dyn_syn_namespace_name)
                         )  # set the weights
 
-            assert eval("sum(%s.wght)!=0" % _dyn_syn_name), f'Synapses {_dyn_syn_name} set to zero weight, aborting...'  #
+            if self.device == 'python':
+                assert eval("sum(%s.wght)!=0" % _dyn_syn_name), f'Synapses {_dyn_syn_name} set to zero weight, aborting...'  #
             # # the next two lines are commented out for GeNN and are added as a parameter when creating syn
             # exec("%s.delay=%s['delay']" % (_dyn_syn_name,
             #                                 _dyn_syn_namespace_name) ) # set the delays
