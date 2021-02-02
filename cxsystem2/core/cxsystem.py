@@ -1409,7 +1409,7 @@ class CxSystem:
                 _do_save = 0
                 pass
 
-            # Loading connections from file
+            # Loading connections from file NOTE NOT LOADING POSITIONS ONLY
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and \
                     hasattr(self, 'imported_connections') and not self.load_positions_only:
                 assert _syn_ref_name in list(self.imported_connections.keys()), \
@@ -1506,9 +1506,15 @@ class CxSystem:
                     syn_con_str += ')'
                 exec(syn_con_str)
 
+            import pdb; pdb.set_trace()
             # Weight set again (overrided) here if connections were loaded
             exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
                                               _dyn_syn_namespace_name))  #
+
+            TÄHÄN JÄIT: TUO KONNEKTIOT
+                                              self.imported_connections[_syn_ref_name]['data'].todense() -NUMEROISTA
+                                              LUO IF LAUSEKE EXEC FUNKTIOLLE
+                                              TARKISTA CXSYSTEM MASTER BRANCH, ONKO SAMA VIRHE
             import pdb; pdb.set_trace()
             # set the weights
             if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
