@@ -1065,12 +1065,6 @@ class SynapseReference:
             pre_eq = ''.join(pre_eq_lines).rstrip()
             self.output_synapse['pre_eq'] = pre_eq
 
-        # import pdb; pdb.set_trace()
-        # TÄHÄN JÄIT:
-        # KOPIOI FIXED CONSTANT WEIGHT TOISELLE NIMELLE 
-        # TEE JOKO UUSI MUUTTUJA ANATOMY FILEEN, TAI ASETA CUSTOM WEIGHT -MUUTTUJAAN KERROIN, JOKA NAPATAAN TÄSSÄ. 
-        # KORVAA 1E-6 KO KERTOIMELLA. TARKISTA ETTÄ TOIMII OIKEIN JA TARKISTA ETTÄ TRAVIS MENEE LÄPI.
-
     def Fixed_calcium(self):
         """
         The method for implementing the Fixed synaptic connection.
