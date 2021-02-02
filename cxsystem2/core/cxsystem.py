@@ -1409,27 +1409,22 @@ class CxSystem:
                 _do_save = 0
                 pass
 
-            # Loading connections from file NOTE NOT LOADING POSITIONS ONLY
+            # Loading connections and weights from file 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and \
                     hasattr(self, 'imported_connections') and not self.load_positions_only:
                 assert _syn_ref_name in list(self.imported_connections.keys()), \
                     " -  The data for the following connection was not found in the loaded brian data: %s" % _syn_ref_name
 
-                # 1) Try-except necessary; run fails if no connections exist from 1 group to another
-                # 2) Indexing changed in pd >0.19.1 and thus ...['data'][0][0].tocoo() --> ...['data'].tocoo()
-                #    Unfortunately pd doesn't warn about this change in indexing
                 try:
                     eval(_dyn_syn_name).connect(i=self.imported_connections[_syn_ref_name]['data'].tocoo().row,
                                                 j=self.imported_connections[_syn_ref_name]['data'].tocoo().col,
                                                 n=int(self.imported_connections[_syn_ref_name]['n']))
-                    # Weight is redeclared later, see line ~1200.
-                    # Also, 1) "loading connections" leaves the impression of loading anatomical connections, not synaptic weights
-                    #       2) we do not have need for saving/loading synaptic weights at this point
-                    #       3) it doesn't work in pd >0.19.1
-                    # Therefore I commented:
+
                     # eval(_dyn_syn_name).wght = b2.repeat(self.imported_connections[_syn_ref_name]['data'][0][0].data/int(self.\
                     #     imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
-                    _load_str = 'Connection loaded from '
+                    eval(_dyn_syn_name).wght = b2.repeat(self.imported_connections[_syn_ref_name]['data'].data / int(self.\
+                        imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
+                    _load_str = 'Connection and weight loaded from '
                 except ValueError:
                     _load_str = ' ! No connections from '
 
@@ -1506,21 +1501,19 @@ class CxSystem:
                     syn_con_str += ')'
                 exec(syn_con_str)
 
-            import pdb; pdb.set_trace()
-            # Weight set again (overrided) here if connections were loaded
-            exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
-                                              _dyn_syn_namespace_name))  #
 
-            TÄHÄN JÄIT: TUO KONNEKTIOT
-                                              self.imported_connections[_syn_ref_name]['data'].todense() -NUMEROISTA
-                                              LUO IF LAUSEKE EXEC FUNKTIOLLE
-                                              TARKISTA CXSYSTEM MASTER BRANCH, ONKO SAMA VIRHE
-            import pdb; pdb.set_trace()
-            # set the weights
-            if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
-                exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,
-                                                   _dyn_syn_namespace_name)
-                     )  # set the weights
+            if (self.default_load_flag == -1 and _do_load == 0) or self.load_positions_only:
+                # Weight set for denovo connections
+                exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
+                                                _dyn_syn_namespace_name))  #
+
+                # set the weights for STDP connections
+                if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
+                    exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,
+                                                    _dyn_syn_namespace_name)
+                        )  # set the weights
+
+            assert eval("sum(%s.wght)!=0" % _dyn_syn_name), f'Synapses {_dyn_syn_name} set to zero weight, aborting...'  #
             # # the next two lines are commented out for GeNN and are added as a parameter when creating syn
             # exec("%s.delay=%s['delay']" % (_dyn_syn_name,
             #                                 _dyn_syn_namespace_name) ) # set the delays
