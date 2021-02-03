@@ -9,9 +9,6 @@ import pathlib as pl
 from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.configuration import config_file_converter as file_converter
 from brian2.input.timedarray import TimedArray
-#develop
-import time
-import pdb
 
 def  _remove_timed_arrays(obj):
     # Timed arrays of brian contain some expressions which cannot be saved by pickle, 
@@ -41,7 +38,6 @@ def write_to_file(save_path,
     elif save_path.suffix == '.pickle':
         with open(save_path.as_posix(), 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
-
 
 def load_from_file(load_path):
     if type(load_path) != pl.PosixPath:
@@ -74,8 +70,6 @@ def parameter_finder(df,
     else:
         raise NameError('Variable %s not found in the configuration file.' % keyword)
 
-
-
 def change_parameter_value_in_file(filepath,
                                    save_path,
                                    parameter,
@@ -88,8 +82,7 @@ def change_parameter_value_in_file(filepath,
     elif location[0].size == 1:
         raise ParameterNotFoundError('Parameter {} not found in the configuration file.'.format(parameter))
     else:
-        raise ParameterNotFoundError('More than one instance of parameter {} found, cannot chagne the value'.format(parameter))
-
+        raise ParameterNotFoundError('More than one instance of parameter {} found, cannot change the value'.format(parameter))
 
 def read_config_file(conf,
                      header=False):
