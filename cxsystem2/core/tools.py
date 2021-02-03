@@ -8,6 +8,23 @@ import pathlib as pl
 
 from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.configuration import config_file_converter as file_converter
+from brian2.input.timedarray import TimedArray
+#develop
+import time
+import pdb
+
+def  _remove_timed_arrays(obj):
+    # Timed arrays of brian contain some expressions which cannot be saved by pickle, 
+    # thus we need to remove them.
+    if not isinstance(obj, dict):
+        return
+    keys = list(obj.keys())
+    for key in keys:
+        if isinstance(obj[key],TimedArray):
+            del obj[key]
+        elif isinstance(obj[key], dict):
+            obj[key] = _remove_timed_arrays(obj[key])
+    return obj
 
 def write_to_file(save_path,
                   data):
@@ -15,13 +32,9 @@ def write_to_file(save_path,
         save_path = pl.Path(save_path)
     if save_path.suffix == '.gz':
         with open(save_path.as_posix(), 'wb') as fb:
-            # fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9)) # master branch version
-            try:
-                fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
-            except:
-                # import pdb; pdb.set_trace()
-                data['Neuron_Groups_Parameters']['NG1_L4_CI_SS_L4']['namespace']['I_ext']=''
-                fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
+            # Check data dictionary for TimedArray objects and remove them
+            data = _remove_timed_arrays(data)
+            fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9)) # master branch version
     elif save_path.suffix == '.bz2':
         with bz2.BZ2File(save_path.as_posix(), 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
