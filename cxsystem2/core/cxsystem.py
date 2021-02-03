@@ -1466,8 +1466,10 @@ class CxSystem:
                     # If spatial_decay does not include '[i=j]', exclude autoconnection, use only lambda
                     elif '[ij]' not in spatial_decay:
                         syn_con_str = "%s.connect(condition='i!=j', p= " % _dyn_syn_name
+
                     syn_con_str += "'%f*exp(-(%f/mm)*(sqrt((x_pre-x_post)**2+(y_pre-y_post)**2)))'" % (
                         float(p_arg), float(spatial_decay))
+
                     return syn_con_str
 
                 #Check if p_arg exists, set to None if not
@@ -1476,14 +1478,17 @@ class CxSystem:
 
                 # Check mode, catch missing spatial_decay
                 if self.sys_mode == 'local':
-                    spatial_decay = '0'
+                    spatial_decay = '0[ij]' # even connectivity with distance, includes i=j connections
 
                 elif self.sys_mode == 'expanded':
                     try:
                         spatial_decay=syn[index_of_spatial_decay]
+                        if spatial_decay == '--':
+                            spatial_decay = '0[ij]'
                     except (ValueError, NameError):
-                        # If the length constant has not been defined, set it to 0 corresponding to local mode, ie no decay with distance
-                        spatial_decay = '0'                        
+                        # If the length constant has not been defined, set it to 0, including i=j connections, 
+                        # corresponding to local mode, ie no decay with distance
+                        spatial_decay = '0[ij]'                        
 
  
                 if '_relay_vpm' in self.neurongroups_list[int(current_pre_syn_idx)] and p_arg==None:
@@ -1491,7 +1496,7 @@ class CxSystem:
 
                 elif '_relay_spikes' in self.neurongroups_list[int(current_pre_syn_idx)]:
                     # spatial_decay = '10'
-                    spatial_decay = '0'
+                    spatial_decay = '0[ij]'
 
                 syn_con_str = exp_distance_function(p_arg=p_arg, spatial_decay=spatial_decay)
 
@@ -1513,8 +1518,9 @@ class CxSystem:
                                                     _dyn_syn_namespace_name)
                         )  # set the weights
 
-            if self.device == 'python':
-                assert eval("sum(%s.wght)!=0" % _dyn_syn_name), f'Synapses {_dyn_syn_name} set to zero weight, aborting...'  #
+            if self.device == 'python' and eval("sum(%s.wght)==0" % _dyn_syn_name):
+                print('WARNING: Synapses %s set to zero weight!' % _dyn_syn_name)
+
             # # the next two lines are commented out for GeNN and are added as a parameter when creating syn
             # exec("%s.delay=%s['delay']" % (_dyn_syn_name,
             #                                 _dyn_syn_namespace_name) ) # set the delays
