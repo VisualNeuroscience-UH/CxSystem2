@@ -197,14 +197,6 @@ class PointNeuron:
         s = self.get_membrane_equation(return_string=True)
         return b2.Equations(s)
 
-    # def get_dict(self, base_dict=None, specific_compartment='XX'):
-    #
-    #     compartment_dict = dict(base_dict)
-    #     substitutables = {k: k + '_' + specific_compartment for k in self.comp_specific_vars}
-    #     compartment_dict.update(substitutables)
-    #
-    #     return compartment_dict
-
     def get_parameter_names(self):
         """
         Shows all the parameter names that can/must be defined

@@ -529,6 +529,10 @@ class NeuronReference:
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
+
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
@@ -581,6 +585,10 @@ class NeuronReference:
                 tonic_current = self.output_neuron['namespace']['tonic_current']
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
 
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
@@ -637,6 +645,10 @@ class NeuronReference:
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
+
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
@@ -689,6 +701,10 @@ class NeuronReference:
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
+
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
@@ -727,14 +743,18 @@ class NeuronReference:
             x.set_excitatory_receptors('E_NDF')
             x.set_inhibitory_receptors('I_NDF')
 
-            # if 'noise_sigma' in self.output_neuron['namespace'].keys():
-            #     noise_sigma = self.output_neuron['namespace']['noise_sigma']
-            #     x.add_vm_noise(noise_sigma)
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
 
-            # if 'tonic_current' in self.output_neuron['namespace'].keys():
-            #     tonic_current = self.output_neuron['namespace']['tonic_current']
-            #     tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
-            #     x.add_tonic_current(tonic_current, tau_tonic_rampup)
+            if 'tonic_current' in self.output_neuron['namespace'].keys():
+                tonic_current = self.output_neuron['namespace']['tonic_current']
+                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
 
             # This part is not nicely integrated to the rest of the code, and not even trying to be.
             # It reads current injection from external file. Filepath and filenames are set in the 
@@ -756,10 +776,6 @@ class NeuronReference:
                 # NOTE scaling to picoamperes here
                 I_ext = b2.TimedArray(  civalue * cidata * b2.pA,
                                         dt=framedurations * b2.ms)
-                # # pickle cannot save the pyfunc. I dont know why, but it does not seem to be a critical
-                # # parameter for the simulation, and thus I remove it here.
-                # I_ext.pyfunc = None
-                # I_ext._init_2d = None
 
                 # Add I_ext to namespace
                 self.output_neuron['namespace']['I_ext'] = I_ext
@@ -767,13 +783,11 @@ class NeuronReference:
                 # Add external current to equations here
                 x.add_external_current(current_name='I_ext(t,i)', current_eqs='timedarray')
 
-
-
-
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
             self.output_neuron['refractory'] = x.get_refractory_period()
+            
         self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
