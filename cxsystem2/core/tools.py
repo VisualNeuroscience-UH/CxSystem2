@@ -14,7 +14,7 @@ def  _remove_timed_arrays(obj):
     # Timed arrays of brian contain some expressions which cannot be saved by pickle, 
     # thus we need to remove them.
     if not isinstance(obj, dict):
-        return
+        return obj
     keys = list(obj.keys())
     for key in keys:
         if isinstance(obj[key],TimedArray):
