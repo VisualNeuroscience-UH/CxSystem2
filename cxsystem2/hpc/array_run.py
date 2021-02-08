@@ -17,6 +17,7 @@ import sys
 import time
 from pathlib import Path
 from collections import defaultdict
+import decimal
 
 import numpy as np
 import pandas as pd
@@ -90,7 +91,7 @@ class ArrayRun:
             self._prepare_multi_dim_arrun_metadata()
         else:
             self._prepare_one_dim_arrun_metadata()
-
+        import pdb; pdb.set_trace()
         print(" -  array of Dataframes for anatomical and physiological configuration are ready")
 
 
@@ -257,7 +258,7 @@ class ArrayRun:
         self.final_metadata_df = self.final_metadata_df.loc[np.repeat(self.final_metadata_df.index.values, self.trials_per_config)].reset_index(
             drop=True)
         assert len(self.final_namings) < 1000, ' -  The array run is trying to run more than 1000 simulations, this is not allowed unless you' \
-                                                ' REALLY want it and if you REALLY want it you should konw what to do.'
+                                                ' REALLY want it and if you REALLY want it you should know what to do.'
         # while len(jobs) < number_of_runs:
         while len(jobs) < steps_from_start:
             time.sleep(1.5)
@@ -304,7 +305,7 @@ class ArrayRun:
             array_variable = array_variable.replace(array_variable[opening_braket_idx + 1:colon_idx + 1], '')  # removing default value
         elif ':' in array_variable:
             print(" -  The default value set for %s is omitted since the "
-                  "array run is multidimentional (multidimension_array_run "
+                  "array run is multidimensional (multidimension_array_run "
                   "flag is set to 1)" % array_variable)
             colon_idx = array_variable.index(':')
             array_variable = array_variable.replace(array_variable[opening_braket_idx + 1:colon_idx + 1], '')  # removing default value
@@ -315,8 +316,8 @@ class ArrayRun:
         variables_to_iterate = []
         if '|' in array_variable:
             changing_part = array_variable[opening_braket_idx + 1:closing_braket_idx].replace('|', ',')
-            tmp_str = 'np.arange(' + changing_part + ')'
-            variables_to_iterate = eval(tmp_str)
+            decimal_type_list = [decimal.Decimal(vv) for vv in changing_part.split(',')]
+            variables_to_iterate = np.arange(decimal_type_list[0],decimal_type_list[1],decimal_type_list[2]).tolist()
         elif '&' in array_variable:
             variables_to_iterate = eval('["' + array_variable[opening_braket_idx + 1:closing_braket_idx].replace('&', '","') + '"]')
         variables_to_iterate = [template_of_variable.replace('^^^', str(vv)) for vv in variables_to_iterate]
@@ -340,6 +341,7 @@ class ArrayRun:
             temp_df, namings = self.generate_dataframes_for_param_search(original_df, index_of_array_variable[1:], df_type, naming_prefix='')
             array_of_dfs.extend(temp_df)
             run_namings.extend(namings)
+
         return array_of_dfs, run_namings
 
     def default_df_extractor(self, df_):
@@ -359,9 +361,53 @@ class ArrayRun:
                 value_to_default[value_to_default.index('{'):value_to_default.index('}') + 1], default)
         return df
 
+    def _set_unique_titles_values(self, title, value, idx, df_type):
+        
+        # Create idx lists if they do not exist, and init counters
+        if not hasattr(self, 'tmp_anat_df_idx'):
+            self.tmp_anat_df_idx = []
+            self.anat_same_title_counter = 0
+        if not hasattr(self, 'tmp_physiol_df_idx'):
+            self.tmp_physiol_df_idx = []
+            self.physiol_same_title_counter = 0
+
+ 
+        if idx in self.tmp_anat_df_idx and self.tmp_anat_df_idx.index(idx) > 0:
+            title =  title + str(self.anat_same_title_counter)
+
+        if df_type == 'anatomy':
+            if not title in self.anat_titles:
+                self.anat_titles.append(title)
+                self.tmp_anat_df_idx.append(idx)
+            elif (title in self.anat_titles) and (not idx in self.tmp_anat_df_idx):
+                self.anat_same_title_counter += 1
+                title = title + str(self.anat_same_title_counter)
+                self.tmp_anat_df_idx.append(idx)
+                self.anat_titles.append(title)
+                
+        elif df_type == 'physiology':
+            if not title in self.physiol_titles:
+                self.physiol_titles.append(title)
+                self.tmp_physiol_df_idx.append(idx)
+            elif (title in self.physiol_titles) and (not idx in self.tmp_physiol_df_idx):
+                self.physiol_same_title_counter += 1
+                title = title + str(self.physiol_same_title_counter)
+                self.tmp_physiol_df_idx.append(idx)
+                self.physiol_titles.append(title)
+
+        # Create metadata key if it does not exist
+        if title not in list(self.metadata_dict.keys()):
+            self.metadata_dict[title] = []
+        if value not in self.metadata_dict[title]:
+            self.metadata_dict[title].append(value)
+        print(f'title = {title}, value = {value}')
+        print(self.anat_titles, self.metadata_dict)
+
+        return title
+        
     def filename_generator(self, df, idx, df_type):
         """
-        Generates filanems for each of the runs in ArrayRun.
+        Generates filenames for each of the runs in ArrayRun.
 
         :param df: input dataframe.
         :param idx: index of the cell based on which the name is going to be generated.
@@ -370,14 +416,14 @@ class ArrayRun:
         idx = idx[0]
         whitelist = set('abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-')
 
-        if np.any(df.iloc[:, 0].str.contains('row_type')):
+        if np.any(df.iloc[:, 0].str.contains('row_type')): # Anatomical conf
             definition_rows_indices = np.array(df[0][df[0] == 'row_type'].index.tolist())
             target_row_ix  = max(np.where(definition_rows_indices < idx[0])[0]) # get the index of the row containing the column info
             target_row = definition_rows_indices[target_row_ix]
             title = str(df.loc[target_row][idx[1]])
             value = str(df.loc[idx[0]][idx[1]])
-            naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
-        elif 'Variable' in df.columns:
+            # naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+        elif 'Variable' in df.columns: # Physiology conf
             try:
                 if not math.isnan(df['Key'][idx[0]]):
                     title = str(df['Key'][idx[0]])
@@ -388,21 +434,40 @@ class ArrayRun:
             except TypeError:
                 title = str(df['Key'][idx[0]])
                 value = str(df.loc[idx[0]][idx[1]])
-            naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+            # naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
         else:
             raise InvalidConfigurationError("Configuration file format is not valid")
-        # for metadata
-        if df_type == 'anatomy':
-            if title not in self.anat_titles:
-                self.anat_titles.append(title)
-        elif df_type == 'physiology':
-            if title not in self.physio_titles:
-                self.physio_titles.append(title)
-        if title in list(self.metadata_dict.keys()):
-            if value not in self.metadata_dict[title]:
-                self.metadata_dict[title].append(value)
-        else:
-            self.metadata_dict[title] = [value]
+
+        naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+
+        title = self._set_unique_titles_values(title, value, idx, df_type)            
+    
+
+
+        # test if counter is not 1
+        # add counter to title
+        # # for metadata
+        # if df_type == 'anatomy':
+        #     if title not in self.anat_titles:
+        #         self.anat_titles.append(title)
+        #         self.tmp_anat_df_idx.append(idx)
+        #     elif idx not in self.tmp_anat_df_idx: 
+        #         title = title + str(self.tmp_anat_counter) # Tämä jää valitettavasti vain tilapäiseksi nimeksi
+        #         self.anat_titles.append(title)
+        #         self.tmp_anat_df_idx.append(idx)
+        #         self.tmp_anat_counter += 1
+        # elif df_type == 'physiology':
+        #     if title not in self.physio_titles:
+        #         self.physio_titles.append(title)
+
+        # print(self.metadata_dict)
+        # if title in list(self.metadata_dict.keys()):
+        #     if value not in self.metadata_dict[title]:
+        #         self.metadata_dict[title].append(value)
+        # else:
+        #     self.metadata_dict[title] = [value]
+
+
         return title, value, naming
 
     def _get_multidim_array_run_flag(self):

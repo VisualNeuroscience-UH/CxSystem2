@@ -28,9 +28,9 @@ def write_to_file(save_path,
     if type(save_path) != pl.PosixPath:
         save_path = pl.Path(save_path)
     if save_path.suffix == '.gz':
+        # Check data dictionary for TimedArray objects and remove them
+        data = _remove_timed_arrays(data)
         with open(save_path.as_posix(), 'wb') as fb:
-            # Check data dictionary for TimedArray objects and remove them
-            data = _remove_timed_arrays(data)
             fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9)) # master branch version
     elif save_path.suffix == '.bz2':
         with bz2.BZ2File(save_path.as_posix(), 'wb') as fb:
