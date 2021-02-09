@@ -386,14 +386,14 @@ class ArrayRun:
                 self.anat_titles.append(title)
                 
         elif df_type == 'physiology':
-            if not title in self.physiol_titles:
-                self.physiol_titles.append(title)
+            if not title in self.physio_titles:
+                self.physio_titles.append(title)
                 self.tmp_physiol_df_idx.append(idx)
-            elif (title in self.physiol_titles) and (not idx in self.tmp_physiol_df_idx):
+            elif (title in self.physio_titles) and (not idx in self.tmp_physiol_df_idx):
                 self.physiol_same_title_counter += 1
                 title = title + str(self.physiol_same_title_counter)
                 self.tmp_physiol_df_idx.append(idx)
-                self.physiol_titles.append(title)
+                self.physio_titles.append(title)
 
         # Create metadata key if it does not exist
         if title not in list(self.metadata_dict.keys()):
