@@ -91,9 +91,8 @@ class ArrayRun:
             self._prepare_multi_dim_arrun_metadata()
         else:
             self._prepare_one_dim_arrun_metadata()
-        import pdb; pdb.set_trace()
-        print(" -  array of Dataframes for anatomical and physiological configuration are ready")
 
+        print(" -  array of Dataframes for anatomical and physiological configuration are ready")
 
         if self._should_submit_to_cluster():
             self.total_configs = len(self.list_of_anatomy_dfs) * self.trials_per_config
@@ -400,8 +399,6 @@ class ArrayRun:
             self.metadata_dict[title] = []
         if value not in self.metadata_dict[title]:
             self.metadata_dict[title].append(value)
-        print(f'title = {title}, value = {value}')
-        print(self.anat_titles, self.metadata_dict)
 
         return title
         
