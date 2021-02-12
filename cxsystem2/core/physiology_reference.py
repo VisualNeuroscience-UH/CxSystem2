@@ -722,7 +722,7 @@ class NeuronReference:
 
                 ::
 
-                    dvm/dt = (gL*(EL-vm)  + ge_soma  + gi_soma + I_ext / C : volt (unless refractory)
+                    dvm/dt = (gL*(EL-vm)  + ge_soma * 1 * vm + gi_soma * 1 * vm + I_ext(t,i) / C : volt (unless refractory)
                     dge_soma/dt = -ge_soma/tau_e : siemens
                     dgi_soma/dt = -gi_soma/tau_i : siemens
                     x : meter
@@ -759,14 +759,14 @@ class NeuronReference:
             # This part is not nicely integrated to the rest of the code, and not even trying to be.
             # It reads current injection from external file. Filepath and filenames are set in the 
             # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename. The
-            # civalue is used to multiply the current injection in an array run.
+            # cimultiplier is used to multiply the current injection in an array run.
             if 'cibasepath' in self.output_neuron['namespace'].keys():
                 import scipy.io as sio
                 import os
 
                 cibasepath = self.output_neuron['namespace']['cibasepath'] 
                 cifilename = self.output_neuron['namespace']['cifilename'] 
-                civalue = self.output_neuron['namespace']['civalue'] 
+                cimultiplier = self.output_neuron['namespace']['cimultiplier'] 
                 cidata_dict = {}
                 cidata_fullpath_filename = os.path.join(cibasepath, cifilename)
                 sio.loadmat(cidata_fullpath_filename, cidata_dict) 
@@ -774,7 +774,7 @@ class NeuronReference:
                 cidata = cidata_dict['injected_current']
                 framedurations = cidata_dict['dt']
                 # NOTE scaling to picoamperes here
-                I_ext = b2.TimedArray(  civalue * cidata * b2.pA,
+                I_ext = b2.TimedArray(  cimultiplier * cidata * b2.pA,
                                         dt=framedurations * b2.ms)
 
                 # Add I_ext to namespace
