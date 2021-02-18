@@ -93,7 +93,6 @@ class ArrayRun:
             self._prepare_one_dim_arrun_metadata()
 
         print(" -  array of Dataframes for anatomical and physiological configuration are ready")
-
         if self._should_submit_to_cluster():
             self.total_configs = len(self.list_of_anatomy_dfs) * self.trials_per_config
             self.config_per_node = math.ceil(self.total_configs / self.cluster_number_of_nodes)
@@ -110,7 +109,6 @@ class ArrayRun:
 
         elif self._is_running_locally():
             self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)  # this runs when not in cluster
-
 
     def _should_submit_to_cluster(self):
         return self.run_in_cluster == 1 and self.cluster_start_idx == -1 and self.cluster_step == -1
@@ -159,6 +157,7 @@ class ArrayRun:
                 self.final_namings.append(physio_namings[physio_idx])
 
         self._check_single_experiment_multi_trials()
+        self._set_titles_and_metadata_dict()
         self.all_titles = self.anat_titles + self.physio_titles
         product_of_parameters = list(itertools.product(*list(self.metadata_dict.values())))
         self.tmp_df = pd.DataFrame(product_of_parameters, columns=list(self.metadata_dict.keys()))
@@ -185,6 +184,7 @@ class ArrayRun:
             self.final_namings.extend(physio_namings)
 
         self._check_single_experiment_multi_trials()
+        self._set_titles_and_metadata_dict()
         self.all_titles = self.anat_titles + self.physio_titles
 
         index_len = len([item for sublist in list(self.metadata_dict.values()) for item in sublist])
@@ -284,7 +284,6 @@ class ArrayRun:
             print("cleaning tmp folders " + tmp_folder_path)
             shutil.rmtree(tmp_folder_path)
 
-
     def generate_dataframes_for_param_search(self, original_df, index_of_array_variable, df_type, naming_prefix='', recursion_counter=1):
         """
         Generates new configuration dataframes for each of the scenarios from the original dataframe.
@@ -320,7 +319,7 @@ class ArrayRun:
         elif '&' in array_variable:
             variables_to_iterate = eval('["' + array_variable[opening_braket_idx + 1:closing_braket_idx].replace('&', '","') + '"]')
         variables_to_iterate = [template_of_variable.replace('^^^', str(vv)) for vv in variables_to_iterate]
-        for var_idx, var in enumerate(variables_to_iterate):
+        for var_idx, var in enumerate(variables_to_iterate): # this iteration is unclear, but seems to work
             if type(var) == str:
                 var = var.strip()
             temp_df = original_df.copy()
@@ -360,47 +359,46 @@ class ArrayRun:
                 value_to_default[value_to_default.index('{'):value_to_default.index('}') + 1], default)
         return df
 
-    def _set_unique_titles_values(self, title, value, idx, df_type):
-        
-        # Create idx lists if they do not exist, and init counters
-        if not hasattr(self, 'tmp_anat_df_idx'):
-            self.tmp_anat_df_idx = []
-            self.anat_same_title_counter = 0
-        if not hasattr(self, 'tmp_physiol_df_idx'):
-            self.tmp_physiol_df_idx = []
-            self.physiol_same_title_counter = 0
+    def _set_titles_and_metadata_dict(self):
+       
+        def _get_title_and_unique_values(tmp_value_list):
 
- 
-        if idx in self.tmp_anat_df_idx and self.tmp_anat_df_idx.index(idx) > 0:
-            title =  title + str(self.anat_same_title_counter)
+            unique_values_raw = list(set(tmp_value_list)) # Unsorted list of strings
+            # Check for unit stripping
+            if '*' in unique_values_raw[0]:
+                unique_values_numerical = [nn[:nn.find('*')] for nn in unique_values_raw]
+            else:
+                unique_values_numerical = unique_values_raw
 
-        if df_type == 'anatomy':
-            if not title in self.anat_titles:
-                self.anat_titles.append(title)
-                self.tmp_anat_df_idx.append(idx)
-            elif (title in self.anat_titles) and (not idx in self.tmp_anat_df_idx):
-                self.anat_same_title_counter += 1
-                title = title + str(self.anat_same_title_counter)
-                self.tmp_anat_df_idx.append(idx)
-                self.anat_titles.append(title)
-                
-        elif df_type == 'physiology':
-            if not title in self.physio_titles:
-                self.physio_titles.append(title)
-                self.tmp_physiol_df_idx.append(idx)
-            elif (title in self.physio_titles) and (not idx in self.tmp_physiol_df_idx):
-                self.physiol_same_title_counter += 1
-                title = title + str(self.physiol_same_title_counter)
-                self.tmp_physiol_df_idx.append(idx)
-                self.physio_titles.append(title)
+            unique_values_sorted = np.sort(np.array([float(nn) for nn in unique_values_numerical])) # Sorted array of floats
+            unique_values = [str(nn) for nn in unique_values_sorted] # Sorted list of strings
+            title, value, naming = self.filename_generator(df, [idx], '') # this is for title only, df can be any df
+            return title, unique_values
 
-        # Create metadata key if it does not exist
-        if title not in list(self.metadata_dict.keys()):
-            self.metadata_dict[title] = []
-        if value not in self.metadata_dict[title]:
-            self.metadata_dict[title].append(value)
+        tmp_value_list=[]
+        for idx in self.anatomy_arrun_cell_indices:
+            for df in self.list_of_anatomy_dfs:
+                tmp_value_list.append(df.iloc[idx])
+            
+            title, unique_values = _get_title_and_unique_values(tmp_value_list)
 
-        return title
+            if title in list(self.metadata_dict.keys()):
+                title = title + '_1'
+            self.anat_titles.append(title)
+            self.metadata_dict[title] = unique_values
+            tmp_value_list=[]
+
+        for idx in self.physio_arrun_cell_indices:
+            for df in self.list_of_physio_dfs:
+                tmp_value_list.append(df.iloc[idx])
+            
+            title, unique_values = _get_title_and_unique_values(tmp_value_list)
+
+            if title in list(self.metadata_dict.keys()):
+                title = title + '_1'
+            self.physio_titles.append(title)
+            self.metadata_dict[title] = unique_values
+            tmp_value_list=[]
         
     def filename_generator(self, df, idx, df_type):
         """
@@ -436,34 +434,6 @@ class ArrayRun:
             raise InvalidConfigurationError("Configuration file format is not valid")
 
         naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
-
-        title = self._set_unique_titles_values(title, value, idx, df_type)            
-    
-
-
-        # test if counter is not 1
-        # add counter to title
-        # # for metadata
-        # if df_type == 'anatomy':
-        #     if title not in self.anat_titles:
-        #         self.anat_titles.append(title)
-        #         self.tmp_anat_df_idx.append(idx)
-        #     elif idx not in self.tmp_anat_df_idx: 
-        #         title = title + str(self.tmp_anat_counter) # Tämä jää valitettavasti vain tilapäiseksi nimeksi
-        #         self.anat_titles.append(title)
-        #         self.tmp_anat_df_idx.append(idx)
-        #         self.tmp_anat_counter += 1
-        # elif df_type == 'physiology':
-        #     if title not in self.physio_titles:
-        #         self.physio_titles.append(title)
-
-        # print(self.metadata_dict)
-        # if title in list(self.metadata_dict.keys()):
-        #     if value not in self.metadata_dict[title]:
-        #         self.metadata_dict[title].append(value)
-        # else:
-        #     self.metadata_dict[title] = [value]
-
 
         return title, value, naming
 
@@ -548,7 +518,6 @@ class ArrayRun:
         return arrays_indices
         
         
-
 if __name__ == '__main__':
     if len(sys.argv) != 10:
         print("Array run needs 9 arguments and is not built to be called separately")
