@@ -19,7 +19,7 @@ class ReceptorModel:
     # No driving force current models, will be connection weight x conductance change, exponential synapse
     SynapticExcInhModels['E_NDF'] = {'I_SYNAPTIC_EXC': '+ ge * mV',
                                         'SYNAPTIC_EXC_EQS': 'dge/dt = -ge/tau_e : siemens'} 
-    SynapticExcInhModels['I_NDF'] = {'I_SYNAPTIC_INH': '+ gi * mV',
+    SynapticExcInhModels['I_NDF'] = {'I_SYNAPTIC_INH': '- gi * mV',
                                         'SYNAPTIC_INH_EQS': 'dgi/dt = -gi/tau_i : siemens'}
 
     # Alpha synapses
