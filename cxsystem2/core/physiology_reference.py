@@ -60,7 +60,7 @@ class NeuronReference:
 
         # <editor-fold desc="...General neuron model initialization">
         self.physio_config_df = physio_config_df
-        NeuronReference._celltypes = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_I', 'HH_E', 'NDNEURON', 'CI_SS'])
+        NeuronReference._celltypes = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_I', 'HH_E', 'NDNEURON', 'CI'])
         assert general_grid_radius > min_distance, ' -  The distance between cells should be less than the grid radius'
         assert cell_type in NeuronReference._celltypes, " -  Cell type '%s' is not defined" % cell_type  # check cell type
         assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"  # check layer index
@@ -99,8 +99,51 @@ class NeuronReference:
             if self.model_variation == 1:
                 # print(' -  Model variation is set ON')
 
-                # For non-pyramidal groups
-                if cell_type != 'PC':
+                # For pyramidal groups
+                if cell_type == 'PC':
+                    try:
+                        self.pc_neuron_model = self.value_extractor(self.physio_config_df, 'pc_neuron_model').upper()
+                        # if self.pc_neuron_model == 'ADEX':
+                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
+                    except:
+                        self.pc_neuron_model = self.neuron_model
+                        print(' !  No pyramidal cell neuron model defined, using %s' % self.neuron_model)
+
+                    try:
+                        self.pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model').upper()
+                    except:
+                        self.pc_excitation_model = self.excitation_model
+                        print(' !  No pyramidal cell excitation model defined, using %s' % self.excitation_model)
+
+                    try:
+                        self.pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model').upper()
+                    except:
+                        self.pc_inhibition_model = self.inhibition_model
+                        print(' !  No pyramidal cell inhibition model defined, using %s' % self.inhibition_model)
+
+                # For other non-pyramidal groups
+                elif cell_type == 'CI':
+                    try:
+                        self.ci_neuron_model = self.value_extractor(self.physio_config_df, 'ci_neuron_model').upper()
+                        print(' -  CI neuron model is %s ' % self.ci_neuron_model)
+                    except:
+                        self.ci_neuron_model = 'EIF'
+                        print(' !  No CI neuron model defined, using EIF')
+
+                    try:
+                        self.ci_excitation_model = self.value_extractor(self.physio_config_df, 'ci_excitation_model').upper()
+                    except:
+                        self.ci_excitation_model = 'SIMPLE_E'
+                        print(' !  No CI neuron excitation model defined, using simple')
+
+                    try:
+                        self.ci_inhibition_model = self.value_extractor(self.physio_config_df, 'ci_inhibition_model').upper()
+                    except:
+                        self.ci_inhibition_model = 'SIMPLE_I'
+                        print(' !  No CI neuron inhibition model defined, using simple')
+
+                # For other non-pyramidal groups
+                else:
                     try:
                         self.neuron_model = self.value_extractor(self.physio_config_df, 'neuron_model').upper()
                         print(' -  Neuron model is %s ' % self.neuron_model)
@@ -121,28 +164,6 @@ class NeuronReference:
                     except:
                         self.inhibition_model = 'SIMPLE_I'
                         print(' !  No point neuron inhibition model defined, using simple')
-
-                # For pyramidal groups
-                else:
-                    try:
-                        self.pc_neuron_model = self.value_extractor(self.physio_config_df, 'pc_neuron_model').upper()
-                        # if self.pc_neuron_model == 'ADEX':
-                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
-                    except:
-                        self.pc_neuron_model = self.neuron_model
-                        print(' !  No pyramidal cell neuron model defined, using %s' % self.neuron_model)
-
-                    try:
-                        self.pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model').upper()
-                    except:
-                        self.pc_excitation_model = self.excitation_model
-                        print(' !  No pyramidal cell excitation model defined, using %s' % self.excitation_model)
-
-                    try:
-                        self.pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model').upper()
-                    except:
-                        self.pc_inhibition_model = self.inhibition_model
-                        print(' !  No pyramidal cell inhibition model defined, using %s' % self.inhibition_model)
 
             else:
                 self.model_variation = False
@@ -713,9 +734,9 @@ class NeuronReference:
         self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
-    def CI_SS(self):
+    def CI(self):
         """
-            This method build up the equation for CI_SS neurons. CI stands for current injection as timed array directly to neuron model. 
+            This method build up the equation for CI neurons. CI stands for current injection as timed array directly to neuron model. 
             The final equation is then saved in output_neuron['equation'].
 
             * The equation of the neuron is as follows:
@@ -731,17 +752,21 @@ class NeuronReference:
             """
 
         if self.model_variation is False:
-            raise NotImplementedError('CI_SS neuron type is not defined for model_variation = 0 (i.e. False)')
+            raise NotImplementedError('CI neuron type is not defined for model_variation = 0 (i.e. False)')
 
         else:
             # x = neuron_factory().get_class(self.neuron_model)
             # x.set_excitatory_receptors(self.excitation_model)
             # x.set_inhibitory_receptors(self.inhibition_model)
 
-            # Change equations: remove driving force / replicate deneve dynamics
-            x = neuron_factory().get_class('LIF')
-            x.set_excitatory_receptors('E_NDF')
-            x.set_inhibitory_receptors('I_NDF')
+            x = neuron_factory().get_class(self.ci_neuron_model)
+            x.set_excitatory_receptors(self.ci_excitation_model)
+            x.set_inhibitory_receptors(self.ci_inhibition_model)
+
+            # # Change equations: remove driving force / replicate deneve dynamics
+            # x = neuron_factory().get_class('LIF')
+            # x.set_excitatory_receptors('E_NDF')
+            # x.set_inhibitory_receptors('I_NDF')
 
             if 'noise_sigma' in self.output_neuron['namespace'].keys():
                 noise_sigma = self.output_neuron['namespace']['noise_sigma']
