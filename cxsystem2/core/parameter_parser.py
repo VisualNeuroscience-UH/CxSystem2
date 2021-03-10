@@ -61,8 +61,8 @@ class SynapseParser:
         assert output_synapse['type'] in SynapseParser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
         # Commented Cp and Cd out because not used in this branch /HH
-        # self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
-        # self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
+        self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
+        self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
         try:
             self.sparseness = self.value_extractor(self.physio_config_df,
                                                    'sp_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
@@ -100,6 +100,7 @@ class SynapseParser:
                 return eval(
                     next(iter(cropped_df['Value'][cropped_df['Key'] == key_name[1]])))  # next(iter()) is equivalent to item() which is depricated
             else:
+                # print(f'key_name = {key_name}')
                 return eval(next(iter(df['Value'][df['Key'] == key_name])))  # next(iter()) is equivalent to item() which is depricated
         except NameError:
             tmp_key = next(iter(df['Value'][df['Key'] == key_name]), 'no match')  # next(iter()) is equivalent to item() which is depricated
@@ -177,7 +178,7 @@ class SynapseParser:
             u_f = self.value_extractor(self.physio_config_df, 'U_f')
             self.output_namespace['U_f'] = self.scale_by_calcium(ca, u_f)
 
-    def stdp(self):
+    def STDP(self):
         """
         The STDP method for assigning the STDP parameters to the customized_synapses() object.
 
@@ -201,7 +202,7 @@ class SynapseParser:
         min_delay = std_delay / 2.
         self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (std_delay, min_delay)
 
-    def stdp_with_scaling(self):
+    def STDP_with_scaling(self):
         """
         The STDP method for assigning the STDP parameters to the customized_synapses() object.
         """

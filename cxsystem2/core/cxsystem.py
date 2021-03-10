@@ -1036,6 +1036,8 @@ class CxSystem:
             '[rec]': [',record=']
         }
         self.monitor_name_bank[object_name] = []
+
+
         for mon_arg in mon_args:
             # Extracting the monitor tag
             mon_tag = mon_arg[mon_arg.index('['):mon_arg.index(']') + 1]
@@ -1068,20 +1070,20 @@ class CxSystem:
                         sub_mon_arg.append('True')
                     elif '[rec]' in sub_mon_tags:
                         sub_mon_arg[sub_mon_tags.index('[rec]') + 1] = 'arange' + sub_mon_arg[sub_mon_tags.index('[rec]') + 1].replace('-', ',')
+                        # Check that the index of monitored items does not exceed the number of neurons or synapses
+                        # Get N neurons or synapses
+                        if object_name.startswith('NG'):
+                            N_units = self.customized_neurons_list[-1]['number_of_neurons']
+                        elif object_name.startswith('S'):
+                            N_units = len(eval(f'{object_name}.i'))
+                        else:
+                            raise NotImplementedError('I have no idea what you are monitoring, aborting...')
                         if self.scale >= 1:
-                            assert int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]) < \
-                                   self.customized_neurons_list[-1]['number_of_neurons'], \
-                                " -  The stop index (%d) in the following monitor, is higher than" \
-                                " the number of neurons in the group (%d): \n %s " % \
-                                (int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
-                                 self.customized_neurons_list[-1]['number_of_neurons'], str(self.current_values_list.tolist()),)
-
-                        elif int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]) < self.customized_neurons_list[-1]['number_of_neurons']:
-                            "\n Warning: The stop index (%d) in the following monitor, is higher than the number of neurons in the group (%d):" \
-                            " \n %s . This is caused by using a scale < 1" \
-                            % (int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
-                               self.customized_neurons_list[-1]['number_of_neurons'],
-                               str(self.current_values_list.tolist()),)
+                            # Check max arange against N
+                            assert max(eval(sub_mon_arg[1])) < N_units, f'Monitor index for object {object_name} exceeds max units/synapses'
+                        elif max(eval(sub_mon_arg[1])) < N_units:
+                            f"\n Warning: Monitor index for object {object_name} exceeds max units/synapses" \
+                            " \n This might be caused by using a scale < 1" \
 
                     assert len(sub_mon_arg) == len(sub_mon_tags) + 1, ' -  Error in monitor tag definition.'
                 if sub_mon_arg[0] == '':

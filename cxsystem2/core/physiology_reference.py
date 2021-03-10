@@ -755,18 +755,9 @@ class NeuronReference:
             raise NotImplementedError('CI neuron type is not defined for model_variation = 0 (i.e. False)')
 
         else:
-            # x = neuron_factory().get_class(self.neuron_model)
-            # x.set_excitatory_receptors(self.excitation_model)
-            # x.set_inhibitory_receptors(self.inhibition_model)
-
             x = neuron_factory().get_class(self.ci_neuron_model)
             x.set_excitatory_receptors(self.ci_excitation_model)
             x.set_inhibitory_receptors(self.ci_inhibition_model)
-
-            # # Change equations: remove driving force / replicate deneve dynamics
-            # x = neuron_factory().get_class('LIF')
-            # x.set_excitatory_receptors('E_NDF')
-            # x.set_inhibitory_receptors('I_NDF')
 
             if 'noise_sigma' in self.output_neuron['namespace'].keys():
                 noise_sigma = self.output_neuron['namespace']['noise_sigma']
@@ -983,23 +974,23 @@ class SynapseReference:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght0 * Cp
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0 * siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         else:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght * Cd
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0* siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         if self.output_synapse['namespace']['Apost'] <= 0:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght * Cd
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0* siemens, wght_max)
                         '''
         else:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght0 * Cp
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0* siemens, wght_max)
                         '''
 
     def STDP_with_scaling(self):
@@ -1021,24 +1012,24 @@ class SynapseReference:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght0 * Cp
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0 * siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         else:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght * Cd
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0 * siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         if self.output_synapse['namespace']['Apost'] <= 0:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght * Cd
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0 * siemens, wght_max)
                         spike_sensor += 1 * hertz
                         '''
         else:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght0 * Cp
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0 * siemens, wght_max)
                         spike_sensor += 1 * hertz
                         '''
 

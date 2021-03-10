@@ -716,7 +716,7 @@ class LifNeuron(PointNeuron):
     #     :param obfuscated_param_set (list): obfuscated parameters
     #     :return:
     #     StateMonitor: Brian2 StateMonitor for the membrane voltage "v"
-    #     SpikeMonitor: Biran2 SpikeMonitor
+    #     SpikeMonitor: Brian2 SpikeMonitor
     #     """
     #     vals = self._deobfuscate_params(obfuscated_param_set)
     #     # run the LIF model
@@ -730,6 +730,50 @@ class LifNeuron(PointNeuron):
     #         tau=vals[4],
     #         abs_refractory_period=vals[5])
     #     return state_monitor, spike_monitor
+
+class ClopathLifNeuron(PointNeuron):
+    """
+    Leaky Intergrate-and-Fire (LIF) model including CLopath_2010_NatNeurosci extra variables.
+    See Clopath et al. Nature Neuroscience 13 (2010) 344-352 <http://dx.doi.org/10.1038/nn.2479>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT.
+    """
+
+    # The large gL and capacitance are from the original code
+    default_neuron_parameters = {
+            'EL': -70 * mV,
+            'V_res': -65 * mV,
+            'VT': -50 * mV,
+            'gL': 100 * nS,
+            'C': 800 * pF,
+            'refractory_period': 2.0 * ms,
+            'tau_lowpass1' : 40 * ms,    # timeconstant for low-pass filtered voltage
+            'tau_lowpass2' : 30 * ms,    # timeconstant for low-pass filtered voltage
+            'tau_homeo' : 1000 * ms,     # homeostatic timeconstant
+            'x_reset' : 1.,            # spike trace reset value
+            'taux' : 15. * ms           # spike trace time constant
+    }
+
+    neuron_model_defns = {
+            'I_NEURON_MODEL': 'gL * (EL - vm)',
+            'NEURON_MODEL_EQS': 
+            '''
+            dv_lowpass1 / dt = (vm - v_lowpass1) / tau_lowpass1 : volt     # low-pass filter of the voltage
+            dv_lowpass2 / dt = (vm - v_lowpass2) / tau_lowpass2 : volt     # low-pass filter of the voltage
+            dv_homeo / dt = (vm - EL - v_homeo) / tau_homeo : volt       # low-pass filter of the voltage
+            dx_trace / dt = -x_trace / taux :1                          # spike trace
+            '''
+    }
+    model_info_url = 'https://brian2.readthedocs.io/en/stable/examples/frompapers.Clopath_et_al_2010_homeostasis.html'
+
+    def __init__(self):
+        super().__init__()
+        self.threshold_condition = 'vm > VT'
+        self.reset_statements = 'vm = V_res; x_trace += x_reset / (taux / ms)'
+        self.initial_values = {'vm': None, 'x_trace': 0., 'v_lowpass1': 'EL', 'v_lowpass2': 'EL', 'v_homeo': 0}
+        # new_parameter_units = {'DeltaT': mV, 'Vcut': mV, 'a': nS, 'b': pA, 'tau_w': ms}
+        # new_parameter_units = {'taux': ms,'tau_lowpass1': ms}
+        # self.parameter_units.update(new_parameter_units)
 
 
 class EifNeuron(PointNeuron):
@@ -1104,10 +1148,11 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
 class neuron_factory:
     def __init__(self):
         self.name_to_class = {'LIF': LifNeuron, 'LifNeuron': LifNeuron,
-                              'EIF': EifNeuron, 'EifNeuron': EifNeuron,
-                              'ADEX': AdexNeuron, 'AdexNeuron': AdexNeuron,
-                         'SIMPLE_HH': HodgkinHuxleyNeuron, 'HodgkinHuxleyNeuron': HodgkinHuxleyNeuron,
-                         'IZHIKEVICH': IzhikevichNeuron, 'IzhikevichNeuron': IzhikevichNeuron,
+                            'CLIF': ClopathLifNeuron, 'ClopathLifNeuron': ClopathLifNeuron,
+                            'EIF': EifNeuron, 'EifNeuron': EifNeuron,
+                            'ADEX': AdexNeuron, 'AdexNeuron': AdexNeuron,
+                            'SIMPLE_HH': HodgkinHuxleyNeuron, 'HodgkinHuxleyNeuron': HodgkinHuxleyNeuron,
+                            'IZHIKEVICH': IzhikevichNeuron, 'IzhikevichNeuron': IzhikevichNeuron,
                               'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
 
     def get_class(self, neuron_model_name):
