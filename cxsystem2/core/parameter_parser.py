@@ -61,8 +61,8 @@ class SynapseParser:
         assert output_synapse['type'] in SynapseParser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
         # Commented Cp and Cd out because not used in this branch /HH
-        self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
-        self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
+        # self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
+        # self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
         try:
             self.sparseness = self.value_extractor(self.physio_config_df,
                                                    'sp_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
@@ -185,6 +185,9 @@ class SynapseParser:
         This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
         Following STDP values are set in this method: Apre, Apost, Tau_pre, Tau_post, wght_max, wght0.
         """
+        self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
+        self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
+
         self.output_namespace['Apre'], self.output_namespace['Apost'], self.output_namespace['taupre'], self.output_namespace['taupost'] = \
             self.value_extractor(self.physio_config_df, 'stdp_%s_%s' % (self.output_synapse['pre_group_type'],
                                                                         self.output_synapse['post_group_type'] +
@@ -262,6 +265,7 @@ class SynapseParser:
 
         # Weight
         try:
+            import pdb; pdb.set_trace()
             mean_wght = eval(self.output_synapse['custom_weight']) / nS
             print(' ! Using custom weight: %f nS' % mean_wght)
         except:
