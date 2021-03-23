@@ -9,6 +9,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
 import random as rnd
+from copy import deepcopy
 
 import brian2 as b2
 import numpy as np
@@ -772,6 +773,15 @@ class NeuronReference:
                 refractory_period = self.output_neuron['namespace']['refractory_period']
                 x.set_neuron_parameters(refractory_period=refractory_period)
 
+            if 'vclamp' in self.output_neuron['namespace'].keys():
+                x.add_external_current( current_name='gclamp * (vclamp - vm) ', 
+                                        current_eqs='''
+                                        gclamp : siemens
+                                                    ''')
+                init_val = {'gclamp': self.output_neuron['namespace']['gL'] * 500}
+                x.initial_values.update(init_val)
+                self.output_neuron['initial_values'] = x.initial_values
+
             # This part is not nicely integrated to the rest of the code, and not even trying to be.
             # It reads current injection from external file. Filepath and filenames are set in the 
             # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename. The
@@ -798,6 +808,12 @@ class NeuronReference:
 
                 # Add external current to equations here
                 x.add_external_current(current_name='I_ext(t,i)', current_eqs='timedarray')
+
+            # In case some model type specific necessary values are missing from physiology csv file,
+            # get the default values from neurodynlib neuron_models.py 
+            new_namespace_dict = deepcopy(x.default_neuron_parameters) # keep original unchanged
+            new_namespace_dict.update(self.output_neuron['namespace'] )
+            self.output_neuron['namespace'] = new_namespace_dict 
 
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
@@ -882,7 +898,7 @@ class SynapseReference:
         * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
 
         """
-        SynapseReference.syntypes = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_multiply', 'Fixed_calcium', 'Depressing', 'Facilitating'])
+        SynapseReference.syntypes = np.array(['STDP', 'CPlastic', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_multiply', 'Fixed_calcium', 'Depressing', 'Facilitating'])
         assert syn_type in SynapseReference.syntypes, " -  Synapse type '%s' is not defined" % syn_type
         self.output_synapse = {'type': syn_type,
                                'receptor': receptor,
@@ -991,6 +1007,39 @@ class SynapseReference:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght0 * Cp
                         wght = clip(wght + apre, 0* siemens, wght_max)
+                        '''
+
+    def CPlastic(self):
+        """
+        The method for implementing the plastic synaptic connection according to Clopath_2010_NatNeurosci.
+
+        """
+
+        self.output_synapse['equation'] = b2.Equations('''
+            # wght:siemens
+            wght:siemens
+            w_minus : siemens
+            w_plus : siemens
+            A_LTD_u : 1
+            ''')
+
+        # Assigning the multiplier here enables later addition of wght equation into this method .
+        if self.model_variation is False:
+            raise NotImplementedError('Fixed_multiply is only defined for model_variation = True (or 1)')
+        else:
+            self.output_synapse['pre_eq'] = '''
+                        %s += wght * ampa_max_cond                                                                                  # increment synaptic conductance
+                        A_LTD_u = A_LTD * (v_homeo**2 / v_target)                                                                   # metaplasticity: If membrane_voltage - resting potential equals sqrt(12) => Au equals A
+                        w_minus = A_LTD_u * (v_lowpass1_post / mV - Theta_low / mV) * int(v_lowpass1_post / mV - Theta_low / mV > 0) * siemens  # depression
+                        wght = clip(wght - w_minus, 0 * siemens, wght_max)                                                           # hard bounds
+                        ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
+            # Note that the following variables are calculated for each synapse. For 100 incoming synapses, += 1 becomes += 100
+            self.output_synapse['post_eq'] = '''
+                        v_lowpass1 += (10 * mV) / N_incoming
+                        v_lowpass2 += (10 * mV) / N_incoming                                                                        # mimics the depolarisation effect due to a spike
+                        v_homeo += (0.1 * mV) / N_incoming                                                                           # mimics the depolarisation effect due to a spike
+                        w_plus = A_LTP * x_trace_pre * (v_lowpass2_post / mV - Theta_low / mV) * int(v_lowpass2_post / mV - Theta_low / mV > 0) * siemens  # potentiation
+                        wght = clip(wght + w_plus, 0 * siemens, wght_max)                                                           # hard bounds
                         '''
 
     def STDP_with_scaling(self):

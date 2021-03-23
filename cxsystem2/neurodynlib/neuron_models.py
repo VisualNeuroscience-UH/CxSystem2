@@ -109,7 +109,7 @@ class PointNeuron:
         self.integration_method = 'euler'
 
         # Add other defaults
-        self.initial_values = {'vm': None}  # vm: None => EL will be used
+        self.initial_values = {'vm': 'EL'}  # was vm : None, but this was not tolerated by added set_state() method in cxsystem.py
         self.states_to_monitor = ['vm']
         self.neuron_name = self.__class__.__name__ + '_' + datetime.now().strftime('%Y%m%d%H%M%S%f')
 
@@ -160,8 +160,6 @@ class PointNeuron:
         if return_string is True:
             return model_membrane_equation
         else:
-            #substitutables = {k: k+'_'+self.compartment for k in self.comp_specific_vars}
-            #compartment_eq = b2.Equations(self.model_membrane_equation, **substitutables)
             return b2.Equations(model_membrane_equation)
 
     def get_compartment_equations(self, compartment_name):
@@ -306,7 +304,6 @@ class PointNeuron:
         neuron_parameters.update(kwargs)
         refractory_period = neuron_parameters['refractory_period']
 
-        #eqs = self.get_membrane_equation(substitute_ad_hoc={'EXT_CURRENTS': '+ I_stim(t,i)'})
         stim_string = '+ I_stim(t,i)'
         old_model_defns = dict(self.full_model_defns)
         self.add_model_definition('EXT_CURRENTS', stim_string)
@@ -657,83 +654,9 @@ class LifNeuron(PointNeuron):
     def __init__(self):
         super().__init__()
 
-
-    # def _obfuscate_params(self, param_set):
-    #     """ A helper to _obfuscate_params a parameter vector.
-    #     Args:
-    #         param_set:
-    #     Returns:
-    #         list: obfuscated list
-    #     """
-    #     obfuscated_factors = [LifNeuron.__OBFUSCATION_FACTORS[i] * param_set[i] for i in range(6)]
-    #     return obfuscated_factors
-    #
-    # def _deobfuscate_params(self, obfuscated_params):
-    #     """ A helper to deobfuscate a parameter set.
-    #     Args:
-    #         obfuscated_params (list):
-    #     Returns:
-    #         list: de-obfuscated list
-    #     """
-    #     param_set = [obfuscated_params[i] / LifNeuron.__OBFUSCATION_FACTORS[i] for i in range(6)]
-    #     return param_set
-
-    # def get_random_param_set(self, random_seed=None):
-    #     """
-    #     creates a set of random parameters. All values are constrained to their typical range
-    #     :param random_seed:
-    #     :return: list: a list of (obfuscated) parameters. Use this vector when calling simulate_random_neuron()
-    #     """
-    #     random.seed(random_seed)
-    #     v_rest = (-75. + random.randint(0, 15)) * mV
-    #     v_reset = v_rest + random.randint(-10, +10) * mV
-    #     firing_threshold = random.randint(-40, +5) * mV
-    #     membrane_resistance = random.randint(2, 15) * Mohm
-    #     membrane_time_scale = random.randint(2, 30) * ms
-    #     abs_refractory_period = random.randint(1, 7) * ms
-    #     true_rand_params = [v_rest, v_reset, firing_threshold,
-    #                         membrane_resistance, membrane_time_scale, abs_refractory_period]
-    #     return self._obfuscate_params(true_rand_params)
-    #
-    # def print_obfuscated_parameters(self, obfuscated_params):
-    #     """
-    #     Print the de-obfuscated values to the console
-    #     :param obfuscated_params:
-    #     :return:
-    #     """
-    #     true_vals = self._deobfuscate_params(obfuscated_params)
-    #     print("Resting potential: {}".format(true_vals[0]))
-    #     print("Reset voltage: {}".format(true_vals[1]))
-    #     print("Firing threshold: {}".format(true_vals[2]))
-    #     print("Membrane resistance: {}".format(true_vals[3]))
-    #     print("Membrane time-scale: {}".format(true_vals[4]))
-    #     print("Absolute refractory period: {}".format(true_vals[5]))
-    #
-    # def simulate_random_neuron(self, input_current, obfuscated_param_set):
-    #     """
-    #     Simulates a LIF neuron with unknown parameters (obfuscated_param_set)
-    #     :param input_current (TimedArray): The current to probe the neuron
-    #     :param obfuscated_param_set (list): obfuscated parameters
-    #     :return:
-    #     StateMonitor: Brian2 StateMonitor for the membrane voltage "v"
-    #     SpikeMonitor: Brian2 SpikeMonitor
-    #     """
-    #     vals = self._deobfuscate_params(obfuscated_param_set)
-    #     # run the LIF model
-    #     state_monitor, spike_monitor = self.simulate_LIF_neuron(
-    #         input_current,
-    #         simulation_time=50 * ms,
-    #         EL=vals[0],
-    #         v_reset=vals[1],
-    #         firing_threshold=vals[2],
-    #         R=vals[3],
-    #         tau=vals[4],
-    #         abs_refractory_period=vals[5])
-    #     return state_monitor, spike_monitor
-
-class ClopathLifNeuron(PointNeuron):
+class ClopathAdexNeuron(PointNeuron):
     """
-    Leaky Intergrate-and-Fire (LIF) model including CLopath_2010_NatNeurosci extra variables.
+    LAdaptive Exponential Integrate-and-Fire (ADEX) model including CLopath_2010_NatNeurosci extra variables.
     See Clopath et al. Nature Neuroscience 13 (2010) 344-352 <http://dx.doi.org/10.1038/nn.2479>`_.
 
     Requires setting the following parameters: EL, gL, C, V_res, VT.
@@ -741,12 +664,21 @@ class ClopathLifNeuron(PointNeuron):
 
     # The large gL and capacitance are from the original code
     default_neuron_parameters = {
-            'EL': -70 * mV,
-            'V_res': -65 * mV,
-            'VT': -50 * mV,
-            'gL': 100 * nS,
-            'C': 800 * pF,
+            'EL': -70.0 * mV,
+            'V_res': -51.0 * mV,
+            'VTrest': -50.0 * mV,
+            'gL': 2 * nS,
+            'C': 10 * pF,
+            'DeltaT': 2 * mV,
+            'a': 0.5 * nS,
+            'b': 7.0 * pA,
+            'Isp': 40. * pA,
+            'tau_w': 100.0 * ms,
+            'tau_z': 40.0 * ms, 
             'refractory_period': 2.0 * ms,
+            'Vcut': -30.0 * mV,
+            'tau_VT': 50 * ms, 
+            'VTmax': 30 * mV,
             'tau_lowpass1' : 40 * ms,    # timeconstant for low-pass filtered voltage
             'tau_lowpass2' : 30 * ms,    # timeconstant for low-pass filtered voltage
             'tau_homeo' : 1000 * ms,     # homeostatic timeconstant
@@ -754,14 +686,16 @@ class ClopathLifNeuron(PointNeuron):
             'taux' : 15. * ms           # spike trace time constant
     }
 
-    neuron_model_defns = {
-            'I_NEURON_MODEL': 'gL * (EL - vm)',
-            'NEURON_MODEL_EQS': 
+    neuron_model_defns = {'I_NEURON_MODEL': 'gL*(EL-vm) - w + z + gL * DeltaT * exp((vm-VT) / DeltaT)',
+                          'NEURON_MODEL_EQS': 
             '''
-            dv_lowpass1 / dt = (vm - v_lowpass1) / tau_lowpass1 : volt     # low-pass filter of the voltage
-            dv_lowpass2 / dt = (vm - v_lowpass2) / tau_lowpass2 : volt     # low-pass filter of the voltage
-            dv_homeo / dt = (vm - EL - v_homeo) / tau_homeo : volt       # low-pass filter of the voltage
-            dx_trace / dt = -x_trace / taux :1                          # spike trace
+            dw/dt = (a*(vm-EL) - w) / tau_w : amp
+            dz/dt = -z / tau_z : amp                                        
+            dVT/dt = (VTrest-VT) / tau_VT : volt
+            dv_lowpass1 / dt = (vm - v_lowpass1) / tau_lowpass1 : volt      # low-pass filter of the voltage
+            dv_lowpass2 / dt = (vm - v_lowpass2) / tau_lowpass2 : volt      # low-pass filter of the voltage
+            dv_homeo / dt = (vm - EL - v_homeo) / tau_homeo : volt          # low-pass filter of the voltage
+            dx_trace / dt = -x_trace / taux :1                              # spike trace
             '''
     }
     model_info_url = 'https://brian2.readthedocs.io/en/stable/examples/frompapers.Clopath_et_al_2010_homeostasis.html'
@@ -769,12 +703,12 @@ class ClopathLifNeuron(PointNeuron):
     def __init__(self):
         super().__init__()
         self.threshold_condition = 'vm > VT'
-        self.reset_statements = 'vm = V_res; x_trace += x_reset / (taux / ms)'
-        self.initial_values = {'vm': None, 'x_trace': 0., 'v_lowpass1': 'EL', 'v_lowpass2': 'EL', 'v_homeo': 0}
-        # new_parameter_units = {'DeltaT': mV, 'Vcut': mV, 'a': nS, 'b': pA, 'tau_w': ms}
-        # new_parameter_units = {'taux': ms,'tau_lowpass1': ms}
-        # self.parameter_units.update(new_parameter_units)
-
+        self.reset_statements = 'vm = V_res; w += b; x_trace += x_reset / (taux / ms); z = Isp; VT = VTmax'
+        self.initial_values = { 'vm': 'EL', 'w': 0.*pA, 'z': 0.*pA, 'x_trace': 0., 'v_lowpass1': -70.*mvolt, 
+                                'v_lowpass2': -70.*mvolt, 'v_homeo': 0., 'VT': -50. * mvolt}
+        # self.states_to_monitor = ['vm', 'w']
+        new_parameter_units = {'DeltaT': mV, 'Vcut': mV, 'a': nS, 'b': pA, 'tau_w': ms, 'tau_z': ms}
+        self.parameter_units.update(new_parameter_units)
 
 class EifNeuron(PointNeuron):
     """
@@ -807,27 +741,6 @@ class EifNeuron(PointNeuron):
 
     def getting_started(self, step_amplitude=0.8*nA, sine_amplitude=1.6*nA, sine_freq=150*Hz, sine_dc=1.3*nA):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
-
-    # def _min_curr_expl(self):
-    #
-    #     durations = [1, 2, 5, 10, 20, 50, 100, 200]
-    #     min_amp = [8.6, 4.45, 2., 1.15, .70, .48, 0.43, .4]
-    #     i = 1
-    #     t = durations[i]
-    #     I_amp = min_amp[i] * b2.namp
-    #
-    #     input_current = input_factory.get_step_current(
-    #         t_start=10, t_end=10 + t - 1, unit_time=ms, amplitude=I_amp)
-    #
-    #     state_monitor, spike_monitor = self.simulate_neuron(
-    #         I_stim=input_current, simulation_time=(t + 20) * ms)
-    #
-    #     plot_tools.plot_voltage_and_current_traces(
-    #         state_monitor, input_current, title="step current",
-    #         firing_threshold=EifNeuron.FIRING_THRESHOLD_v_spike, legend_location=2)
-    #     plt.show()
-    #     print("nr of spikes: {}".format(spike_monitor.count[0]))
-
 
 class AdexNeuron(PointNeuron):
     """
@@ -862,7 +775,7 @@ class AdexNeuron(PointNeuron):
         super().__init__()
         self.threshold_condition = 'vm > Vcut'
         self.reset_statements = 'vm = V_res; w += b'
-        self.initial_values = {'vm': None, 'w': 0*pA}
+        self.initial_values = {'vm': 'EL', 'w': 0*pA}
         self.states_to_monitor = ['vm', 'w']
         new_parameter_units = {'DeltaT': mV, 'Vcut': mV, 'a': nS, 'b': pA, 'tau_w': ms}
         self.parameter_units.update(new_parameter_units)
@@ -897,7 +810,6 @@ class AdexNeuron(PointNeuron):
 
         plt.tight_layout(w_pad=0.5, h_pad=1.5)
         plt.show()
-
 
 class HodgkinHuxleyNeuron(PointNeuron):
     """
@@ -1000,7 +912,6 @@ class HodgkinHuxleyNeuron(PointNeuron):
     def getting_started(self, step_amplitude=7.2*uA, sine_amplitude=3.6*uA, sine_freq=150*Hz, sine_dc=2.9*nA):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
-
 class IzhikevichNeuron(PointNeuron):
     """
     Izhikevich model (IZHIKEVICH).
@@ -1066,7 +977,6 @@ class IzhikevichNeuron(PointNeuron):
 
         plt.tight_layout(w_pad=0.5, h_pad=1.5)
         plt.show()
-
 
 class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from plots in cell type atlas
     """
@@ -1148,7 +1058,7 @@ class LifAscNeuron(PointNeuron):  # TODO - Figure out why output different from 
 class neuron_factory:
     def __init__(self):
         self.name_to_class = {'LIF': LifNeuron, 'LifNeuron': LifNeuron,
-                            'CLIF': ClopathLifNeuron, 'ClopathLifNeuron': ClopathLifNeuron,
+                            'CADEX': ClopathAdexNeuron, 'ClopathAdexNeuron': ClopathAdexNeuron,
                             'EIF': EifNeuron, 'EifNeuron': EifNeuron,
                             'ADEX': AdexNeuron, 'AdexNeuron': AdexNeuron,
                             'SIMPLE_HH': HodgkinHuxleyNeuron, 'HodgkinHuxleyNeuron': HodgkinHuxleyNeuron,
@@ -1158,194 +1068,6 @@ class neuron_factory:
     def get_class(self, neuron_model_name):
         return copy.deepcopy(self.name_to_class[neuron_model_name]())
 
-
-# class FitzhughNagumo:
-#     """
-#     This file implements functions to simulate and analyze
-#     Fitzhugh-Nagumo type differential equations with Brian2.
-#     Relevant book chapters:
-#     - http://neuronaldynamics.epfl.ch/online/Ch4.html
-#     - http://neuronaldynamics.epfl.ch/online/Ch4.S3.html.
-#     """
-#
-#     def get_trajectory(self, v0=0., w0=0., I=0., eps=0.1, a=2.0, tend=500.):
-#         """Solves the following system of FitzHugh Nagumo equations
-#         for given initial conditions:
-#         dv/dt = 1/1ms * v * (1-v**2) - w + I
-#         dw/dt = eps * (v + 0.5 * (a - w))
-#         Args:
-#             v0: Intial condition for v [mV]
-#             w0: Intial condition for w [mV]
-#             I: Constant input [mV]
-#             eps: Inverse time constant of the recovery variable w [1/ms]
-#             a: Offset of the w-nullcline [mV]
-#             tend: Simulation time [ms]
-#         Returns:
-#             tuple: (t, v, w) tuple for solutions
-#         """
-#
-#         eqs = """
-#         I_e : amp
-#         dv/dt = 1/ms * ( v * (1 - (v**2) / (mV**2) ) - w + I_e * Mohm ) : volt
-#         dw/dt = eps/ms * (v + 0.5 * (a * mV - w)) : volt
-#         """
-#
-#         neuron = b2.NeuronGroup(1, eqs, method="euler")
-#
-#         # state initialization
-#         neuron.v = v0 * mV
-#         neuron.w = w0 * mV
-#
-#         # set input current
-#         neuron.I_e = I * b2.nA
-#
-#         # record states
-#         rec = b2.StateMonitor(neuron, ["v", "w"], record=True)
-#
-#         # run the simulation
-#         b2.run(tend * ms)
-#
-#         return (rec.t / ms, rec.v[0] / mV, rec.w[0] / mV)
-#
-#     def plot_flow(self, I=0., eps=0.1, a=2.0):
-#         """Plots the phase plane of the Fitzhugh-Nagumo model
-#         for given model parameters.
-#         Args:
-#             I: Constant input [mV]
-#             eps: Inverse time constant of the recovery variable w [1/ms]
-#             a: Offset of the w-nullcline [mV]
-#         """
-#
-#         # define the interval spanned by voltage v and recovery variable w
-#         # to produce the phase plane
-#         vv = np.arange(-2.5, 2.5, 0.2)
-#         ww = np.arange(-2.5, 5.5, 0.2)
-#         (VV, WW) = np.meshgrid(vv, ww)
-#
-#         # Compute derivative of v and w according to FHN equations
-#         # and velocity as vector norm
-#         dV = VV * (1. - (VV ** 2)) - WW + I
-#         dW = eps * (VV + 0.5 * (a - WW))
-#         vel = np.sqrt(dV ** 2 + dW ** 2)
-#
-#         # Use quiver function to plot the phase plane
-#         plt.quiver(VV, WW, dV, dW, vel)
-#
-#     def get_fixed_point(self, I=0., eps=0.1, a=2.0):
-#         """Computes the fixed point of the FitzHugh Nagumo model
-#         as a function of the input current I.
-#         We solve the 3rd order poylnomial equation:
-#         v**3 + V + a - I0 = 0
-#         Args:
-#             I: Constant input [mV]
-#             eps: Inverse time constant of the recovery variable w [1/ms]
-#             a: Offset of the w-nullcline [mV]
-#         Returns:
-#             tuple: (v_fp, w_fp) fixed point of the equations
-#         """
-#
-#         # Use poly1d function from numpy to compute the
-#         # roots of 3rd order polynomial
-#         P = np.poly1d([1, 0, 1, (a - I)], variable="x")
-#
-#         # take only the real root
-#         v_fp = np.real(P.r[np.isreal(P.r)])[0]
-#         w_fp = 2. * v_fp + a
-#
-#         return (v_fp, w_fp)
-#
-#
-# class passive_cable:
-#     """
-#     Implements compartmental model of a passive cable. See Neuronal Dynamics
-#     `Chapter 3 Section 2 <http://neuronaldynamics.epfl.ch/online/Ch3.S2.html>`_
-#     """
-#
-#     # DEFAULT morphological and electrical parameters
-#     CABLE_LENGTH = 500. * b2.um  # length of dendrite
-#     CABLE_DIAMETER = 2. * b2.um  # diameter of dendrite
-#     R_LONGITUDINAL = 0.5 * b2.kohm * b2.mm  # Intracellular medium resistance
-#     R_TRANSVERSAL = 1.25 * Mohm * b2.mm ** 2  # cell membrane resistance (->leak current)
-#     E_LEAK = -70. * mV  # reversal potential of the leak current (-> resting potential)
-#     CAPACITANCE = 0.8 * b2.uF / b2.cm ** 2  # membrane capacitance
-#     DEFAULT_INPUT_CURRENT = input_factory.get_step_current(2000, 3000, unit_time=b2.us, amplitude=0.2 * b2.namp)
-#     DEFAULT_INPUT_LOCATION = [CABLE_LENGTH / 3]  # provide an array of locations
-#
-#     # print("Membrane Timescale = {}".format(R_TRANSVERSAL*CAPACITANCE))
-#
-#     def simulate_passive_cable(self, current_injection_location=DEFAULT_INPUT_LOCATION, input_current=DEFAULT_INPUT_CURRENT,
-#                                length=CABLE_LENGTH, diameter=CABLE_DIAMETER,
-#                                r_longitudinal=R_LONGITUDINAL,
-#                                r_transversal=R_TRANSVERSAL, e_leak=E_LEAK, initial_voltage=E_LEAK,
-#                                capacitance=CAPACITANCE, nr_compartments=200, simulation_time=5 * ms):
-#         """Builds a multicompartment cable and numerically approximates the cable equation.
-#         Args:
-#             t_spikes (int): list of spike times
-#             current_injection_location (list): List [] of input locations (Quantity, Length): [123.*b2.um]
-#             input_current (TimedArray): TimedArray of current amplitudes. One column per current_injection_location.
-#             length (Quantity): Length of the cable: 0.8*b2.mm
-#             diameter (Quantity): Diameter of the cable: 0.2*b2.um
-#             r_longitudinal (Quantity): The longitudinal (axial) resistance of the cable: 0.5*b2.kohm*b2.mm
-#             r_transversal (Quantity): The transversal resistance (=membrane resistance): 1.25*Mohm*b2.mm**2
-#             e_leak (Quantity): The reversal potential of the leak current (=resting potential): -70.*mV
-#             initial_voltage (Quantity): Value of the potential at t=0: -70.*mV
-#             capacitance (Quantity): Membrane capacitance: 0.8*b2.uF/b2.cm**2
-#             nr_compartments (int): Number of compartments. Spatial discretization: 200
-#             simulation_time (Quantity): Time for which the dynamics are simulated: 5*ms
-#         Returns:
-#             (StateMonitor, SpatialNeuron): The state monitor contains the membrane voltage in a
-#             Time x Location matrix. The SpatialNeuron object specifies the simulated neuron model
-#             and gives access to the morphology. You may want to use those objects for
-#             spatial indexing: myVoltageStateMonitor[mySpatialNeuron.morphology[0.123*b2.um]].v
-#         """
-#         assert isinstance(input_current, b2.TimedArray), "input_current is not of type TimedArray"
-#         assert input_current.values.shape[1] == len(current_injection_location), \
-#             "number of injection_locations does not match nr of input currents"
-#
-#         cable_morphology = b2.Cylinder(diameter=diameter, length=length, n=nr_compartments)
-#         # Im is transmembrane current
-#         # Iext is  injected current at a specific position on dendrite
-#         EL = e_leak
-#         RT = r_transversal
-#         eqs = """
-#         Iext = current(t, location_index): amp (point current)
-#         location_index : integer (constant)
-#         Im = (EL-v)/RT : amp/meter**2
-#         """
-#         cable_model = b2.SpatialNeuron(morphology=cable_morphology, model=eqs, Cm=capacitance, Ri=r_longitudinal)
-#         monitor_v = b2.StateMonitor(cable_model, "v", record=True)
-#
-#         # inject all input currents at the specified location:
-#         nr_input_locations = len(current_injection_location)
-#         input_current_0 = np.insert(input_current.values, 0, 0., axis=1) * b2.amp  # insert default current: 0. [amp]
-#         current = b2.TimedArray(input_current_0, dt=input_current.dt * b2.second)
-#         for current_index in range(nr_input_locations):
-#             insert_location = current_injection_location[current_index]
-#             compartment_index = int(np.floor(insert_location / (length / nr_compartments)))
-#             # next line: current_index+1 because 0 is the default current 0Amp
-#             cable_model.location_index[compartment_index] = current_index + 1
-#
-#         # set initial values and run for 1 ms
-#         cable_model.v = initial_voltage
-#         b2.run(simulation_time)
-#         return monitor_v, cable_model
-#
-#     def getting_started(self):
-#         """A simple code example to get started.
-#         """
-#         current = input_factory.get_step_current(500, 510, unit_time=b2.us, amplitude=3. * b2.namp)
-#         voltage_monitor, cable_model = self.simulate_passive_cable(
-#             length=0.5 * b2.mm, current_injection_location=[0.1 * b2.mm], input_current=current,
-#             nr_compartments=100, simulation_time=2 * ms)
-#
-#         # provide a minimal plot
-#         plt.figure()
-#         plt.imshow(voltage_monitor.v / b2.volt)
-#         plt.colorbar(label="voltage")
-#         plt.xlabel("time index")
-#         plt.ylabel("location index")
-#         plt.title("vm at (t,x), raw data voltage_monitor.v")
-#         plt.show()
 
 
 if __name__ == '__main__':

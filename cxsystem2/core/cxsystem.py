@@ -536,11 +536,6 @@ class CxSystem:
             print(f'\nTarget directory is {target_directory}')
             b2.set_device('cpp_standalone', directory=target_directory)
 
-    #            if 'linux' in sys.platform and self.device == 'cpp':
-    #                print(" -  parallel compile flag set")
-    #                b2.prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j']
-    #            b2.prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
-
     def _set_runtime(self, *args):
         assert '*' in args[0], ' -  Please specify the unit for the runtime parameter, e.g. um , mm '
         self.runtime = eval(args[0])
@@ -637,8 +632,6 @@ class CxSystem:
         assert self.sys_mode != '', " -  System mode is not defined."
         _all_columns = ['idx', 'number_of_neurons', 'neuron_type', 'layer_idx', 'net_center', 'monitors',
                         'n_background_inputs', 'n_background_inhibition', 'neuron_subtype']
-        # 'threshold', 'reset', 'refractory',
-        # 'tonic_current', 'noise_sigma', 'gemean', 'gestd', 'gimean', 'gistd']
         _obligatory_params = [0, 1, 2, 3]
         assert len(self.current_values_list) >= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
         is missing. Following obligatory columns should be defined:\n%s\n ' \
@@ -663,15 +656,6 @@ class CxSystem:
                            'neuron_type': '',
                            'layer_idx': 0,
                            'monitors': ''}
-        # local_namespace['threshold'] = ''
-        # local_namespace['reset'] = ''
-        # local_namespace['refractory'] = ''
-        # local_namespace['noise_sigma'] = ''
-        # local_namespace['gemean'] = ''
-        # local_namespace['gestd'] = ''
-        # local_namespace['gimean'] = ''
-        # local_namespace['gistd'] = ''
-        # local_namespace['tonic_current'] = ''
 
         for column in _all_columns:
             try:
@@ -689,15 +673,6 @@ class CxSystem:
         monitors = local_namespace['monitors']
         neuron_type = local_namespace['neuron_type']
         neuron_subtype = local_namespace['neuron_subtype']
-        # noise_sigma = local_namespace['noise_sigma']
-        # gemean = local_namespace['gemean']
-        # gestd = local_namespace['gestd']
-        # gimean = local_namespace['gimean']
-        # gistd = local_namespace['gistd']
-        # threshold = local_namespace['threshold']
-        # reset = local_namespace['reset']
-        # refractory = local_namespace['refractory']
-        # tonic_current = local_namespace['tonic_current']
 
         assert idx not in self.NG_indices, \
             " -  Multiple indices with same values exist in the configuration file."
@@ -707,22 +682,6 @@ class CxSystem:
             # description can be found in configuration file tutorial.
         net_center = complex(net_center)
         current_idx = len(self.customized_neurons_list)
-
-        # if tonic_current == '--':
-        #     tonic_current = '0*pA'
-        #
-        # if noise_sigma == '--':
-        #     noise_sigma = '0*mV'
-        # noise_sigma = eval(noise_sigma)
-        #
-        # if gemean == '--':
-        #     gemean = '0*nS'
-        # if gestd == '--':
-        #     gestd = '0*nS'
-        # if gimean == '--':
-        #     gimean = '0*nS'
-        # if gistd == '--':
-        #     gistd = '0*nS'
 
         if n_background_inputs == '--':
             n_background_inputs = '0'
@@ -748,13 +707,6 @@ class CxSystem:
                                                             network_center=net_center, cell_subtype=neuron_subtype).output_neuron)  # creating a
         # NeuronReference() object and passing the positional arguments to it. The main member of the class called
         # output_neuron is then appended to customized_neurons_list.
-        # in case of threshold/reset/refractory overwrite
-        # if threshold != '--':
-        #     self.customized_neurons_list[-1]['threshold'] = threshold
-        # if reset != '--':
-        #     self.customized_neurons_list[-1]['reset'] = reset
-        # if refractory != '--':
-        #     self.customized_neurons_list[-1]['refractory'] = refractory
 
         # Generating variable names for Groups, NeuronNumbers, Equations, Threshold, Reset, Refractory and Namespace
         if neuron_subtype == '--':
@@ -780,17 +732,6 @@ class CxSystem:
         exec("%s=self.customized_neurons_list[%d]['reset']" % (_dyn_neuron_reset_name, current_idx))
         exec("%s=self.customized_neurons_list[%d]['refractory']" % (_dyn_neuron_refra_name, current_idx))
         exec("%s=self.customized_neurons_list[%d]['namespace']" % (_dyn_neuron_namespace_name, current_idx))
-
-        # // Background input code BEGINS
-        # Adding tonic current to namespace
-        # self.customized_neurons_list[current_idx]['namespace']['tonic_current'] = eval(tonic_current)
-        # Adding the noise sigma to namespace
-        # self.customized_neurons_list[current_idx]['namespace']['noise_sigma'] = noise_sigma
-        # # Adding ge/gi mean/std to namespace
-        # self.customized_neurons_list[current_idx]['namespace']['gemean'] = eval(gemean)
-        # self.customized_neurons_list[current_idx]['namespace']['gestd'] = eval(gestd)
-        # self.customized_neurons_list[current_idx]['namespace']['gimean'] = eval(gimean)
-        # self.customized_neurons_list[current_idx]['namespace']['gistd'] = eval(gistd)
 
         # Creating the actual NeuronGroup() using the variables in the previous 6 lines
         exec("%s= b2.NeuronGroup(%s, model=%s, method='%s', threshold=%s, reset=%s,refractory = %s, namespace = %s)"
@@ -971,22 +912,20 @@ class CxSystem:
             ng_init += "\tif _key.find('vm')>=0:\n"
             ng_init += "\t\tsetattr(%s,_key,%s['V_init_min']+Vr_offset * (%s['V_init_max']-%s['V_init_min']))\n" % \
                        (_dyn_neurongroup_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name)
-
-            # Commented out (didn't work with receptors) /HH
-            # ng_init += "\telif ((_key.find('ge')>=0) or (_key.find('gi')>=0)):\n"
-            # ng_init += "\t\tsetattr(%s,_key,0)" % _dyn_neurongroup_name
             exec(ng_init)
         else:
             ng_init = "for _key in %s.variables.keys():\n" % _dyn_neurongroup_name
             ng_init += "\tif _key.find('vm')>=0:\n"
             ng_init += "\t\tsetattr(%s,_key,%s['V_init'])\n" % (_dyn_neurongroup_name, _dyn_neuron_namespace_name)
-
-            # Commented out (didn't work with receptors) /HH
-            # ng_init += "\telif ((_key.find('ge')>=0) or (_key.find('gi')>=0)):\n"
-            # ng_init += "\t\tsetattr(%s,_key,0)" % _dyn_neurongroup_name
             exec(ng_init)
         # </editor-fold>
 
+        # import pdb; pdb.set_trace()
+        if 'initial_values' in self.customized_neurons_list[-1].keys():
+            exec(f'{_dyn_neurongroup_name}.set_states(self.customized_neurons_list[-1]["initial_values"])')
+        
+        print(f'\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron modelis:\n{eval(_dyn_neuron_eq_name)}\n')
+ 
         setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
         try:
             setattr(self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
@@ -1812,7 +1751,6 @@ class CxSystem:
                 times_str = 'GEN_TI = b2.repeat(%s,%s)*%s' % (array_string, number_of_active_neurons, spike_times_unit)
             exec(times_str, globals(), locals())  # running the string
             # containing the syntax for time indices in the input neuron group.
-            # spikes_str = 'GEN_SP=b2.tile(%s,%d)' % (active_neurons_str, len(spike_times_)) # len(spike_times_) should be 1 if unit is Hz
             spikes_str = 'GEN_SP=b2.tile(%s,%d)' % (active_neurons_str, b2.asarray(spike_times_list).size) # len(spike_times_) should be 1 if unit is Hz
             exec(spikes_str, globals(), locals())  # running the string
             sg_str = 'GEN = b2.SpikeGeneratorGroup(%s, GEN_SP, GEN_TI, period=GEN_PE)' % number_of_neurons

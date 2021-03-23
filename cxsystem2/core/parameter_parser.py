@@ -57,7 +57,7 @@ class SynapseParser:
         self.output_synapse = output_synapse
         self.physio_config_df = physio_config_df
 
-        SynapseParser.type_ref = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght',  'Fixed_multiply', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
+        SynapseParser.type_ref = np.array(['STDP', 'CPlastic', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght',  'Fixed_multiply', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
         assert output_synapse['type'] in SynapseParser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
         # Commented Cp and Cd out because not used in this branch /HH
@@ -202,6 +202,33 @@ class SynapseParser:
         min_delay = std_delay / 2.
         self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (std_delay, min_delay)
 
+    def CPlastic(self):
+        """
+        The CPlastic method for assigning the parameters to the customized_synapses() object.
+
+        This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
+        Following values are set in this method: Apre, Apost, Tau_pre, Tau_post, wght_max, wght0.
+        """
+        self.output_namespace['A_LTD'], self.output_namespace['A_LTP'] = \
+            self.value_extractor(self.physio_config_df, 'cplastic_%s_%s' % (self.output_synapse['pre_group_type'],
+                                                                        self.output_synapse['post_group_type'] +
+                                                                        self.output_synapse['post_comp_name']))
+
+        self.output_namespace['Theta_low'] = self.value_extractor(self.physio_config_df, 'Theta_low')
+        self.output_namespace['v_target'] = self.value_extractor(self.physio_config_df, 'v_target')
+        self.output_namespace['ampa_max_cond'] = self.value_extractor(self.physio_config_df, 'ampa_max_cond')
+        self.output_namespace['wght_max'] = self.value_extractor(self.physio_config_df, 'w_max')
+        std_wght = self.value_extractor(self.physio_config_df,
+                                        'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+        mu_wght = std_wght / 2.
+        self.output_namespace['init_wght'] = f'{std_wght} * nS'
+        # self.output_namespace['init_wght'] = '(%f * rand() + %f) * nS' % (std_wght, mu_wght)
+        std_delay = self.value_extractor(self.physio_config_df,
+                                         'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
+        min_delay = std_delay / 2.
+        self.output_namespace['delay'] = f'{std_delay} * ms'
+        # self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (std_delay, min_delay)
+
     def STDP_with_scaling(self):
         """
         The STDP method for assigning the STDP parameters to the customized_synapses() object.
@@ -309,32 +336,6 @@ class SynapseParser:
                                           'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
         min_delay = mean_delay / 2.
         self.output_namespace['delay'] = '(%f + %f * rand()) * ms' % (min_delay, mean_delay)
-
-    # def Fixed_normal(self):
-    #     '''
-    #      The Fixed method for assigning the parameters for Fixed synaptic connection to the customized_synapses() object.
-    #      '''
-    #
-    #     mean_wght = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (self.output_synapse['pre_group_type'],
-    #                                       self.output_synapse['post_group_type'])) / nS
-    #     sd_wght = mean_wght / 2.
-    #
-    #     # SCALE mean & SD of weight wrt calcium level
-    #     # Calcium scaling is just multiplication by a constant so we can scale mean and SD wght
-    #     # instead of scaling individual weights separately after randomization (change of variables of the Gaussian PDF)
-    #     if self.calcium_concentration > 0:
-    #         mean_wght = self.scale_by_calcium(self.calcium_concentration, mean_wght)
-    #         sd_wght  = self.scale_by_calcium(self.calcium_concentration, sd_wght) # we don't want to prescribe SDs separately in this model
-    #
-    #     # SET the weight
-    #     self.output_namespace['init_wght'] = '(%f + %f*randn()) * nS' % (mean_wght, sd_wght)
-    #     # Note that we don't scale randomized weights individually, but the parameters going into the randomization
-    #
-    #     # SET synaptic delay
-    #     mean_delay = self.value_extractor(self.physio_config_df, 'delay_%s_%s' % (self.output_synapse['pre_group_type'],
-    #                                       self.output_synapse['post_group_type'])) / ms
-    #     sd_delay = mean_delay / 2.
-    #     self.output_namespace['delay'] = '(%f + %f*randn()) * ms' % (mean_delay, sd_delay)
 
     def Depressing(self):
         """
