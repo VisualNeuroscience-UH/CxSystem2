@@ -60,9 +60,6 @@ class SynapseParser:
         SynapseParser.type_ref = np.array(['STDP', 'CPlastic', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght',  'Fixed_multiply', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
         assert output_synapse['type'] in SynapseParser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
-        # Commented Cp and Cd out because not used in this branch /HH
-        # self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
-        # self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
         try:
             self.sparseness = self.value_extractor(self.physio_config_df,
                                                    'sp_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
