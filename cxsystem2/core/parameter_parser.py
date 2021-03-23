@@ -262,7 +262,7 @@ class SynapseParser:
 
         # Weight
         try:
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             mean_wght = eval(self.output_synapse['custom_weight']) / nS
             print(' ! Using custom weight: %f nS' % mean_wght)
         except:
