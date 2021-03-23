@@ -920,7 +920,6 @@ class CxSystem:
             exec(ng_init)
         # </editor-fold>
 
-        # import pdb; pdb.set_trace()
         if 'initial_values' in self.customized_neurons_list[-1].keys():
             exec(f'{_dyn_neurongroup_name}.set_states(self.customized_neurons_list[-1]["initial_values"])')
         
