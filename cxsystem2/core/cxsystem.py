@@ -498,7 +498,7 @@ class CxSystem:
             self.set_workspace('~/CxSystem')
 
         if not np.any(self.current_parameters_list.str.contains('runtime')):
-            print(" -  Runtime duration is not defined in the configuration file. The default runtime duratoin is 500*ms")
+            print(" -  Runtime duration is not defined in the configuration file. The default runtime duration is 500*ms")
             self.runtime = 500 * ms
 
         if not np.any(self.current_parameters_list.str.contains('device')):
@@ -1330,10 +1330,9 @@ class CxSystem:
                     _do_load = int(syn[load_connection_idx])
             except TypeError:
                 _do_load = 0
-                pass
 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and not hasattr(self, 'imported_connections'):
-                # only load the file if it's not loaded already, and if the connections are supposed to tbe loaded from the file
+                # Only load the file if it's not loaded already, and if the connections are supposed to be loaded from the file
                 self.set_import_connections_path()
 
             try:
@@ -1446,11 +1445,12 @@ class CxSystem:
                     syn_con_str += ')'
                 exec(syn_con_str)
 
-
-            if (self.default_load_flag == -1 and _do_load == 0) or self.load_positions_only:
-                # Weight set for denovo connections
-                exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
-                                                _dyn_syn_namespace_name))  #
+            # Generate de novo if now or earlier line set 0-->, or if this line <--0, or load positions only 
+            if  self.default_load_flag == 0 \
+                or (self.default_load_flag == -1 and _do_load == 0) \
+                or self.load_positions_only:
+                # Weight set for de novo connections
+                exec("%s.wght=%s['init_wght']" % (_dyn_syn_name, _dyn_syn_namespace_name))  #
 
                 # set the weights for STDP connections
                 if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
@@ -1742,7 +1742,7 @@ class CxSystem:
                 # times give the start of first spike, which must be less than the period, thus the 0.5/[period in Hz] below
                 times_str = 'GEN_TI = b2.repeat(0.5/%s,%s)*%s' % (spike_times_ / eval(spike_times_unit), number_of_active_neurons, "second")
             else:
-                assert b2.units.is_dimensionless(eval(spike_times_unit) / second), "Unkown unit, should be second, ms etc, or Hz"
+                assert b2.units.is_dimensionless(eval(spike_times_unit) / second), "Unknown unit, should be second, ms etc, or Hz"
                 period_str = 'GEN_PE = 0*second' # default
                 exec(period_str, globals(), locals())  # running the syntax for period of the input neuron group
                 spike_times_array_nodim = spike_times_ / eval(spike_times_unit)
