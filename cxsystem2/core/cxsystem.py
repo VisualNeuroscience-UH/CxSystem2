@@ -1977,9 +1977,9 @@ class CxSystem:
             self.workspace.connections['positions_all']['z_coord'] = self.workspace.results['positions_all']['z_coord']
             self.workspace.save_connections_to_file()
 
-    @staticmethod
-    def import_optimizer():
-        return [rand(), scprs.csr_matrix([])]
+#    @staticmethod
+#    def import_optimizer():
+#        return [rand(), scprs.csr_matrix([])]
 
 
 if __name__ == '__main__':
