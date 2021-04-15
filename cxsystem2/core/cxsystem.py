@@ -123,7 +123,7 @@ class CxSystem:
             'compression_method': [9, self.set_compression_method],
             'simulation_title': [10, self.create_simulation],
             'import_connections_from': [11, self.set_import_connections_path],
-            'load_positions_only': [12, self.load_positions_only],
+            'load_positions': [12, self.load_positions],
             'benchmark': [13, self.set_benchmark],
             'profiling': [14, self.set_profiling],
             'multidimension_array_run': [15, self.passer],  # this parameter is used by array_run module, so here we just pass
@@ -185,7 +185,7 @@ class CxSystem:
         self.min_distance = 0
         self.init_vms = 0
         self.do_save_connections = 0  # if there is at least one connection to save, this flag will be set to 1
-        self.load_positions_only = 0
+        self.load_positions = 0
         self.profiling = 0
         self.array_run_in_cluster = array_run_in_cluster
         self.awaited_conf_lines = []
@@ -592,12 +592,12 @@ class CxSystem:
         if self.scale != 1:
             print(" -  CxSystem is being build on the scale of %s" % args[0])
 
-    def load_positions_only(self, *args):
-        assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, ' -  The load_positions_only flag should be either 0 or 1 but it is %s .' % args[0]
-        self.load_positions_only = int(eval(args[0]))
-        if self.load_positions_only:
+    def load_positions(self, *args):
+        assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, ' -  The load_positions flag should be either 0 or 1 but it is %s .' % args[0]
+        self.load_positions = int(eval(args[0]))
+        if self.load_positions:
             self.set_import_connections_path()
-            print(" -  only positions are being loaded from the brian_data_file")
+            print(" -  positions are being loaded from the brian_data_file")
 
     def set_benchmark(self, *args):
         assert int(eval(args[0])) in [0, 1], " -  Do benchmark flag should be either 0 or 1"
@@ -877,7 +877,6 @@ class CxSystem:
         # </editor-fold>
 
         # <editor-fold desc="...Loading neuron positions">
-        # import pdb; pdb.set_trace()
         if hasattr(self, 'imported_connections'):
             # in case the NG index are different.
             # for example a MC_L2 neuron might have had index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1362,7 +1361,7 @@ class CxSystem:
 
             # Loading connections, weights and delays from file 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and \
-                    hasattr(self, 'imported_connections') and not self.load_positions_only:
+                    hasattr(self, 'imported_connections'):
                 assert _syn_ref_name in list(self.imported_connections.keys()), \
                     " -  The data for the following connection was not found in the loaded brian data: %s" % _syn_ref_name
 
@@ -1374,10 +1373,11 @@ class CxSystem:
                     # Load weights
                     eval(_dyn_syn_name).wght = b2.repeat(self.imported_connections[_syn_ref_name]['data'].data / int(self.\
                         imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
-                    # Load delays
-                    eval(_dyn_syn_name).delay = b2.repeat(self.imported_connections[_syn_ref_name]['delay'].data / int(self.\
-                        imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * second
-                    _load_str = 'Connection and weights and delays loaded from '
+                    # Load delays. The if statement is for files created before 15.4.2021, when delays were not saved yet / SV
+                    if 'delay' in  self.imported_connections[_syn_ref_name].keys():
+                        eval(_dyn_syn_name).delay = b2.repeat(self.imported_connections[_syn_ref_name]['delay'].data / int(self.\
+                            imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * second
+                    _load_str = 'Connections loaded from '
                 except ValueError:
                     _load_str = ' ! No connections from '
 
@@ -1461,8 +1461,7 @@ class CxSystem:
 
             # Generate de novo if now or earlier line set 0-->, or if this line <--0, or load positions only 
             if  self.default_load_flag == 0 \
-                or (self.default_load_flag == -1 and _do_load == 0) \
-                or self.load_positions_only:
+                or (self.default_load_flag == -1 and _do_load == 0):
                 # Weight set for de novo connections
                 exec("%s.wght=%s['init_wght']" % (_dyn_syn_name, _dyn_syn_namespace_name))  #
                 exec("%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name))  #

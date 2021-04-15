@@ -1,4 +1,4 @@
-row_type,runtime,device,sys_mode,scale,grid_radius,min_distance,init_vms,workspace_path,simulation_title,import_connections_from,load_positions_only,benchmark,profiling,save_input_video,multidimension_array_run,number_of_process,trials_per_config,default_clock,run_in_cluster,cluster_job_file_path,cluster_number_of_nodes,cluster_address,cluster_username,cluster_workspace
+row_type,runtime,device,sys_mode,scale,grid_radius,min_distance,init_vms,workspace_path,simulation_title,import_connections_from,load_positions,benchmark,profiling,save_input_video,multidimension_array_run,number_of_process,trials_per_config,default_clock,run_in_cluster,cluster_job_file_path,cluster_number_of_nodes,cluster_address,cluster_username,cluster_workspace
 params,2*second,Python,local,1,210*um,1*um,1,~/CxWorkspace,step2,#,0,0,0,0,0,1,1,0.1*ms,0,./csc_taito.job,3,taito.csc.fi,username,/homeappl/home/username/CxWorkspace
 row_type,idx,type,number_of_neurons,radius,spike_times,net_center,monitors,,,,,,,,,,,,,,,,,
 IN,0,VPM,60,92*um,[99.0]*second,--,[Sp],,,,,,,,,,,,,,,,,
