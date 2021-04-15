@@ -877,6 +877,7 @@ class CxSystem:
         # </editor-fold>
 
         # <editor-fold desc="...Loading neuron positions">
+        # import pdb; pdb.set_trace()
         if hasattr(self, 'imported_connections'):
             # in case the NG index are different.
             # for example a MC_L2 neuron might have had index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1293,16 +1294,27 @@ class CxSystem:
             exec("%s=self.customized_synapses_list[%d]['namespace']" % (_dyn_syn_namespace_name, current_idx))
 
             # creating the initial synaptic connection :
-            try:
-                exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )"
-                     % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
-                        _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name,
-                        eval(_dyn_syn_namespace_name)['delay']))
-            except NameError:  # for when there is no "on_post =...", i.e. fixed connection
-                exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, "
-                     "namespace= %s, delay = %s)"
-                     % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
-                        _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name, eval(_dyn_syn_namespace_name)['delay']))
+            if 'rand' in eval("%s['delay']" % _dyn_syn_namespace_name):
+                # Do NOT set delay yet
+                try:
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s)"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name,))
+                except NameError:  # for when there is no "on_post =...", i.e. fixed connection
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, namespace= %s)"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name))
+            else:
+                try:
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name,
+                            eval(_dyn_syn_namespace_name)['delay']))
+                except NameError:  # for when there is no "on_post =...", i.e. fixed connection
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, "
+                        "namespace= %s, delay = %s)"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name, eval(_dyn_syn_namespace_name)['delay']))
 
             # Connecting synapses
 
@@ -1348,22 +1360,24 @@ class CxSystem:
                 _do_save = 0
                 pass
 
-            # Loading connections and weights from file 
+            # Loading connections, weights and delays from file 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and \
                     hasattr(self, 'imported_connections') and not self.load_positions_only:
                 assert _syn_ref_name in list(self.imported_connections.keys()), \
                     " -  The data for the following connection was not found in the loaded brian data: %s" % _syn_ref_name
 
                 try:
+                    # Load connection
                     eval(_dyn_syn_name).connect(i=self.imported_connections[_syn_ref_name]['data'].tocoo().row,
                                                 j=self.imported_connections[_syn_ref_name]['data'].tocoo().col,
                                                 n=int(self.imported_connections[_syn_ref_name]['n']))
-
-                    # eval(_dyn_syn_name).wght = b2.repeat(self.imported_connections[_syn_ref_name]['data'][0][0].data/int(self.\
-                    #     imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
+                    # Load weights
                     eval(_dyn_syn_name).wght = b2.repeat(self.imported_connections[_syn_ref_name]['data'].data / int(self.\
                         imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
-                    _load_str = 'Connection and weight loaded from '
+                    # Load delays
+                    eval(_dyn_syn_name).delay = b2.repeat(self.imported_connections[_syn_ref_name]['delay'].data / int(self.\
+                        imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * second
+                    _load_str = 'Connection and weights and delays loaded from '
                 except ValueError:
                     _load_str = ' ! No connections from '
 
@@ -1451,12 +1465,11 @@ class CxSystem:
                 or self.load_positions_only:
                 # Weight set for de novo connections
                 exec("%s.wght=%s['init_wght']" % (_dyn_syn_name, _dyn_syn_namespace_name))  #
+                exec("%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name))  #
 
                 # set the weights for STDP connections
                 if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
-                    exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,
-                                                    _dyn_syn_namespace_name)
-                        )  # set the weights
+                    exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,_dyn_syn_namespace_name)) 
 
             if self.device == 'python' and eval("sum(%s.wght)==0" % _dyn_syn_name):
                 print('WARNING: Synapses %s set to zero weight!' % _dyn_syn_name)
@@ -1510,6 +1523,10 @@ class CxSystem:
                 self.workspace.syntax_bank.append(
                     'self.workspace.connections["%s"]["data"] ='
                     ' scprs.csr_matrix((%s.wght[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))'
+                    % (_syn_ref_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name))
+                self.workspace.syntax_bank.append(
+                    'self.workspace.connections["%s"]["delay"] ='
+                    ' scprs.csr_matrix((%s.delay[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))'
                     % (_syn_ref_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name))
                 self.workspace.syntax_bank.append('self.workspace.connections["%s"]["n"] = %d' % (_syn_ref_name, int(n_arg)))
             # elif (self.default_save_flag==1 or (self.default_save_flag==-1 and _do_save )) and \
@@ -1957,11 +1974,12 @@ class CxSystem:
     def gather_result(self):
         """
         After the simulation and using the syntaxes that are previously prepared in the syntax_bank of save_data() object,
-        this method saves the collected data to a file.
+        this method saves the collected data to a file.  
 
         """
         print(" -  Generating the syntaxes for saving CX output:")
         for syntax in self.workspace.syntax_bank:
+            #The first loop saves monitors by searching the substring "get_states" from syntax bank list items.
             if 'get_states' in syntax:
                 tmp_monitor = syntax.split(' ')[-1]
                 print(tmp_monitor)
@@ -1971,7 +1989,8 @@ class CxSystem:
         if self.do_save_connections:
             print(" -  Generating the syntaxes for saving connection data ...")
             for syntax in self.workspace.syntax_bank:
-                exec(syntax)
+                if 'connections' in syntax:
+                    exec(syntax)
             self.workspace.create_connections_key('positions_all')
             self.workspace.connections['positions_all']['w_coord'] = self.workspace.results['positions_all']['w_coord']
             self.workspace.connections['positions_all']['z_coord'] = self.workspace.results['positions_all']['z_coord']

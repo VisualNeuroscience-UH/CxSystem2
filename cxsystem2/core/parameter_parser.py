@@ -294,7 +294,8 @@ class SynapseParser:
         mean_delay = self.value_extractor(self.physio_config_df,
                                          'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
         min_delay = mean_delay / 2.
-        self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
+        # self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
+        self.output_namespace['delay'] = '%f * ms' % (mean_delay, min_delay)
 
     def Fixed_multiply(self):
         """
