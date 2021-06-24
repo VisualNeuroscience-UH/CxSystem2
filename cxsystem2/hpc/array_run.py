@@ -17,6 +17,7 @@ import sys
 import time
 from pathlib import Path
 from collections import defaultdict
+import decimal
 
 import numpy as np
 import pandas as pd
@@ -92,8 +93,6 @@ class ArrayRun:
             self._prepare_one_dim_arrun_metadata()
 
         print(" -  array of Dataframes for anatomical and physiological configuration are ready")
-
-
         if self._should_submit_to_cluster():
             self.total_configs = len(self.list_of_anatomy_dfs) * self.trials_per_config
             self.config_per_node = math.ceil(self.total_configs / self.cluster_number_of_nodes)
@@ -110,7 +109,6 @@ class ArrayRun:
 
         elif self._is_running_locally():
             self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)  # this runs when not in cluster
-
 
     def _should_submit_to_cluster(self):
         return self.run_in_cluster == 1 and self.cluster_start_idx == -1 and self.cluster_step == -1
@@ -159,6 +157,7 @@ class ArrayRun:
                 self.final_namings.append(physio_namings[physio_idx])
 
         self._check_single_experiment_multi_trials()
+        self._set_titles_and_metadata_dict()
         self.all_titles = self.anat_titles + self.physio_titles
         product_of_parameters = list(itertools.product(*list(self.metadata_dict.values())))
         self.tmp_df = pd.DataFrame(product_of_parameters, columns=list(self.metadata_dict.keys()))
@@ -185,6 +184,7 @@ class ArrayRun:
             self.final_namings.extend(physio_namings)
 
         self._check_single_experiment_multi_trials()
+        self._set_titles_and_metadata_dict()
         self.all_titles = self.anat_titles + self.physio_titles
 
         index_len = len([item for sublist in list(self.metadata_dict.values()) for item in sublist])
@@ -257,7 +257,7 @@ class ArrayRun:
         self.final_metadata_df = self.final_metadata_df.loc[np.repeat(self.final_metadata_df.index.values, self.trials_per_config)].reset_index(
             drop=True)
         assert len(self.final_namings) < 1000, ' -  The array run is trying to run more than 1000 simulations, this is not allowed unless you' \
-                                                ' REALLY want it and if you REALLY want it you should konw what to do.'
+                                                ' REALLY want it and if you REALLY want it you should know what to do.'
         # while len(jobs) < number_of_runs:
         while len(jobs) < steps_from_start:
             time.sleep(1.5)
@@ -284,7 +284,6 @@ class ArrayRun:
             print("cleaning tmp folders " + tmp_folder_path)
             shutil.rmtree(tmp_folder_path)
 
-
     def generate_dataframes_for_param_search(self, original_df, index_of_array_variable, df_type, naming_prefix='', recursion_counter=1):
         """
         Generates new configuration dataframes for each of the scenarios from the original dataframe.
@@ -304,7 +303,7 @@ class ArrayRun:
             array_variable = array_variable.replace(array_variable[opening_braket_idx + 1:colon_idx + 1], '')  # removing default value
         elif ':' in array_variable:
             print(" -  The default value set for %s is omitted since the "
-                  "array run is multidimentional (multidimension_array_run "
+                  "array run is multidimensional (multidimension_array_run "
                   "flag is set to 1)" % array_variable)
             colon_idx = array_variable.index(':')
             array_variable = array_variable.replace(array_variable[opening_braket_idx + 1:colon_idx + 1], '')  # removing default value
@@ -315,12 +314,12 @@ class ArrayRun:
         variables_to_iterate = []
         if '|' in array_variable:
             changing_part = array_variable[opening_braket_idx + 1:closing_braket_idx].replace('|', ',')
-            tmp_str = 'np.arange(' + changing_part + ')'
-            variables_to_iterate = eval(tmp_str)
+            decimal_type_list = [decimal.Decimal(vv) for vv in changing_part.split(',')]
+            variables_to_iterate = np.arange(decimal_type_list[0],decimal_type_list[1],decimal_type_list[2]).tolist()
         elif '&' in array_variable:
             variables_to_iterate = eval('["' + array_variable[opening_braket_idx + 1:closing_braket_idx].replace('&', '","') + '"]')
         variables_to_iterate = [template_of_variable.replace('^^^', str(vv)) for vv in variables_to_iterate]
-        for var_idx, var in enumerate(variables_to_iterate):
+        for var_idx, var in enumerate(variables_to_iterate): # this iteration is unclear, but seems to work
             if type(var) == str:
                 var = var.strip()
             temp_df = original_df.copy()
@@ -340,6 +339,7 @@ class ArrayRun:
             temp_df, namings = self.generate_dataframes_for_param_search(original_df, index_of_array_variable[1:], df_type, naming_prefix='')
             array_of_dfs.extend(temp_df)
             run_namings.extend(namings)
+
         return array_of_dfs, run_namings
 
     def default_df_extractor(self, df_):
@@ -359,9 +359,50 @@ class ArrayRun:
                 value_to_default[value_to_default.index('{'):value_to_default.index('}') + 1], default)
         return df
 
+    def _set_titles_and_metadata_dict(self):
+       
+        def _get_title_and_unique_values(tmp_value_list):
+
+            unique_values_raw = list(set(tmp_value_list)) # Unsorted list of strings
+            # Check for unit stripping
+            if '*' in unique_values_raw[0]:
+                unique_values_numerical = [nn[:nn.find('*')] for nn in unique_values_raw]
+            else:
+                unique_values_numerical = unique_values_raw
+
+            unique_values_sorted = np.sort(np.array([float(nn) for nn in unique_values_numerical])) # Sorted array of floats
+            unique_values = [str(nn) for nn in unique_values_sorted] # Sorted list of strings
+            title, value, naming = self.filename_generator(df, [idx], '') # this is for title only, df can be any df
+            return title, unique_values
+
+        tmp_value_list=[]
+        for idx in self.anatomy_arrun_cell_indices:
+            for df in self.list_of_anatomy_dfs:
+                tmp_value_list.append(df.iloc[idx])
+            
+            title, unique_values = _get_title_and_unique_values(tmp_value_list)
+
+            if title in list(self.metadata_dict.keys()):
+                title = title + '_1'
+            self.anat_titles.append(title)
+            self.metadata_dict[title] = unique_values
+            tmp_value_list=[]
+
+        for idx in self.physio_arrun_cell_indices:
+            for df in self.list_of_physio_dfs:
+                tmp_value_list.append(df.iloc[idx])
+            
+            title, unique_values = _get_title_and_unique_values(tmp_value_list)
+
+            if title in list(self.metadata_dict.keys()):
+                title = title + '_1'
+            self.physio_titles.append(title)
+            self.metadata_dict[title] = unique_values
+            tmp_value_list=[]
+        
     def filename_generator(self, df, idx, df_type):
         """
-        Generates filanems for each of the runs in ArrayRun.
+        Generates filenames for each of the runs in ArrayRun.
 
         :param df: input dataframe.
         :param idx: index of the cell based on which the name is going to be generated.
@@ -370,14 +411,14 @@ class ArrayRun:
         idx = idx[0]
         whitelist = set('abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-')
 
-        if np.any(df.iloc[:, 0].str.contains('row_type')):
+        if np.any(df.iloc[:, 0].str.contains('row_type')): # Anatomical conf
             definition_rows_indices = np.array(df[0][df[0] == 'row_type'].index.tolist())
             target_row_ix  = max(np.where(definition_rows_indices < idx[0])[0]) # get the index of the row containing the column info
             target_row = definition_rows_indices[target_row_ix]
             title = str(df.loc[target_row][idx[1]])
             value = str(df.loc[idx[0]][idx[1]])
-            naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
-        elif 'Variable' in df.columns:
+            # naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+        elif 'Variable' in df.columns: # Physiology conf
             try:
                 if not math.isnan(df['Key'][idx[0]]):
                     title = str(df['Key'][idx[0]])
@@ -388,21 +429,12 @@ class ArrayRun:
             except TypeError:
                 title = str(df['Key'][idx[0]])
                 value = str(df.loc[idx[0]][idx[1]])
-            naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+            # naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
         else:
             raise InvalidConfigurationError("Configuration file format is not valid")
-        # for metadata
-        if df_type == 'anatomy':
-            if title not in self.anat_titles:
-                self.anat_titles.append(title)
-        elif df_type == 'physiology':
-            if title not in self.physio_titles:
-                self.physio_titles.append(title)
-        if title in list(self.metadata_dict.keys()):
-            if value not in self.metadata_dict[title]:
-                self.metadata_dict[title].append(value)
-        else:
-            self.metadata_dict[title] = [value]
+
+        naming = self.suffix + '_' + title + ''.join(filter(whitelist.__contains__, value))
+
         return title, value, naming
 
     def _get_multidim_array_run_flag(self):
@@ -486,7 +518,6 @@ class ArrayRun:
         return arrays_indices
         
         
-
 if __name__ == '__main__':
     if len(sys.argv) != 10:
         print("Array run needs 9 arguments and is not built to be called separately")

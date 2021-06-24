@@ -9,6 +9,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 '''
 
 import random as rnd
+from copy import deepcopy
 
 import brian2 as b2
 import numpy as np
@@ -60,7 +61,7 @@ class NeuronReference:
 
         # <editor-fold desc="...General neuron model initialization">
         self.physio_config_df = physio_config_df
-        NeuronReference._celltypes = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_I', 'HH_E', 'NDNEURON'])
+        NeuronReference._celltypes = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_I', 'HH_E', 'NDNEURON', 'CI'])
         assert general_grid_radius > min_distance, ' -  The distance between cells should be less than the grid radius'
         assert cell_type in NeuronReference._celltypes, " -  Cell type '%s' is not defined" % cell_type  # check cell type
         assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"  # check layer index
@@ -99,8 +100,51 @@ class NeuronReference:
             if self.model_variation == 1:
                 # print(' -  Model variation is set ON')
 
-                # For non-pyramidal groups
-                if cell_type != 'PC':
+                # For pyramidal groups
+                if cell_type == 'PC':
+                    try:
+                        self.pc_neuron_model = self.value_extractor(self.physio_config_df, 'pc_neuron_model').upper()
+                        # if self.pc_neuron_model == 'ADEX':
+                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
+                    except:
+                        self.pc_neuron_model = self.neuron_model
+                        print(' !  No pyramidal cell neuron model defined, using %s' % self.neuron_model)
+
+                    try:
+                        self.pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model').upper()
+                    except:
+                        self.pc_excitation_model = self.excitation_model
+                        print(' !  No pyramidal cell excitation model defined, using %s' % self.excitation_model)
+
+                    try:
+                        self.pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model').upper()
+                    except:
+                        self.pc_inhibition_model = self.inhibition_model
+                        print(' !  No pyramidal cell inhibition model defined, using %s' % self.inhibition_model)
+
+                # For other non-pyramidal groups
+                elif cell_type == 'CI':
+                    try:
+                        self.ci_neuron_model = self.value_extractor(self.physio_config_df, 'ci_neuron_model').upper()
+                        print(' -  CI neuron model is %s ' % self.ci_neuron_model)
+                    except:
+                        self.ci_neuron_model = 'EIF'
+                        print(' !  No CI neuron model defined, using EIF')
+
+                    try:
+                        self.ci_excitation_model = self.value_extractor(self.physio_config_df, 'ci_excitation_model').upper()
+                    except:
+                        self.ci_excitation_model = 'SIMPLE_E'
+                        print(' !  No CI neuron excitation model defined, using simple')
+
+                    try:
+                        self.ci_inhibition_model = self.value_extractor(self.physio_config_df, 'ci_inhibition_model').upper()
+                    except:
+                        self.ci_inhibition_model = 'SIMPLE_I'
+                        print(' !  No CI neuron inhibition model defined, using simple')
+
+                # For other non-pyramidal groups
+                else:
                     try:
                         self.neuron_model = self.value_extractor(self.physio_config_df, 'neuron_model').upper()
                         print(' -  Neuron model is %s ' % self.neuron_model)
@@ -121,28 +165,6 @@ class NeuronReference:
                     except:
                         self.inhibition_model = 'SIMPLE_I'
                         print(' !  No point neuron inhibition model defined, using simple')
-
-                # For pyramidal groups
-                else:
-                    try:
-                        self.pc_neuron_model = self.value_extractor(self.physio_config_df, 'pc_neuron_model').upper()
-                        # if self.pc_neuron_model == 'ADEX':
-                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
-                    except:
-                        self.pc_neuron_model = self.neuron_model
-                        print(' !  No pyramidal cell neuron model defined, using %s' % self.neuron_model)
-
-                    try:
-                        self.pc_excitation_model = self.value_extractor(self.physio_config_df, 'pc_excitation_model').upper()
-                    except:
-                        self.pc_excitation_model = self.excitation_model
-                        print(' !  No pyramidal cell excitation model defined, using %s' % self.excitation_model)
-
-                    try:
-                        self.pc_inhibition_model = self.value_extractor(self.physio_config_df, 'pc_inhibition_model').upper()
-                    except:
-                        self.pc_inhibition_model = self.inhibition_model
-                        print(' !  No pyramidal cell inhibition model defined, using %s' % self.inhibition_model)
 
             else:
                 self.model_variation = False
@@ -529,6 +551,10 @@ class NeuronReference:
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
+
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
@@ -581,6 +607,10 @@ class NeuronReference:
                 tonic_current = self.output_neuron['namespace']['tonic_current']
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
 
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
@@ -637,6 +667,10 @@ class NeuronReference:
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
+
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
@@ -689,11 +723,103 @@ class NeuronReference:
                 tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
                 x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
+
             self.output_neuron['equation'] = x.get_compartment_equations('soma')
             self.output_neuron['threshold'] = x.get_threshold_condition()
             self.output_neuron['reset'] = x.get_reset_statements()
             self.output_neuron['refractory'] = x.get_refractory_period()
 
+        self.output_neuron['equation'] += b2.Equations('''x : meter
+            y : meter''')
+
+    def CI(self):
+        """
+            This method build up the equation for CI neurons. CI stands for current injection as timed array directly to neuron model. 
+            The final equation is then saved in output_neuron['equation'].
+
+            * The equation of the neuron is as follows:
+
+                ::
+
+                    dvm/dt = (gL*(EL-vm)  + ge_soma * 1 * vm + gi_soma * 1 * vm + I_ext(t,i) / C : volt (unless refractory)
+                    dge_soma/dt = -ge_soma/tau_e : siemens
+                    dgi_soma/dt = -gi_soma/tau_i : siemens
+                    x : meter
+                    y : meter
+                    I_ext : amp
+            """
+
+        if self.model_variation is False:
+            raise NotImplementedError('CI neuron type is not defined for model_variation = 0 (i.e. False)')
+
+        else:
+            x = neuron_factory().get_class(self.ci_neuron_model)
+            x.set_excitatory_receptors(self.ci_excitation_model)
+            x.set_inhibitory_receptors(self.ci_inhibition_model)
+
+            if 'noise_sigma' in self.output_neuron['namespace'].keys():
+                noise_sigma = self.output_neuron['namespace']['noise_sigma']
+                x.add_vm_noise(noise_sigma)
+
+            if 'tonic_current' in self.output_neuron['namespace'].keys():
+                tonic_current = self.output_neuron['namespace']['tonic_current']
+                tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
+                x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+            if 'refractory_period' in self.output_neuron['namespace'].keys():
+                refractory_period = self.output_neuron['namespace']['refractory_period']
+                x.set_neuron_parameters(refractory_period=refractory_period)
+
+            if 'vclamp' in self.output_neuron['namespace'].keys():
+                x.add_external_current( current_name='gclamp * (vclamp - vm) ', 
+                                        current_eqs='''
+                                        gclamp : siemens
+                                                    ''')
+                init_val = {'gclamp': self.output_neuron['namespace']['gL'] * 500}
+                x.initial_values.update(init_val)
+                self.output_neuron['initial_values'] = x.initial_values
+
+            # This part is not nicely integrated to the rest of the code, and not even trying to be.
+            # It reads current injection from external file. Filepath and filenames are set in the 
+            # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename. The
+            # cimultiplier is used to multiply the current injection in an array run.
+            if 'cibasepath' in self.output_neuron['namespace'].keys():
+                import scipy.io as sio
+                import os
+
+                cibasepath = self.output_neuron['namespace']['cibasepath'] 
+                cifilename = self.output_neuron['namespace']['cifilename'] 
+                cimultiplier = self.output_neuron['namespace']['cimultiplier'] 
+                cidata_dict = {}
+                cidata_fullpath_filename = os.path.join(cibasepath, cifilename)
+                sio.loadmat(cidata_fullpath_filename, cidata_dict) 
+
+                cidata = cidata_dict['injected_current']
+                framedurations = cidata_dict['dt']
+                # NOTE scaling to picoamperes here
+                I_ext = b2.TimedArray(  cimultiplier * cidata * b2.pA,
+                                        dt=framedurations * b2.ms)
+
+                # Add I_ext to namespace
+                self.output_neuron['namespace']['I_ext'] = I_ext
+
+                # Add external current to equations here
+                x.add_external_current(current_name='I_ext(t,i)', current_eqs='timedarray')
+
+            # In case some model type specific necessary values are missing from physiology csv file,
+            # get the default values from neurodynlib neuron_models.py 
+            new_namespace_dict = deepcopy(x.default_neuron_parameters) # keep original unchanged
+            new_namespace_dict.update(self.output_neuron['namespace'] )
+            self.output_neuron['namespace'] = new_namespace_dict 
+
+            self.output_neuron['equation'] = x.get_compartment_equations('soma')
+            self.output_neuron['threshold'] = x.get_threshold_condition()
+            self.output_neuron['reset'] = x.get_reset_statements()
+            self.output_neuron['refractory'] = x.get_refractory_period()
+            
         self.output_neuron['equation'] += b2.Equations('''x : meter
             y : meter''')
 
@@ -750,7 +876,7 @@ class SynapseReference:
     """
 
     def __init__(self, receptor, pre_group_idx, post_group_idx, syn_type, pre_type, post_type, physio_config_df, post_comp_name='_soma',
-                 custom_weight='--'):
+                 custom_weight='--', multiply_weight=1):
         """
         initializes the SynapseReference based on its arguments.
 
@@ -772,7 +898,7 @@ class SynapseReference:
         * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
 
         """
-        SynapseReference.syntypes = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_calcium', 'Depressing', 'Facilitating'])
+        SynapseReference.syntypes = np.array(['STDP', 'CPlastic', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_multiply', 'Fixed_calcium', 'Depressing', 'Facilitating'])
         assert syn_type in SynapseReference.syntypes, " -  Synapse type '%s' is not defined" % syn_type
         self.output_synapse = {'type': syn_type,
                                'receptor': receptor,
@@ -781,8 +907,9 @@ class SynapseReference:
                                'post_group_idx': int(post_group_idx),
                                'post_group_type': post_type,
                                'post_comp_name': post_comp_name,
-                               'custom_weight': custom_weight}
-        # self.output_synapse['namespace_type'] = namespace_type
+                               'custom_weight': custom_weight,
+                               'multiply_weight': multiply_weight}
+        # self.output_synapse['namespace_type'] = namespace_type 
         # self.output_synapse['pre_type'] = pre_group_type
         # self.output_synapse['post_type'] = post_group_type
         _name_space = SynapseParser(self.output_synapse, physio_config_df)
@@ -863,23 +990,56 @@ class SynapseReference:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght0 * Cp
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0 * siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         else:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght * Cd
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0* siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         if self.output_synapse['namespace']['Apost'] <= 0:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght * Cd
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0* siemens, wght_max)
                         '''
         else:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght0 * Cp
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0* siemens, wght_max)
+                        '''
+
+    def CPlastic(self):
+        """
+        The method for implementing the plastic synaptic connection according to Clopath_2010_NatNeurosci.
+
+        """
+
+        self.output_synapse['equation'] = b2.Equations('''
+            # wght:siemens
+            wght:siemens
+            w_minus : siemens
+            w_plus : siemens
+            A_LTD_u : 1
+            ''')
+
+        # Assigning the multiplier here enables later addition of wght equation into this method .
+        if self.model_variation is False:
+            raise NotImplementedError('Fixed_multiply is only defined for model_variation = True (or 1)')
+        else:
+            self.output_synapse['pre_eq'] = '''
+                        %s += wght * ampa_max_cond                                                                                  # increment synaptic conductance
+                        A_LTD_u = A_LTD * (v_homeo**2 / v_target)                                                                   # metaplasticity: If membrane_voltage - resting potential equals sqrt(12) => Au equals A
+                        w_minus = A_LTD_u * (v_lowpass1_post / mV - Theta_low / mV) * int(v_lowpass1_post / mV - Theta_low / mV > 0) * siemens  # depression
+                        wght = clip(wght - w_minus, 0 * siemens, wght_max)                                                           # hard bounds
+                        ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
+            # Note that the following variables are calculated for each synapse. For 100 incoming synapses, += 1 becomes += 100
+            self.output_synapse['post_eq'] = '''
+                        v_lowpass1 += (10 * mV) / N_incoming
+                        v_lowpass2 += (10 * mV) / N_incoming                                                                        # mimics the depolarisation effect due to a spike
+                        v_homeo += (0.1 * mV) / N_incoming                                                                           # mimics the depolarisation effect due to a spike
+                        w_plus = A_LTP * x_trace_pre * (v_lowpass2_post / mV - Theta_low / mV) * int(v_lowpass2_post / mV - Theta_low / mV > 0) * siemens  # potentiation
+                        wght = clip(wght + w_plus, 0 * siemens, wght_max)                                                           # hard bounds
                         '''
 
     def STDP_with_scaling(self):
@@ -901,24 +1061,24 @@ class SynapseReference:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght0 * Cp
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0 * siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         else:
             self.output_synapse['pre_eq'] = '''
                         %s+=wght
                         apre += Apre * wght * Cd
-                        wght = clip(wght + apost, 0, wght_max)
+                        wght = clip(wght + apost, 0 * siemens, wght_max)
                         ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         if self.output_synapse['namespace']['Apost'] <= 0:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght * Cd
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0 * siemens, wght_max)
                         spike_sensor += 1 * hertz
                         '''
         else:
             self.output_synapse['post_eq'] = '''
                         apost += Apost * wght0 * Cp
-                        wght = clip(wght + apre, 0, wght_max)
+                        wght = clip(wght + apre, 0 * siemens, wght_max)
                         spike_sensor += 1 * hertz
                         '''
 
@@ -961,6 +1121,26 @@ class SynapseReference:
         else:
             pre_eq_lines = ['%s += wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
                             for true_receptor in self.true_receptors]
+            pre_eq = ''.join(pre_eq_lines).rstrip()
+            self.output_synapse['pre_eq'] = pre_eq
+
+    def Fixed_multiply(self):
+        """
+        The method for implementing the Fixed synaptic connection which is multiplied with factor coming from Anatomy csv.
+
+        """
+
+        self.output_synapse['equation'] = b2.Equations('''
+            wght:siemens
+            ''')
+
+        # Assigning the multiplier here enables later addition of wght equation into this method .
+        if self.model_variation is False:
+            raise NotImplementedError('Fixed_multiply is only defined for model_variation = True (or 1)')
+        else:
+            # pre_eq_lines = ['%s += wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
+            #                 for true_receptor in self.true_receptors]
+            pre_eq_lines = ['%s += %s * wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post', str(self.output_synapse['multiply_weight'])) for true_receptor in self.true_receptors]
             pre_eq = ''.join(pre_eq_lines).rstrip()
             self.output_synapse['pre_eq'] = pre_eq
 

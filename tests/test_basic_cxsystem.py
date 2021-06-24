@@ -120,8 +120,8 @@ class TestConfigurationExecutor:
 	def test_set_import_connections_path(self):
 		assert isinstance(CM.workspace.get_imported_connection_path(), str)
 
-	def test_load_positions_only(self):
-		assert CM.load_positions_only in (0,1)
+	def test_load_positions(self):
+		assert CM.load_positions in (0,1)
 
 	def test_set_profiling(self):
 		assert CM.profiling in (0,1)

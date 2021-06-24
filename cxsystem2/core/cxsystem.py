@@ -123,7 +123,7 @@ class CxSystem:
             'compression_method': [9, self.set_compression_method],
             'simulation_title': [10, self.create_simulation],
             'import_connections_from': [11, self.set_import_connections_path],
-            'load_positions_only': [12, self.load_positions_only],
+            'load_positions': [12, self.load_positions],
             'benchmark': [13, self.set_benchmark],
             'profiling': [14, self.set_profiling],
             'multidimension_array_run': [15, self.passer],  # this parameter is used by array_run module, so here we just pass
@@ -185,7 +185,7 @@ class CxSystem:
         self.min_distance = 0
         self.init_vms = 0
         self.do_save_connections = 0  # if there is at least one connection to save, this flag will be set to 1
-        self.load_positions_only = 0
+        self.load_positions = 0
         self.profiling = 0
         self.array_run_in_cluster = array_run_in_cluster
         self.awaited_conf_lines = []
@@ -498,7 +498,7 @@ class CxSystem:
             self.set_workspace('~/CxSystem')
 
         if not np.any(self.current_parameters_list.str.contains('runtime')):
-            print(" -  Runtime duration is not defined in the configuration file. The default runtime duratoin is 500*ms")
+            print(" -  Runtime duration is not defined in the configuration file. The default runtime duration is 500*ms")
             self.runtime = 500 * ms
 
         if not np.any(self.current_parameters_list.str.contains('device')):
@@ -535,11 +535,6 @@ class CxSystem:
         elif self.device == 'cpp':
             print(f'\nTarget directory is {target_directory}')
             b2.set_device('cpp_standalone', directory=target_directory)
-
-    #            if 'linux' in sys.platform and self.device == 'cpp':
-    #                print(" -  parallel compile flag set")
-    #                b2.prefs['devices.cpp_standalone.extra_make_args_unix'] = ['-j']
-    #            b2.prefs.codegen.cpp.extra_compile_args_gcc = ['-O3', '-pipe']
 
     def _set_runtime(self, *args):
         assert '*' in args[0], ' -  Please specify the unit for the runtime parameter, e.g. um , mm '
@@ -597,12 +592,12 @@ class CxSystem:
         if self.scale != 1:
             print(" -  CxSystem is being build on the scale of %s" % args[0])
 
-    def load_positions_only(self, *args):
-        assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, ' -  The load_positions_only flag should be either 0 or 1 but it is %s .' % args[0]
-        self.load_positions_only = int(eval(args[0]))
-        if self.load_positions_only:
+    def load_positions(self, *args):
+        assert int(eval(args[0])) == 0 or int(eval(args[0])) == 1, ' -  The load_positions flag should be either 0 or 1 but it is %s .' % args[0]
+        self.load_positions = int(eval(args[0]))
+        if self.load_positions:
             self.set_import_connections_path()
-            print(" -  only positions are being loaded from the brian_data_file")
+            print(" -  positions are being loaded from the brian_data_file")
 
     def set_benchmark(self, *args):
         assert int(eval(args[0])) in [0, 1], " -  Do benchmark flag should be either 0 or 1"
@@ -637,8 +632,6 @@ class CxSystem:
         assert self.sys_mode != '', " -  System mode is not defined."
         _all_columns = ['idx', 'number_of_neurons', 'neuron_type', 'layer_idx', 'net_center', 'monitors',
                         'n_background_inputs', 'n_background_inhibition', 'neuron_subtype']
-        # 'threshold', 'reset', 'refractory',
-        # 'tonic_current', 'noise_sigma', 'gemean', 'gestd', 'gimean', 'gistd']
         _obligatory_params = [0, 1, 2, 3]
         assert len(self.current_values_list) >= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
         is missing. Following obligatory columns should be defined:\n%s\n ' \
@@ -663,15 +656,6 @@ class CxSystem:
                            'neuron_type': '',
                            'layer_idx': 0,
                            'monitors': ''}
-        # local_namespace['threshold'] = ''
-        # local_namespace['reset'] = ''
-        # local_namespace['refractory'] = ''
-        # local_namespace['noise_sigma'] = ''
-        # local_namespace['gemean'] = ''
-        # local_namespace['gestd'] = ''
-        # local_namespace['gimean'] = ''
-        # local_namespace['gistd'] = ''
-        # local_namespace['tonic_current'] = ''
 
         for column in _all_columns:
             try:
@@ -689,15 +673,6 @@ class CxSystem:
         monitors = local_namespace['monitors']
         neuron_type = local_namespace['neuron_type']
         neuron_subtype = local_namespace['neuron_subtype']
-        # noise_sigma = local_namespace['noise_sigma']
-        # gemean = local_namespace['gemean']
-        # gestd = local_namespace['gestd']
-        # gimean = local_namespace['gimean']
-        # gistd = local_namespace['gistd']
-        # threshold = local_namespace['threshold']
-        # reset = local_namespace['reset']
-        # refractory = local_namespace['refractory']
-        # tonic_current = local_namespace['tonic_current']
 
         assert idx not in self.NG_indices, \
             " -  Multiple indices with same values exist in the configuration file."
@@ -707,22 +682,6 @@ class CxSystem:
             # description can be found in configuration file tutorial.
         net_center = complex(net_center)
         current_idx = len(self.customized_neurons_list)
-
-        # if tonic_current == '--':
-        #     tonic_current = '0*pA'
-        #
-        # if noise_sigma == '--':
-        #     noise_sigma = '0*mV'
-        # noise_sigma = eval(noise_sigma)
-        #
-        # if gemean == '--':
-        #     gemean = '0*nS'
-        # if gestd == '--':
-        #     gestd = '0*nS'
-        # if gimean == '--':
-        #     gimean = '0*nS'
-        # if gistd == '--':
-        #     gistd = '0*nS'
 
         if n_background_inputs == '--':
             n_background_inputs = '0'
@@ -748,13 +707,6 @@ class CxSystem:
                                                             network_center=net_center, cell_subtype=neuron_subtype).output_neuron)  # creating a
         # NeuronReference() object and passing the positional arguments to it. The main member of the class called
         # output_neuron is then appended to customized_neurons_list.
-        # in case of threshold/reset/refractory overwrite
-        # if threshold != '--':
-        #     self.customized_neurons_list[-1]['threshold'] = threshold
-        # if reset != '--':
-        #     self.customized_neurons_list[-1]['reset'] = reset
-        # if refractory != '--':
-        #     self.customized_neurons_list[-1]['refractory'] = refractory
 
         # Generating variable names for Groups, NeuronNumbers, Equations, Threshold, Reset, Refractory and Namespace
         if neuron_subtype == '--':
@@ -780,17 +732,6 @@ class CxSystem:
         exec("%s=self.customized_neurons_list[%d]['reset']" % (_dyn_neuron_reset_name, current_idx))
         exec("%s=self.customized_neurons_list[%d]['refractory']" % (_dyn_neuron_refra_name, current_idx))
         exec("%s=self.customized_neurons_list[%d]['namespace']" % (_dyn_neuron_namespace_name, current_idx))
-
-        # // Background input code BEGINS
-        # Adding tonic current to namespace
-        # self.customized_neurons_list[current_idx]['namespace']['tonic_current'] = eval(tonic_current)
-        # Adding the noise sigma to namespace
-        # self.customized_neurons_list[current_idx]['namespace']['noise_sigma'] = noise_sigma
-        # # Adding ge/gi mean/std to namespace
-        # self.customized_neurons_list[current_idx]['namespace']['gemean'] = eval(gemean)
-        # self.customized_neurons_list[current_idx]['namespace']['gestd'] = eval(gestd)
-        # self.customized_neurons_list[current_idx]['namespace']['gimean'] = eval(gimean)
-        # self.customized_neurons_list[current_idx]['namespace']['gistd'] = eval(gistd)
 
         # Creating the actual NeuronGroup() using the variables in the previous 6 lines
         exec("%s= b2.NeuronGroup(%s, model=%s, method='%s', threshold=%s, reset=%s,refractory = %s, namespace = %s)"
@@ -821,6 +762,7 @@ class CxSystem:
             except ValueError:
                 flag_bg_calcium_scaling = 0
 
+            # NOTE Hard coded Fixed receptor type to bg input
             bg_synapse = SynapseParser({'type': 'Fixed', 'pre_group_type': 'SS', 'post_group_type': neuron_type},
                                        self.physio_config_df)
             bg_synapse_inh = SynapseParser({'type': 'Fixed', 'pre_group_type': 'BC', 'post_group_type': neuron_type},
@@ -970,22 +912,19 @@ class CxSystem:
             ng_init += "\tif _key.find('vm')>=0:\n"
             ng_init += "\t\tsetattr(%s,_key,%s['V_init_min']+Vr_offset * (%s['V_init_max']-%s['V_init_min']))\n" % \
                        (_dyn_neurongroup_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name, _dyn_neuron_namespace_name)
-
-            # Commented out (didn't work with receptors) /HH
-            # ng_init += "\telif ((_key.find('ge')>=0) or (_key.find('gi')>=0)):\n"
-            # ng_init += "\t\tsetattr(%s,_key,0)" % _dyn_neurongroup_name
             exec(ng_init)
         else:
             ng_init = "for _key in %s.variables.keys():\n" % _dyn_neurongroup_name
             ng_init += "\tif _key.find('vm')>=0:\n"
             ng_init += "\t\tsetattr(%s,_key,%s['V_init'])\n" % (_dyn_neurongroup_name, _dyn_neuron_namespace_name)
-
-            # Commented out (didn't work with receptors) /HH
-            # ng_init += "\telif ((_key.find('ge')>=0) or (_key.find('gi')>=0)):\n"
-            # ng_init += "\t\tsetattr(%s,_key,0)" % _dyn_neurongroup_name
             exec(ng_init)
         # </editor-fold>
 
+        if 'initial_values' in self.customized_neurons_list[-1].keys():
+            exec(f'{_dyn_neurongroup_name}.set_states(self.customized_neurons_list[-1]["initial_values"])')
+        
+        print(f'\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron modelis:\n{eval(_dyn_neuron_eq_name)}\n')
+ 
         setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
         try:
             setattr(self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
@@ -1035,6 +974,8 @@ class CxSystem:
             '[rec]': [',record=']
         }
         self.monitor_name_bank[object_name] = []
+
+
         for mon_arg in mon_args:
             # Extracting the monitor tag
             mon_tag = mon_arg[mon_arg.index('['):mon_arg.index(']') + 1]
@@ -1067,20 +1008,20 @@ class CxSystem:
                         sub_mon_arg.append('True')
                     elif '[rec]' in sub_mon_tags:
                         sub_mon_arg[sub_mon_tags.index('[rec]') + 1] = 'arange' + sub_mon_arg[sub_mon_tags.index('[rec]') + 1].replace('-', ',')
+                        # Check that the index of monitored items does not exceed the number of neurons or synapses
+                        # Get N neurons or synapses
+                        if object_name.startswith('NG'):
+                            N_units = self.customized_neurons_list[-1]['number_of_neurons']
+                        elif object_name.startswith('S'):
+                            N_units = len(eval(f'{object_name}.i'))
+                        else:
+                            raise NotImplementedError('I have no idea what you are monitoring, aborting...')
                         if self.scale >= 1:
-                            assert int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]) < \
-                                   self.customized_neurons_list[-1]['number_of_neurons'], \
-                                " -  The stop index (%d) in the following monitor, is higher than" \
-                                " the number of neurons in the group (%d): \n %s " % \
-                                (int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
-                                 self.customized_neurons_list[-1]['number_of_neurons'], str(self.current_values_list.tolist()),)
-
-                        elif int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]) < self.customized_neurons_list[-1]['number_of_neurons']:
-                            "\n Warning: The stop index (%d) in the following monitor, is higher than the number of neurons in the group (%d):" \
-                            " \n %s . This is caused by using a scale < 1" \
-                            % (int(sub_mon_arg[sub_mon_tags.index('[rec]') + 1].split(',')[1]),
-                               self.customized_neurons_list[-1]['number_of_neurons'],
-                               str(self.current_values_list.tolist()),)
+                            # Check max arange against N
+                            assert max(eval(sub_mon_arg[1])) < N_units, f'Monitor index for object {object_name} exceeds max units/synapses'
+                        elif max(eval(sub_mon_arg[1])) < N_units:
+                            f"\n Warning: Monitor index for object {object_name} exceeds max units/synapses" \
+                            " \n This might be caused by using a scale < 1" \
 
                     assert len(sub_mon_arg) == len(sub_mon_tags) + 1, ' -  Error in monitor tag definition.'
                 if sub_mon_arg[0] == '':
@@ -1142,8 +1083,9 @@ class CxSystem:
         * syn_con_str: The string containing the syntax for connect() method of a current Synapses() object. This string
                         changes depending on using the [p] and [n] tags in the configuration file.
         """
+
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
-                        'save_connection', 'custom_weight','spatial_decay']
+                        'save_connection', 'custom_weight','spatial_decay', 'multiply_weight']
         _obligatory_params = [0, 1, 2, 3]
         assert len(self.current_values_list) <= len(_all_columns), \
             ' -  One or more of the obligatory columns for input definition is missing. Obligatory columns are:\n%s\n ' \
@@ -1158,6 +1100,7 @@ class CxSystem:
         _options = {
             '[C]': self.neuron_group,
         }
+
         # getting the connection probability gain from the namespace and apply it on all the connections:
         index_of_receptor = int(np.where(self.current_parameters_list.values == 'receptor')[0])
         index_of_post_syn_idx = int(np.where(self.current_parameters_list.values == 'post_syn_idx')[0])
@@ -1189,6 +1132,7 @@ class CxSystem:
             _current_ns = self.current_values_list.values[index_of_n]
         except (ValueError, NameError):
             pass
+
         # When the post-synaptic neuron is a multi-compartmental PC neuron:
         if len(current_post_syn_idx) > 1 and '[' in current_post_syn_idx:
             try:
@@ -1282,6 +1226,7 @@ class CxSystem:
             self.current_parameters_list = self.current_parameters_list.append(pd.Series(['pre_type', 'post_type', 'post_comp_name']),
                                                                                ignore_index=True)
             self.current_values_list = [self.current_values_list]
+
         for syn in self.current_values_list:
             receptor = syn[index_of_receptor]
             pre_syn_idx = syn[index_of_pre_syn_idx]
@@ -1310,8 +1255,17 @@ class CxSystem:
             try:
                 custom_weight_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'custom_weight'].index))
                 custom_weight = syn[custom_weight_idx]
-            except (ValueError, NameError):
+            except (ValueError, NameError, IndexError):
                 custom_weight = '--'
+
+            # Get multiplier if defined 
+            try:
+                multiply_weight_idx = self.current_parameters_list[self.current_parameters_list=='multiply_weight'].index.values[0]
+                multiply_weight = syn[multiply_weight_idx]
+                if multiply_weight == '--':
+                    multiply_weight = '1'
+            except (ValueError, NameError, IndexError):
+                multiply_weight = '1'
 
             # check monitors in line:
             current_idx = len(self.customized_synapses_list)
@@ -1319,7 +1273,7 @@ class CxSystem:
             # the class called output_synapse is then appended to customized_synapses_list:
             self.customized_synapses_list.append(SynapseReference(receptor, pre_syn_idx, post_syn_idx, syn_type,
                                                                   pre_type, post_type, self.physio_config_df, post_comp_name,
-                                                                  custom_weight).output_synapse)
+                                                                  custom_weight, multiply_weight).output_synapse)
             _pre_group_idx = self.neurongroups_list[self.customized_synapses_list[-1]['pre_group_idx']]
             _post_group_idx = self.neurongroups_list[self.customized_synapses_list[-1]['post_group_idx']]
             # Generated variable name for the Synapses(), equation, pre_synaptic and post_synaptic equation and Namespace
@@ -1339,16 +1293,27 @@ class CxSystem:
             exec("%s=self.customized_synapses_list[%d]['namespace']" % (_dyn_syn_namespace_name, current_idx))
 
             # creating the initial synaptic connection :
-            try:
-                exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )"
-                     % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
-                        _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name,
-                        eval(_dyn_syn_namespace_name)['delay']))
-            except NameError:  # for when there is no "on_post =...", i.e. fixed connection
-                exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, "
-                     "namespace= %s, delay = %s)"
-                     % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
-                        _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name, eval(_dyn_syn_namespace_name)['delay']))
+            if 'rand' in eval("%s['delay']" % _dyn_syn_namespace_name):
+                # Do NOT set delay yet
+                try:
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s)"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name,))
+                except NameError:  # for when there is no "on_post =...", i.e. fixed connection
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, namespace= %s)"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name))
+            else:
+                try:
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_post_eq_name, _dyn_syn_namespace_name,
+                            eval(_dyn_syn_namespace_name)['delay']))
+                except NameError:  # for when there is no "on_post =...", i.e. fixed connection
+                    exec("%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, "
+                        "namespace= %s, delay = %s)"
+                        % (_dyn_syn_name, _pre_group_idx, _post_group_idx,
+                            _dyn_syn_eq_name, _dyn_syn_pre_eq_name, _dyn_syn_namespace_name, eval(_dyn_syn_namespace_name)['delay']))
 
             # Connecting synapses
 
@@ -1376,10 +1341,9 @@ class CxSystem:
                     _do_load = int(syn[load_connection_idx])
             except TypeError:
                 _do_load = 0
-                pass
 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and not hasattr(self, 'imported_connections'):
-                # only load the file if it's not loaded already, and if the connections are supposed to tbe loaded frmo the file
+                # Only load the file if it's not loaded already, and if the connections are supposed to be loaded from the file
                 self.set_import_connections_path()
 
             try:
@@ -1395,27 +1359,25 @@ class CxSystem:
                 _do_save = 0
                 pass
 
-            # Loading connections from file
+            # Loading connections, weights and delays from file 
             if (self.default_load_flag == 1 or (self.default_load_flag == -1 and _do_load == 1)) and \
-                    hasattr(self, 'imported_connections') and not self.load_positions_only:
+                    hasattr(self, 'imported_connections'):
                 assert _syn_ref_name in list(self.imported_connections.keys()), \
                     " -  The data for the following connection was not found in the loaded brian data: %s" % _syn_ref_name
 
-                # 1) Try-except necessary; run fails if no connections exist from 1 group to another
-                # 2) Indexing changed in pd >0.19.1 and thus ...['data'][0][0].tocoo() --> ...['data'].tocoo()
-                #    Unfortunately pd doesn't warn about this change in indexing
                 try:
+                    # Load connection
                     eval(_dyn_syn_name).connect(i=self.imported_connections[_syn_ref_name]['data'].tocoo().row,
                                                 j=self.imported_connections[_syn_ref_name]['data'].tocoo().col,
                                                 n=int(self.imported_connections[_syn_ref_name]['n']))
-                    # Weight is redeclared later, see line ~1200.
-                    # Also, 1) "loading connections" leaves the impression of loading anatomical connections, not synaptic weights
-                    #       2) we do not have need for saving/loading synaptic weights at this point
-                    #       3) it doesn't work in pd >0.19.1
-                    # Therefore I commented:
-                    # eval(_dyn_syn_name).wght = b2.repeat(self.imported_connections[_syn_ref_name]['data'][0][0].data/int(self.\
-                    #     imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
-                    _load_str = 'Connection loaded from '
+                    # Load weights
+                    eval(_dyn_syn_name).wght = b2.repeat(self.imported_connections[_syn_ref_name]['data'].data / int(self.\
+                        imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * siemens
+                    # Load delays. The if statement is for files created before 15.4.2021, when delays were not saved yet / SV
+                    if 'delay' in  self.imported_connections[_syn_ref_name].keys():
+                        eval(_dyn_syn_name).delay = b2.repeat(self.imported_connections[_syn_ref_name]['delay'].data / int(self.\
+                            imported_connections[_syn_ref_name]['n']),int(self.imported_connections[_syn_ref_name]['n'])) * second
+                    _load_str = 'Connections loaded from '
                 except ValueError:
                     _load_str = ' ! No connections from '
 
@@ -1457,8 +1419,10 @@ class CxSystem:
                     # If spatial_decay does not include '[i=j]', exclude autoconnection, use only lambda
                     elif '[ij]' not in spatial_decay:
                         syn_con_str = "%s.connect(condition='i!=j', p= " % _dyn_syn_name
+
                     syn_con_str += "'%f*exp(-(%f/mm)*(sqrt((x_pre-x_post)**2+(y_pre-y_post)**2)))'" % (
                         float(p_arg), float(spatial_decay))
+
                     return syn_con_str
 
                 #Check if p_arg exists, set to None if not
@@ -1467,14 +1431,17 @@ class CxSystem:
 
                 # Check mode, catch missing spatial_decay
                 if self.sys_mode == 'local':
-                    spatial_decay = '0'
+                    spatial_decay = '0[ij]' # even connectivity with distance, includes i=j connections
 
                 elif self.sys_mode == 'expanded':
                     try:
                         spatial_decay=syn[index_of_spatial_decay]
+                        if spatial_decay == '--':
+                            spatial_decay = '0[ij]'
                     except (ValueError, NameError):
-                        # If the length constant has not been defined, set it to 0 corresponding to local mode, ie no decay with distance
-                        spatial_decay = '0'                        
+                        # If the length constant has not been defined, set it to 0, including i=j connections, 
+                        # corresponding to local mode, ie no decay with distance
+                        spatial_decay = '0[ij]'                        
 
  
                 if '_relay_vpm' in self.neurongroups_list[int(current_pre_syn_idx)] and p_arg==None:
@@ -1482,7 +1449,7 @@ class CxSystem:
 
                 elif '_relay_spikes' in self.neurongroups_list[int(current_pre_syn_idx)]:
                     # spatial_decay = '10'
-                    spatial_decay = '0'
+                    spatial_decay = '0[ij]'
 
                 syn_con_str = exp_distance_function(p_arg=p_arg, spatial_decay=spatial_decay)
 
@@ -1492,14 +1459,20 @@ class CxSystem:
                     syn_con_str += ')'
                 exec(syn_con_str)
 
-            # Weight set again (overrided) here if connections were loaded
-            exec("%s.wght=%s['init_wght']" % (_dyn_syn_name,
-                                              _dyn_syn_namespace_name))  #
-            # set the weights
-            if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
-                exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,
-                                                   _dyn_syn_namespace_name)
-                     )  # set the weights
+            # Generate de novo if now or earlier line set 0-->, or if this line <--0, or load positions only 
+            if  self.default_load_flag == 0 \
+                or (self.default_load_flag == -1 and _do_load == 0):
+                # Weight set for de novo connections
+                exec("%s.wght=%s['init_wght']" % (_dyn_syn_name, _dyn_syn_namespace_name))  #
+                exec("%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name))  #
+
+                # set the weights for STDP connections
+                if syn_type == 'STDP':  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
+                    exec("%s.wght0=%s['init_wght']" % (_dyn_syn_name,_dyn_syn_namespace_name)) 
+
+            if self.device == 'python' and eval("sum(%s.wght)==0" % _dyn_syn_name):
+                print('WARNING: Synapses %s set to zero weight!' % _dyn_syn_name)
+
             # # the next two lines are commented out for GeNN and are added as a parameter when creating syn
             # exec("%s.delay=%s['delay']" % (_dyn_syn_name,
             #                                 _dyn_syn_namespace_name) ) # set the delays
@@ -1549,6 +1522,10 @@ class CxSystem:
                 self.workspace.syntax_bank.append(
                     'self.workspace.connections["%s"]["data"] ='
                     ' scprs.csr_matrix((%s.wght[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))'
+                    % (_syn_ref_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name))
+                self.workspace.syntax_bank.append(
+                    'self.workspace.connections["%s"]["delay"] ='
+                    ' scprs.csr_matrix((%s.delay[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))'
                     % (_syn_ref_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name))
                 self.workspace.syntax_bank.append('self.workspace.connections["%s"]["n"] = %d' % (_syn_ref_name, int(n_arg)))
             # elif (self.default_save_flag==1 or (self.default_save_flag==-1 and _do_save )) and \
@@ -1668,7 +1645,7 @@ class CxSystem:
                           thread_ng_name)
                 else:  # load the positions:
                     self.customized_neurons_list[self.video_input_idx]['z_positions'] = np.squeeze(inp.get_input_positions())
-                    self.customized_neurons_list[self.video_input_idx]['w_positions'] = 17 * log(relay_group['z_positions'] + 1)
+                    self.customized_neurons_list[self.video_input_idx]['w_positions'] = 17 * log(relay_group['z_positions'] + 1) # NOTE Hard coded scaling from z to w
 
                 # setting the position of the neurons based on the positions in the .mat input file:
                 exec("%s.x=b2.real(self.customized_neurons_list[%d]["
@@ -1781,7 +1758,7 @@ class CxSystem:
                 # times give the start of first spike, which must be less than the period, thus the 0.5/[period in Hz] below
                 times_str = 'GEN_TI = b2.repeat(0.5/%s,%s)*%s' % (spike_times_ / eval(spike_times_unit), number_of_active_neurons, "second")
             else:
-                assert b2.units.is_dimensionless(eval(spike_times_unit) / second), "Unkown unit, should be second, ms etc, or Hz"
+                assert b2.units.is_dimensionless(eval(spike_times_unit) / second), "Unknown unit, should be second, ms etc, or Hz"
                 period_str = 'GEN_PE = 0*second' # default
                 exec(period_str, globals(), locals())  # running the syntax for period of the input neuron group
                 spike_times_array_nodim = spike_times_ / eval(spike_times_unit)
@@ -1789,7 +1766,6 @@ class CxSystem:
                 times_str = 'GEN_TI = b2.repeat(%s,%s)*%s' % (array_string, number_of_active_neurons, spike_times_unit)
             exec(times_str, globals(), locals())  # running the string
             # containing the syntax for time indices in the input neuron group.
-            # spikes_str = 'GEN_SP=b2.tile(%s,%d)' % (active_neurons_str, len(spike_times_)) # len(spike_times_) should be 1 if unit is Hz
             spikes_str = 'GEN_SP=b2.tile(%s,%d)' % (active_neurons_str, b2.asarray(spike_times_list).size) # len(spike_times_) should be 1 if unit is Hz
             exec(spikes_str, globals(), locals())  # running the string
             sg_str = 'GEN = b2.SpikeGeneratorGroup(%s, GEN_SP, GEN_TI, period=GEN_PE)' % number_of_neurons
@@ -1997,11 +1973,12 @@ class CxSystem:
     def gather_result(self):
         """
         After the simulation and using the syntaxes that are previously prepared in the syntax_bank of save_data() object,
-        this method saves the collected data to a file.
+        this method saves the collected data to a file.  
 
         """
         print(" -  Generating the syntaxes for saving CX output:")
         for syntax in self.workspace.syntax_bank:
+            #The first loop saves monitors by searching the substring "get_states" from syntax bank list items.
             if 'get_states' in syntax:
                 tmp_monitor = syntax.split(' ')[-1]
                 print(tmp_monitor)
@@ -2011,15 +1988,16 @@ class CxSystem:
         if self.do_save_connections:
             print(" -  Generating the syntaxes for saving connection data ...")
             for syntax in self.workspace.syntax_bank:
-                exec(syntax)
+                if 'connections' in syntax:
+                    exec(syntax)
             self.workspace.create_connections_key('positions_all')
             self.workspace.connections['positions_all']['w_coord'] = self.workspace.results['positions_all']['w_coord']
             self.workspace.connections['positions_all']['z_coord'] = self.workspace.results['positions_all']['z_coord']
             self.workspace.save_connections_to_file()
 
-    @staticmethod
-    def import_optimizer():
-        return [rand(), scprs.csr_matrix([])]
+#    @staticmethod
+#    def import_optimizer():
+#        return [rand(), scprs.csr_matrix([])]
 
 
 if __name__ == '__main__':

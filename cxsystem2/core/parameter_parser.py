@@ -36,7 +36,7 @@ class SynapseParser:
     """
 
     # For _change_calcium()
-    _excitatory_groups = ['PC', 'SS']
+    _excitatory_groups = ['PC', 'SS', 'CI']
     _steep_post_inhibitory_groups = ['MC']
     _shallow_post_inhibitory_groups = ['BC']
     _steep_post = _excitatory_groups + _steep_post_inhibitory_groups
@@ -57,12 +57,9 @@ class SynapseParser:
         self.output_synapse = output_synapse
         self.physio_config_df = physio_config_df
 
-        SynapseParser.type_ref = np.array(['STDP', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
+        SynapseParser.type_ref = np.array(['STDP', 'CPlastic', 'STDP_with_scaling', 'Fixed', 'Fixed_const_wght',  'Fixed_multiply', 'Fixed_calcium', 'Fixed_normal', 'Depressing', 'Facilitating'])
         assert output_synapse['type'] in SynapseParser.type_ref, " -  Synapse type '%s' is not defined." % output_synapse['type']
         self.output_namespace = {}
-        # Commented Cp and Cd out because not used in this branch /HH
-        # self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
-        # self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
         try:
             self.sparseness = self.value_extractor(self.physio_config_df,
                                                    'sp_%s_%s' % (output_synapse['pre_group_type'], output_synapse['post_group_type']))
@@ -100,6 +97,7 @@ class SynapseParser:
                 return eval(
                     next(iter(cropped_df['Value'][cropped_df['Key'] == key_name[1]])))  # next(iter()) is equivalent to item() which is depricated
             else:
+                # print(f'key_name = {key_name}')
                 return eval(next(iter(df['Value'][df['Key'] == key_name])))  # next(iter()) is equivalent to item() which is depricated
         except NameError:
             tmp_key = next(iter(df['Value'][df['Key'] == key_name]), 'no match')  # next(iter()) is equivalent to item() which is depricated
@@ -114,7 +112,7 @@ class SynapseParser:
         # NB! It's not only E->E and E->I connections that get scaled. Goes both ways. See Markram suppl p16.
         """
 
-        excitatory_groups = ['PC', 'SS', 'VPM']
+        excitatory_groups = ['PC', 'SS', 'CI', 'VPM']
         steep_inhibitory_groups = ['MC']
         shallow_inhibitory_groups = ['BC']
         steep_post = excitatory_groups + steep_inhibitory_groups
@@ -155,7 +153,7 @@ class SynapseParser:
         return final_synapse_strength
 
     def _set_utilization_factor(self, is_facilitating=False, ca=2.0):
-        excitatory_groups = ['PC', 'SS', 'in']
+        excitatory_groups = ['PC', 'SS', 'CI', 'in']
         inhibitory_groups = ['BC', 'MC', 'L1i']
 
         if is_facilitating is False:
@@ -177,13 +175,16 @@ class SynapseParser:
             u_f = self.value_extractor(self.physio_config_df, 'U_f')
             self.output_namespace['U_f'] = self.scale_by_calcium(ca, u_f)
 
-    def stdp(self):
+    def STDP(self):
         """
         The STDP method for assigning the STDP parameters to the customized_synapses() object.
 
         This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
         Following STDP values are set in this method: Apre, Apost, Tau_pre, Tau_post, wght_max, wght0.
         """
+        self.output_namespace['Cp'] = self.value_extractor(self.physio_config_df,'Cp')
+        self.output_namespace['Cd'] = self.value_extractor(self.physio_config_df,'Cd')
+
         self.output_namespace['Apre'], self.output_namespace['Apost'], self.output_namespace['taupre'], self.output_namespace['taupost'] = \
             self.value_extractor(self.physio_config_df, 'stdp_%s_%s' % (self.output_synapse['pre_group_type'],
                                                                         self.output_synapse['post_group_type'] +
@@ -201,7 +202,34 @@ class SynapseParser:
         min_delay = std_delay / 2.
         self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (std_delay, min_delay)
 
-    def stdp_with_scaling(self):
+    def CPlastic(self):
+        """
+        The CPlastic method for assigning the parameters to the customized_synapses() object.
+
+        This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
+        Following values are set in this method: Apre, Apost, Tau_pre, Tau_post, wght_max, wght0.
+        """
+        self.output_namespace['A_LTD'], self.output_namespace['A_LTP'] = \
+            self.value_extractor(self.physio_config_df, 'cplastic_%s_%s' % (self.output_synapse['pre_group_type'],
+                                                                        self.output_synapse['post_group_type'] +
+                                                                        self.output_synapse['post_comp_name']))
+
+        self.output_namespace['Theta_low'] = self.value_extractor(self.physio_config_df, 'Theta_low')
+        self.output_namespace['v_target'] = self.value_extractor(self.physio_config_df, 'v_target')
+        self.output_namespace['ampa_max_cond'] = self.value_extractor(self.physio_config_df, 'ampa_max_cond')
+        self.output_namespace['wght_max'] = self.value_extractor(self.physio_config_df, 'w_max')
+        std_wght = self.value_extractor(self.physio_config_df,
+                                        'cw_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / nS
+        mu_wght = std_wght / 2.
+        self.output_namespace['init_wght'] = f'{std_wght} * nS'
+        # self.output_namespace['init_wght'] = '(%f * rand() + %f) * nS' % (std_wght, mu_wght)
+        std_delay = self.value_extractor(self.physio_config_df,
+                                         'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
+        min_delay = std_delay / 2.
+        self.output_namespace['delay'] = f'{std_delay} * ms'
+        # self. = '(%f * rand() + %f) * ms' % (std_delay, min_delay)
+
+    def STDP_with_scaling(self):
         """
         The STDP method for assigning the STDP parameters to the customized_synapses() object.
         """
@@ -266,7 +294,15 @@ class SynapseParser:
         mean_delay = self.value_extractor(self.physio_config_df,
                                          'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
         min_delay = mean_delay / 2.
-        self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
+        # self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
+        self.output_namespace['delay'] = '%f * ms' % (mean_delay)
+
+    def Fixed_multiply(self):
+        """
+        The Fixed multiply method using constant weight but assigning multiplier further on to synaptic weight. This enables array search for
+        loaded connection strengths.
+        """
+        self.Fixed_const_wght()
 
     def Fixed_calcium(self):
         """
@@ -301,32 +337,6 @@ class SynapseParser:
                                           'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
         min_delay = mean_delay / 2.
         self.output_namespace['delay'] = '(%f + %f * rand()) * ms' % (min_delay, mean_delay)
-
-    # def Fixed_normal(self):
-    #     '''
-    #      The Fixed method for assigning the parameters for Fixed synaptic connection to the customized_synapses() object.
-    #      '''
-    #
-    #     mean_wght = self.value_extractor(self.physio_config_df, 'cw_%s_%s' % (self.output_synapse['pre_group_type'],
-    #                                       self.output_synapse['post_group_type'])) / nS
-    #     sd_wght = mean_wght / 2.
-    #
-    #     # SCALE mean & SD of weight wrt calcium level
-    #     # Calcium scaling is just multiplication by a constant so we can scale mean and SD wght
-    #     # instead of scaling individual weights separately after randomization (change of variables of the Gaussian PDF)
-    #     if self.calcium_concentration > 0:
-    #         mean_wght = self.scale_by_calcium(self.calcium_concentration, mean_wght)
-    #         sd_wght  = self.scale_by_calcium(self.calcium_concentration, sd_wght) # we don't want to prescribe SDs separately in this model
-    #
-    #     # SET the weight
-    #     self.output_namespace['init_wght'] = '(%f + %f*randn()) * nS' % (mean_wght, sd_wght)
-    #     # Note that we don't scale randomized weights individually, but the parameters going into the randomization
-    #
-    #     # SET synaptic delay
-    #     mean_delay = self.value_extractor(self.physio_config_df, 'delay_%s_%s' % (self.output_synapse['pre_group_type'],
-    #                                       self.output_synapse['post_group_type'])) / ms
-    #     sd_delay = mean_delay / 2.
-    #     self.output_namespace['delay'] = '(%f + %f*randn()) * ms' % (mean_delay, sd_delay)
 
     def Depressing(self):
         """
@@ -405,7 +415,7 @@ class NeuronParser:
 
     def __init__(self, output_neuron, physio_config_df):
         self.physio_config_df = physio_config_df
-        NeuronParser.type_ref = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_E', 'HH_I', 'NDNEURON'])
+        NeuronParser.type_ref = np.array(['PC', 'SS', 'BC', 'MC', 'L1i', 'VPM', 'HH_E', 'HH_I', 'NDNEURON', 'CI'])
         assert output_neuron['type'] in NeuronParser.type_ref, " -  Cell type '%s' is not defined." % output_neuron['type']
 
         # Handling of "neuron subtype" parameters; new since Aug 2018
@@ -444,6 +454,9 @@ class NeuronParser:
         getattr(self, '_' + output_neuron['type'])(output_neuron)
 
     def _NDNEURON(self, output_neuron):
+        pass
+
+    def _CI(self, output_neuron):
         pass
 
     def _PC(self, output_neuron):

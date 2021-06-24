@@ -3,8 +3,8 @@ class ReceptorModel:
     # <editor-fold desc="SYNAPTIC EXC/INH MODEL COMPONENTS">
     default_synaptic_excinh_strings = {}
 
-    ExcModelNames = ['SIMPLE_E', 'E_ALPHA', 'E_ALPHA_NONSCALED', 'AMPA_NMDA', 'AMPA_NMDA_BIEXP', 'SIMPLE_E_NMDA', 'E_ALPHA_NMDA']
-    InhModelNames = ['SIMPLE_I', 'I_ALPHA', 'I_ALPHA_NONSCALED', 'GABAA_GABAB', 'GABAA_GABAB_BIEXP', 'SIMPLE_I_GABAB', 'I_ALPHA_GABAB']
+    ExcModelNames = ['SIMPLE_E', 'E_ALPHA', 'E_ALPHA_NONSCALED', 'AMPA_NMDA', 'AMPA_NMDA_BIEXP', 'SIMPLE_E_NMDA', 'E_ALPHA_NMDA', 'E_NDF'] # NDF for NoDrivingForce model
+    InhModelNames = ['SIMPLE_I', 'I_ALPHA', 'I_ALPHA_NONSCALED', 'GABAA_GABAB', 'GABAA_GABAB_BIEXP', 'SIMPLE_I_GABAB', 'I_ALPHA_GABAB', 'I_NDF']
 
     SynapticExcInhModels = dict()
 
@@ -14,6 +14,12 @@ class ReceptorModel:
     SynapticExcInhModels['SIMPLE_E'] = {'I_SYNAPTIC_EXC': '+ ge * (Ee - vm)',
                                         'SYNAPTIC_EXC_EQS': 'dge/dt = -ge/tau_e : siemens'}
     SynapticExcInhModels['SIMPLE_I'] = {'I_SYNAPTIC_INH': '+ gi * (Ei - vm)',
+                                        'SYNAPTIC_INH_EQS': 'dgi/dt = -gi/tau_i : siemens'}
+
+    # No driving force current models, will be connection weight x conductance change, exponential synapse
+    SynapticExcInhModels['E_NDF'] = {'I_SYNAPTIC_EXC': '+ ge * mV',
+                                        'SYNAPTIC_EXC_EQS': 'dge/dt = -ge/tau_e : siemens'} 
+    SynapticExcInhModels['I_NDF'] = {'I_SYNAPTIC_INH': '- gi * mV',
                                         'SYNAPTIC_INH_EQS': 'dgi/dt = -gi/tau_i : siemens'}
 
     # Alpha synapses
@@ -120,9 +126,11 @@ class ReceptorModel:
                                                           '''}
     #</editor-fold>
 
-    # Variables that are compartment-specific; will have compartment name attached to them
+    # Variables that are compartment-specific; will have compartment name attached to them 
     CompSpecificVariables = {'SIMPLE_E': ['ge'],
                              'SIMPLE_I': ['gi'],
+                             'E_NDF': ['ge'],
+                             'I_NDF': ['gi'],
                              'E_ALPHA': ['ge', 'gealpha', 'gealpha1'],
                              'I_ALPHA': ['gi', 'gialpha', 'gialpha1'],
                              'E_ALPHA_NONSCALED': ['ge', 'gealpha'],
@@ -136,9 +144,11 @@ class ReceptorModel:
                              'E_ALPHA_NMDA': ['ge', 'gealpha', 'gealpha1', 'g_nmda', 'g_nmda_alpha', 'g_nmda_alpha1', 'B'],
                              'I_ALPHA_GABAB': ['gi', 'gialpha', 'gialpha1', 'g_gabab', 'g_gabab_alpha', 'g_gabab_alpha1']}
 
-    # Receptors that need to be incremented in response to presynaptic spikes
+    # Receptors that need to be incremented in response to presynaptic spikes 
     Receptors = {'SIMPLE_E': ['ge'],
                  'SIMPLE_I': ['gi'],
+                 'E_NDF': ['ge'],
+                 'I_NDF': ['gi'],
                  'E_ALPHA': ['ge'],
                  'I_ALPHA': ['gi'],
                  'E_ALPHA_NONSCALED': ['ge'],
@@ -155,6 +165,8 @@ class ReceptorModel:
 
     BackgroundReceptors = {'SIMPLE_E': ['ge'],
                  'SIMPLE_I': ['gi'],
+                 'E_NDF': ['ge'],
+                 'I_NDF': ['gi'],
                  'E_ALPHA': ['ge'],
                  'I_ALPHA': ['gi'],
                  'E_ALPHA_NONSCALED': ['ge'],

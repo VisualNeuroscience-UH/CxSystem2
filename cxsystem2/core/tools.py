@@ -8,21 +8,36 @@ import pathlib as pl
 
 from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.configuration import config_file_converter as file_converter
+from brian2.input.timedarray import TimedArray
+
+def  _remove_timed_arrays(obj):
+    # Timed arrays of brian contain some expressions which cannot be saved by pickle, 
+    # thus we need to remove them.
+    if not isinstance(obj, dict):
+        return obj
+    keys = list(obj.keys())
+    for key in keys:
+        if isinstance(obj[key],TimedArray):
+            del obj[key]
+        elif isinstance(obj[key], dict):
+            obj[key] = _remove_timed_arrays(obj[key])
+    return obj
 
 def write_to_file(save_path,
                   data):
     if type(save_path) != pl.PosixPath:
         save_path = pl.Path(save_path)
     if save_path.suffix == '.gz':
+        # Check data dictionary for TimedArray objects and remove them
+        data = _remove_timed_arrays(data)
         with open(save_path.as_posix(), 'wb') as fb:
-            fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
+            fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9)) # master branch version
     elif save_path.suffix == '.bz2':
         with bz2.BZ2File(save_path.as_posix(), 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
     elif save_path.suffix == '.pickle':
         with open(save_path.as_posix(), 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
-
 
 def load_from_file(load_path):
     if type(load_path) != pl.PosixPath:
@@ -55,8 +70,6 @@ def parameter_finder(df,
     else:
         raise NameError('Variable %s not found in the configuration file.' % keyword)
 
-
-
 def change_parameter_value_in_file(filepath,
                                    save_path,
                                    parameter,
@@ -69,8 +82,7 @@ def change_parameter_value_in_file(filepath,
     elif location[0].size == 1:
         raise ParameterNotFoundError('Parameter {} not found in the configuration file.'.format(parameter))
     else:
-        raise ParameterNotFoundError('More than one instance of parameter {} found, cannot chagne the value'.format(parameter))
-
+        raise ParameterNotFoundError('More than one instance of parameter {} found, cannot change the value'.format(parameter))
 
 def read_config_file(conf,
                      header=False):
