@@ -17,6 +17,7 @@ import time
 from builtins import input
 from pathlib import Path, PurePosixPath
 from sys import platform
+from packaging import version
 
 import paramiko
 from ping3 import ping
@@ -42,6 +43,14 @@ class ClusterRun:
             raise ParameterNotFoundError("cluster_workspace is not defined for running CxSystem on cluster")
         assert self.cluster_workspace.is_absolute(), \
             "cluster_workspace {} must be an absolute path with explicit [remote] home directory path".format(self.cluster_workspace.as_posix())
+
+        try:
+            self.cluster_repospace = PurePosixPath(parameter_finder(array_run_obj.anatomy_df, 'remote_repo_path'))
+        except NameError:
+            print('remote_repo_path not found, assuming remote_repo_path = [cluster_workspace]/CxSystem2') # inside method update_remote_cxsystem2
+            self.cluster_repospace = None
+        assert self.cluster_repospace.is_absolute(), \
+            "remote_repo_path {} must be an absolute path with explicit [remote] home directory path".format(self.remote_repo_path.as_posix())
 
         try:
             self.cluster_address = parameter_finder(array_run_obj.anatomy_df, 'cluster_address')
@@ -96,7 +105,7 @@ class ClusterRun:
                                 password=self.password)
 
         print(" -  Connected to %s" % self.cluster_address)
-        print(" -  Creating workspace folder if not exists")
+        print(f" -  Creating workspace folder ({self.cluster_workspace}) if not exists")
         self.ssh_commander('mkdir -p {}'.format(self.cluster_workspace.as_posix()))
         scp = SCPClient(self.client.get_transport())
 
@@ -144,7 +153,7 @@ class ClusterRun:
                 raise FileNotFoundError("\nSlurm file {} not found".format(self.slurm_file_path.as_posix()))
 
         # updating remote cxsystem2
-        self.update_remote_cxsystem2(self.slurm_file_path, self.cluster_workspace)
+        self.update_remote_cxsystem2(self.slurm_file_path, self.cluster_workspace, self.cluster_repospace)
 
         # building slurm :
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
@@ -223,36 +232,50 @@ class ClusterRun:
 
     def update_remote_cxsystem2(self,
                                 slurm_path,
-                                remote_workspace):
+                                remote_workspace,
+                                remote_repospace=None):
         slurm_path = Path(slurm_path)
         remote_workspace = Path(remote_workspace)
-        module_name = self.find_remote_python_module(slurm_path)
+        module_name, venv_activation = self.find_remote_python_module(slurm_path) # This examines slurm job file
         self.ssh_commander('mkdir -p {}'.format(self.cluster_workspace.as_posix()))
 
         # Query for valid cxsystem, install/update if necessary, report
         print(" -  Checking CxSystem2 on cluster")
 
-        # Should be empty string for existing git repo
-        git_repo_error_message = self.ssh_commander('source ~/.bash_profile ; '
-                                 'source ~/.bashrc ; '
-                                 'cd {workspace} ; '
-                                 'cd CxSystem2 ; '
-                                 'git -C . rev-parse'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
-        
+        # Check installation in current environment. Remote environment should be set in .bashrc or in slurm job file on the cluster.
+        first_cxsystem_version_for_virtual_env = '2.1.0.0'
+
+        cxsystem_version_rawstring = self.ssh_commander(  f'source ~/.bashrc ; {venv_activation}; cxsystem2 -v')
+        cxsystem_version_string = cxsystem_version_rawstring.decode("utf-8")
+        cxsystem_version_string = cxsystem_version_string.strip('\r\n')
+        cxsystem_version = cxsystem_version_string.removeprefix('CxSystem2 Version ')
+        if version.parse(cxsystem_version) >= version.parse(first_cxsystem_version_for_virtual_env):
+            git_repo_error_message = ''
+            print(f" -  Found CxSystem2 version {cxsystem_version} installed")
+            installed_repo_init_module = self.ssh_commander(  'source ~/.bashrc ; python -c "import cxsystem2; print(cxsystem2.__file__)"').decode('utf-8')
+            if str(remote_repospace.as_posix()) not in installed_repo_init_module:
+                print(f" -  NOTE {str(remote_repospace)} not in {installed_repo_init_module}, best to re-install")
+                git_repo_error_message = 'not empty'
+            
+        else:
+            remote_repospace = remote_workspace / 'CxSystem2'
+            # Should be empty string for existing git repo
+            git_repo_error_message = self.ssh_commander('source ~/.bash_profile ; '
+                                    'source ~/.bashrc ; '
+                                    'cd {repospace} ; '
+                                    'git -C . rev-parse'.format(repospace=remote_repospace.as_posix())).decode('utf-8')
         if not git_repo_error_message:
             git_basename = self.ssh_commander(
-                                    'cd {workspace}/CxSystem2 ; '
-                                    'git rev-parse --show-toplevel'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
+                                    'cd {repospace} ; '
+                                    'git rev-parse --show-toplevel'.format(repospace=remote_repospace.as_posix())).decode('utf-8')
             commit_HEAD_hash = self.ssh_commander('source ~/.bash_profile ; '
                                     'source ~/.bashrc ; '
-                                    'cd {workspace} ; '
-                                    'cd CxSystem2 ; '
-                                    'git rev-parse --short HEAD'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
+                                    'cd {repospace} ; '
+                                    'git rev-parse --short HEAD'.format(repospace=remote_repospace.as_posix())).decode('utf-8')
             git_branch = self.ssh_commander('source ~/.bash_profile ; '
                                     'source ~/.bashrc ; '
-                                    'cd {workspace} ; '
-                                    'cd CxSystem2 ; '
-                                    'git rev-parse --abbrev-ref HEAD'.format(workspace=remote_workspace.as_posix())).decode('utf-8')
+                                    'cd {repospace} ; '
+                                    'git rev-parse --abbrev-ref HEAD'.format(repospace=remote_repospace.as_posix())).decode('utf-8')
             print(f" -  The git repo is {git_basename}    branch is {git_branch}    commit HEAD hash is {commit_HEAD_hash}")
             print(f" -  No need to download/install")
         else:
@@ -263,25 +286,43 @@ class ClusterRun:
                                     'git clone https://github.com/VisualNeuroscience-UH/CxSystem2 ; '
                                     'cd CxSystem2 ; '
                                     'git pull ; '.format(workspace=remote_workspace.as_posix())).decode('utf-8'))
-            print(self.ssh_commander('bash -lc \''
-                                    'source ~/.bash_profile ; '
-                                    'source ~/.bashrc ; '
-                                    'echo $PATH; '
-                                    'module load {module} ;'
-                                    'cd {cxfolder} ; '
-                                    'python -m pip install -Ue . --user\''
-                                    .format(module=module_name, cxfolder=remote_workspace.joinpath('CxSystem2').as_posix())).decode('utf-8'))
+            if module_name:
+                print(self.ssh_commander('bash -lc \''
+                                        'source ~/.bash_profile ; '
+                                        'source ~/.bashrc ; '
+                                        'echo $PATH; '
+                                        'module load {module} ;'
+                                        'cd {cxfolder} ; '
+                                        'python -m pip install -Ue . --user\''
+                                        .format(module=module_name, cxfolder=remote_workspace.joinpath('CxSystem2').as_posix())).decode('utf-8'))
+            elif venv_activation:
+                print(self.ssh_commander('bash -lc \''
+                                        'source ~/.bash_profile ; '
+                                        'source ~/.bashrc ; '
+                                        'echo $PATH; '
+                                        '{venv} ;'
+                                        'cd {cxfolder} ; '
+                                        'python -m pip install -Ue . --user\''
+                                        .format(venv=venv_activation, cxfolder=remote_workspace.joinpath('CxSystem2').as_posix())).decode('utf-8'))
 
     def find_remote_python_module(self,
                                   slurm_path):
         module_name = ''
+        venv_activation = ''
         slurm_path = Path(slurm_path)
         with open(slurm_path.as_posix()) as f:
             for line in f:
                 if 'module load' in line.lower() and 'python' in line.lower():
                     module_name = line.split(' ')[-1].strip('\n')
-        print(" -  Remote module name is {}".format(module_name))
-        return module_name
+                elif 'conda activate' in line.lower() or ('source' in line.lower() and 'activate' in line.lower()):
+                    venv_activation = line.strip('\n')
+        assert not module_name and venv_activation, 'You have both virtual environment activation and module load strings in your slurm job file, aborting...'
+        
+        if module_name:
+            print(" -  Remote module name is {}".format(module_name))
+        if venv_activation:
+            print(" -  Remote virtual environment is activated with command {}".format(venv_activation))
+        return module_name, venv_activation
 
 
 class ClusterDownloader:
