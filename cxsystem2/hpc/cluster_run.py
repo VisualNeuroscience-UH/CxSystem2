@@ -46,11 +46,11 @@ class ClusterRun:
 
         try:
             self.cluster_repospace = PurePosixPath(parameter_finder(array_run_obj.anatomy_df, 'remote_repo_path'))
+            assert self.cluster_repospace.is_absolute(), \
+                "remote_repo_path {} must be an absolute path with explicit [remote] home directory path".format(self.remote_repo_path.as_posix())
         except NameError:
-            print('remote_repo_path not found, assuming remote_repo_path = [cluster_workspace]/CxSystem2') # inside method update_remote_cxsystem2
+            print(' -  Remote_repo_path not found, assuming remote_repo_path = [cluster_workspace]/CxSystem2') # inside method update_remote_cxsystem2
             self.cluster_repospace = None
-        assert self.cluster_repospace.is_absolute(), \
-            "remote_repo_path {} must be an absolute path with explicit [remote] home directory path".format(self.remote_repo_path.as_posix())
 
         try:
             self.cluster_address = parameter_finder(array_run_obj.anatomy_df, 'cluster_address')
@@ -155,13 +155,15 @@ class ClusterRun:
         # updating remote cxsystem2
         self.update_remote_cxsystem2(self.slurm_file_path, self.cluster_workspace, self.cluster_repospace)
 
-        # building slurm :
+        # building slurm files. This includes the cxsystem call for each job file at cluster. The cxsystem parameters, including idx to array, is defined here.
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
             with open(self.slurm_file_path.as_posix(), 'r') as sl1:
                 remote_slurm_filename = "_tmp_slurm{}_part{}.job".format(self.suffix, item_idx)
                 with open(self.local_cluster_folder.joinpath(remote_slurm_filename).as_posix(), 'w') as sl2:  # wb -> w
                     for line in sl1:
                         sl2.write(line)
+                    
+                    # Append command to launch one of the jobs with correct item index (parameter).
                     try:
                         sl2.write("python -c "
                                   "\"from cxsystem2.core.cxsystem import CxSystem as cxs; "
@@ -183,6 +185,8 @@ class ClusterRun:
             scp.put(self.local_cluster_folder.joinpath(remote_slurm_filename).as_posix(),
                     self.cluster_workspace.joinpath(remote_slurm_filename).as_posix())
         print(" -  Slurm file generated and copied to cluster")
+
+        # Now the job files are launched at the remote cluster with sbatch slurm command
         self.channel = self.client.invoke_shell()
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
             remote_slurm_filename = "_tmp_slurm{}_part{}.job".format(self.suffix, item_idx)
@@ -193,6 +197,7 @@ class ClusterRun:
             self.channel.send('cd {} && sbatch {}\n'.format(self.cluster_workspace.as_posix(), remote_slurm_filename))
             print(" -  Job file {} submitted".format(remote_slurm_filename))
             time.sleep(1)
+
         cluster_metadata = \
             {'cluster_address': self.cluster_address,
              'cluster_login_node': self.cluster_login_node,
@@ -268,13 +273,9 @@ class ClusterRun:
             git_basename = self.ssh_commander(
                                     'cd {repospace} ; '
                                     'git rev-parse --show-toplevel'.format(repospace=remote_repospace.as_posix())).decode('utf-8')
-            commit_HEAD_hash = self.ssh_commander('source ~/.bash_profile ; '
-                                    'source ~/.bashrc ; '
-                                    'cd {repospace} ; '
+            commit_HEAD_hash = self.ssh_commander('cd {repospace} ; '
                                     'git rev-parse --short HEAD'.format(repospace=remote_repospace.as_posix())).decode('utf-8')
-            git_branch = self.ssh_commander('source ~/.bash_profile ; '
-                                    'source ~/.bashrc ; '
-                                    'cd {repospace} ; '
+            git_branch = self.ssh_commander('cd {repospace} ; '
                                     'git rev-parse --abbrev-ref HEAD'.format(repospace=remote_repospace.as_posix())).decode('utf-8')
             print(f" -  The git repo is {git_basename}    branch is {git_branch}    commit HEAD hash is {commit_HEAD_hash}")
             print(f" -  No need to download/install")
@@ -316,7 +317,10 @@ class ClusterRun:
                     module_name = line.split(' ')[-1].strip('\n')
                 elif 'conda activate' in line.lower() or ('source' in line.lower() and 'activate' in line.lower()):
                     venv_activation = line.strip('\n')
-        assert not module_name and venv_activation, 'You have both virtual environment activation and module load strings in your slurm job file, aborting...'
+
+        if module_name and venv_activation:
+            print('NOTE: You have both virtual environment activation and module load strings in your slurm job file, setting module priority')
+            venv_activation = ''
         
         if module_name:
             print(" -  Remote module name is {}".format(module_name))

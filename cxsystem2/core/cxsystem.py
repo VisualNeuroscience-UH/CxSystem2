@@ -260,7 +260,10 @@ class CxSystem:
                     -1]
                 print("spawning index: %d, step: %d" % (int(cluster_run_start_idx), int(cluster_run_step)))
                 cluster_flag = 1
+                # When in cluster, suffix is the global suffix, for whole arrayrun. The self.suffix is local suffix for one job.
                 suffix = array_run_suffix
+                # during cluster run, we need to save the current job suffix for removal of the tmp files later
+                self.current_cluster_job_suffix = self.suffix
 
             if type(anatomy_and_system_config) == dict:
                 tmp_anat_path2 = tmp_folder_path.joinpath('tmp_anat_2_' + self.suffix + '.json').as_posix()
@@ -275,7 +278,8 @@ class CxSystem:
             # this is vulnerable to code injection
             if sys.platform == 'linux':
                 from cxsystem2.hpc.array_run import ArrayRun
-                ArrayRun(tmp_anat_path, tmp_physio_path,suffix,int(cluster_run_start_idx),int(cluster_run_step),anatomy_and_system_config,physiology_config,cluster_flag,self.array_run_stdout_file)
+                # When in cluster, here you run the individual parameter set. The tmp_anat_path and tmp_physio_path are dataframes with correct params.
+                ArrayRun(tmp_anat_path, tmp_physio_path, suffix, int(cluster_run_start_idx), int(cluster_run_step), anatomy_and_system_config, physiology_config,cluster_flag,self.array_run_stdout_file)
             else:
                 command = 'python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}'.format(
                     array_run=array_run_path,
@@ -294,6 +298,12 @@ class CxSystem:
                 if sys.platform == 'linux' or sys.platform == 'darwin':
                     command = '/bin/bash -c "' + command + '"'
                 os.system(command)
+
+            # Teardown code for cluster run, moved here from array_ryn.py>spawn_processes
+            if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:
+                print("cleaning tmp folders " + str(tmp_folder_path))
+                shutil.rmtree(tmp_folder_path)
+
             self.array_run = 1
             return
         try:

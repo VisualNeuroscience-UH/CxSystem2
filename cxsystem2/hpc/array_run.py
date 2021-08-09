@@ -46,7 +46,7 @@ class ArrayRun:
         :param physiology_dataframe: The dataframe containing the physiology configurations that has an instance for ArrayRun in it.
         :param job_suffix: The job_suffix for the metadata file containing the filename and changing parameters in each of the simulations.
         """
-        self.suffix = job_suffix
+        self.suffix = job_suffix # At cluster this is global suffix (one for whole requested array)
         self.cluster_start_idx = int(cluster_start_idx)
         self.cluster_step = int(cluster_step)
         self.array_run_is_in_cluster = array_run_is_in_cluster
@@ -235,6 +235,7 @@ class ArrayRun:
         tr_suffix = ''
         if self.trials_per_config > 1:
              tr_suffix = '_' + str(tr).zfill(3)
+        # The self.list_of_anatomy/physio_dfs[idx] contains the dataframes with final (single) parameter value for simulation.
         cm = cx.CxSystem(self.list_of_anatomy_dfs[idx], self.list_of_physio_dfs[idx], output_file_suffix=self.final_namings[idx]
                          + tr_suffix, instantiated_from_array_run=1, array_run_in_cluster=self.array_run_is_in_cluster)
         cm.run()
@@ -279,10 +280,11 @@ class ArrayRun:
             tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
             print("cleaning tmp folders " + tmp_folder_path)
             shutil.rmtree(tmp_folder_path)
-        elif self._is_running_in_cluster() is True:
-            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'cluster_workspace')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
-            print("cleaning tmp folders " + tmp_folder_path)
-            shutil.rmtree(tmp_folder_path)
+#        Moved to end of cxsystem init 
+#        elif self._is_running_in_cluster() is True:
+#            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'cluster_workspace')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
+#            print("cleaning tmp folders " + tmp_folder_path)
+#            shutil.rmtree(tmp_folder_path)
 
     def generate_dataframes_for_param_search(self, original_df, index_of_array_variable, df_type, naming_prefix='', recursion_counter=1):
         """
