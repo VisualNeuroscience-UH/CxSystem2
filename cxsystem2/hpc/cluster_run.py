@@ -338,8 +338,8 @@ class ClusterDownloader:
         submission_time = datetime.strptime(self.metadata['timestamp'], '%Y-%m-%d %H:%M:%S')
         time_diff = datetime.now() - submission_time
         # let's wait for at least 30 seconds after job submissions and then look for results
-        while time_diff.seconds < 30:
-            time.sleep(10)
+        while time_diff.seconds < 5:
+            time.sleep(1)
             time_diff = datetime.now() - submission_time
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
@@ -398,7 +398,7 @@ class ClusterDownloader:
             # if not ssh_commander(client,'cd %s; ls -d */' % (remote_result_abs_path), 0) and \
             # 'metadata' in ssh_commander(client,'cd %s; ls' % (remote_result_abs_path), 0):
             # just a better check:
-            time.sleep(10)
+            time.sleep(2)
             check_remote = self.ssh_commander(self.client, 'squeue -l -u {}'.format(self.metadata['cluster_username']), 0).decode('utf-8')
             if not self.metadata['cluster_username'] in check_remote:
                 # here it means there is no folder in result folder and therefore all simulations are done
