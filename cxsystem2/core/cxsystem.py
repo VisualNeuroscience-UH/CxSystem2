@@ -245,8 +245,8 @@ class CxSystem:
             self.workspace.create_simulation(parameter_finder(self.anat_and_sys_conf_df, 'simulation_title'))
             suffix = self.suffix
             tmp_folder_path = self.workspace.get_workspace_folder().joinpath('.tmp' + suffix)
-            if not tmp_folder_path.is_dir():
-                os.mkdir(tmp_folder_path.as_posix())
+            #if not tmp_folder_path.is_dir():
+            os.makedirs(tmp_folder_path.as_posix(), exist_ok=True) 
             tmp_anat_path = tmp_folder_path.joinpath('tmp_anat' + self.suffix + '.csv').as_posix()
             tmp_physio_path = tmp_folder_path.joinpath('tmp_phys' + self.suffix + '.csv').as_posix()
             self.anat_and_sys_conf_df.to_csv(tmp_anat_path, index=False, header=False)
@@ -302,7 +302,11 @@ class CxSystem:
             # Teardown code for cluster run, moved here from array_ryn.py>spawn_processes
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:
                 print("cleaning tmp folders " + str(tmp_folder_path))
-                shutil.rmtree(tmp_folder_path)
+                try:
+                    shutil.rmtree(tmp_folder_path)
+                except FileNotFoundError:
+                    print("already removed, passing")
+                    pass
 
             self.array_run = 1
             return
