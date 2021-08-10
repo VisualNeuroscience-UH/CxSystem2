@@ -1,3 +1,7 @@
+branches:
+  only:
+  - master
+  - deneve_info
 language: python
 os:
 - linux
