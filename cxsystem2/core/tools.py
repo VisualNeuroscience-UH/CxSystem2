@@ -35,7 +35,7 @@ def write_to_file(save_path,
     elif save_path.suffix == '.bz2':
         with bz2.BZ2File(save_path.as_posix(), 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
-    elif save_path.suffix == '.pickle':
+    elif save_path.suffix == '.pickle' or save_path.suffix == '.pkl':
         with open(save_path.as_posix(), 'wb') as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
 
@@ -49,7 +49,7 @@ def load_from_file(load_path):
     elif load_path.suffix == '.bz2':
         with bz2.BZ2File(load_path.as_posix(), 'rb') as fb:
             loaded_data = pickle.load(fb)
-    elif load_path.suffix == '.pickle':
+    elif load_path.suffix == '.pickle' or load_path.suffix == '.pkl':
         with open(load_path.as_posix(), 'rb') as fb:
             loaded_data = pickle.load(fb)
     return loaded_data

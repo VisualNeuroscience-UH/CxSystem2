@@ -299,11 +299,9 @@ class CxSystem:
                     command = '/bin/bash -c "' + command + '"'
                 os.system(command)
 
+
             # Teardown code for cluster run, moved here from array_ryn.py>spawn_processes
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:
-                # Copy anat and phys csv to downloads folder
-                import pdb; pdb.set_trace()
-                self.local_cluster_folder
                 print("cleaning tmp folders " + str(tmp_folder_path))
                 try:
                     shutil.rmtree(tmp_folder_path)
