@@ -15,15 +15,15 @@ script:
 - pytest tests/test_cpp_and_array.py
 jobs:
   include:
-    - stage: py37 array and cluster 
-      python: 3.7
-      script: pytest tests/test_python_array_clusterrun.py
-    - stage: py39 array and cluster
-      python: 3.9
-      script: pytest tests/test_python_array_clusterrun.py
+  - stage: py37 array and cluster
+    python: 3.7
+    script: pytest tests/test_python_array_clusterrun.py
+  - stage: py39 array and cluster
+    python: 3.9
+    script: pytest tests/test_python_array_clusterrun.py
 notifications:
   slack:
     secure: rlLWtxBUFu+o3mCcz1FnKi5Ylmsy9ZtaSG5Ex0c45oZpGWOidRdpoqJqgZO+nBpVgAcmupKmEjRHvOl2waPMgP2Xbyh++FOPCdEM+WB1R4cGPOVrAv+8H+m3A6oKSX+fRXjZM5rqEDgaV4LVlTQPkFfdcGX+tSwrlpHV5xeMRp2hhRJ4LZ/VvnzV/Y7B+Z1wSFyidiOflhGwzdp2todqIFt87ZpfJ7FEj3oPBtnvquGY0Yq3GoMgBDcRddFdo7UMk582H2FyEUdOk6v7Qnie9BBooSaA9tPlY4m5rBzD/hP47qXo3x7mOZaGQnl/TeItIVe9eJFesANStQKevgkeg/rK/iq4xM+7dMa+SQIu2AOShF1auwnVN/2nKPUlbgV4Idi3CQb6uH9lcFp7p9gRA3TXBj4+VUsP/74PMC2blR07G7s/r9+QGpYQLD+5ODZ9wNG9K+sOCB18hs3ZeuY94B+GDTWnsjZtFsV73OLy/+EfSyY4W9R+Vv5KdDDVd4ldkVx8QPQNSljska90GbA1M5Rspj78FdLDvCz4TqH5AsqavFmSyqshRrICVFJQS1H2z12kF4K5SKMbxcDMWYxqDUK34cqjefXfz2HPrJWtDCN23jFxa+4OBplMoUJxow4Al0Qu3SZnDKnRIoM17ILxb75mJODYo6f5Wd4TLhrqgpI=
 env:
   global:
-  - secure: QOWpVOnWep3NCbjULtrGGu2+EQomKGhiWdZM+J7DKPWL+RWyiNwZiJkfDnAYvt4Z/a/TP8eNZs0WURQ+sSgOQVNVgmnshiQdFZ9kcRo+DQemydoq/nWJO4CLphTsZVsi1UJUFcI4n4q+en1JtjiyoonKRlm8p8jdA+ep+DUp0EIOCrDy1KZ3evtZQP20oaErYg779gbUz0PHAiOh6CoSUBVx/FJ+4FWLjd7xTk2HQ4A+W1OnWxtvM74abrZo7LkqzDqA6YA+BKx0Zd39q9VUH+xLfRngviElwDvckQKpfbRl7cnvNyGwjULisahsaDAKsfec+iano6QfnI3D1TyRvcQ3l1YFaYgCuIB48AqkspeKHYeGrRCTNZBOW737dfx0tGfxkHC2VdUkIQigKjNE+gAFNUKtCu5/JlgrdQhI+4UZrJin9h9YXcZEaBTCuP3tXtswl2qnPBTDKNA2Z6445uhsWzkfQzJoR++ZoX0NA9zYzBQS7Vngr+Y7VrKL64TzMy2UhEEoV3AfVDhKobN1LVdL0KRwiQX4QKp4VxQDOF5YZx4YvFlPxDDjm02m+N+iebpzKFg7zOYlHNyq7IXYfwrt6E87mvy1pPO5U/UFkkzPPq2MquhdEJIQFZZ+7wg2M1LWtv7YgE0vMuwt38fPkU59vcje+Olw0GMPgCGYSbw=
+  - secure: YHkZs9hhOSBSHJJnKrmvRTZABeObUZ1WaxSkbVOZxNxnWD53jy/6T3ZuDngUI0AiKOZm6axsYI+8X4gS82lPITXSPykIpeirj/zbVSxKQ3++inTrCcMeINevjaRIUdH2EraYWtH/KdVq8FvPnWB4mwO9QWsnf+cMHIbWKartkFd8KTw5FOZSouwpxXaccao4Pd+BJFFwRtrQ/zoRu41auLiN5bYxuPFUtSy7R1KF8HGisUfZjXSXVUnL/kfsVUlntIWiDbYW7SLZKLGHNfgbjTk6r3w8wXu1E2FLZCfanRnFrkmRZxM24V4+ds2fu7LTGcsIAN0EB4PI4b5Pz3ppk1l7oXCY0/iltK/pc/7bcR2T2y8phQhqPLZ+wy3HAzXlGEIaR8tBVb9+yjn4VikvHeEJ76Mf1XUdqcmMcq2rrzpR7k8NVfYymcZhVlE9AoFus37Hbxf/6Zss2HoCg1nYpFkOEqMuA5JFH53erCTA+Uyf58NgCCUD4glJ9iniJhIoCmpHPHwcUuXK73KxIhmnMdE08e2XCiQ9ZZmrev09UnnQgWO3cshn8m1Bh+gL9tPzdjAlkMKXy9DZ1gKp7SorweslpftDKRxOwAAsShkMqULa/O+ghvCp/CvuZnDGZclj+RrJLqdCD856ydBXJHhxZwGPUTjCm+QKj9bKUQ0vjIY=
