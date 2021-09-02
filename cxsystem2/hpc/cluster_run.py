@@ -205,7 +205,7 @@ class ClusterRun:
              'local_workspace_unexpanded': self.local_workspace_unexpanded.as_posix(),
              'local_workspace': self.local_workspace.as_posix(),
              'local_cluster_run_folder': self.local_cluster_folder.as_posix(),
-             'local_cluster_run_download_folder': self.local_cluster_folder.joinpath('downloads'),
+             'local_cluster_run_download_folder': self.local_cluster_folder.joinpath('downloads').as_posix(),
              'cluster_workspace': self.cluster_workspace.as_posix(),
              'cluster_simulation_folder': self.cluster_workspace.joinpath(parameter_finder(array_run_obj.anatomy_df, 'simulation_title')).as_posix(),
              'suffix': self.suffix,
