@@ -392,6 +392,8 @@ class ClusterDownloader:
     def retrieve(self):
         waiting_flag = True
         print(" -  Waiting for the results ...")
+        if type(self.metadata['local_cluster_run_download_folder']) is str:
+            self.metadata['local_cluster_run_download_folder'] =Path(self.metadata['local_cluster_run_download_folder'])
         if not self.metadata['local_cluster_run_download_folder'].is_dir():
             os.mkdir(self.metadata['local_cluster_run_download_folder'].as_posix())
         while waiting_flag:
