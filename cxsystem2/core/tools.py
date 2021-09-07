@@ -79,7 +79,7 @@ def change_parameter_value_in_file(filepath,
     if location[0].size == 1:
         df.at[int(location[0] + 1), int(location[1])] = new_value
         df.to_csv(save_path, header=False, index=False)
-    elif location[0].size == 1:
+    elif location[0].size == 0:
         raise ParameterNotFoundError('Parameter {} not found in the configuration file.'.format(parameter))
     else:
         raise ParameterNotFoundError('More than one instance of parameter {} found, cannot change the value'.format(parameter))
