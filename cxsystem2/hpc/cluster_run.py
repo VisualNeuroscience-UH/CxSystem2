@@ -253,7 +253,8 @@ class ClusterRun:
         cxsystem_version_rawstring = self.ssh_commander(  f'source ~/.bashrc ; {venv_activation}; cxsystem2 -v')
         cxsystem_version_string = cxsystem_version_rawstring.decode("utf-8")
         cxsystem_version_string = cxsystem_version_string.strip('\r\n')
-        cxsystem_version = cxsystem_version_string.removeprefix('CxSystem2 Version ')
+        # cxsystem_version = cxsystem_version_string.removeprefix('CxSystem2 Version ')
+        cxsystem_version = cxsystem_version_string[18:]
         if version.parse(cxsystem_version) >= version.parse(first_cxsystem_version_for_virtual_env):
             git_repo_error_message = ''
             print(f" -  Found CxSystem2 version {cxsystem_version} installed")
