@@ -33,7 +33,7 @@ CxSystem is a cerebral cortex simulation framework, which operates on personal c
 
 The CxSystem aims at easy testing and buildup of diverse models at single cell resolution.  Implemented on the top of the Python-based [Brian2 simulator](https://github.com/brian-team/brian2), CxSystem supports the main goal of Brian, i.e. minimizing development time, by providing the user with a simplified interface.
 
-The preliminary version of this software has been developed at Aalto University 2012-2015 [2], and the full version at the University of Helsinki 2013-2017. The software is distributed under the terms of the GNU General Public License, Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
+The preliminary version of this software has been developed at Aalto University 2012-2015 [2], and the full version at the Hospital District of Helsinki and Uusimaa and University of Helsinki 2013-2017. The software is distributed under the terms of the GNU General Public License, Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 
 ## Installation
