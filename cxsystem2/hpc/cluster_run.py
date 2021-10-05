@@ -153,7 +153,7 @@ class ClusterRun:
                 raise FileNotFoundError("\nSlurm file {} not found".format(self.slurm_file_path.as_posix()))
 
         # updating remote cxsystem2
-        self.update_remote_cxsystem2(self.slurm_file_path, self.cluster_workspace, self.cluster_repospace)
+        # self.update_remote_cxsystem2(self.slurm_file_path, self.cluster_workspace, self.cluster_repospace) # TMP SKIPPING VERSION CHECK AT HPC SIMO 211005
 
         # building slurm files. This includes the cxsystem call for each job file at cluster. The cxsystem parameters, including idx to array, is defined here.
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
@@ -214,7 +214,11 @@ class ClusterRun:
             pickle.dump(cluster_metadata, ff)
         print(" -  Cluster metadata saved. To download the result and clean the environments after getting the email,"
               " run the following command in the terminal:\n")
-        print("cxcluster " + self.local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)).as_posix())
+        metadata_path = self.local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix))
+        print("cxcluster " + metadata_path.as_posix())
+
+        # TMP AUTOMATIC DOWNLOADING FROM HPC SIMO 211005
+        ClusterDownloader(metadata_path.as_posix(), clean_remote=True, retrieve=True)
 
     def ping_cluster(self):
         try:  # check if the cluster address is ip or hostname
