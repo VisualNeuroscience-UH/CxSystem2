@@ -217,8 +217,8 @@ class ClusterRun:
         metadata_path = self.local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix))
         print("cxcluster " + metadata_path.as_posix())
 
-        # TMP AUTOMATIC DOWNLOADING FROM HPC SIMO 211005
-        ClusterDownloader(metadata_path.as_posix(), clean_remote=True, retrieve=True)
+        # # TMP AUTOMATIC DOWNLOADING FROM HPC SIMO 211005
+        # ClusterDownloader(metadata_path.as_posix(), clean_remote=True, retrieve=True)
 
     def ping_cluster(self):
         try:  # check if the cluster address is ip or hostname
