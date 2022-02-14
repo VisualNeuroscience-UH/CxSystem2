@@ -152,8 +152,8 @@ class ClusterRun:
             else:
                 raise FileNotFoundError("\nSlurm file {} not found".format(self.slurm_file_path.as_posix()))
 
-        # updating remote cxsystem2
-        # self.update_remote_cxsystem2(self.slurm_file_path, self.cluster_workspace, self.cluster_repospace) # TMP SKIPPING VERSION CHECK AT HPC SIMO 211005
+        # updating remote cxsystem2. Comment to skip version check.
+        self.update_remote_cxsystem2(self.slurm_file_path, self.cluster_workspace, self.cluster_repospace) 
 
         # building slurm files. This includes the cxsystem call for each job file at cluster. The cxsystem parameters, including idx to array, is defined here.
         for item_idx, item in enumerate(array_run_obj.clipping_indices):
@@ -210,6 +210,7 @@ class ClusterRun:
              'cluster_simulation_folder': self.cluster_workspace.joinpath(parameter_finder(array_run_obj.anatomy_df, 'simulation_title')).as_posix(),
              'suffix': self.suffix,
              'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-7]}
+        
         with open(self.local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)), 'wb') as ff:
             pickle.dump(cluster_metadata, ff)
         print(" -  Cluster metadata saved. To download the result and clean the environments after getting the email,"
@@ -252,6 +253,7 @@ class ClusterRun:
         print(" -  Checking CxSystem2 on cluster")
 
         # Check installation in current environment. Remote environment should be set in .bashrc or in slurm job file on the cluster.
+        # TODO Version check does not skip reinstallation, fix. Clear code, now somewhat spagetti
         first_cxsystem_version_for_virtual_env = '2.1.0.0'
 
         cxsystem_version_rawstring = self.ssh_commander(  f'source ~/.bashrc ; {venv_activation}; cxsystem2 -v')
