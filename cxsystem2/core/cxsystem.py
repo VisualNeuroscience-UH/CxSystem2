@@ -1237,9 +1237,9 @@ class CxSystem:
             assert _post_type != 'PC', \
                 ' -  The post_synaptic group is a multi-compartmental PC but the target compartment is' \
                 ' not selected. Use [C] tag followed by compartment number.'
-            self.current_values_list = self.current_values_list.append(pd.Series([_pre_type, _post_type, '_soma']), ignore_index=True)
-            self.current_parameters_list = self.current_parameters_list.append(pd.Series(['pre_type', 'post_type', 'post_comp_name']),
-                                                                               ignore_index=True)
+            # import pdb; pdb.set_trace()
+            self.current_values_list = pd.concat([self.current_values_list, pd.Series([_pre_type, _post_type, '_soma'])], ignore_index=True )
+            self.current_parameters_list = pd.concat([self.current_parameters_list, pd.Series(['pre_type', 'post_type', 'post_comp_name'])], ignore_index=True)
             self.current_values_list = [self.current_values_list]
 
         for syn in self.current_values_list:
