@@ -13,6 +13,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 import numpy as np
 from brian2.units import *
 from numpy import nan, array
+import pandas as pd
 
 
 class SynapseParser:
@@ -443,7 +444,7 @@ class NeuronParser:
 
         # "Root variables" extracted so that neuron parameters can refer to variables globals in physio config
         root_variables = self.physio_config_df[self.physio_config_df['Key'].isnull()].dropna(subset=['Variable'])
-        cropped_with_root = root_variables.append(cropped_df)
+        cropped_with_root = pd.concat([root_variables, cropped_df])
 
         for neural_parameter in cropped_df['Key'].dropna():
             try:
