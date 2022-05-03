@@ -24,7 +24,7 @@ import pandas as pd
 
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
-from cxsystem2.core.tools import write_to_file, parameter_finder
+from cxsystem2.core.tools import write_to_file, parameter_finder, load_from_file
 from cxsystem2.hpc.cluster_run import ClusterRun
 
 class ArrayRun:
@@ -98,9 +98,13 @@ class ArrayRun:
             self.config_per_node = math.ceil(self.total_configs / self.cluster_number_of_nodes)
             self.clipping_indices = np.arange(0, self.total_configs, self.config_per_node)
             ClusterRun(self, Path(anatomy_file_path), Path(physio_file_path), self.suffix)
+            
+            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
+
+            # Next we transfer tmp anat and phys csv files to downloads folder for future use
+            self._save_tmp_anat_phys_to_downloads(tmp_folder_path)
 
             print (" -  removing .tmp folder")
-            tmp_folder_path = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser().joinpath('.tmp' + self.suffix).as_posix()
             print("cleaning tmp folders " + tmp_folder_path)
             shutil.rmtree(tmp_folder_path)
 
@@ -109,6 +113,24 @@ class ArrayRun:
 
         elif self._is_running_locally():
             self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)  # this runs when not in cluster
+
+    def _save_tmp_anat_phys_to_downloads(self, tmp_folder_path):
+        # After ClusterRun call metadata master file has been created earlier, we read it here to get the downloads folder address
+        local_workspace = Path(parameter_finder(self.anatomy_df, 'workspace_path')).expanduser()
+        local_cluster_folder = local_workspace.joinpath('cluster_run' + self.suffix)
+        metadata_pkl_fullfile = Path(local_cluster_folder.joinpath('cluster_metadata{}.pkl'.format(self.suffix)))
+        metadata_dict = load_from_file(metadata_pkl_fullfile)
+        downloads_folder = metadata_dict['local_cluster_run_download_folder']
+        #Create downloads folder
+        Path(downloads_folder).mkdir(parents=True, exist_ok=True)
+            # Move anat and phys files to download folder
+        tmp_folder_contents_list = os.listdir(tmp_folder_path)
+        fullfile_source_list = []
+        fullfile_target_list = []
+        for this_file in tmp_folder_contents_list:
+            fullfile_source_list.append(os.path.join(tmp_folder_path, this_file))
+            fullfile_target_list.append(os.path.join(downloads_folder, this_file))
+        [Path(s).replace(t) for s, t in zip(fullfile_source_list, fullfile_target_list) if 'anat' in s or 'phys' in s]
 
     def _should_submit_to_cluster(self):
         return self.run_in_cluster == 1 and self.cluster_start_idx == -1 and self.cluster_step == -1

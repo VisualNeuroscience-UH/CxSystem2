@@ -13,6 +13,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 import numpy as np
 from brian2.units import *
 from numpy import nan, array
+import pandas as pd
 
 
 class SynapseParser:
@@ -294,8 +295,8 @@ class SynapseParser:
         mean_delay = self.value_extractor(self.physio_config_df,
                                          'delay_%s_%s' % (self.output_synapse['pre_group_type'], self.output_synapse['post_group_type'])) / ms
         min_delay = mean_delay / 2.
-        # self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (mean_delay, min_delay)
-        self.output_namespace['delay'] = '%f * ms' % (mean_delay)
+        # self.output_namespace['delay'] = '%f * ms' % (mean_delay) # This has ceased to correctly save connections, scipy.sparse matrix generation cannot accept a skalar. However, the syntax below creates same values
+        self.output_namespace['delay'] = '(%f * rand() + %f) * ms' % (0, mean_delay)
 
     def Fixed_multiply(self):
         """
@@ -443,7 +444,7 @@ class NeuronParser:
 
         # "Root variables" extracted so that neuron parameters can refer to variables globals in physio config
         root_variables = self.physio_config_df[self.physio_config_df['Key'].isnull()].dropna(subset=['Variable'])
-        cropped_with_root = root_variables.append(cropped_df)
+        cropped_with_root = pd.concat([root_variables, cropped_df])
 
         for neural_parameter in cropped_df['Key'].dropna():
             try:

@@ -299,6 +299,7 @@ class CxSystem:
                     command = '/bin/bash -c "' + command + '"'
                 os.system(command)
 
+
             # Teardown code for cluster run, moved here from array_ryn.py>spawn_processes
             if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:
                 print("cleaning tmp folders " + str(tmp_folder_path))
@@ -1236,9 +1237,9 @@ class CxSystem:
             assert _post_type != 'PC', \
                 ' -  The post_synaptic group is a multi-compartmental PC but the target compartment is' \
                 ' not selected. Use [C] tag followed by compartment number.'
-            self.current_values_list = self.current_values_list.append(pd.Series([_pre_type, _post_type, '_soma']), ignore_index=True)
-            self.current_parameters_list = self.current_parameters_list.append(pd.Series(['pre_type', 'post_type', 'post_comp_name']),
-                                                                               ignore_index=True)
+
+            self.current_values_list = pd.concat([self.current_values_list, pd.Series([_pre_type, _post_type, '_soma'])], ignore_index=True )
+            self.current_parameters_list = pd.concat([self.current_parameters_list, pd.Series(['pre_type', 'post_type', 'post_comp_name'])], ignore_index=True)
             self.current_values_list = [self.current_values_list]
 
         for syn in self.current_values_list:
@@ -1487,9 +1488,9 @@ class CxSystem:
             if self.device == 'python' and eval("sum(%s.wght)==0" % _dyn_syn_name):
                 print('WARNING: Synapses %s set to zero weight!' % _dyn_syn_name)
 
-            # # the next two lines are commented out for GeNN and are added as a parameter when creating syn
-            # exec("%s.delay=%s['delay']" % (_dyn_syn_name,
-            #                                 _dyn_syn_namespace_name) ) # set the delays
+            # the next two lines are commented out for GeNN and are added as a parameter when creating syn
+            exec("%s.delay=%s['delay']" % (_dyn_syn_name,
+                                            _dyn_syn_namespace_name) ) # set the delays
             setattr(self.main_module, _dyn_syn_name, eval(_dyn_syn_name))
             try:
                 setattr(self.Cxmodule, _dyn_syn_name, eval(_dyn_syn_name))
