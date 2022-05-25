@@ -6,8 +6,8 @@ language: python
 os:
 - linux
 python:
-- '3.7'
 - '3.9'
+- '3.10'
 git:
   depth: 3
   quiet: true
@@ -19,11 +19,8 @@ script:
 - pytest tests/test_cpp_and_array.py
 jobs:
   include:
-  - stage: py37 array and cluster
-    python: 3.7
-    script: pytest tests/test_python_array_clusterrun.py
   - stage: py39 array and cluster
-    python: 3.9
+    python: 3.10
     script: pytest tests/test_python_array_clusterrun.py
 notifications:
   slack:
