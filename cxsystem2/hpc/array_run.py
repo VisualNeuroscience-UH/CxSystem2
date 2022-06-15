@@ -394,7 +394,11 @@ class ArrayRun:
             else:
                 unique_values_numerical = unique_values_raw
 
-            unique_values_sorted = np.sort(np.array([float(nn) for nn in unique_values_numerical])) # Sorted array of floats
+            try:
+                unique_values_sorted = np.sort(np.array([float(nn) for nn in unique_values_numerical])) # Sorted array of floats
+            except:
+                unique_values_sorted = sorted(unique_values_numerical) # Sorted array -- allows strings to be arrayed, such as input file names
+
             unique_values = [str(nn) for nn in unique_values_sorted] # Sorted list of strings
             title, value, naming = self.filename_generator(df, [idx], '') # this is for title only, df can be any df
             return title, unique_values
