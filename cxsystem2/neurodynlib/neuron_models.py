@@ -656,10 +656,11 @@ class LifNeuron(PointNeuron):
 
 class ClopathAdexNeuron(PointNeuron):
     """
-    LAdaptive Exponential Integrate-and-Fire (ADEX) model including CLopath_2010_NatNeurosci extra variables.
+    Adaptive Exponential Integrate-and-Fire (ADEX) model including CLopath_2010_NatNeurosci extra variables.
     See Clopath et al. Nature Neuroscience 13 (2010) 344-352 <http://dx.doi.org/10.1038/nn.2479>`_.
 
-    Requires setting the following parameters: EL, gL, C, V_res, VT.
+    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut, a, b, tau_w,
+    Isp, tau_z, tau_VT, VTmax, tau_lowpass1, tau_lowpass2, tau_homeo, x_reset, taux.
     """
 
     # The large gL and capacitance are from the original code
@@ -1063,7 +1064,7 @@ class neuron_factory:
                             'ADEX': AdexNeuron, 'AdexNeuron': AdexNeuron,
                             'SIMPLE_HH': HodgkinHuxleyNeuron, 'HodgkinHuxleyNeuron': HodgkinHuxleyNeuron,
                             'IZHIKEVICH': IzhikevichNeuron, 'IzhikevichNeuron': IzhikevichNeuron,
-                              'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
+                            'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
 
     def get_class(self, neuron_model_name):
         return copy.deepcopy(self.name_to_class[neuron_model_name]())
