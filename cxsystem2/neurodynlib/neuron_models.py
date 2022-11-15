@@ -449,15 +449,25 @@ class PointNeuron:
         plt.ylabel("vm [mV]")
         plt.show()
 
-    def plot_states(self, state_monitor):
+    def plot_states(self, state_monitor, parameters=None):
         """
         Plots pre-defined state variables from a state monitor
 
         :param state_monitor: b2.StateMonitor
-
+        :param parameters: list of parameters
         """
-
-        self.plot_vm(state_monitor)
+        if parameters is None:
+            print("No parameters specified. Plotting membrane voltage.")
+            self.plot_vm(state_monitor)
+        else:
+            n_parameters = len(parameters)
+            fig, axs = plt.subplots(n_parameters, figsize=(12, 4 * n_parameters))
+            for i, parameter in enumerate(parameters):
+                this_unit = self.parameter_units[parameter]
+                axs[i].plot(state_monitor.t / ms, state_monitor[parameter][0] / this_unit, lw=1)
+                axs[i].set_title(parameter)
+                axs[i].set_xlabel("time [ms]")
+                axs[i].set_ylabel(f"{parameter} [{this_unit}]")
 
     def get_json(self, include_neuron_name=True):
         """
@@ -786,7 +796,7 @@ class AdexNeuron(PointNeuron):
     def getting_started(self, step_amplitude=65*pA, sine_amplitude=125*pA, sine_freq=150*Hz, sine_dc=100*pA):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
-    def plot_states(self, state_monitor):
+    def plot_states(self, state_monitor, spike_monitor):
         """
         Visualizes the state variables: w-t, vm-t and phase-plane w-vm
 
@@ -808,6 +818,23 @@ class AdexNeuron(PointNeuron):
         plt.xlabel("t [ms]")
         plt.ylabel("w [pA]")
         plt.title("Adaptation current")
+
+        # measure the range of the membrane potential
+        vm_min = np.min(state_monitor.vm[0] / mV)
+        vm_max = np.max(state_monitor.vm[0] / mV)
+        # measure the range of the adaptation current
+        w_min = np.min(state_monitor.w[0] / pA)
+        w_max = np.max(state_monitor.w[0] / pA)
+        # # set the spike amplitude coefficients to go 10% under the min values of the two plots
+        # spike_amplitude_vm = vm_min - 0.1 * (vm_max - vm_min)
+        # spike_amplitude_w = w_min - 0.1 * (w_max - w_min)
+        
+        # Show spikes as dashed vertical lines on top of the Membrane potential and Adaptation current plots
+        for t in spike_monitor.t:
+            plt.subplot(2, 2, 1)
+            plt.axvline(t / ms, ls='--', lw=.5, color='k')
+            plt.subplot(2, 2, 3)
+            plt.axvline(t / ms, ls='--', lw=.5, color='k')
 
         plt.tight_layout(w_pad=0.5, h_pad=1.5)
         plt.show()
