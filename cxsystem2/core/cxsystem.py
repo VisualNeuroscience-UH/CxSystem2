@@ -22,7 +22,6 @@ import time
 import platform
 from datetime import datetime
 from pathlib import Path
-import pdb
 
 import brian2 as b2
 import numpy as np
@@ -1183,10 +1182,6 @@ class CxSystem:
                     ' -  A compartment is targeted but the neuron group is not PC. Check Synapses in the configuration file.'
                 _pre_type = self.customized_neurons_list[pre_group_ref_idx]['type']  # Pre-synaptic neuron type
                 _post_type = self.customized_neurons_list[post_group_ref_idx]['type']  # Post-synaptic neuron type
-                # pdb.set_trace()
-                # self.current_parameters_s = self.current_parameters_s.append(pd.Series(['pre_type', 'post_type', 'post_comp_name']),
-                #                                                                    ignore_index=True)
-                # self.current_values_s = self.current_values_s.append(pd.Series([_pre_type, _post_type]), ignore_index=True)
                 self.current_parameters_s = pd.concat([self.current_parameters_s, pd.Series(['pre_type', 'post_type', 'post_comp_name'])],
                                                                                    ignore_index=True)
                 self.current_values_s = pd.concat([self.current_values_s, pd.Series([_pre_type, _post_type])], ignore_index=True)
