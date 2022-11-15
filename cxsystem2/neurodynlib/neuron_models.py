@@ -818,16 +818,6 @@ class AdexNeuron(PointNeuron):
         plt.xlabel("t [ms]")
         plt.ylabel("w [pA]")
         plt.title("Adaptation current")
-
-        # measure the range of the membrane potential
-        vm_min = np.min(state_monitor.vm[0] / mV)
-        vm_max = np.max(state_monitor.vm[0] / mV)
-        # measure the range of the adaptation current
-        w_min = np.min(state_monitor.w[0] / pA)
-        w_max = np.max(state_monitor.w[0] / pA)
-        # # set the spike amplitude coefficients to go 10% under the min values of the two plots
-        # spike_amplitude_vm = vm_min - 0.1 * (vm_max - vm_min)
-        # spike_amplitude_w = w_min - 0.1 * (w_max - w_min)
         
         # Show spikes as dashed vertical lines on top of the Membrane potential and Adaptation current plots
         for t in spike_monitor.t:
@@ -835,6 +825,12 @@ class AdexNeuron(PointNeuron):
             plt.axvline(t / ms, ls='--', lw=.5, color='k')
             plt.subplot(2, 2, 3)
             plt.axvline(t / ms, ls='--', lw=.5, color='k')
+        
+        # In subplot 2,2,4, show the same dashed vertical line segment and explanation "spike times"
+        plt.subplot(2, 2, 4)
+        plt.axvline(0, ls='--', lw=.5, color='k')
+        plt.text(0, 0, " = spike times", rotation=0, va='bottom', ha='left')
+        plt.axis('off')
 
         plt.tight_layout(w_pad=0.5, h_pad=1.5)
         plt.show()
