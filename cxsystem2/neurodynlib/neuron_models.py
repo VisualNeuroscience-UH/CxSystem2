@@ -418,7 +418,7 @@ class PointNeuron:
         counts = spike_monitor.count
         print(f'N_steps = {N_steps}')
         # print(f'dir(spike_monitor) = {dir(spike_monitor)}')
-        print(f"spike_monitor.get_states(['t', 'i']) = {spike_monitor.get_states(['t', 'i'])}")
+        # print(f"spike_monitor.get_states(['t', 'i']) = {spike_monitor.get_states(['t', 'i'])}")
         # print(f'len(spike_monitor.it) = {len(spike_monitor.it)}')
         # print(f'type(spike_monitor.it[0]) = {type(spike_monitor.it[0])}')
         
