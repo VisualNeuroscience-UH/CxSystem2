@@ -21,6 +21,7 @@
 import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy
+from cxsystem2.neurodynlib.tools import spike_tools
 
 def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing_threshold=None, legend_location=0, save_name=None):
     """Not implemented! plots voltage and current .
@@ -57,7 +58,7 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
     plt.grid()
     axis_v = plt.subplot(212)
     plt.plot(time_values_ms, voltage_monitor[0].vm / b2.mV, lw=2)
-    
+
     if firing_threshold is not None:
         plt.plot(
             (voltage_monitor.t / b2.ms)[[0, -1]],
@@ -270,7 +271,6 @@ def plot_ISI_distribution(spike_stats, hist_nr_bins=50, xlim_max_ISI=None):
     Returns:
         the figure
     """
-    from neurodynex.tools import spike_tools
     assert isinstance(spike_stats, spike_tools.PopulationSpikeStats), \
         "spike_stats is not of type spike_tools.PopulationSpikeStats"
     isi_ms = spike_stats.all_ISI/b2.ms
