@@ -796,27 +796,34 @@ class AdexNeuron(PointNeuron):
     def getting_started(self, step_amplitude=65*pA, sine_amplitude=125*pA, sine_freq=150*Hz, sine_dc=100*pA):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
-    def plot_states(self, state_monitor, spike_monitor):
+    def plot_states(self, state_monitor, spike_monitor=None, v_eff=None, save_name=None):
         """
         Visualizes the state variables: w-t, vm-t and phase-plane w-vm
 
         :param state_monitor: b2.StateMonitor
 
         """
-        plt.subplot(2, 2, 1)
+        parameters = self.get_neuron_parameters()
+        if v_eff is None:
+            n_hor_panels =2
+        else:
+            n_hor_panels = 3
+        plt.subplot(2, n_hor_panels, 1)
         plt.plot(state_monitor.t / ms, state_monitor.vm[0] / mV, lw=2)
         plt.xlabel("t [ms]")
         plt.ylabel("u [mV]")
+        plt.axhline(parameters['EL'] / mV, ls='-', color='k')
         plt.title("Membrane potential")
-        plt.subplot(2, 2, 2)
+        plt.subplot(2, n_hor_panels, 2)
         plt.plot(state_monitor.vm[0] / mV, state_monitor.w[0] / pA, lw=2)
         plt.xlabel("u [mV]")
         plt.ylabel("w [pA]")
         plt.title("Phase plane representation")
-        plt.subplot(2, 2, 3)
+        plt.subplot(2, n_hor_panels, n_hor_panels + 1)
         plt.plot(state_monitor.t / ms, state_monitor.w[0] / pA, lw=2)
         plt.xlabel("t [ms]")
         plt.ylabel("w [pA]")
+        plt.plot([state_monitor.t[0] / ms, state_monitor.t[-1] / ms], [0, 0], '-', color='black', lw=1)
         plt.title("Adaptation current")
         
         # Show spikes as dashed vertical lines on top of the Membrane potential and Adaptation current plots
@@ -832,7 +839,50 @@ class AdexNeuron(PointNeuron):
         plt.text(0, 0, " = spike times", rotation=0, va='bottom', ha='left')
         plt.axis('off')
 
+
+        
+        # Plot the effective membrane potential
+        if v_eff is not None:
+            plt.subplot(2, n_hor_panels, 5)
+            plt.plot(state_monitor.t / ms, v_eff[0] / mV, lw=2)
+            plt.xlabel("t [ms]")
+            plt.ylabel("v_eff [mV]")
+            plt.plot([state_monitor.t[0] / ms, state_monitor.t[-1] / ms], [0, 0], '-', color='black', lw=1)
+            plt.title("Effective membrane potential")
+
+            # write parameters to the plot
+            plt.subplot(2, n_hor_panels, 3)
+
+            plt.axis('off')
+            plt.text(0.1, 0.9, 'EL = %.2f mV' % (parameters['EL'] / mV), fontsize=10)
+            plt.text(0.1, 0.8, 'V_res = %.2f mV' % (parameters['V_res'] / mV), fontsize=10)
+            plt.text(0.1, 0.7, 'VT = %.2f mV' % (parameters['VT'] / mV), fontsize=10)
+            plt.text(0.1, 0.6, 'gL = %.2f nS' % (parameters['gL'] / nS), fontsize=10)
+            plt.text(0.1, 0.5, 'C = %.2f pF' % (parameters['C'] / pF), fontsize=10)
+            plt.text(0.1, 0.4, 'DeltaT = %.2f mV' % (parameters['DeltaT'] / mV), fontsize=10)
+            plt.text(0.1, 0.3, 'a = %.2f nS' % (parameters['a'] / nS), fontsize=10)
+            plt.text(0.1, 0.2, 'b = %.2f pA' % (parameters['b'] / pA), fontsize=10)
+            plt.text(0.1, 0.1, 'tau_w = %.2f ms' % (parameters['tau_w'] / ms), fontsize=10)
+
+        # Plot spikes as vertical dashed lines to Membrane potential and Adaptation current plots
+        if spike_monitor is not None:
+            for t in spike_monitor.t:
+                plt.subplot(2, n_hor_panels, 1)
+                plt.axvline(t / ms, ls='--', c='k')
+                plt.subplot(2, n_hor_panels, n_hor_panels + 1)
+                plt.axvline(t / ms, ls='--', c='k')
+                if v_eff is not None:
+                    plt.subplot(2, n_hor_panels, 5)
+                    plt.axvline(t / ms, ls='--', c='k')
+
         plt.tight_layout(w_pad=0.5, h_pad=1.5)
+
+        # Check save_name for suffix png or eps. If no suffix is provided, use .png
+        if save_name is not None:
+            if save_name[-4:] != '.png' and save_name[-4:] != '.eps':
+                save_name += '.png'
+            plt.savefig(save_name)
+
         plt.show()
 
 class HodgkinHuxleyNeuron(PointNeuron):
