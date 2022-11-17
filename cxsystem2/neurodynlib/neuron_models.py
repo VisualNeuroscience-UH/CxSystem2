@@ -371,7 +371,7 @@ class PointNeuron:
         print("nr of spikes: {}".format(spike_monitor.count[0]))
         plt.show()
 
-    def plot_fi_curve(self, min_current=0*pA, max_current=1*nA, step_size=10*pA, plot=True, max_rate=None):
+    def plot_fi_curve(self, min_current=0*pA, max_current=1*nA, step_size=10*pA, plot=True, max_rate=None, save_name=None):
         """
         Plot the frequency-current (f-I) curve.
 
@@ -430,6 +430,12 @@ class PointNeuron:
             plt.xlabel('Current [pA]')
             if max_rate is not None:
                 plt.ylim([0, max_rate])
+            
+            if save_name is not None:
+                if save_name[-4:] != '.png' and save_name[-4:] != '.eps':
+                    save_name += '.png'
+                plt.savefig(save_name)
+            
             plt.show()
         else:
             return steps, counts
