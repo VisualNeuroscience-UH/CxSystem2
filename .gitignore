@@ -1,3 +1,31 @@
+# SSL certificates
+**/server_cert.key
+**/server_cert.crt
+
+# =========================
+# Operating System Files
+# =========================
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+.vscode
+# Thumbnails
+._*
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+.idea
+
+# Windows
+# =========================
 
 # Windows image file caches
 Thumbs.db
@@ -18,42 +46,29 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
-# =========================
-
-.DS_Store
-.AppleDouble
-.LSOverride
-.vscode
-# Thumbnails
-._*
-
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
 
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-.idea
+# =========================
+# Cache-type files
+# =========================
+
 *.pyc
 *.rst~
 docs/_build/
 docs/build/
 
-# Pytest files
+# neurodynlib notebook checkpoints
+cxsystem2/neurodynlib/tutorial/.ipynb_checkpoints
+
+# =========================
+# Test and build files
+# =========================
 .pytest_cache
 tests/__pycache__
 tests/temp_output_files
 tests/temp_connection_files
-.hypothesis
 cxsystem2.egg-info
 dist
 build
@@ -62,10 +77,7 @@ build
 # Developer files
 test_notebooks/
 
-
 # Output data files which may be big
 
-# SSL certificates
-**/server_cert.key
-**/server_cert.crt
+
 

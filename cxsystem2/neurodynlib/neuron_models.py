@@ -449,15 +449,25 @@ class PointNeuron:
         plt.ylabel("vm [mV]")
         plt.show()
 
-    def plot_states(self, state_monitor):
+    def plot_states(self, state_monitor, parameters=None):
         """
         Plots pre-defined state variables from a state monitor
 
         :param state_monitor: b2.StateMonitor
-
+        :param parameters: list of parameters
         """
-
-        self.plot_vm(state_monitor)
+        if parameters is None:
+            print("No parameters specified. Plotting membrane voltage.")
+            self.plot_vm(state_monitor)
+        else:
+            n_parameters = len(parameters)
+            fig, axs = plt.subplots(n_parameters, figsize=(12, 4 * n_parameters))
+            for i, parameter in enumerate(parameters):
+                this_unit = self.parameter_units[parameter]
+                axs[i].plot(state_monitor.t / ms, state_monitor[parameter][0] / this_unit, lw=1)
+                axs[i].set_title(parameter)
+                axs[i].set_xlabel("time [ms]")
+                axs[i].set_ylabel(f"{parameter} [{this_unit}]")
 
     def get_json(self, include_neuron_name=True):
         """
@@ -656,10 +666,11 @@ class LifNeuron(PointNeuron):
 
 class ClopathAdexNeuron(PointNeuron):
     """
-    LAdaptive Exponential Integrate-and-Fire (ADEX) model including CLopath_2010_NatNeurosci extra variables.
+    Adaptive Exponential Integrate-and-Fire (ADEX) model including CLopath_2010_NatNeurosci extra variables.
     See Clopath et al. Nature Neuroscience 13 (2010) 344-352 <http://dx.doi.org/10.1038/nn.2479>`_.
 
-    Requires setting the following parameters: EL, gL, C, V_res, VT.
+    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut, a, b, tau_w,
+    Isp, tau_z, tau_VT, VTmax, tau_lowpass1, tau_lowpass2, tau_homeo, x_reset, taux.
     """
 
     # The large gL and capacitance are from the original code
@@ -785,7 +796,7 @@ class AdexNeuron(PointNeuron):
     def getting_started(self, step_amplitude=65*pA, sine_amplitude=125*pA, sine_freq=150*Hz, sine_dc=100*pA):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
-    def plot_states(self, state_monitor):
+    def plot_states(self, state_monitor, spike_monitor):
         """
         Visualizes the state variables: w-t, vm-t and phase-plane w-vm
 
@@ -807,6 +818,19 @@ class AdexNeuron(PointNeuron):
         plt.xlabel("t [ms]")
         plt.ylabel("w [pA]")
         plt.title("Adaptation current")
+        
+        # Show spikes as dashed vertical lines on top of the Membrane potential and Adaptation current plots
+        for t in spike_monitor.t:
+            plt.subplot(2, 2, 1)
+            plt.axvline(t / ms, ls='--', lw=.5, color='k')
+            plt.subplot(2, 2, 3)
+            plt.axvline(t / ms, ls='--', lw=.5, color='k')
+        
+        # In subplot 2,2,4, show the same dashed vertical line segment and explanation "spike times"
+        plt.subplot(2, 2, 4)
+        plt.axvline(0, ls='--', lw=.5, color='k')
+        plt.text(0, 0, " = spike times", rotation=0, va='bottom', ha='left')
+        plt.axis('off')
 
         plt.tight_layout(w_pad=0.5, h_pad=1.5)
         plt.show()
@@ -1063,7 +1087,7 @@ class neuron_factory:
                             'ADEX': AdexNeuron, 'AdexNeuron': AdexNeuron,
                             'SIMPLE_HH': HodgkinHuxleyNeuron, 'HodgkinHuxleyNeuron': HodgkinHuxleyNeuron,
                             'IZHIKEVICH': IzhikevichNeuron, 'IzhikevichNeuron': IzhikevichNeuron,
-                              'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
+                            'LIFASC': LifAscNeuron, 'LifAscNeuron': LifAscNeuron}
 
     def get_class(self, neuron_model_name):
         return copy.deepcopy(self.name_to_class[neuron_model_name]())

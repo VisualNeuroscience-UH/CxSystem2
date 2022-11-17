@@ -154,10 +154,10 @@ class CxSystem:
         self.benchmark = 0
         self.cluster_run_start_idx = cluster_run_start_idx
         self.cluster_run_step = cluster_run_step
-        self.current_parameters_list = []
-        # current_parameters_list is changing at some point in the code, so the original length of it is needed
-        self.current_parameters_list_orig_len = 0
-        self.current_values_list = []
+        self.current_parameters_s = pd.Series([], dtype=str)
+        # current_parameters_s is changing at some point in the code, so the original length of it is needed
+        self.current_parameters_s_orig_len = 0
+        self.current_values_s = pd.Series([], dtype=object)
         self.NG_indices = []
         # Next list contains the NeuronReference instances. So for each neuron group target line, there would be an element in this list which
         # contains all the information for that particular neuron group.
@@ -345,9 +345,9 @@ class CxSystem:
         for value_line_title in order_of_lines:
             for def_idx in definition_lines_idx:
                 if value_line_title in self.anat_and_sys_conf_df.loc[def_idx + 1, 0]:
-                    self.current_parameters_list = self.anat_and_sys_conf_df.loc[def_idx, 1:].dropna()
-                    self.current_parameters_list = self.current_parameters_list[~self.current_parameters_list.str.contains('#')]
-                    self.current_parameters_list_orig_len = len(self.current_parameters_list)
+                    self.current_parameters_s = self.anat_and_sys_conf_df.loc[def_idx, 1:].dropna()
+                    self.current_parameters_s = self.current_parameters_s[~self.current_parameters_s.str.contains('#')]
+                    self.current_parameters_s_orig_len = len(self.current_parameters_s)
                     try:
                         next_def_line_idx = definition_lines_idx[definition_lines_idx.tolist().index(def_idx) + 1].item()
                     except IndexError:
@@ -356,10 +356,10 @@ class CxSystem:
                         if type(self.anat_and_sys_conf_df.loc[self.value_line_idx, 0]) == str:
                             if self.anat_and_sys_conf_df.loc[self.value_line_idx, 0] in list(self.parameter_to_method_mapping.keys()) and \
                                     self.anat_and_sys_conf_df.loc[self.value_line_idx, 0][0] != '#':
-                                self.current_parameters_list = self.anat_and_sys_conf_df.loc[def_idx, 1:].dropna()
-                                self.current_parameters_list = self.current_parameters_list[~self.current_parameters_list.str.contains('#')]
-                                self.current_values_list = self.anat_and_sys_conf_df.loc[
-                                    self.value_line_idx, self.current_parameters_list.index].dropna()
+                                self.current_parameters_s = self.anat_and_sys_conf_df.loc[def_idx, 1:].dropna()
+                                self.current_parameters_s = self.current_parameters_s[~self.current_parameters_s.str.contains('#')]
+                                self.current_values_s = self.anat_and_sys_conf_df.loc[
+                                    self.value_line_idx, self.current_parameters_s.index].dropna()
                                 self.parameter_to_method_mapping[self.anat_and_sys_conf_df.loc[self.value_line_idx, 0]][1]()
                     break
 
@@ -508,33 +508,33 @@ class CxSystem:
                 shutil.rmtree(self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix())
 
     def set_runtime_parameters(self):
-        if not np.any(self.current_parameters_list.str.contains('runtime')):
+        if not np.any(self.current_parameters_s.str.contains('runtime')):
             print(" -  The parameter 'workspace_path' is not defined in the configuration file. The default workspace is ~/CxSystem")
             self.set_workspace('~/CxSystem')
 
-        if not np.any(self.current_parameters_list.str.contains('runtime')):
+        if not np.any(self.current_parameters_s.str.contains('runtime')):
             print(" -  Runtime duration is not defined in the configuration file. The default runtime duration is 500*ms")
             self.runtime = 500 * ms
 
-        if not np.any(self.current_parameters_list.str.contains('device')):
+        if not np.any(self.current_parameters_s.str.contains('device')):
             print(" -  Device is not defined in the configuration file. The default device is Python.")
             self.device = 'Python'
 
-        if not np.any(self.current_parameters_list.str.contains('compression_method')):
+        if not np.any(self.current_parameters_s.str.contains('compression_method')):
             # gzip is default of workspace manager
             print(" -  compression_method is not defined in the configuration file. Default compression method is gzip")
 
-        for ParamIdx, parameter in self.current_parameters_list.items():
+        for ParamIdx, parameter in self.current_parameters_s.items():
             if parameter not in list(self.parameter_to_method_mapping.keys()):
                 print(" -  System parameter %s not defined." % parameter)
         options_with_priority = [it for it in self.parameter_to_method_mapping if not np.isnan(self.parameter_to_method_mapping[it][0])]
         parameters_to_set_prioritized = [it for priority_idx in range(len(options_with_priority)) for it in self.parameter_to_method_mapping if
                                          self.parameter_to_method_mapping[it][0] == priority_idx]
         for correct_parameter_to_set in parameters_to_set_prioritized:
-            for ParamIdx, parameter in self.current_parameters_list.items():
-                if parameter == correct_parameter_to_set and str(self.current_values_list[ParamIdx])[0] != '#':
+            for ParamIdx, parameter in self.current_parameters_s.items():
+                if parameter == correct_parameter_to_set and str(self.current_values_s[ParamIdx])[0] != '#':
                     assert (parameter in list(self.parameter_to_method_mapping.keys())), ' -  The tag %s is not defined.' % parameter
-                    self.parameter_to_method_mapping[parameter][1](self.current_values_list[ParamIdx])
+                    self.parameter_to_method_mapping[parameter][1](self.current_values_s[ParamIdx])
                     break
         if self.sys_mode == '':
             raise NameError(" -  System mode is not defined.")
@@ -648,20 +648,20 @@ class CxSystem:
         _all_columns = ['idx', 'number_of_neurons', 'neuron_type', 'layer_idx', 'net_center', 'monitors',
                         'n_background_inputs', 'n_background_inhibition', 'neuron_subtype']
         _obligatory_params = [0, 1, 2, 3]
-        assert len(self.current_values_list) >= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
+        assert len(self.current_values_s) >= len(_all_columns), ' -  One or more of of the columns for NeuronGroups definition \
         is missing. Following obligatory columns should be defined:\n%s\n ' \
                                                                    % str([_all_columns[ii] for ii in _obligatory_params])
         obligatory_columns = list(np.array(_all_columns)[_obligatory_params])
-        obligatory_indices = [next(iter(self.current_parameters_list[self.current_parameters_list == ii].index)) for ii in obligatory_columns]
-        assert not np.any(self.current_values_list.loc[obligatory_indices] == '--'), \
+        obligatory_indices = [next(iter(self.current_parameters_s[self.current_parameters_s == ii].index)) for ii in obligatory_columns]
+        assert not np.any(self.current_values_s.loc[obligatory_indices] == '--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
-        assert len(self.current_values_list) == self.current_parameters_list_orig_len, \
+        assert len(self.current_values_s) == self.current_parameters_s_orig_len, \
             " -  One or more of of the columns for NeuronGroup definition is missing in the following" \
             " line (lengths not equal: {} and {}):\n {} \n {}  ".format(
-                len(self.current_values_list),
-                self.current_parameters_list_orig_len,
-                self.current_parameters_list,
-                self.current_values_list)
+                len(self.current_values_s),
+                self.current_parameters_s_orig_len,
+                self.current_parameters_s,
+                self.current_values_s)
         local_namespace = {'idx': -1,
                            'net_center': 0 + 0j,
                            'number_of_neurons': 0,
@@ -674,8 +674,8 @@ class CxSystem:
 
         for column in _all_columns:
             try:
-                tmp_value_idx = int(next(iter(self.current_parameters_list[self.current_parameters_list == column].index), 'no match'))
-                tmp_var_str = "local_namespace['%s']=self.current_values_list[%d]" % (column, tmp_value_idx)
+                tmp_value_idx = int(next(iter(self.current_parameters_s[self.current_parameters_s == column].index), 'no match'))
+                tmp_var_str = "local_namespace['%s']=self.current_values_s[%d]" % (column, tmp_value_idx)
                 exec(tmp_var_str)
             except ValueError:
                 exec("local_namespace['%s']='--'" % column)
@@ -938,7 +938,7 @@ class CxSystem:
         if 'initial_values' in self.customized_neurons_list[-1].keys():
             exec(f'{_dyn_neurongroup_name}.set_states(self.customized_neurons_list[-1]["initial_values"])')
         
-        print(f'\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron modelis:\n{eval(_dyn_neuron_eq_name)}\n')
+        print(f'\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron model is:\n{eval(_dyn_neuron_eq_name)}\n')
  
         setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
         try:
@@ -1102,14 +1102,14 @@ class CxSystem:
         _all_columns = ['receptor', 'pre_syn_idx', 'post_syn_idx', 'syn_type', 'p', 'n', 'monitors', 'load_connection',
                         'save_connection', 'custom_weight','spatial_decay', 'multiply_weight']
         _obligatory_params = [0, 1, 2, 3]
-        assert len(self.current_values_list) <= len(_all_columns), \
+        assert len(self.current_values_s) <= len(_all_columns), \
             ' -  One or more of the obligatory columns for input definition is missing. Obligatory columns are:\n%s\n ' \
             % str([_all_columns[ii] for ii in _obligatory_params])
         obligatory_columns = list(np.array(_all_columns)[_obligatory_params])
-        obligatory_indices = [next(iter(self.current_parameters_list[self.current_parameters_list == ii].index)) for ii in obligatory_columns]
-        assert not np.any(self.current_values_list.loc[obligatory_indices].isnull()), \
+        obligatory_indices = [next(iter(self.current_parameters_s[self.current_parameters_s == ii].index)) for ii in obligatory_columns]
+        assert not np.any(self.current_values_s.loc[obligatory_indices].isnull()), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
-        assert len(self.current_values_list) == self.current_parameters_list_orig_len, \
+        assert len(self.current_values_s) == self.current_parameters_s_orig_len, \
             " -  One or more of of the columns for synapse definition is missing in the following line:\n %s " % str(
                 list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
         _options = {
@@ -1117,34 +1117,34 @@ class CxSystem:
         }
 
         # getting the connection probability gain from the namespace and apply it on all the connections:
-        index_of_receptor = int(np.where(self.current_parameters_list.values == 'receptor')[0])
-        index_of_post_syn_idx = int(np.where(self.current_parameters_list.values == 'post_syn_idx')[0])
-        index_of_pre_syn_idx = int(np.where(self.current_parameters_list.values == 'pre_syn_idx')[0])
-        index_of_syn_type = int(np.where(self.current_parameters_list.values == 'syn_type')[0])
+        index_of_receptor = int(np.where(self.current_parameters_s.values == 'receptor')[0])
+        index_of_post_syn_idx = int(np.where(self.current_parameters_s.values == 'post_syn_idx')[0])
+        index_of_pre_syn_idx = int(np.where(self.current_parameters_s.values == 'pre_syn_idx')[0])
+        index_of_syn_type = int(np.where(self.current_parameters_s.values == 'syn_type')[0])
         try:
-            index_of_p = int(np.where(self.current_parameters_list.values == 'p')[0])
+            index_of_p = int(np.where(self.current_parameters_s.values == 'p')[0])
         except TypeError:
             pass
         try:
-            index_of_n = int(np.where(self.current_parameters_list.values == 'n')[0])
+            index_of_n = int(np.where(self.current_parameters_s.values == 'n')[0])
         except TypeError:
             pass
         try:
-            index_of_monitors = int(np.where(self.current_parameters_list.values == 'monitors')[0])
+            index_of_monitors = int(np.where(self.current_parameters_s.values == 'monitors')[0])
         except TypeError:
             pass
         try:
-            index_of_spatial_decay = int(np.where(self.current_parameters_list.values == 'spatial_decay')[0])
+            index_of_spatial_decay = int(np.where(self.current_parameters_s.values == 'spatial_decay')[0])
         except TypeError:
             pass 
-        current_post_syn_idx = self.current_values_list.values[index_of_post_syn_idx]
-        current_pre_syn_idx = self.current_values_list.values[index_of_pre_syn_idx]
+        current_post_syn_idx = self.current_values_s.values[index_of_post_syn_idx]
+        current_pre_syn_idx = self.current_values_s.values[index_of_pre_syn_idx]
         try:
-            _current_probs = self.current_values_list.values[index_of_p]
+            _current_probs = self.current_values_s.values[index_of_p]
         except (ValueError, NameError):
             pass
         try:
-            _current_ns = self.current_values_list.values[index_of_n]
+            _current_ns = self.current_values_s.values[index_of_n]
         except (ValueError, NameError):
             pass
 
@@ -1173,7 +1173,7 @@ class CxSystem:
                 assert int(_post_group_idx) < len(self.neurongroups_list), \
                     ' -  The synapse in the following line is targeting a group index that is not defined:\n%s' % str(
                         list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
-                self.current_values_list.values[index_of_post_syn_idx] = _post_group_idx
+                self.current_values_s.values[index_of_post_syn_idx] = _post_group_idx
                 pre_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in
                                      self.customized_neurons_list if tmp_group['idx'] == int(current_pre_syn_idx)][0]
                 post_group_ref_idx = [self.customized_neurons_list.index(tmp_group) for tmp_group in
@@ -1182,9 +1182,9 @@ class CxSystem:
                     ' -  A compartment is targeted but the neuron group is not PC. Check Synapses in the configuration file.'
                 _pre_type = self.customized_neurons_list[pre_group_ref_idx]['type']  # Pre-synaptic neuron type
                 _post_type = self.customized_neurons_list[post_group_ref_idx]['type']  # Post-synaptic neuron type
-                self.current_parameters_list = self.current_parameters_list.append(pd.Series(['pre_type', 'post_type', 'post_comp_name']),
+                self.current_parameters_s = pd.concat([self.current_parameters_s, pd.Series(['pre_type', 'post_type', 'post_comp_name'])],
                                                                                    ignore_index=True)
-                self.current_values_list = self.current_values_list.append(pd.Series([_pre_type, _post_type]), ignore_index=True)
+                self.current_values_s = pd.concat([self.current_values_s, pd.Series([_pre_type, _post_type])], ignore_index=True)
                 #  In case the target is from compartment 0 which has 3 compartments itself
                 if str(_post_com_idx)[0] == '0':
                     assert len(_post_com_idx) > 1, ' -  The soma layer of a compartmental neuron is being targeted, but the exact ' \
@@ -1202,11 +1202,11 @@ class CxSystem:
                     # soma or apical), hence the name triple_args
                     triple_args = []
                     for idx, tmp_idx in enumerate(_post_com_idx[1:]):
-                        tmp_args = list(self.current_values_list)
-                        if np.any(self.current_parameters_list.str.contains('p')):
+                        tmp_args = list(self.current_values_s)
+                        if np.any(self.current_parameters_s.str.contains('p')):
                             tmp_args[index_of_p] = _current_probs[idx] if \
                                 str(tmp_args[index_of_p]) != '--' else '--'
-                        if np.any(self.current_parameters_list.str.contains('n')):
+                        if np.any(self.current_parameters_s.str.contains('n')):
                             tmp_args[index_of_n] = _current_ns[idx] if \
                                 str(tmp_args[index_of_n]) != '--' else '--'
                         if tmp_idx.lower() == 'b':
@@ -1218,12 +1218,13 @@ class CxSystem:
                         elif tmp_idx.lower() == 'a':
                             tmp_args.append('_a0')
                             triple_args.append(tmp_args)
-                    self.current_values_list = triple_args
+                    self.current_values_s = triple_args
                 elif int(_post_com_idx) > 0:
-                    self.current_values_list = self.current_values_list.append(pd.Series(['_a' + str(_post_com_idx)]), ignore_index=True)
-            if type(self.current_values_list[0]) != list:  # type of self.current_values_list[0] would be list in case
+                    # self.current_values_s = self.current_values_s.append(pd.Series(['_a' + str(_post_com_idx)]), ignore_index=True)
+                    self.current_values_s = pd.concat([self.current_values_s, pd.Series(['_a' + str(_post_com_idx)])], ignore_index=True)
+            if type(self.current_values_s[0]) != list:  # type of self.current_values_s[0] would be list in case
                 # of multiple synaptic targets in soma area
-                self.current_values_list = [self.current_values_list]
+                self.current_values_s = [self.current_values_s]
         else:
             assert int(current_post_syn_idx) < len(self.neurongroups_list), \
                 ' -  The synapse in the following line is targeting a group index that is not defined:\n%s' % str(
@@ -1238,11 +1239,11 @@ class CxSystem:
                 ' -  The post_synaptic group is a multi-compartmental PC but the target compartment is' \
                 ' not selected. Use [C] tag followed by compartment number.'
 
-            self.current_values_list = pd.concat([self.current_values_list, pd.Series([_pre_type, _post_type, '_soma'])], ignore_index=True )
-            self.current_parameters_list = pd.concat([self.current_parameters_list, pd.Series(['pre_type', 'post_type', 'post_comp_name'])], ignore_index=True)
-            self.current_values_list = [self.current_values_list]
+            self.current_values_s = pd.concat([self.current_values_s, pd.Series([_pre_type, _post_type, '_soma'])], ignore_index=True )
+            self.current_parameters_s = pd.concat([self.current_parameters_s, pd.Series(['pre_type', 'post_type', 'post_comp_name'])], ignore_index=True)
+            self.current_values_s = [self.current_values_s]
 
-        for syn in self.current_values_list:
+        for syn in self.current_values_s:
             receptor = syn[index_of_receptor]
             pre_syn_idx = syn[index_of_pre_syn_idx]
             post_syn_idx = syn[index_of_post_syn_idx]
@@ -1259,23 +1260,23 @@ class CxSystem:
                 monitors = syn[index_of_monitors]
             except (ValueError, NameError):
                 monitors = '--'
-            pre_type_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'pre_type'].index))
+            pre_type_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'pre_type'].index))
             pre_type = syn[pre_type_idx]
-            post_type_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'post_type'].index))
+            post_type_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'post_type'].index))
             post_type = syn[post_type_idx]
-            post_comp_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'post_comp_name'].index))
+            post_comp_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'post_comp_name'].index))
             post_comp_name = syn[post_comp_idx]
 
             # Get custom weight if defined
             try:
-                custom_weight_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'custom_weight'].index))
+                custom_weight_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'custom_weight'].index))
                 custom_weight = syn[custom_weight_idx]
             except (ValueError, NameError, IndexError):
                 custom_weight = '--'
 
             # Get multiplier if defined 
             try:
-                multiply_weight_idx = self.current_parameters_list[self.current_parameters_list=='multiply_weight'].index.values[0]
+                multiply_weight_idx = self.current_parameters_s[self.current_parameters_s=='multiply_weight'].index.values[0]
                 multiply_weight = syn[multiply_weight_idx]
                 if multiply_weight == '--':
                     multiply_weight = '1'
@@ -1339,7 +1340,7 @@ class CxSystem:
                 customized_synapses_list[-1]['post_group_idx']].index('_') + 1:] + \
                             self.customized_synapses_list[-1]['post_comp_name']
             try:
-                index_of_load_connection = int(np.where(self.current_parameters_list.values == 'load_connection')[0])
+                index_of_load_connection = int(np.where(self.current_parameters_s.values == 'load_connection')[0])
                 if '-->' in syn[index_of_load_connection]:
                     self.default_load_flag = int(syn[index_of_load_connection].replace('-->', ''))
                 elif '<--' in syn[index_of_load_connection]:
@@ -1351,7 +1352,7 @@ class CxSystem:
                             " is not defined in the parameters. The connection is being created:\n%s" \
                             % str(list(self.anat_and_sys_conf_df.loc[self.value_line_idx].to_dict().values()))
                 else:
-                    load_connection_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'load_connection'].index),
+                    load_connection_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'load_connection'].index),
                                                'no match')
                     _do_load = int(syn[load_connection_idx])
             except TypeError:
@@ -1362,7 +1363,7 @@ class CxSystem:
                 self.set_import_connections_path()
 
             try:
-                index_of_save_connection = int(np.where(self.current_parameters_list.values == 'save_connection')[0])
+                index_of_save_connection = int(np.where(self.current_parameters_s.values == 'save_connection')[0])
                 if '-->' in syn[index_of_save_connection]:
                     self.default_save_flag = int(syn[index_of_save_connection].replace('-->', ''))
                 elif '<--' in syn[index_of_save_connection]:
@@ -1505,8 +1506,8 @@ class CxSystem:
                 num_tmp = tmp_namespace['num_tmp']
                 self.total_number_of_synapses += num_tmp
                 try:
-                    n_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'n'].index), 'no match')
-                    _current_connections = int(num_tmp / float(syn[n_idx])) / len(self.current_values_list)
+                    n_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'n'].index), 'no match')
+                    _current_connections = int(num_tmp / float(syn[n_idx])) / len(self.current_values_s)
                 except ValueError:
                     print(" -  number of synapses for last connection was "
                           "equal to number of connections")
@@ -1543,9 +1544,6 @@ class CxSystem:
                     ' scprs.csr_matrix((%s.delay[:],(%s.i[:],%s.j[:])),shape=(len(%s.source),len(%s.target)))'
                     % (_syn_ref_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name, _dyn_syn_name))
                 self.workspace.syntax_bank.append('self.workspace.connections["%s"]["n"] = %d' % (_syn_ref_name, int(n_arg)))
-            # elif (self.default_save_flag==1 or (self.default_save_flag==-1 and _do_save )) and \
-            #         not hasattr(self,'workspace') :
-            #     raise ValueError(" -  Synaptic connection is set to be saved, however the save_brian_data_path parameter is not defined.")
 
     def relay(self):
         """
@@ -1590,8 +1588,8 @@ class CxSystem:
 
         def video(self):
             print(" -  Creating an input based on the video input ...")
-            input_mat_path = self.current_values_list[self.current_parameters_list[self.current_parameters_list == 'path'].index.item()]
-            freq = self.current_values_list[self.current_parameters_list[self.current_parameters_list == 'freq'].index.item()]
+            input_mat_path = self.current_values_s[self.current_parameters_s[self.current_parameters_s == 'path'].index.item()]
+            freq = self.current_values_s[self.current_parameters_s[self.current_parameters_s == 'freq'].index.item()]
             inp = Stimuli(duration=self.runtime, input_mat_path=input_mat_path, output_folder=self.workspace.get_simulation_folder_as_posix(),
                           output_file_suffix=self.suffix, output_file_extension=self.workspace.get_output_extension() )
             # # Next two lines are for debugging, bypassing multiprocessing
@@ -1691,7 +1689,7 @@ class CxSystem:
                 # taking care of the monitors:
                 self.monitors(mons.split(' '), thread_ng_name) #, self.customized_neurons_list[-1]['equation'])
 
-            # input_neuron_group_idx = self.current_values_list[self.current_parameters_list[self.current_parameters_list=='idx'].index.item()]
+            # input_neuron_group_idx = self.current_values_s[self.current_parameters_s[self.current_parameters_s=='idx'].index.item()]
             syn_lines = self.anat_and_sys_conf_df[self.anat_and_sys_conf_df[0].str.startswith('S') == True]
             input_synaptic_lines = syn_lines[syn_lines[2] == '0']
             row_type_lines = self.anat_and_sys_conf_df.loc[:input_synaptic_lines.index[0]][0].str.startswith('row_type') == True
@@ -1721,12 +1719,12 @@ class CxSystem:
             #     self.thr.join()
 
         def VPM(self):  # ventral posteromedial (VPM) thalamic nucleus
-            spike_times_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'spike_times'].index))
-            spike_times = self.current_values_list[spike_times_idx].replace(' ', ',')
+            spike_times_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'spike_times'].index))
+            spike_times = self.current_values_s[spike_times_idx].replace(' ', ',')
             spike_times_list = ast.literal_eval(spike_times[0:spike_times.index('*')])
 
-            num_of_neurons_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'number_of_neurons'].index))
-            number_of_neurons = self.current_values_list[num_of_neurons_idx]
+            num_of_neurons_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'number_of_neurons'].index))
+            number_of_neurons = self.current_values_s[num_of_neurons_idx]
 
             if '[act]' in spike_times:
                 spike_times_unit = spike_times[spike_times.index('*') + 1:spike_times.index('[act]')]
@@ -1740,19 +1738,19 @@ class CxSystem:
                  locals(), globals())
             spike_times_ = tmp_namespace["spike_times_"]
 
-            num_of_neurons_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'number_of_neurons'].index))
-            number_of_neurons = self.current_values_list[num_of_neurons_idx]
+            num_of_neurons_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'number_of_neurons'].index))
+            number_of_neurons = self.current_values_s[num_of_neurons_idx]
             number_of_active_neurons =len(eval(active_neurons_str))
 
             try:
-                tmp_net_center_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'net_center'].index), 'no match')
-                net_center = self.current_values_list[tmp_net_center_idx]
+                tmp_net_center_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'net_center'].index), 'no match')
+                net_center = self.current_values_s[tmp_net_center_idx]
                 net_center = complex(net_center)
             except ValueError:
                 net_center = 0 + 0j
 
-            radius_idx = next(iter(self.current_parameters_list[self.current_parameters_list == 'radius'].index))
-            radius = self.current_values_list[radius_idx]
+            radius_idx = next(iter(self.current_parameters_s[self.current_parameters_s == 'radius'].index))
+            radius = self.current_values_s[radius_idx]
             print(" -  Creating an input based on the central %s neurons "
                   "..." % number_of_neurons)
             spikes_name = 'GEN_SP' # Not used elsewhere in this namespace?
@@ -1858,8 +1856,8 @@ class CxSystem:
             self.monitors(mons.split(' '), _dyn_neurongroup_name) # , self.customized_neurons_list[-1]['equation'])
 
         def spikes(self):
-            input_spikes_filename = self.current_values_list[
-                self.current_parameters_list[self.current_parameters_list == 'input_spikes_filename'].index.item()]
+            input_spikes_filename = self.current_values_s[
+                self.current_parameters_s[self.current_parameters_s == 'input_spikes_filename'].index.item()]
             spikes_data = load_from_file(self.workspace.get_simulation_folder().joinpath(input_spikes_filename))
             print(" -   Spike file loaded from: %s" % self.workspace.get_simulation_folder().joinpath(input_spikes_filename))
             spk_generator_sp = spikes_data['spikes_0'][0]
@@ -1937,7 +1935,7 @@ class CxSystem:
             self.monitors(mons.split(' '), ng_name) #, self.customized_neurons_list[-1]['equation'])
 
         assert self.sys_mode != '', " -  System mode not defined."
-        assert np.any(self.current_parameters_list.str.contains('type')), ' -  The type of the input is not defined in the configuration file.'
+        assert np.any(self.current_parameters_s.str.contains('type')), ' -  The type of the input is not defined in the configuration file.'
         input_type_to_method_mapping = {
             # input type : [ columns , obligatory column indices,  sub-routine to call     ]
             'Video': [['idx', 'type', 'path', 'freq', 'monitors'], [0, 1, 2], video],
@@ -1945,33 +1943,33 @@ class CxSystem:
             'spikes': [['idx', 'type', 'input_spikes_filename', 'monitors'], [0, 1, 2], spikes]
         }
         param_idx = next(
-            iter(self.current_parameters_list[self.current_parameters_list == 'type'].index))  # this is equivalent to item() which is deprecated
-        _input_type = self.current_values_list[param_idx]
+            iter(self.current_parameters_s[self.current_parameters_s == 'type'].index))  # this is equivalent to item() which is deprecated
+        _input_type = self.current_values_s[param_idx]
         _all_columns = input_type_to_method_mapping[_input_type][
             0]  # all possible columns of parameters for the current type of input in configuration fil
         assert _input_type in list(input_type_to_method_mapping.keys()), ' -  The input type %s of the configuration file is ' \
                                                                          'not defined' % _input_type
 
         _obligatory_params = input_type_to_method_mapping[_input_type][1]
-        assert len(self.current_values_list) >= len(_obligatory_params), \
+        assert len(self.current_values_s) >= len(_obligatory_params), \
             ' -  One or more of of the columns for input definition is missing. Following obligatory columns should be defined:\n%s\n' % str(
                 [_all_columns[ii] for ii in _obligatory_params])
-        assert len(self.current_parameters_list) <= len(input_type_to_method_mapping[_input_type][0]), ' -  Too many parameters for the\
+        assert len(self.current_parameters_s) <= len(input_type_to_method_mapping[_input_type][0]), ' -  Too many parameters for the\
          current %s input. The parameters should be consist of:\n %s' % (_input_type, input_type_to_method_mapping[_input_type][0])
         obligatory_columns = list(np.array(input_type_to_method_mapping[_input_type][0])[input_type_to_method_mapping[_input_type][1]])
         # next(iter()) is equivalent to item() which is deprecated
-        obligatory_indices = [next(iter(self.current_parameters_list[self.current_parameters_list == ii].index)) for ii in obligatory_columns]
-        assert not np.any(self.current_values_list.loc[obligatory_indices] == '--'), \
+        obligatory_indices = [next(iter(self.current_parameters_s[self.current_parameters_s == ii].index)) for ii in obligatory_columns]
+        assert not np.any(self.current_values_s.loc[obligatory_indices] == '--'), \
             ' -  Following obligatory values cannot be "--":\n%s' % str([_all_columns[ii] for ii in _obligatory_params])
-        assert len(self.current_parameters_list) == len(self.current_values_list), \
+        assert len(self.current_parameters_s) == len(self.current_values_s), \
             ' -  The number of columns for the input are not equal to number of values in the configuration file.'
         try:
             # next(iter()) is equivalent to item() which is deprecated
-            mons = self.current_values_list[next(iter(self.current_parameters_list[self.current_parameters_list == 'monitors'].index), 'no match')]
+            mons = self.current_values_s[next(iter(self.current_parameters_s[self.current_parameters_s == 'monitors'].index), 'no match')]
         except ValueError:
             mons = '--'
         # next(iter()) is equivalent to item() which is deprecated
-        group_idx = self.current_values_list[next(iter(self.current_parameters_list[self.current_parameters_list == 'idx'].index))]
+        group_idx = self.current_values_s[next(iter(self.current_parameters_s[self.current_parameters_s == 'idx'].index))]
 
         assert group_idx not in self.NG_indices, \
             " -  Error: multiple indices with same values exist in the configuration file."
@@ -2016,9 +2014,9 @@ class CxSystem:
 
 
 if __name__ == '__main__':
-    root = Path(Path(os.getcwd()).parents[1])
+    root = Path(os.getcwd())
     os.chdir(root)
-    anatomy_path = root.joinpath('tests', 'config_files', 'pytest_Anatomy_config.json').as_posix()
-    physio_path = root.joinpath('tests', 'config_files', 'pytest_Physiology_config.json').as_posix()
+    anatomy_path = root.joinpath('tests', 'config_files', 'pytest_Anatomy_config.csv').as_posix()
+    physio_path = root.joinpath('tests', 'config_files', 'pytest_Physiology_config.csv').as_posix()
     CM = CxSystem(anatomy_path, physio_path)
     CM.run()
