@@ -826,21 +826,6 @@ class AdexNeuron(PointNeuron):
         plt.plot([state_monitor.t[0] / ms, state_monitor.t[-1] / ms], [0, 0], '-', color='black', lw=1)
         plt.title("Adaptation current")
         
-        # Show spikes as dashed vertical lines on top of the Membrane potential and Adaptation current plots
-        for t in spike_monitor.t:
-            plt.subplot(2, 2, 1)
-            plt.axvline(t / ms, ls='--', lw=.5, color='k')
-            plt.subplot(2, 2, 3)
-            plt.axvline(t / ms, ls='--', lw=.5, color='k')
-        
-        # In subplot 2,2,4, show the same dashed vertical line segment and explanation "spike times"
-        plt.subplot(2, 2, 4)
-        plt.axvline(0, ls='--', lw=.5, color='k')
-        plt.text(0, 0, " = spike times", rotation=0, va='bottom', ha='left')
-        plt.axis('off')
-
-
-        
         # Plot the effective membrane potential
         if v_eff is not None:
             plt.subplot(2, n_hor_panels, 5)
