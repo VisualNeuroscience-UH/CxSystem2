@@ -796,7 +796,7 @@ class AdexNeuron(PointNeuron):
     def getting_started(self, step_amplitude=65*pA, sine_amplitude=125*pA, sine_freq=150*Hz, sine_dc=100*pA):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
-    def plot_states(self, state_monitor, spike_monitor=None, v_eff=None, save_name=None):
+    def plot_states(self, state_monitor, spike_monitor=None, save_name=None):
         """
         Visualizes the state variables: w-t, vm-t and phase-plane w-vm
 
@@ -804,7 +804,7 @@ class AdexNeuron(PointNeuron):
 
         """
         parameters = self.get_neuron_parameters()
-        if v_eff is None:
+        if save_name is None:
             n_hor_panels =2
         else:
             n_hor_panels = 3
@@ -825,16 +825,19 @@ class AdexNeuron(PointNeuron):
         plt.ylabel("w [pA]")
         plt.plot([state_monitor.t[0] / ms, state_monitor.t[-1] / ms], [0, 0], '-', color='black', lw=1)
         plt.title("Adaptation current")
-        
-        # Plot the effective membrane potential
-        if v_eff is not None:
-            plt.subplot(2, n_hor_panels, 5)
-            plt.plot(state_monitor.t / ms, v_eff[0] / mV, lw=2)
-            plt.xlabel("t [ms]")
-            plt.ylabel("v_eff [mV]")
-            plt.plot([state_monitor.t[0] / ms, state_monitor.t[-1] / ms], [0, 0], '-', color='black', lw=1)
-            plt.title("Effective membrane potential")
 
+        # Plot spikes as vertical dashed lines to Membrane potential and Adaptation current plots
+        if spike_monitor is not None:
+            for t in spike_monitor.t:
+                plt.subplot(2, n_hor_panels, 1)
+                plt.axvline(t / ms, ls='--', c='k')
+                plt.subplot(2, n_hor_panels, n_hor_panels + 1)
+                plt.axvline(t / ms, ls='--', c='k')
+
+        plt.tight_layout(w_pad=0.5, h_pad=1.5)
+
+        # Check save_name for suffix png or eps. If no suffix is provided, use .png
+        if save_name is not None:
             # write parameters to the plot
             plt.subplot(2, n_hor_panels, 3)
 
@@ -849,21 +852,6 @@ class AdexNeuron(PointNeuron):
             plt.text(0.1, 0.2, 'b = %.2f pA' % (parameters['b'] / pA), fontsize=10)
             plt.text(0.1, 0.1, 'tau_w = %.2f ms' % (parameters['tau_w'] / ms), fontsize=10)
 
-        # Plot spikes as vertical dashed lines to Membrane potential and Adaptation current plots
-        if spike_monitor is not None:
-            for t in spike_monitor.t:
-                plt.subplot(2, n_hor_panels, 1)
-                plt.axvline(t / ms, ls='--', c='k')
-                plt.subplot(2, n_hor_panels, n_hor_panels + 1)
-                plt.axvline(t / ms, ls='--', c='k')
-                if v_eff is not None:
-                    plt.subplot(2, n_hor_panels, 5)
-                    plt.axvline(t / ms, ls='--', c='k')
-
-        plt.tight_layout(w_pad=0.5, h_pad=1.5)
-
-        # Check save_name for suffix png or eps. If no suffix is provided, use .png
-        if save_name is not None:
             if save_name[-4:] != '.png' and save_name[-4:] != '.eps':
                 save_name += '.png'
             plt.savefig(save_name)

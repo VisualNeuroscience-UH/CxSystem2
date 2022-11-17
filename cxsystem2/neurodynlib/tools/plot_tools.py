@@ -22,7 +22,7 @@ import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy
 
-def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing_threshold=None, legend_location=0):
+def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing_threshold=None, legend_location=0, save_name=None):
     """Not implemented! plots voltage and current .
 
     Args:
@@ -31,6 +31,7 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
         title (string, optional): title of the figure
         firing_threshold (Quantity, optional): if set to a value, the firing threshold is plotted.
         legend_location (int): legend location. default = 0 (="best")
+        save_name (string, optional): if set, the figure is saved to this file name
 
     Returns:
         the figure
@@ -51,11 +52,12 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
     plt.plot(voltage_monitor.t / b2.ms, c, "r", lw=2)
     if margin > 0.:
         plt.ylim((min_current - margin) / b2.amp, (max_current + margin) / b2.amp)
-    # plt.xlabel("t [ms]")
+
     plt.ylabel("Input current [A] \n min: {0} \nmax: {1}".format(min_current, max_current))
     plt.grid()
     axis_v = plt.subplot(212)
     plt.plot(time_values_ms, voltage_monitor[0].vm / b2.mV, lw=2)
+    
     if firing_threshold is not None:
         plt.plot(
             (voltage_monitor.t / b2.ms)[[0, -1]],
@@ -77,6 +79,12 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
 
     if title is not None:
         plt.suptitle(title)
+
+    if save_name is not None:
+        if save_name[-4:] != '.png' and save_name[-4:] != '.eps':
+            save_name += '.png'
+        plt.savefig(save_name)
+
     return axis_c, axis_v
 
 
