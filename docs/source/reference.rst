@@ -58,7 +58,7 @@ Core module
 .. autofunction:: write_to_file
 .. autofunction:: load_from_file
 .. autofunction:: parameter_finder
-.. autofunction:: change_parameter_value_in_file
+.. autofunction:: change_anat_file_header_value
 .. autofunction:: read_config_file
 
 

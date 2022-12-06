@@ -70,7 +70,7 @@ def parameter_finder(df,
     else:
         raise NameError('Variable %s not found in the configuration file.' % keyword)
 
-def change_parameter_value_in_file(filepath,
+def change_anat_file_header_value(filepath,
                                    save_path,
                                    parameter,
                                    new_value):

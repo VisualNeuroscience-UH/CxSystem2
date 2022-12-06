@@ -26,7 +26,7 @@ from datetime import datetime
 
 from cxsystem2.configuration import config_file_converter as fileconverter
 from cxsystem2.core.exceptions import ParameterNotFoundError, ClusterNotReachableError, RelativePathError
-from cxsystem2.core.tools import parameter_finder, change_parameter_value_in_file
+from cxsystem2.core.tools import parameter_finder, change_anat_file_header_value
 
 
 class ClusterRun:
@@ -130,7 +130,7 @@ class ClusterRun:
             if imported_connections_file.is_file():
                 scp.put(imported_connections_file.as_posix(), self.cluster_workspace.as_posix())
                 new_path = Path('./').joinpath(imported_connections_file.name).as_posix()
-                change_parameter_value_in_file(anat_file_path.as_posix(), self.local_cluster_folder.joinpath(anat_file_path.name),
+                change_anat_file_header_value(anat_file_path.as_posix(), self.local_cluster_folder.joinpath(anat_file_path.name),
                                                'import_connections_from', new_path)
                 anat_file_path = self.local_cluster_folder.joinpath(anat_file_path.name)
         except TypeError:  # this is when the value is # or -- for instance
