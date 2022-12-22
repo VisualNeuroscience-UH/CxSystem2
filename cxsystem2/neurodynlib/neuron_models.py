@@ -431,7 +431,7 @@ class PointNeuron:
             if max_rate is not None:
                 plt.ylim([0, max_rate])
             
-            if save_name is not None:
+            if save_name is not None and save_name != '':
                 if save_name[-4:] != '.png' and save_name[-4:] != '.eps':
                     save_name += '.png'
                 plt.savefig(save_name)
@@ -810,7 +810,7 @@ class AdexNeuron(PointNeuron):
 
         """
         parameters = self.get_neuron_parameters()
-        if save_name is None:
+        if save_name is None or save_name == '':
             n_hor_panels =2
         else:
             n_hor_panels = 3
@@ -843,7 +843,7 @@ class AdexNeuron(PointNeuron):
         plt.tight_layout(w_pad=0.5, h_pad=1.5)
 
         # Check save_name for suffix png or eps. If no suffix is provided, use .png
-        if save_name is not None:
+        if save_name is not None and save_name != '':
             # write parameters to the plot
             plt.subplot(2, n_hor_panels, 3)
 
