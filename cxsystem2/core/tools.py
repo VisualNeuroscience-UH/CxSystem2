@@ -59,10 +59,10 @@ def parameter_finder(df,
     location = np.where(df.values == keyword)
     value = ''
     if location[0].size:
-        counter = int(location[0]) + 1
+        counter = int(location[0][0]) + 1
         while counter < df.shape[0]:
-            if '#' not in str(df.loc[counter][int(location[1])]):
-                value = df.loc[counter][int(location[1])]
+            if '#' not in str(df.loc[counter][int(location[1][0])]):
+                value = df.loc[counter][int(location[1][0])]
                 break
             else:
                 counter += 1

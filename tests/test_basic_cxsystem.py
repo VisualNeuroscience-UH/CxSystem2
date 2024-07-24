@@ -241,7 +241,7 @@ def cxsystem_run_fixture():
 	
 	yield # Run the tests here
 	
-	#Executing teardown code
+	# #Executing teardown code
 	shutil.rmtree(CM.workspace.get_simulation_folder_as_posix())
 
 @pytest.fixture(scope='module')

@@ -46,7 +46,7 @@ def cxsystem_run_fixture2():
 
 	yield  # Run the tests here
 
-	#Executing teardown code. Connections are already gone if run with basic test
+	# #Executing teardown code. Connections are already gone if run with basic test
 	shutil.rmtree(simulation_path.as_posix())
 
 

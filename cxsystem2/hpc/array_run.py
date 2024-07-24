@@ -214,8 +214,8 @@ class ArrayRun:
         counter = 0
         for par_idx, parameter in enumerate(self.all_titles):
             for val in self.metadata_dict[parameter]:
-                self.final_metadata_df['Dimension-1 Parameter'][counter] = parameter
-                self.final_metadata_df['Dimension-1 Value'][counter] = val
+                self.final_metadata_df.loc[counter, 'Dimension-1 Parameter'] = parameter
+                self.final_metadata_df.loc[counter, 'Dimension-1 Value'] = val
                 counter += 1
 
     def _check_single_experiment_multi_trials(self):
@@ -293,7 +293,7 @@ class ArrayRun:
             j.join()
 
         for item in list(paths.keys()):
-            self.final_metadata_df['Full path'][item] = paths[item]
+            self.final_metadata_df.loc[item, 'Full path'] = paths[item]
         write_to_file(os.path.join(os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename), self.final_metadata_df)
         print(" -  Array run metadata saved at: %s" % os.path.join(
             os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename))
@@ -320,7 +320,10 @@ class ArrayRun:
         """
         array_of_dfs = []
         run_namings = []
-        array_variable = original_df.loc[index_of_array_variable[0][0]][index_of_array_variable[0][1]]
+        # array_variable = original_df.loc[index_of_array_variable[0][0]][index_of_array_variable[0][1]]
+        # array_variable = original_df.loc[index_of_array_variable[0][0]].iloc[index_of_array_variable[0][1]]
+        array_variable = original_df.iloc[index_of_array_variable[0][0], index_of_array_variable[0][1]]
+
         opening_braket_idx = array_variable.index('{')
         if (not self.multidimension_array_run and self.param_search_num_of_params > 1) or (self.param_search_num_of_params == 1 and ':' in array_variable):
             colon_idx = array_variable.index(':')
@@ -371,7 +374,7 @@ class ArrayRun:
             # in case there is just one parameter for array run OR we are having a multidimension array_run then default finding is not needed
             return df_ 
         df = df_.copy()
-        df_search_result = df[df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
+        df_search_result = df[df.map(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         df_search_result = np.where(df_search_result.notnull())
         arrays_idx_ = [(df_search_result[0][i], df_search_result[1][i]) for i in range(len(df_search_result[0]))]
         for to_default_idx in arrays_idx_:
@@ -453,7 +456,7 @@ class ArrayRun:
                     value = str(df[idx[0]][idx[1]])
                 else:
                     title = str(df['Variable'][idx[0]])
-                    value = str(df.loc[idx[0]][idx[1]])
+                    value = str(df.iloc[idx[0], idx[1]])
             except TypeError:
                 title = str(df['Key'][idx[0]])
                 value = str(df.loc[idx[0]][idx[1]])
@@ -540,7 +543,7 @@ class ArrayRun:
         return metadata_filename
 
     def _get_arrun_cell_indices_from_df (self, df):
-        arrun_search_result = df[df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
+        arrun_search_result = df[df.map(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)]
         arrays_indices = np.where(arrun_search_result.isnull().values != True)
         arrays_indices = [(arrays_indices[0][i], arrays_indices[1][i]) for i in range(len(arrays_indices[0]))]
         return arrays_indices

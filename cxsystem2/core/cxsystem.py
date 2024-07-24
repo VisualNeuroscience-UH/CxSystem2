@@ -192,10 +192,10 @@ class CxSystem:
         self.array_run_stdout_file = array_run_stdout_file
 
         self.physio_config_df = read_config_file(physiology_config, header=True)
-        self.physio_config_df = self.physio_config_df.applymap(lambda x: b2.NaN if str(x)[0] == '#' else x)
+        self.physio_config_df = self.physio_config_df.map(lambda x: b2.NaN if str(x)[0] == '#' else x)
 
         self.anat_and_sys_conf_df = read_config_file(anatomy_and_system_config)
-        self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.applymap(lambda x: x.strip() if type(x) == str else x)
+        self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.map(lambda x: x.strip() if type(x) == str else x)
 
         # dropping the commented lines :
         self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.drop(self.anat_and_sys_conf_df[0].index[self.anat_and_sys_conf_df[0][
@@ -233,8 +233,8 @@ class CxSystem:
             self.numerical_integration_method = 'euler'
         print(" -  The system is running with %s integration method" % self.numerical_integration_method)
 
-        check_array_run_anatomy = self.anat_and_sys_conf_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)
-        check_array_run_physiology = self.physio_config_df.applymap(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)
+        check_array_run_anatomy = self.anat_and_sys_conf_df.map(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)
+        check_array_run_physiology = self.physio_config_df.map(lambda x: True if ('|' in str(x) or '&' in str(x)) else False)
         try:
             trials_per_config = int(parameter_finder(self.anat_and_sys_conf_df, 'trials_per_config'))
         except NameError:
@@ -1117,20 +1117,20 @@ class CxSystem:
         }
 
         # getting the connection probability gain from the namespace and apply it on all the connections:
-        index_of_receptor = int(np.where(self.current_parameters_s.values == 'receptor')[0])
-        index_of_post_syn_idx = int(np.where(self.current_parameters_s.values == 'post_syn_idx')[0])
-        index_of_pre_syn_idx = int(np.where(self.current_parameters_s.values == 'pre_syn_idx')[0])
-        index_of_syn_type = int(np.where(self.current_parameters_s.values == 'syn_type')[0])
+        index_of_receptor = int(np.where(self.current_parameters_s.values == 'receptor')[0][0])
+        index_of_post_syn_idx = int(np.where(self.current_parameters_s.values == 'post_syn_idx')[0][0])
+        index_of_pre_syn_idx = int(np.where(self.current_parameters_s.values == 'pre_syn_idx')[0][0])
+        index_of_syn_type = int(np.where(self.current_parameters_s.values == 'syn_type')[0][0])
         try:
-            index_of_p = int(np.where(self.current_parameters_s.values == 'p')[0])
+            index_of_p = int(np.where(self.current_parameters_s.values == 'p')[0][0])
         except TypeError:
             pass
         try:
-            index_of_n = int(np.where(self.current_parameters_s.values == 'n')[0])
+            index_of_n = int(np.where(self.current_parameters_s.values == 'n')[0][0])
         except TypeError:
             pass
         try:
-            index_of_monitors = int(np.where(self.current_parameters_s.values == 'monitors')[0])
+            index_of_monitors = int(np.where(self.current_parameters_s.values == 'monitors')[0][0])
         except TypeError:
             pass
         try:
@@ -1340,7 +1340,7 @@ class CxSystem:
                 customized_synapses_list[-1]['post_group_idx']].index('_') + 1:] + \
                             self.customized_synapses_list[-1]['post_comp_name']
             try:
-                index_of_load_connection = int(np.where(self.current_parameters_s.values == 'load_connection')[0])
+                index_of_load_connection = int(np.where(self.current_parameters_s.values == 'load_connection')[0][0])
                 if '-->' in syn[index_of_load_connection]:
                     self.default_load_flag = int(syn[index_of_load_connection].replace('-->', ''))
                 elif '<--' in syn[index_of_load_connection]:
@@ -1363,7 +1363,7 @@ class CxSystem:
                 self.set_import_connections_path()
 
             try:
-                index_of_save_connection = int(np.where(self.current_parameters_s.values == 'save_connection')[0])
+                index_of_save_connection = int(np.where(self.current_parameters_s.values == 'save_connection')[0][0])
                 if '-->' in syn[index_of_save_connection]:
                     self.default_save_flag = int(syn[index_of_save_connection].replace('-->', ''))
                 elif '<--' in syn[index_of_save_connection]:
