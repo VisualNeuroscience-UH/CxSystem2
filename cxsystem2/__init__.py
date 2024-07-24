@@ -15,4 +15,4 @@
 #
 # for instance the new format starts with 0.1.1.1 which means version 0.1 beta with several patches. At final release
 # we will move to version 1.0 instead of 0.1
-__version__ = "2.1.1.51"
+__version__ = "2.1.1.52"
