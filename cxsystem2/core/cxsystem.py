@@ -711,7 +711,7 @@ class CxSystem:
                 local_namespace['layer_idx'] = eval(local_namespace['layer_idx'].replace('->', ','))
         layer_idx = local_namespace['layer_idx']
         try:
-            number_of_neurons = str(int(int(number_of_neurons) * self.scale))
+            number_of_neurons = str(round(float(number_of_neurons) * self.scale))
         except AttributeError:
             pass
         # </editor-fold>
