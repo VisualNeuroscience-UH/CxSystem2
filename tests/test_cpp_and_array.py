@@ -98,20 +98,12 @@ def test_outputfile(cxsystem_run_fixture2):
     )
 
 
-# @pytest.mark.xfail(reason='not identical spikes')
 def test_spikecount_10percent_tolerance(cxsystem_run_fixture2, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
     for key in keys:
         spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
         assert 0.9 <= spike_count_proportion <= 1.1
-        # with capsys.disabled():
-        # print(f'\nProportion of spike counts (new/old) for {key} is {spike_count_proportion}')
-        # import matplotlib.pyplot as plt
-        # # key = 'NG1_L4_PC1_L4toL1'
-        # plt.plot(new_spikes_all[key]['t'], new_spikes_all[key]['i'], 'k.')
-        # plt.plot(spikes_all[key]['t'], spikes_all[key]['i'], 'r.')
-        # plt.show()
 
 
 @pytest.mark.xfail(reason="The same spikes not attainable in a distinct run")
@@ -121,16 +113,6 @@ def test_spikecount_strict(cxsystem_run_fixture2, get_spike_data):
     for key in keys:
         spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
         assert spike_count_proportion == 1.0
-
-
-# @pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')
-# def test_spiketiming_strict(cxsystem_run_fixture2,
-# 							get_spike_data):
-# 	spikes_all, new_spikes_all = get_spike_data
-# 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
-# 	for key in keys:
-# 		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
-# 		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
 
 
 def test_spikecount_report(cxsystem_run_fixture2, capsys, get_spike_data):
@@ -146,7 +128,6 @@ def test_spikecount_report(cxsystem_run_fixture2, capsys, get_spike_data):
                     key, spike_count_proportion
                 )
             )
-        # assert spike_count_proportion == 1.0
 
 
 def test_spiketiming_report(cxsystem_run_fixture2, capsys, get_spike_data):
@@ -194,19 +175,13 @@ def test_spiketiming_report(cxsystem_run_fixture2, capsys, get_spike_data):
 
             spike_data = np.nonzero(spikes_index_time_matrix[idx, :])[0]
             new_spike_data = np.nonzero(new_spikes_index_time_matrix[idx, :])[0]
-
-            # ksstat = ks_2samp(spike_data,new_spike_data)
             wass_dist = wasserstein_distance(spike_data, new_spike_data)
-
-            # cumulative_ks += ksstat[0]
             cumulative_wd += wass_dist
 
-        # mean_ks = cumulative_ks/len(all_spiking_neurons)
         mean_wd = (time_resolution / msecond) * cumulative_wd / len(all_spiking_neurons)
 
         # report mean of these stats
         with capsys.disabled():
-            # print('Mean KS statistics for {0} is {1:.2f}'.format(key,mean_ks)) # Quantified spiketiming similarity
             print(
                 "Mean Wasserstein Distance (spike shift) for {0} is {1:.2f} ms".format(
                     key, mean_wd

@@ -63,6 +63,7 @@ cryptography = { version = "*", optional = true }
 django = { version = "*", optional = true }
 django-extensions = { version = "*", optional = true }
 django-sslserver = { version = "*", optional = true }
+isort = { version = "*", optional = true }
 ping3 = { version = "*", optional = true }
 paramiko = { version = "*", optional = true }
 pyopenssl = { version = "*", optional = true }
@@ -110,3 +111,15 @@ cxcluster = "cxsystem2.cmd.cxcluster_cmd:main"
 cxvisualize = "cxsystem2.cmd.cxvisualize_cmd:main"
 cxserver = "cxsystem2.cmd.cxserver_cmd:main"
 cxmetadata = "cxsystem2.cmd.cxmetadata_cmd:main"
+
+[tool.isort]
+profile = "black"
+known_third_party = ["numpy", "pandas", "matplotlib"]
+known_first_party = ["cxsystem2"]
+known_localfolder = ["core"]
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+default_section = "THIRDPARTY"
+import_heading_stdlib = "Built-in"
+import_heading_thirdparty = "Third-party"
+import_heading_firstparty = "First-party"
+import_heading_localfolder = "Local"

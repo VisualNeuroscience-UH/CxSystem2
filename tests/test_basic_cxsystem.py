@@ -11,7 +11,7 @@ import brian2
 import zlib
 import pickle
 import shutil
-from scipy.stats import ks_2samp, wasserstein_distance
+from scipy.stats import wasserstein_distance
 from pathlib import Path
 
 
@@ -284,12 +284,10 @@ class TestEquationHelper:
 @pytest.fixture(scope="module")
 def cxsystem_run_fixture():
 
-    # Executing setup code
     CM.run()
 
-    yield  # Run the tests here
+    yield
 
-    # #Executing teardown code
     shutil.rmtree(CM.workspace.get_simulation_folder_as_posix())
 
 
@@ -318,7 +316,6 @@ def get_spike_data():
     return spikes_all, new_spikes_all
 
 
-# @pytest.mark.skip(reason="too slow")
 def test_outputfile(cxsystem_run_fixture):
     """Test for existing outputfile"""
     outputfilelist = [
@@ -331,7 +328,6 @@ def test_outputfile(cxsystem_run_fixture):
     )
 
 
-# @pytest.mark.xfail(reason='not identical spikes')
 def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
@@ -349,17 +345,6 @@ def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
         assert spike_count_proportion == 1.0
 
 
-# @pytest.mark.xfail(reason='The same spikes not attainable in a distinct run')
-# def test_spiketiming_strict(cxsystem_run_fixture,
-# 							get_spike_data):
-# 	spikes_all, new_spikes_all = get_spike_data
-# 	keys=list(spikes_all.keys()) # dict_keys is not indexable directly
-# 	for key in keys:
-
-# 		assert all(new_spikes_all[key]['i'] == spikes_all[key]['i'])
-# 		assert all(new_spikes_all[key]['t'] == spikes_all[key]['t'])
-
-
 def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
@@ -373,7 +358,6 @@ def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
                     key, spike_count_proportion
                 )
             )
-        # assert spike_count_proportion == 1.0
 
 
 def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
@@ -397,7 +381,7 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
         # create time vectors of zeros and ones for all neurons and both datasets
         spikes_index_time_matrix = np.zeros(
             [max(all_spiking_neurons) + 1, int(time_vector_length)]
-        )  # +1 because indexing starts at 0
+        )
         spikes_time_indeces_float = spikes_all[key]["t"] / time_resolution
         spikes_index_time_matrix[
             spikes_all[key]["i"], spikes_time_indeces_float.astype(int)
@@ -415,27 +399,22 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
             all_spiking_neurons, :
         ]
 
-        # cumulative_ks = 0
         cumulative_wd = 0
         for idx, neuron_idx in enumerate(all_spiking_neurons):
 
             spike_data = np.nonzero(spikes_index_time_matrix[idx, :])[0]
             new_spike_data = np.nonzero(new_spikes_index_time_matrix[idx, :])[0]
 
-            # ksstat = ks_2samp(spike_data,new_spike_data)
             wass_dist = wasserstein_distance(spike_data, new_spike_data)
 
-            # cumulative_ks += ksstat[0]
             cumulative_wd += wass_dist
 
-        # mean_ks = cumulative_ks/len(all_spiking_neurons)
         mean_wd = (time_resolution / msecond) * cumulative_wd / len(all_spiking_neurons)
 
         # report mean of these stats
         with capsys.disabled():
-            # print('Mean KS statistics for {0} is {1:.2f}'.format(key,mean_ks)) # Quantified spiketiming similarity
             print(
                 "Mean Wasserstein Distance (spike shift) for {0} is {1:.2f} ms".format(
                     key, mean_wd
                 )
-            )  # Quantified spiketiming similarity
+            )

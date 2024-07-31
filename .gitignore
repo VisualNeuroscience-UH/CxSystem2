@@ -30,6 +30,7 @@ Temporary Items
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
+*Zone.Identifier
 
 # Folder config file
 Desktop.ini
