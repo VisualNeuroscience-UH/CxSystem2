@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-__author__ = 'Andalibi, V., Hokkanen H., Vanni, S.'
+__author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
-'''
+"""
 The preliminary version of this software has been developed at Aalto University 2012-2015, 
 and the full version at the University of Helsinki 2013-2017. The software is distributed 
 under the terms of the GNU General Public License. 
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
-'''
+"""
 
 import os
 from pathlib import Path
@@ -38,16 +38,16 @@ class Workspace:
         if not self.workspace_path.is_dir():
             os.makedirs(self.workspace_path.as_posix())
         self.suffix = suffix
-        self.output_extension = '.gz'
+        self.output_extension = ".gz"
         self.compression_to_extension = {
-            'gzip': '.gz',
-            'bzip2': 'bz2',
-            'pickle': '.pickle'
+            "gzip": ".gz",
+            "bzip2": "bz2",
+            "pickle": ".pickle",
         }
         self.results = {}
         self.connections = {}
         self.syntax_bank = []
-        self.simulation_name = ''
+        self.simulation_name = ""
         self.simulation_folder = Path()
         self.results_export_path = Path()
         self.connections_export_path = Path()
@@ -62,9 +62,12 @@ class Workspace:
         print(" -  simulation folder {}".format(self.simulation_folder))
         # if not self.simulation_folder.is_dir():
         os.makedirs(self.simulation_folder.as_posix(), exist_ok=True)
-        self.results_export_path = self.simulation_folder.joinpath(self.simulation_name + '_results' + self.suffix).with_suffix(self.output_extension)
-        self.connections_export_path = self.simulation_folder.joinpath(self.simulation_name + '_connections' + self.suffix).with_suffix(
-            self.output_extension)
+        self.results_export_path = self.simulation_folder.joinpath(
+            self.simulation_name + "_results" + self.suffix
+        ).with_suffix(self.output_extension)
+        self.connections_export_path = self.simulation_folder.joinpath(
+            self.simulation_name + "_connections" + self.suffix
+        ).with_suffix(self.output_extension)
 
     def get_workspace_folder(self):
         return self.workspace_path
@@ -91,18 +94,31 @@ class Workspace:
         self.imported_connections_path = Path(path).expanduser()
 
     def import_connections(self):
-        assert self.imported_connections_path.suffix in self.compression_to_extension.values(), \
-            ' -  Compression method {} is not supported. Supported methods are gzip (gz), bzip2 (bz2) or pickle (pkl)'.format(
-                self.imported_connections_path.suffix)
+        assert (
+            self.imported_connections_path.suffix
+            in self.compression_to_extension.values()
+        ), " -  Compression method {} is not supported. Supported methods are gzip (gz), bzip2 (bz2) or pickle (pkl)".format(
+            self.imported_connections_path.suffix
+        )
         if not self.imported_connections_path.is_absolute():
             if self.workspace_path.joinpath(self.imported_connections_path).is_file():
-                self.imported_connections_path = self.workspace_path.joinpath(self.imported_connections_path)
+                self.imported_connections_path = self.workspace_path.joinpath(
+                    self.imported_connections_path
+                )
             elif Path.cwd().joinpath(self.imported_connections_path).is_file():
-                self.imported_connections_path = Path.cwd().joinpath(self.imported_connections_path)
+                self.imported_connections_path = Path.cwd().joinpath(
+                    self.imported_connections_path
+                )
             elif Path.cwd().parent.joinpath(self.imported_connections_path).is_file():
-                self.imported_connections_path = Path.cwd().parent.joinpath(self.imported_connections_path)
+                self.imported_connections_path = Path.cwd().parent.joinpath(
+                    self.imported_connections_path
+                )
             else:
-                raise FileNotFoundError(' -  Connection file not found: {}'.format(self.imported_connections_path.as_posix()))
+                raise FileNotFoundError(
+                    " -  Connection file not found: {}".format(
+                        self.imported_connections_path.as_posix()
+                    )
+                )
         return load_from_file(self.imported_connections_path)
 
     def create_results_key(self, key):
@@ -127,21 +143,31 @@ class Workspace:
 
     def save_results_to_file(self):
         print(" -  Saving results to file ...")
-        self.results['Full path'] = self.results_export_path.as_posix()
+        self.results["Full path"] = self.results_export_path.as_posix()
         while self.results_export_path.is_file():
             idx = 1
             self.results_export_path = self.results_export_path.parent.joinpath(
-                self.results_export_path.stem + '_{}'.format(idx) + self.results_export_path.suffix)
+                self.results_export_path.stem
+                + "_{}".format(idx)
+                + self.results_export_path.suffix
+            )
             idx += 1
         write_to_file(self.results_export_path.as_posix(), self.results)
-        print(" -  The output of the simulation is saved at: {}".format(self.results_export_path))
+        print(
+            " -  The output of the simulation is saved at: {}".format(
+                self.results_export_path
+            )
+        )
 
     def save_connections_to_file(self):
         print(" -  Saving connections to file ...")
-        self.connections['Full path'] = self.connections_export_path.as_posix()
+        self.connections["Full path"] = self.connections_export_path.as_posix()
         while self.connections_export_path.is_file():
             idx = 1
             self.connections_export_path = self.connections_export_path.parent.joinpath(
-                self.connections_export_path.stem + '_{}'.format(idx) + self.connections_export_path.suffix)
+                self.connections_export_path.stem
+                + "_{}".format(idx)
+                + self.connections_export_path.suffix
+            )
             idx += 1
         write_to_file(self.connections_export_path.as_posix(), self.connections)

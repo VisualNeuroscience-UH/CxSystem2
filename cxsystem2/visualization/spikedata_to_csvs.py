@@ -24,7 +24,7 @@ class SpikeData:
         :return: dict
         """
 
-        fi = open(self.data_filename, 'rb')
+        fi = open(self.data_filename, "rb")
         data_pickle = zlib.decompress(fi.read())
         data = pickle.loads(data_pickle)
         return data
@@ -39,7 +39,7 @@ class SpikeData:
         :return:
         """
 
-        a = np.cumsum(list(self.data['number_of_neurons'].values()))
+        a = np.cumsum(list(self.data["number_of_neurons"].values()))
         abs_start_index = [0]
         abs_start_index.extend(a)
         abs_start_index = np.array(abs_start_index)
@@ -48,7 +48,7 @@ class SpikeData:
         if return_names is False:
             return abs_start_index
         else:
-            group_names = np.array(list(self.data['number_of_neurons'].keys()))
+            group_names = np.array(list(self.data["number_of_neurons"].keys()))
             return abs_start_index, group_names
 
     def get_spike_list(self):
@@ -64,19 +64,23 @@ class SpikeData:
 
         # Count all spikes
         N_spikes = 0
-        for group in self.data['spikes_all'].keys():
-            N_spikes += self.data['spikes_all'][group]['N']
+        for group in self.data["spikes_all"].keys():
+            N_spikes += self.data["spikes_all"][group]["N"]
 
         # Create an array of spikes
         spikelist = np.zeros((N_spikes, 2))
 
         list_ix = 0
         group_ix = 0
-        for group in self.data['spikes_all'].keys():
-            N_spikes_in_group = self.data['spikes_all'][group]['N']
+        for group in self.data["spikes_all"].keys():
+            N_spikes_in_group = self.data["spikes_all"][group]["N"]
 
-            spikelist[list_ix:list_ix + N_spikes_in_group, 0] = self.data['spikes_all'][group]['i'] + abs_start_index[group_ix]
-            spikelist[list_ix:list_ix + N_spikes_in_group, 1] = self.data['spikes_all'][group]['t'] / second
+            spikelist[list_ix : list_ix + N_spikes_in_group, 0] = (
+                self.data["spikes_all"][group]["i"] + abs_start_index[group_ix]
+            )
+            spikelist[list_ix : list_ix + N_spikes_in_group, 1] = (
+                self.data["spikes_all"][group]["t"] / second
+            )
 
             list_ix += N_spikes_in_group
             group_ix += 1
@@ -99,7 +103,9 @@ class SpikeData:
         #            'NG12_L5_MC_L5': 0.04, 'NG13_L6_PC1_L6toL6': 0.05, 'NG14_L6_PC2_L6toL4': 0.05,
         #            'NG15_L6_PC3_L6toL2': 0.05, 'NG16_L6_BC_L6': 0.05, 'NG17_L6_MC_L6': 0.05}
         try:
-            layer_number = int(re.findall('^.*_L(\d)\w*$', group_name)[0])  # by convention, L2/3 is "L2"
+            layer_number = int(
+                re.findall("^.*_L(\d)\w*$", group_name)[0]
+            )  # by convention, L2/3 is "L2"
         except IndexError:
             layer_number = 0
 
@@ -109,7 +115,12 @@ class SpikeData:
 
         return z_level[layer_number]
 
-    def get_positions_list(self, xy_multiplier=(1500.0/50000), z_multiplier=(1500.0/50000), return_subsets=True):
+    def get_positions_list(
+        self,
+        xy_multiplier=(1500.0 / 50000),
+        z_multiplier=(1500.0 / 50000),
+        return_subsets=True,
+    ):
         """
         Creates a N_neurons x 3 matrix of neurons, where N_neurons = number of neurons,
         column 0 = x position, column 1 = y position, and column 2 = z position.
@@ -124,7 +135,7 @@ class SpikeData:
         start_ix, group_names = self._get_start_indices(return_names=True)
         N_neurons = start_ix[-1]
         # In CxSystem, w = position in cortex, in millimeters (and z = position in retina)
-        coords = self.data['positions_all']['w_coord']
+        coords = self.data["positions_all"]["w_coord"]
 
         all_positions = np.zeros((N_neurons, 3))
 
@@ -133,10 +144,18 @@ class SpikeData:
             group_pos = np.array(coords[group])
             group_z = self._get_z_level(group)
 
-            x = np.array([(xy_multiplier * neuron_pos.real, xy_multiplier * neuron_pos.imag, z_multiplier * group_z)
-                          for neuron_pos in group_pos])
+            x = np.array(
+                [
+                    (
+                        xy_multiplier * neuron_pos.real,
+                        xy_multiplier * neuron_pos.imag,
+                        z_multiplier * group_z,
+                    )
+                    for neuron_pos in group_pos
+                ]
+            )
 
-            all_positions[start_ix[group_ix]:start_ix[group_ix+1], :] = x
+            all_positions[start_ix[group_ix] : start_ix[group_ix + 1], :] = x
 
             group_ix += 1
             # for neuron_pos in group_pos:
@@ -148,7 +167,7 @@ class SpikeData:
         else:
             subsets_dict = dict()
             for i, group_name in enumerate(group_names):
-                subsets_dict[group_name] = np.array([start_ix[i], start_ix[i+1]-1])
+                subsets_dict[group_name] = np.array([start_ix[i], start_ix[i + 1] - 1])
 
             return all_positions, subsets_dict
 
@@ -160,38 +179,44 @@ class SpikeData:
         :return:
         """
 
-        visimpl_se_dict = {'subsets': [], 'timeframes': []}  # se = subsets & events
+        visimpl_se_dict = {"subsets": [], "timeframes": []}  # se = subsets & events
         for group in subsets_dict.keys():
             start_ix = subsets_dict[group][0]
             last_ix = subsets_dict[group][1]
             # In ViSimpl, subsets are given as first_index:last_index
             tmp_subset_dict = {group: str(start_ix) + ":" + str(last_ix)}
-            visimpl_se_dict['subsets'].append(tmp_subset_dict)
+            visimpl_se_dict["subsets"].append(tmp_subset_dict)
 
         return json.dumps(visimpl_se_dict)
 
     def save_for_visimpl(self, structure_csv=None, spikes_csv=None, subsets_json=None):
         if structure_csv is None:
-            structure_csv = self.file_dir.joinpath(Path(self.filename_stem + '_structure.csv'))
+            structure_csv = self.file_dir.joinpath(
+                Path(self.filename_stem + "_structure.csv")
+            )
         if spikes_csv is None:
-            spikes_csv = self.file_dir.joinpath(Path(self.filename_stem + '_spikes.csv'))
+            spikes_csv = self.file_dir.joinpath(
+                Path(self.filename_stem + "_spikes.csv")
+            )
         if subsets_json is None:
-            subsets_json = self.file_dir.joinpath(Path(self.filename_stem + '_subsets.json'))
+            subsets_json = self.file_dir.joinpath(
+                Path(self.filename_stem + "_subsets.json")
+            )
 
         positions_list, subsets_dict = self.get_positions_list()
-        np.savetxt(structure_csv, positions_list, delimiter=',', fmt='%.9f')
+        np.savetxt(structure_csv, positions_list, delimiter=",", fmt="%.9f")
 
         spike_list = self.get_spike_list()
-        np.savetxt(spikes_csv, spike_list, delimiter=',', fmt=['%d', '%.9f'])
+        np.savetxt(spikes_csv, spike_list, delimiter=",", fmt=["%d", "%.9f"])
 
         subsets_json_data = self._convert_subsets_dict_to_visimpl_json(subsets_dict)
-        with open(subsets_json, 'w') as fi:
+        with open(subsets_json, "w") as fi:
             fi.write(subsets_json_data)
 
         return structure_csv, spikes_csv, subsets_json
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    x = SpikeData('/home/henhok/sim_results/step2_output.gz')
+    x = SpikeData("/home/henhok/sim_results/step2_output.gz")
     x.save_for_visimpl()

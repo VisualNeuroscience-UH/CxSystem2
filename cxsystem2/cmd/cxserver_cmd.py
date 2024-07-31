@@ -64,24 +64,25 @@ from docopt import docopt
 
 from cxsystem2.core.cxsystem import CxSystem
 
+
 def all_params_exist(httpsconf):
-    missing_parameter = ''
-    if 'oauth2' in httpsconf.keys():
-        if 'provider-id' not in httpsconf['oauth2'].keys():
-            missing_parameter = 'provider-id'
-        elif 'client-id' not in httpsconf['oauth2'].keys():
-            missing_parameter = 'client-id'
-        elif 'redirect-uri' not in httpsconf['oauth2'].keys():
-            missing_parameter = 'redirect-uri'
-        elif 'authorization' not in httpsconf['oauth2'].keys():
-            missing_parameter = 'authorization'
+    missing_parameter = ""
+    if "oauth2" in httpsconf.keys():
+        if "provider-id" not in httpsconf["oauth2"].keys():
+            missing_parameter = "provider-id"
+        elif "client-id" not in httpsconf["oauth2"].keys():
+            missing_parameter = "client-id"
+        elif "redirect-uri" not in httpsconf["oauth2"].keys():
+            missing_parameter = "redirect-uri"
+        elif "authorization" not in httpsconf["oauth2"].keys():
+            missing_parameter = "authorization"
     else:
-        missing_parameter = 'oauth2'
-    if 'workspace' not in httpsconf.keys():
-        missing_parameter = 'workspace path'
-    if 'log' not in httpsconf.keys():
-        missing_parameter = 'log path'
-    if missing_parameter == '':
+        missing_parameter = "oauth2"
+    if "workspace" not in httpsconf.keys():
+        missing_parameter = "workspace path"
+    if "log" not in httpsconf.keys():
+        missing_parameter = "log path"
+    if missing_parameter == "":
         return True
     return missing_parameter
 
@@ -90,67 +91,78 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
     cx_folder = Path(os.path.dirname(os.path.abspath(__file__))).parent
-    yaml_path = cx_folder.joinpath('.cxconfig.yaml')
+    yaml_path = cx_folder.joinpath(".cxconfig.yaml")
 
     httpsconfig = {}
-    if yaml_path.is_file() and not arguments['--config']:
-        with open(yaml_path.as_posix(), 'r') as file:
+    if yaml_path.is_file() and not arguments["--config"]:
+        with open(yaml_path.as_posix(), "r") as file:
             httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
         if all_params_exist(httpsconfig) is not True:
             missing_parameter = all_params_exist(httpsconfig)
-            print("Parameter {} missing. Set it using --config (see usage)".format(missing_parameter))
+            print(
+                "Parameter {} missing. Set it using --config (see usage)".format(
+                    missing_parameter
+                )
+            )
             return
 
-    if arguments['--config']:
+    if arguments["--config"]:
         if yaml_path.is_file():
-            with open(yaml_path.as_posix(), 'r') as file:
+            with open(yaml_path.as_posix(), "r") as file:
                 httpsconfig = yaml.load(file, Loader=yaml.FullLoader)
-        if arguments['--provider-id'] and arguments['--client-id'] and arguments['--redirect-uri'] and arguments['--authorization']:
-            httpsconfig['oauth2'] = {
-                'provider-id': arguments['--provider-id'],
-                'client-id': arguments['--client-id'],
-                'redirect-uri': arguments['--redirect-uri'],
-                'authorization': arguments['--authorization']}
-        elif arguments['--workspace-path']:
-            workspace_path = Path(arguments['--workspace-path'])
-            if workspace_path.suffix != '':
+        if (
+            arguments["--provider-id"]
+            and arguments["--client-id"]
+            and arguments["--redirect-uri"]
+            and arguments["--authorization"]
+        ):
+            httpsconfig["oauth2"] = {
+                "provider-id": arguments["--provider-id"],
+                "client-id": arguments["--client-id"],
+                "redirect-uri": arguments["--redirect-uri"],
+                "authorization": arguments["--authorization"],
+            }
+        elif arguments["--workspace-path"]:
+            workspace_path = Path(arguments["--workspace-path"])
+            if workspace_path.suffix != "":
                 print("Workspace path should be folder, removing the file name")
                 workspace_path = workspace_path.parent
             workspace_path.mkdir(parents=True, exist_ok=True)
-            httpsconfig['workspace'] = {'path': workspace_path.as_posix()}
-        elif arguments['--log-path']:
-            log_path = Path(arguments['--log-path'])
-            if log_path.suffix != '':
+            httpsconfig["workspace"] = {"path": workspace_path.as_posix()}
+        elif arguments["--log-path"]:
+            log_path = Path(arguments["--log-path"])
+            if log_path.suffix != "":
                 print("Log path should be folder, removing the file name")
                 log_path = log_path.parent
             log_path.mkdir(parents=True, exist_ok=True)
-            httpsconfig['log'] = {'path': log_path.as_posix()}
+            httpsconfig["log"] = {"path": log_path.as_posix()}
 
-        with open(yaml_path.as_posix(), 'w') as file:
+        with open(yaml_path.as_posix(), "w") as file:
             yaml.dump(httpsconfig, file)
-        print ("Parameter(s) set successfully")
+        print("Parameter(s) set successfully")
         return
 
-    if arguments['--https']:
+    if arguments["--https"]:
         cx = CxSystem()
         if not yaml_path.is_file():
-            print ("Cxserver needs path to workspace and log, as well as OAuth configuration to run in https mode. These parameters should "
-                   "be set using --config as parameters (see usage).")
+            print(
+                "Cxserver needs path to workspace and log, as well as OAuth configuration to run in https mode. These parameters should "
+                "be set using --config as parameters (see usage)."
+            )
             return
 
-
-        cx.run_bui(ssl=True,
-                   port=arguments['--port'],
-                   nobrowser=arguments['--no-browser'])
+        cx.run_bui(
+            ssl=True, port=arguments["--port"], nobrowser=arguments["--no-browser"]
+        )
 
     else:
         cx = CxSystem()
-        cx.run_bui(ssl=False,
-                   port=arguments['--port'],
-                   nobrowser=arguments['--no-browser'])
+        cx.run_bui(
+            ssl=False, port=arguments["--port"], nobrowser=arguments["--no-browser"]
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) == 1:
-        sys.argv.append('-h')
+        sys.argv.append("-h")
     main()

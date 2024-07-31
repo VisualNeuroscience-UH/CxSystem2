@@ -18,6 +18,7 @@
 # __version__ = "2.1.1.52"
 from pathlib import Path
 
+
 this_file_path = Path(__file__).resolve()
 full_path = this_file_path.parent.parent / "pyproject.toml"
 

@@ -51,15 +51,17 @@ from cxsystem2.visualization.spikedata_to_csvs import SpikeData
 from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
 
 
-VISIMPL_BINARY = ''
+VISIMPL_BINARY = ""
+
+
 def check_visimpl():
     global VISIMPL_BINARY
     if which("visimpl.AppImage") is None:
-        VISIMPL_BINARY = '~/visimpl/visimpl.AppImage'
+        VISIMPL_BINARY = "~/visimpl/visimpl.AppImage"
         if not Path(VISIMPL_BINARY).is_file():
             raise FileNotFoundError("ViSimpl binary not found ")
     else:
-        VISIMPL_BINARY = 'visimpl.AppImage'  # ViSimpl is already in path
+        VISIMPL_BINARY = "visimpl.AppImage"  # ViSimpl is already in path
 
 
 def _convert(filepath):
@@ -68,10 +70,16 @@ def _convert(filepath):
     return structure_csv, spikes_csv, subsets_json
 
 
-def _run_visimpl(structure_csv,
-                 spikes_csv,
-                 subsets_json):
-    run_visimpl_cmd = VISIMPL_BINARY + ' -csv ' + str(structure_csv) + ' ' + str(spikes_csv) + ' -se ' + str(subsets_json)
+def _run_visimpl(structure_csv, spikes_csv, subsets_json):
+    run_visimpl_cmd = (
+        VISIMPL_BINARY
+        + " -csv "
+        + str(structure_csv)
+        + " "
+        + str(spikes_csv)
+        + " -se "
+        + str(subsets_json)
+    )
     os.system(run_visimpl_cmd)
 
 
@@ -79,47 +87,57 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
 
-    if arguments['--rasterplot-pdf']:
-        folder_path = Path(arguments['FOLDERPATH'])
+    if arguments["--rasterplot-pdf"]:
+        folder_path = Path(arguments["FOLDERPATH"])
         if not folder_path.is_dir():
             print("arrayrun folder not found. Make sure the path is correct.")
             return
-        timestamp = arguments['TIMESTAMP'].strip('_')
-        dir_file_list = folder_path.glob('**/*')
-        files = [x for x in dir_file_list if x.is_file() and timestamp in x.as_posix() and 'results' in x.as_posix()]
+        timestamp = arguments["TIMESTAMP"].strip("_")
+        dir_file_list = folder_path.glob("**/*")
+        files = [
+            x
+            for x in dir_file_list
+            if x.is_file() and timestamp in x.as_posix() and "results" in x.as_posix()
+        ]
         if len(files) == 0:
             print("arrayrun folder does not contain files with that timestamp.")
             return
-        sampling_rate = '1%'
-        if arguments['--sampling-rate']:
+        sampling_rate = "1%"
+        if arguments["--sampling-rate"]:
             try:
-                if arguments['--sampling-rate'].count('%') != 1 or \
-                    float(arguments['--sampling-rate'][:-1]) > 100 or \
-                    float(arguments['--sampling-rate'][:-1]) <= 0 :
-                    print ("Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%")
+                if (
+                    arguments["--sampling-rate"].count("%") != 1
+                    or float(arguments["--sampling-rate"][:-1]) > 100
+                    or float(arguments["--sampling-rate"][:-1]) <= 0
+                ):
+                    print(
+                        "Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%"
+                    )
                     return
             except ValueError:
-                print("Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%")
+                print(
+                    "Sampling rate not valid. It should be number greater than 0% and less than or equal to 100%"
+                )
                 return
-            sampling_rate = arguments['--sampling-rate']
+            sampling_rate = arguments["--sampling-rate"]
         rasterplot_pdf_generator(folder_path, timestamp, sampling_rate)
     else:
         check_visimpl()
-        filepath = Path(arguments['FILEPATH'])
+        filepath = Path(arguments["FILEPATH"])
         if not filepath.is_file():
             print("Error: file {} not found".format(filepath.as_posix()))
 
         else:
             structure_csv, spikes_csv, subsets_json = _convert(filepath)
-            if not arguments['--convert']:
+            if not arguments["--convert"]:
                 _run_visimpl(structure_csv, spikes_csv, subsets_json)
-            if arguments['--delete']:
+            if arguments["--delete"]:
                 os.remove(structure_csv)
                 os.remove(spikes_csv)
                 os.remove(subsets_json)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) == 1:
-        sys.argv.append('-h')
+        sys.argv.append("-h")
     main()

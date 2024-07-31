@@ -35,21 +35,21 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
 
-    filepath = Path(arguments['FILEPATH'])
+    filepath = Path(arguments["FILEPATH"])
     if not filepath.is_file():
         print("Error: file {} not found".format(filepath.as_posix()))
 
     else:
-        if filepath.suffix == '.json':
+        if filepath.suffix == ".json":
             converted = ConfigConverter(filepath)
             converted.save_as_csv()
 
-        if filepath.suffix == '.csv':
+        if filepath.suffix == ".csv":
             converted = ConfigConverter(filepath)
             converted.save_as_json()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) == 1:
-        sys.argv.append('-h')
+        sys.argv.append("-h")
     main()

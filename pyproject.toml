@@ -66,6 +66,7 @@ django-sslserver = { version = "*", optional = true }
 ping3 = { version = "*", optional = true }
 paramiko = { version = "*", optional = true }
 pyopenssl = { version = "*", optional = true }
+pytest = { version = "*", optional = true }
 requests = { version = "*", optional = true }
 scp = { version = "*", optional = true }
 six = { version = "*", optional = true }

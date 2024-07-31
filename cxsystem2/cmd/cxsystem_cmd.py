@@ -40,23 +40,23 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
 
-    if arguments['--anatomy'] and arguments['--physiology']:
-        anatomy_path = Path(arguments['--anatomy'])
+    if arguments["--anatomy"] and arguments["--physiology"]:
+        anatomy_path = Path(arguments["--anatomy"])
         if not anatomy_path.is_file():
             print("Anatomy file not found")
             return
-        physio_path = Path(arguments['--physiology'])
+        physio_path = Path(arguments["--physiology"])
         if not physio_path.is_file():
             print("Physiology file not found")
             return
         cx = CxSystem(anatomy_path.as_posix(), physio_path.as_posix())
         cx.run()
 
-    if arguments['--version']:
+    if arguments["--version"]:
         print("CxSystem2 Version {}".format(cxmodule.__version__))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) == 1:
-        sys.argv.append('-h')
+        sys.argv.append("-h")
     main()

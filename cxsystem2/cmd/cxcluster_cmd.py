@@ -33,14 +33,14 @@ def main():
     arguments = docopt(__doc__)
     # print(arguments)
 
-    metadata_path = Path(arguments['META_FILE_PATH'])
+    metadata_path = Path(arguments["META_FILE_PATH"])
     if not metadata_path.is_file():
         print("Error: metadata file {} not found".format(metadata_path.as_posix()))
     else:
         ClusterDownloader(metadata_path.as_posix())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) == 1:
-        sys.argv.append('-h')
+        sys.argv.append("-h")
     main()
