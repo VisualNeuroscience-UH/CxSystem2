@@ -1,0 +1,111 @@
+[tool.poetry]
+name = "cxsystem2"
+version = "2.1.3.0"  # third position: 0 alpha, 1 beta, 2 release candidate, 3 final release
+description = "A cerebral cortex simulation framework"
+authors = ["Vafa Andalibi <vafa.andalibi@gmail.com>", "Henri Hokkanen", "Simo Vanni"]
+license = "GPL v3.0"
+readme = "README.md"
+homepage = "https://github.com/VisualNeuroscience-UH/CxSystem2"
+repository = "https://github.com/VisualNeuroscience-UH/CxSystem2"
+documentation = "https://cxsystem2.readthedocs.io/en/latest/"
+
+classifiers = [
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: MacOS X",
+    "Environment :: X11 Applications",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Utilities",
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+brian2 = "^2.7.1"
+brian2genn = "*"
+cffi = "*"
+cycler = "*"
+cython = "*"
+docopt = "*"
+ipython = "*"
+jinja2 = "*"
+kiwisolver = "*"
+markupsafe = "*"
+matplotlib = "*"
+mpmath = "*"
+numpy = "*"
+pandas = "*"
+pycparser = "*"
+pynacl = "*"
+pyparsing = "*"
+python-dateutil = "*"
+pytz = "*"
+scipy = "*"
+sqlparse = "*"
+sympy = "*"
+pyyaml = "*"
+asn1crypto = { version = "*", optional = true }
+bcrypt = { version = "*", optional = true }
+cryptography = { version = "*", optional = true }
+django = { version = "*", optional = true }
+django-extensions = { version = "*", optional = true }
+django-sslserver = { version = "*", optional = true }
+ping3 = { version = "*", optional = true }
+paramiko = { version = "*", optional = true }
+pyopenssl = { version = "*", optional = true }
+requests = { version = "*", optional = true }
+scp = { version = "*", optional = true }
+six = { version = "*", optional = true }
+werkzeug = { version = "*", optional = true }
+sphinx = { version = "*", optional = true }
+sphinx-rtd-theme = { version = "*", optional = true }
+wheel = { version = "*", optional = true }
+
+[tool.poetry.extras]
+full_installation = [
+    "asn1crypto",
+    "bcrypt",
+    "black",
+    "coverage",
+    "cryptography",
+    "django",
+    "django-extensions",
+    "django-sslserver",
+    "paramiko",
+    "ping3",
+    "pyopenssl",
+    "pytest",
+    "pytest-cov",
+    "requests",
+    "scp",
+    "six",
+    "sphinx",
+    "sphinx-rtd-theme",
+    "werkzeug",
+    "wheel",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+cxsystem2 = "cxsystem2.cmd.cxsystem_cmd:main"
+cxconfig = "cxsystem2.cmd.cxconfig_cmd:main"
+cxcluster = "cxsystem2.cmd.cxcluster_cmd:main"
+cxvisualize = "cxsystem2.cmd.cxvisualize_cmd:main"
+cxserver = "cxsystem2.cmd.cxserver_cmd:main"
+cxmetadata = "cxsystem2.cmd.cxmetadata_cmd:main"

@@ -37,7 +37,6 @@ from cxsystem2.core.parameter_parser import SynapseParser
 from cxsystem2.core.physiology_reference import NeuronReference, SynapseReference
 from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.workspace_manager import Workspace
-from cxsystem2.bui import bui
 from cxsystem2.core.tools import parameter_finder, read_config_file, load_from_file
 
 b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
@@ -333,11 +332,16 @@ class CxSystem:
             self.configuration_executor()
         print(" -  Cortical Module initialization Done.")
 
-    @staticmethod
-    def run_bui(ssl=False,
-                port=None,
-                nobrowser=False):
-        bui.RunServer(ssl=ssl, port=port, nobrowser=nobrowser)
+    try:
+        from cxsystem2.bui import bui
+
+        @staticmethod
+        def run_bui(ssl=False,
+                    port=None,
+                    nobrowser=False):
+            bui.RunServer(ssl=ssl, port=port, nobrowser=nobrowser)
+    except ImportError:
+        print(" -  Browser User Interface (BUI) is not installed.")
 
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:, 0][self.anat_and_sys_conf_df.loc[:, 0] == 'row_type'].index
