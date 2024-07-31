@@ -9,28 +9,31 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Built-in
 import getpass
 import os
 import pickle as pickle
 import socket
 import time
 from builtins import input
+from datetime import datetime
 from pathlib import Path, PurePosixPath
 from sys import platform
-from packaging import version
 
+# Third-party
 import paramiko
+from packaging import version
 from ping3 import ping
 from scp import SCPClient
-from datetime import datetime
 
+# First-party
 from cxsystem2.configuration import config_file_converter as fileconverter
 from cxsystem2.core.exceptions import (
-    ParameterNotFoundError,
     ClusterNotReachableError,
+    ParameterNotFoundError,
     RelativePathError,
 )
-from cxsystem2.core.tools import parameter_finder, change_anat_file_header_value
+from cxsystem2.core.tools import change_anat_file_header_value, parameter_finder
 
 
 class ClusterRun:

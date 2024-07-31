@@ -1,5 +1,7 @@
+# Third-party
 from django.urls import path
 
+# Local
 from . import views
 
 urlpatterns = [

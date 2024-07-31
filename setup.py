@@ -3,8 +3,8 @@
 CxSystem2 setup script
 """
 
+# Third-party
 from setuptools import find_packages, setup
-
 
 requiers = """
 wheel

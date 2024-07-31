@@ -8,8 +8,10 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Built-in
 from string import Template
 
+# Third-party
 import brian2 as b2
 
 

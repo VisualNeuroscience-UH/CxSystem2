@@ -86,6 +86,7 @@ full_installation = [
     "django",
     "django-extensions",
     "django-sslserver",
+    "isort",
     "paramiko",
     "ping3",
     "pyopenssl",

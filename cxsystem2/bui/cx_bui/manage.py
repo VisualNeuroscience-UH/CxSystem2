@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+# Built-in
 import os
 import sys
 
@@ -7,6 +8,7 @@ import sys
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cx_bui.settings')
     try:
+        # Third-party
         from django.core.management import execute_from_command_line
     except ImportError as exc:
         raise ImportError(

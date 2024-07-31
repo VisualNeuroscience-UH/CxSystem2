@@ -8,6 +8,8 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Built-in
+import decimal
 import itertools
 import math
 import multiprocessing
@@ -16,15 +18,15 @@ import shutil
 import sys
 import time
 from pathlib import Path
-from collections import defaultdict
-import decimal
 
+# Third-party
 import numpy as np
 import pandas as pd
 
+# First-party
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
-from cxsystem2.core.tools import write_to_file, parameter_finder, load_from_file
+from cxsystem2.core.tools import load_from_file, parameter_finder, write_to_file
 from cxsystem2.hpc.cluster_run import ClusterRun
 
 

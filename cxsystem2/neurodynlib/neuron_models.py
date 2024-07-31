@@ -10,17 +10,21 @@
 # Neuron models that were used from the exercise code repository are:
 # AdEx, passive_cable, exp_IF, HH, LIF, NeuronAbstract, NeuronTypeOne, NeuronTypeTwo, fitzhugh_nagumo
 
+# Built-in
+import copy
 import json
 from datetime import datetime
 from string import Template
+
+# Third-party
 import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy as np
 from brian2.units import *
-import copy
 
+# First-party
 from cxsystem2.neurodynlib.receptor_models import ReceptorModel
-from cxsystem2.neurodynlib.tools import plot_tools, input_factory
+from cxsystem2.neurodynlib.tools import input_factory, plot_tools
 
 
 class PointNeuron:

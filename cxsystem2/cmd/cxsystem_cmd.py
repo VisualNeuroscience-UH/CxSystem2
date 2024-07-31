@@ -27,11 +27,14 @@ Description:
 
 """
 
+# Built-in
 import sys
 from pathlib import Path
 
+# Third-party
 from docopt import docopt
 
+# First-party
 import cxsystem2 as cxmodule
 from cxsystem2.core.cxsystem import CxSystem
 

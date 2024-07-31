@@ -8,15 +8,18 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Built-in
 import os
 import shutil
 
+# Third-party
 import brian2 as b2
 import numpy as np
 from brian2.units import *
 from scipy import io
 
-from cxsystem2.core.tools import write_to_file, load_from_file
+# First-party
+from cxsystem2.core.tools import load_from_file, write_to_file
 
 
 class Stimuli:

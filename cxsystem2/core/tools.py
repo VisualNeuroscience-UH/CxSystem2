@@ -1,14 +1,17 @@
+# Built-in
 import bz2
+import pathlib as pl
 import pickle as pickle
 import zlib
 
+# Third-party
 import numpy as np
 import pandas as pd
-import pathlib as pl
-
-from cxsystem2.core.exceptions import ParameterNotFoundError
-from cxsystem2.configuration import config_file_converter as file_converter
 from brian2.input.timedarray import TimedArray
+
+# First-party
+from cxsystem2.configuration import config_file_converter as file_converter
+from cxsystem2.core.exceptions import ParameterNotFoundError
 
 
 def _remove_timed_arrays(obj):

@@ -1,6 +1,8 @@
+# Third-party
 import brian2 as b2
 from brian2.units import *
 
+# First-party
 import cxsystem2.neurodynlib.neuron_models as nd
 
 

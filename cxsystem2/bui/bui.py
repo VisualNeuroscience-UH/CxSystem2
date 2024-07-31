@@ -1,12 +1,15 @@
+# Built-in
 import ctypes
 import os
 import socket
-import webbrowser
-import requests
 import threading
-from time import sleep
+import webbrowser
 from pathlib import Path
-from sys import platform, exit
+from sys import exit, platform
+from time import sleep
+
+# Third-party
+import requests
 from requests.exceptions import ConnectionError, SSLError
 
 

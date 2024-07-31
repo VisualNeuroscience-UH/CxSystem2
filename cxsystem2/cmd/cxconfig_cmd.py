@@ -23,11 +23,14 @@ Description:
 
 """
 
+# Built-in
 import sys
 from pathlib import Path
 
+# Third-party
 from docopt import docopt
 
+# First-party
 from cxsystem2.configuration.config_file_converter import ConfigConverter
 
 

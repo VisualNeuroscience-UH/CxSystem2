@@ -1,19 +1,26 @@
+# Built-in
 import os
 import sys
 
+# Third-party
 import pytest
 
 [sys.path.append(i) for i in [".", ".."]]
-from cxsystem2.core import cxsystem as cx, equation_templates as eqt
-import numpy as np
-from brian2.units import *
-import brian2
-import zlib
+# Built-in
 import pickle
 import shutil
-from scipy.stats import wasserstein_distance
+import zlib
 from pathlib import Path
 
+# Third-party
+import brian2
+import numpy as np
+from brian2.units import *
+from scipy.stats import wasserstein_distance
+
+# First-party
+from cxsystem2.core import cxsystem as cx
+from cxsystem2.core import equation_templates as eqt
 
 """
 To use this test you need to pip install -U pytest. 

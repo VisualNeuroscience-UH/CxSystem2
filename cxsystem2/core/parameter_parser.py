@@ -10,10 +10,11 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Third-party
 import numpy as np
-from brian2.units import *
-from numpy import nan, array
 import pandas as pd
+from brian2.units import *
+from numpy import array, nan
 
 
 class SynapseParser:

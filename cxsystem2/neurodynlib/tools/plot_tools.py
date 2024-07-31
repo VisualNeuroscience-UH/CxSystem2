@@ -18,10 +18,14 @@
 
 
 
+# Third-party
 import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy
+
+# First-party
 from cxsystem2.neurodynlib.tools import spike_tools
+
 
 def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing_threshold=None, legend_location=0, save_name=None):
     """Not implemented! plots voltage and current .

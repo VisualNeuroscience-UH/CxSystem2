@@ -10,10 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os
-import yaml
-from pathlib import Path
+# Built-in
 import logging.config
+import os
+from pathlib import Path
+
+# Third-party
+import yaml
 
 # set the logging level to error:
 LOGGING_CONFIG = None

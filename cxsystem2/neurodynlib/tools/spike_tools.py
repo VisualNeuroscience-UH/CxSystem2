@@ -26,8 +26,10 @@ Relevant book chapters:
 
 
 
+# Built-in
 import math
 
+# Third-party
 import brian2 as b2
 import numpy as np
 

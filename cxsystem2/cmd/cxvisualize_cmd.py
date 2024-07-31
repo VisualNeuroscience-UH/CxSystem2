@@ -40,16 +40,18 @@ Description:
 
 """
 
+# Built-in
 import os
 import sys
 from pathlib import Path
 from shutil import which
 
+# Third-party
 from docopt import docopt
 
-from cxsystem2.visualization.spikedata_to_csvs import SpikeData
+# First-party
 from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
-
+from cxsystem2.visualization.spikedata_to_csvs import SpikeData
 
 VISIMPL_BINARY = ""
 

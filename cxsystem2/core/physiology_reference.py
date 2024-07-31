@@ -8,16 +8,19 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Built-in
 import random as rnd
 from copy import deepcopy
 
+# Third-party
 import brian2 as b2
 import numpy as np
 from brian2.units import *
 from numpy import nan
 
+# First-party
 from cxsystem2.core import equation_templates as eqt
-from cxsystem2.core.parameter_parser import SynapseParser, NeuronParser
+from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser
 from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 
@@ -1021,8 +1024,11 @@ class NeuronReference:
             # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename. The
             # cimultiplier is used to multiply the current injection in an array run.
             if "cibasepath" in self.output_neuron["namespace"].keys():
-                import scipy.io as sio
+                # Built-in
                 import os
+
+                # Third-party
+                import scipy.io as sio
 
                 cibasepath = self.output_neuron["namespace"]["cibasepath"]
                 cifilename = self.output_neuron["namespace"]["cifilename"]

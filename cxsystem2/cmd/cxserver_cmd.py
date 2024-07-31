@@ -55,13 +55,16 @@ Description:
 
 """
 
+# Built-in
+import os
 import sys
 from pathlib import Path
-import yaml
-import os
 
+# Third-party
+import yaml
 from docopt import docopt
 
+# First-party
 from cxsystem2.core.cxsystem import CxSystem
 
 

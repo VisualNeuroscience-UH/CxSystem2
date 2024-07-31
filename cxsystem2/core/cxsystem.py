@@ -9,20 +9,22 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Built-in
 import ast
 import builtins
 import csv
 import json
 import multiprocessing
 import os
+import platform
 import shutil
 import sys
 import threading
 import time
-import platform
 from datetime import datetime
 from pathlib import Path
 
+# Third-party
 import brian2 as b2
 import numpy as np
 import pandas as pd
@@ -31,13 +33,14 @@ from brian2 import rand
 from brian2.units import *
 from numpy import nan
 
+# First-party
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.core.parameter_parser import SynapseParser
 from cxsystem2.core.physiology_reference import NeuronReference, SynapseReference
 from cxsystem2.core.stimuli import Stimuli
+from cxsystem2.core.tools import load_from_file, parameter_finder, read_config_file
 from cxsystem2.core.workspace_manager import Workspace
-from cxsystem2.core.tools import parameter_finder, read_config_file, load_from_file
 
 b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
 
@@ -364,6 +367,7 @@ class CxSystem:
                 physiology_config = tmp_physio_path2
             # this is vulnerable to code injection
             if sys.platform == "linux":
+                # First-party
                 from cxsystem2.hpc.array_run import ArrayRun
 
                 # When in cluster, here you run the individual parameter set. The tmp_anat_path and tmp_physio_path are dataframes with correct params.
@@ -450,6 +454,7 @@ class CxSystem:
         print(" -  Cortical Module initialization Done.")
 
     try:
+        # First-party
         from cxsystem2.bui import bui
 
         @staticmethod

@@ -8,10 +8,12 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+# Built-in
 import os
 from pathlib import Path
 
-from cxsystem2.core.tools import write_to_file, load_from_file
+# First-party
+from cxsystem2.core.tools import load_from_file, write_to_file
 
 
 class Workspace:

@@ -20,16 +20,20 @@ Description:
 
 """
 
+# Built-in
 import sys
 from pathlib import Path
 
-from docopt import docopt
+# Third-party
 import pandas as pd
+from docopt import docopt
 
 pd.set_option("display.max_columns", 30)
 pd.set_option("display.max_colwidth", -1)
+# Built-in
 from pprint import pprint
 
+# First-party
 from cxsystem2.core.tools import load_from_file
 
 

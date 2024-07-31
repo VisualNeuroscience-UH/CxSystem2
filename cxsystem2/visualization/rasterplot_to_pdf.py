@@ -1,10 +1,13 @@
+# Built-in
 from pathlib import Path
 
+# Third-party
 import brian2 as b2
 import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+# First-party
 from cxsystem2.core.tools import load_from_file
 
 
