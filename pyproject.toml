@@ -2,12 +2,15 @@
 name = "cxsystem2"
 version = "2.1.3.1"  # third position: 0 alpha, 1 beta, 2 release candidate, 3 final release
 description = "A cerebral cortex simulation framework"
-authors = ["Vafa Andalibi <vafa.andalibi@gmail.com>", "Henri Hokkanen", "Simo Vanni"]
+authors = ["Vafa Andalibi <vafa.andalibi@gmail.com>", "Henri Hokkanen", "Simo Vanni <simo.vanni@helsinki.fi>"]
 license = "GPL v3.0"
 readme = "README.md"
 homepage = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 repository = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 documentation = "https://cxsystem2.readthedocs.io/en/latest/"
+
+include = ["**/csc_taito.job", "tests/**/*.py", "tests/**/*.csv", "tests/**/*.json", "tests/**/*.gz", "cxsystem2/**/*", "cxsystem2/gui/cx_gui/**/*.css", "cxsystem2/gui/cx_gui/**/*.js", "cxsystem2/gui/cx_gui/**/*.html", "cxsystem2/gui/cx_gui/**/*.json"]
+exclude = ["**/__pycache__", "**/*.pyc", "**/*.pyo"]
 
 classifiers = [
     "Environment :: Win32 (MS Windows)",
@@ -23,6 +26,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: POSIX :: Linux",
     "Operating System :: Unix",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.11",
