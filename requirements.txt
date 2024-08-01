@@ -2,7 +2,7 @@ wheel
 requests
 asn1crypto
 bcrypt
-brian2
+brian2 >= 2.7.1
 brian2genn
 cffi
 cryptography
@@ -18,7 +18,7 @@ kiwisolver
 markupsafe
 matplotlib
 mpmath
-numpy >= 1.16.5
+numpy 
 pandas
 ping3
 paramiko

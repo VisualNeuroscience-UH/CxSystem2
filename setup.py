@@ -75,7 +75,7 @@ setup(
     license="GPL v3.0",
     url=URL,
     setup_requires=["wheel"],
-    python_requires=">=3.5",
+    python_requires=">=3.11",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
