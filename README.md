@@ -36,17 +36,17 @@ The CxSystem aims at easy testing and buildup of diverse models at single cell r
 The preliminary version of this software has been developed at Aalto University 2012-2015 [2], and the full version at the Hospital District of Helsinki and Uusimaa and University of Helsinki 2013-2017. The software is distributed under the terms of the GNU General Public License, Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 
-## Installation
+## Installation with pip
 
 We highly recommend installing `CxSystem2` on a virtual environment. Use the following commands to install a Python3 virtual environment and install CxSystem: 
 
 ### Windows
 
- Make sure you have python 3.5 or above. To create activate a `venv` in windows at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command):
+ Make sure you have python 3.11 or above. To create activate a `venv` in windows at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command):
 
 ```shell
 C:\> python --version
-Python 3.7.4
+Python 3.11.9
 C:\> python3 -m venv %userprofile%\CX2
 C:\> %userprofile%\CX2\Scripts\activate
 (CX2) C:\> pip install --upgrade setuptools
@@ -57,11 +57,11 @@ Moreover, to use the C++ standalone device on Windows, install the [Visual C++ B
 
 ### Linux/Mac
 
-Make sure you have python 3.5 or above. To create activate a `venv` in Linux/Mac at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command):
+Make sure you have python 3.11 or above. To create activate a `venv` in Linux/Mac at `~/CX2` (you can deactivate the environment with the command `deactivate` and reactivate later by running the second command):
 
 ```shell
 $ python --version
-Python 3.7.4
+Python 3.11.9
 $ python3 -m venv ~/CX2
 $ source ~/CX2/bin/activate
 (CX2) $ pip install --upgrade setuptools
@@ -81,6 +81,53 @@ To develop `CxSystem2`, after cloning the repository install it with the followi
 ```
 
 With this method any change to the code will be reflected on the package immediately.
+
+
+## Installation with poetry (tested only in linux)
+
+Set up your [SSH key for GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+
+Install Poetry (if not already installed): If you don't have Poetry installed, follow the [instructions on the official Poetry website: ](https://python-poetry.org/docs/#installation)
+
+Clone the repository:
+
+```
+git clone git@github.com:VisualNeuroscience-UH/CxSystem2.git
+
+cd CxSystem2
+```
+
+Install dependencies (no development environment):
+
+```
+poetry install
+```
+
+Install dependencies (incl. development environment):
+
+```
+poetry install --with dev
+```
+
+Activate the virtual environment:
+
+```
+poetry shell
+```
+
+Verify the installation:
+
+```
+poetry show
+```
+
+This will list all successfully installed packages in light blue typeface. If they are red, the packages were not installed correctly.
+
+Test the installation:
+
+```
+pytest
+```
 
 ## Interfaces
 
