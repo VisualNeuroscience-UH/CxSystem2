@@ -33,7 +33,6 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
 brian2 = "^2.7.1"
 brian2genn = "*"
 cffi = "*"
@@ -48,28 +47,28 @@ matplotlib = "*"
 mpmath = "*"
 numpy = "*"
 pandas = "*"
+paramiko = "*"
+ping3 = "*"
 pycparser = "*"
 pynacl = "*"
 pyparsing = "*"
+pytest = "*"
+pytest-cov = "*"
+python = "^3.11"
 python-dateutil = "*"
 pytz = "*"
+pyyaml = "*"
+scp = "*"
 scipy = "*"
 sqlparse = "*"
 sympy = "*"
-pyyaml = "*"
 asn1crypto = { version = "*", optional = true }
-bcrypt = { version = "*", optional = true }
-cryptography = { version = "*", optional = true }
 django = { version = "*", optional = true }
 django-extensions = { version = "*", optional = true }
 django-sslserver = { version = "*", optional = true }
 isort = { version = "*", optional = true }
-ping3 = { version = "*", optional = true }
-paramiko = { version = "*", optional = true }
 pyopenssl = { version = "*", optional = true }
-pytest = { version = "*", optional = true }
 requests = { version = "*", optional = true }
-scp = { version = "*", optional = true }
 six = { version = "*", optional = true }
 werkzeug = { version = "*", optional = true }
 sphinx = { version = "*", optional = true }
@@ -79,21 +78,14 @@ wheel = { version = "*", optional = true }
 [tool.poetry.extras]
 full_installation = [
     "asn1crypto",
-    "bcrypt",
     "black",
     "coverage",
-    "cryptography",
     "django",
     "django-extensions",
     "django-sslserver",
     "isort",
-    "paramiko",
-    "ping3",
     "pyopenssl",
-    "pytest",
-    "pytest-cov",
     "requests",
-    "scp",
     "six",
     "sphinx",
     "sphinx-rtd-theme",
@@ -115,9 +107,9 @@ cxmetadata = "cxsystem2.cmd.cxmetadata_cmd:main"
 
 [tool.isort]
 profile = "black"
-known_third_party = ["numpy", "pandas", "matplotlib"]
-known_first_party = ["cxsystem2"]
-known_localfolder = ["core"]
+known_third_party = ["matplotlib", "numpy", "pandas", "scipy"]
+known_first_party = []
+known_localfolder = ["core", "cxsystem2"]
 sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 default_section = "THIRDPARTY"
 import_heading_stdlib = "Built-in"
