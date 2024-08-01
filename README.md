@@ -97,16 +97,16 @@ git clone git@github.com:VisualNeuroscience-UH/CxSystem2.git
 cd CxSystem2
 ```
 
-Install dependencies (no development environment):
+Install dependencies (main only):
 
 ```
 poetry install
 ```
 
-Install dependencies (incl. development environment):
+Install dependencies (full, incl. doc and bui etc):
 
 ```
-poetry install --with dev
+poetry install --with full
 ```
 
 Activate the virtual environment:
@@ -123,10 +123,18 @@ poetry show
 
 This will list all successfully installed packages in light blue typeface. If they are red, the packages were not installed correctly.
 
+
 Test the installation:
 
 ```
 pytest
+```
+
+Remove full installation (main remains):
+
+```
+poetry install --without full
+poetry install --sync
 ```
 
 ## Interfaces

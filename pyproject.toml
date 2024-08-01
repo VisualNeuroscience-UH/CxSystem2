@@ -63,7 +63,10 @@ scipy = "*"
 sqlparse = "*"
 sympy = "*"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.full]
+optional = true
+
+[tool.poetry.group.full.dependencies]
 asn1crypto = "*"
 django = "*"
 django-extensions = "*"
