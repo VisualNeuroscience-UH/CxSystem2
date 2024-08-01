@@ -18,7 +18,7 @@ import numpy as np
 from brian2.units import *
 from scipy.stats import ks_2samp, wasserstein_distance
 
-# First-party
+# Local
 import cxsystem2.hpc.cluster_run as cluster
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core import equation_templates as eqt

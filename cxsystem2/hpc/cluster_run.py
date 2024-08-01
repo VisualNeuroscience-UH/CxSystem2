@@ -26,7 +26,7 @@ from packaging import version
 from ping3 import ping
 from scp import SCPClient
 
-# First-party
+# Local
 from cxsystem2.configuration import config_file_converter as fileconverter
 from cxsystem2.core.exceptions import (
     ClusterNotReachableError,

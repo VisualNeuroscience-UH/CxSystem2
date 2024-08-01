@@ -33,7 +33,7 @@ pd.set_option("display.max_colwidth", -1)
 # Built-in
 from pprint import pprint
 
-# First-party
+# Local
 from cxsystem2.core.tools import load_from_file
 
 

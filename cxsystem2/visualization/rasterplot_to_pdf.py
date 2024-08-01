@@ -7,7 +7,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-# First-party
+# Local
 from cxsystem2.core.tools import load_from_file
 
 

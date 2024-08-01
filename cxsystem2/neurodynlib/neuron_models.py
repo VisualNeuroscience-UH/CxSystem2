@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from brian2.units import *
 
-# First-party
+# Local
 from cxsystem2.neurodynlib.receptor_models import ReceptorModel
 from cxsystem2.neurodynlib.tools import input_factory, plot_tools
 

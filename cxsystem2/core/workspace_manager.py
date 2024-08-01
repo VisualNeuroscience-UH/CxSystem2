@@ -12,7 +12,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 import os
 from pathlib import Path
 
-# First-party
+# Local
 from cxsystem2.core.tools import load_from_file, write_to_file
 
 

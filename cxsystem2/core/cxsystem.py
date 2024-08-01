@@ -33,7 +33,7 @@ from brian2 import rand
 from brian2.units import *
 from numpy import nan
 
-# First-party
+# Local
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.core.parameter_parser import SynapseParser
@@ -367,7 +367,7 @@ class CxSystem:
                 physiology_config = tmp_physio_path2
             # this is vulnerable to code injection
             if sys.platform == "linux":
-                # First-party
+                # Local
                 from cxsystem2.hpc.array_run import ArrayRun
 
                 # When in cluster, here you run the individual parameter set. The tmp_anat_path and tmp_physio_path are dataframes with correct params.
@@ -454,7 +454,7 @@ class CxSystem:
         print(" -  Cortical Module initialization Done.")
 
     try:
-        # First-party
+        # Local
         from cxsystem2.bui import bui
 
         @staticmethod

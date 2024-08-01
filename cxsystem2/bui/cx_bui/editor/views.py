@@ -18,7 +18,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 
-# First-party
+# Local
 from cxsystem2.core.cxsystem import CxSystem as Cx
 from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
 

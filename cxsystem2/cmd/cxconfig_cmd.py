@@ -30,7 +30,7 @@ from pathlib import Path
 # Third-party
 from docopt import docopt
 
-# First-party
+# Local
 from cxsystem2.configuration.config_file_converter import ConfigConverter
 
 

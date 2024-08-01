@@ -18,7 +18,7 @@ import numpy as np
 from brian2.units import *
 from scipy import io
 
-# First-party
+# Local
 from cxsystem2.core.tools import load_from_file, write_to_file
 
 

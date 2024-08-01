@@ -18,7 +18,7 @@ import numpy as np
 from brian2.units import *
 from numpy import nan
 
-# First-party
+# Local
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser
 from cxsystem2.neurodynlib.neuron_models import neuron_factory

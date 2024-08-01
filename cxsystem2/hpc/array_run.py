@@ -23,7 +23,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# First-party
+# Local
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import load_from_file, parameter_finder, write_to_file

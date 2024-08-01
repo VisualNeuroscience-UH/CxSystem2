@@ -23,7 +23,7 @@ import brian2 as b2
 import matplotlib.pyplot as plt
 import numpy
 
-# First-party
+# Local
 from cxsystem2.neurodynlib.tools import spike_tools
 
 

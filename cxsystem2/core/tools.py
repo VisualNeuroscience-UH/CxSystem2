@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from brian2.input.timedarray import TimedArray
 
-# First-party
+# Local
 from cxsystem2.configuration import config_file_converter as file_converter
 from cxsystem2.core.exceptions import ParameterNotFoundError
 

@@ -17,7 +17,7 @@ import numpy as np
 from brian2.units import *
 from scipy.stats import ks_2samp, wasserstein_distance
 
-# First-party
+# Local
 from cxsystem2.core import cxsystem as cx
 
 """

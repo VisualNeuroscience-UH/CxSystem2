@@ -49,7 +49,7 @@ from shutil import which
 # Third-party
 from docopt import docopt
 
-# First-party
+# Local
 from cxsystem2.visualization.rasterplot_to_pdf import rasterplot_pdf_generator
 from cxsystem2.visualization.spikedata_to_csvs import SpikeData
 

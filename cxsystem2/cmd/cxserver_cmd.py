@@ -64,7 +64,7 @@ from pathlib import Path
 import yaml
 from docopt import docopt
 
-# First-party
+# Local
 from cxsystem2.core.cxsystem import CxSystem
 
 
