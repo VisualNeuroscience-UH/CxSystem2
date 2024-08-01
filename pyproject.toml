@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cxsystem2"
-version = "2.1.3.0"  # third position: 0 alpha, 1 beta, 2 release candidate, 3 final release
+version = "2.1.3.1"  # third position: 0 alpha, 1 beta, 2 release candidate, 3 final release
 description = "A cerebral cortex simulation framework"
 authors = ["Vafa Andalibi <vafa.andalibi@gmail.com>", "Henri Hokkanen", "Simo Vanni"]
 license = "GPL v3.0"
@@ -62,36 +62,20 @@ scp = "*"
 scipy = "*"
 sqlparse = "*"
 sympy = "*"
-asn1crypto = { version = "*", optional = true }
-django = { version = "*", optional = true }
-django-extensions = { version = "*", optional = true }
-django-sslserver = { version = "*", optional = true }
-isort = { version = "*", optional = true }
-pyopenssl = { version = "*", optional = true }
-requests = { version = "*", optional = true }
-six = { version = "*", optional = true }
-werkzeug = { version = "*", optional = true }
-sphinx = { version = "*", optional = true }
-sphinx-rtd-theme = { version = "*", optional = true }
-wheel = { version = "*", optional = true }
 
-[tool.poetry.extras]
-full_installation = [
-    "asn1crypto",
-    "black",
-    "coverage",
-    "django",
-    "django-extensions",
-    "django-sslserver",
-    "isort",
-    "pyopenssl",
-    "requests",
-    "six",
-    "sphinx",
-    "sphinx-rtd-theme",
-    "werkzeug",
-    "wheel",
-]
+[tool.poetry.group.dev.dependencies]
+asn1crypto = "*"
+django = "*"
+django-extensions = "*"
+django-sslserver = "*"
+isort = "*"
+pyopenssl = "*"
+requests = "*"
+six = "*"
+werkzeug = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+wheel = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
