@@ -2179,7 +2179,11 @@ class CxSystem:
                         ),
                         "no match",
                     )
-                    _do_load = int(syn[load_connection_idx])
+
+                    if syn[index_of_load_connection] in ["", "--"]:
+                        _do_load = 0
+                    else:
+                        _do_load = int(syn[load_connection_idx])
             except TypeError:
                 _do_load = 0
 
@@ -2204,7 +2208,11 @@ class CxSystem:
                     self.default_save_flag = -1
                     _do_save = int(syn[index_of_save_connection].replace("<--", ""))
                 else:
-                    _do_save = int(syn[index_of_save_connection])
+
+                    if syn[index_of_save_connection] in ["", "--"]:
+                        _do_save = 0
+                    else:
+                        _do_save = int(syn[index_of_save_connection])
             except TypeError:
                 _do_save = 0
                 pass
