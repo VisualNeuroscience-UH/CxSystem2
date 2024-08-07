@@ -82,7 +82,9 @@ def change_anat_file_header_value(filepath, save_path, parameter, new_value):
     df = pd.read_csv(filepath, header=None)
     location = np.where(df.values == parameter)
     if location[0].size == 1:
-        df.at[int(location[0] + 1), int(location[1])] = new_value
+        row_index = int(location[0][0]) + 1
+        col_index = int(location[1][0])
+        df.at[row_index, col_index] = new_value
         df.to_csv(save_path, header=False, index=False)
     elif location[0].size == 0:
         raise ParameterNotFoundError(
