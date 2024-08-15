@@ -1,7 +1,0 @@
-include **/csc_taito.job
-include **/cscs_daint.job
-recursive-include tests *.py *.csv *.json *.gz
-recursive-include cxsystem2 *
-recursive-include cxsystem2/gui/cx_gui *.css *.js *.html *.json
-global-exclude __pycache__
-global-exclude *.py[co]

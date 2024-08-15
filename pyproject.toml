@@ -2,8 +2,8 @@
 name = "cxsystem2"
 version = "2.1.4"
 description = "A cerebral cortex simulation framework"
-authors = ["Vafa Andalibi <vafa.andalibi@gmail.com>", "Henri Hokkanen", "Simo Vanni <simo.vanni@helsinki.fi>"]
-license = "GPL v3.0"
+authors = ["Vafa Andalibi", "Henri Hokkanen", "Simo Vanni <simo.vanni@helsinki.fi>"]
+license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 repository = "https://github.com/VisualNeuroscience-UH/CxSystem2"
@@ -21,7 +21,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Operating System :: MacOS",
