@@ -72,7 +72,7 @@ optional = true
 
 [tool.poetry.group.full.dependencies]
 asn1crypto = "*"
-django = "*"
+django = ">=5.0.9"
 django-extensions = "*"
 django-sslserver = "*"
 isort = "*"
