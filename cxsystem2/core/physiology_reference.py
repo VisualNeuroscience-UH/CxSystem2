@@ -133,8 +133,6 @@ class NeuronReference:
                         self.pc_neuron_model = self.value_extractor(
                             self.physio_config_df, "pc_neuron_model"
                         ).upper()
-                        # if self.pc_neuron_model == 'ADEX':
-                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
                     except:
                         self.pc_neuron_model = self.neuron_model
                         print(
@@ -198,8 +196,6 @@ class NeuronReference:
                             self.physio_config_df, "neuron_model"
                         ).upper()
                         print(" -  Neuron model is %s " % self.neuron_model)
-                        # if self.neuron_model == 'ADEX':
-                        #     self.output_neuron['reset'] += '; w=w+'+repr(self.output_neuron['namespace']['b'])
                     except:
                         self.neuron_model = "EIF"
                         print(" !  No point neuron model defined, using EIF")
@@ -264,8 +260,8 @@ class NeuronReference:
         # </editor-fold>
 
         # <editor-fold desc="...Creating positions">
-        # w = position in cortex (in mm), z = position in retina (in mm)
         self.output_neuron["z_center"] = network_center
+        # TODO parametrize logpolarspace
         self.output_neuron["w_center"] = 17 * np.log(self.output_neuron["z_center"] + 1)
         self.output_neuron["w_positions"] = self._get_w_positions(
             self.output_neuron["number_of_neurons"],
@@ -273,10 +269,9 @@ class NeuronReference:
             general_grid_radius,
             min_distance,
         )
-        # self.output_neuron['w_positions'] = 17 * np.log(self.output_neuron['z_positions'] + 1)
         self.output_neuron["z_positions"] = list(
             map(lambda x: np.e ** (x / 17) - 1, self.output_neuron["w_positions"])
-        )
+        )  # TODO parametrize logpolarspace
         print(
             " -  Customized "
             + str(cell_type)
@@ -304,7 +299,6 @@ class NeuronReference:
                         rnd.choice(possible_pos_idx),
                         rnd.choice(possible_pos_idx),
                     )
-            # _positions =[tuple(map(operator.add,_itm, (float(real(_centre)),float(imag(_centre))))) for _itm in _positions]
             _positions = [
                 complex(_itm[0], _itm[1]) + self.output_neuron["w_center"]
                 for _itm in _positions
@@ -428,9 +422,8 @@ class NeuronReference:
                 I_dendr="Idendr_soma",
                 taum_soma=self.output_neuron["namespace"]["taum_soma"],
             )
-            for _ii in range(
-                self.output_neuron["dend_comp_num"] + 1
-            ):  # extra dendritic compartment in the same level of soma
+            # extra dendritic compartment in the same level of soma
+            for _ii in range(self.output_neuron["dend_comp_num"] + 1):
                 self.output_neuron["equation"] += b2.Equations(
                     eq_template_dend,
                     vm="vm_a%d" % _ii,
@@ -497,36 +490,6 @@ class NeuronReference:
             # </editor-fold>
 
         else:
-
-            # <editor-fold desc="...Model variation b2.Equations">
-            # TODO - Figure out why this is different from old eqs
-            # n_apical = self.output_neuron['dend_comp_num'] + 1
-            # x = nd.LegacyPyramidalCell(n_apical)
-            # x.set_excitatory_receptors(self.pc_excitation_model)
-            # x.set_inhibitory_receptors(self.pc_inhibition_model)
-            #
-            # if 'noise_sigma' in self.output_neuron['namespace'].keys():
-            #     noise_sigma = self.output_neuron['namespace']['noise_sigma']
-            #     x.add_vm_noise(noise_sigma)
-            #
-            # if 'tonic_current' in self.output_neuron['namespace'].keys():
-            #     tonic_current = self.output_neuron['namespace']['tonic_current']
-            #     tau_tonic_rampup = self.output_neuron['namespace']['tau_tonic_rampup']
-            #     x.add_tonic_current(tonic_current, tau_tonic_rampup)
-            #
-            # # Set parameters that are required to compile the equations
-            # C_array = self.output_neuron['namespace']['C']
-            # g_leak_array = self.output_neuron['namespace']['g_leak']
-            # Ra_array = self.output_neuron['namespace']['Ra']
-            # x.set_neuron_parameters(C=C_array, g_leak=g_leak_array, Ra=Ra_array)
-            #
-            # # Finally, get everything
-            # self.output_neuron['equation'] = x.get_neuron_equations()
-            # self.output_neuron['threshold'] = x.get_threshold_condition()
-            # self.output_neuron['reset'] = x.get_reset_statements()
-            # self.output_neuron['refractory'] = x.get_refractory_period()
-            # </editor-fold>
-
             # <editor-fold desc="...Old model variation equations">
             # Old model variation equations using equation_templates (from November 2018)
             eq_template_soma = eqt.EquationHelper(
@@ -745,9 +708,6 @@ class NeuronReference:
             )
 
         else:
-            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-            #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
@@ -789,8 +749,6 @@ class NeuronReference:
                 x : meter
                 y : meter
         """
-        # eq_template = self.value_extractor(self.cropped_df_for_current_type, 'eq_template')
-        # self.output_neuron['equation'] = Equations(eq_template, ge='ge_soma', gi='gi_soma')
 
         if self.model_variation is False:
             assert "noise_sigma" in self.output_neuron["namespace"].keys(), (
@@ -809,9 +767,6 @@ class NeuronReference:
                 gi="gi_soma",
             )
         else:
-            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-            #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
@@ -854,9 +809,6 @@ class NeuronReference:
                 x : meter
                 y : meter
         """
-        # eq_template = self.value_extractor(self.cropped_df_for_current_type, 'eq_template')
-        # self.output_neuron['equation'] = Equations(eq_template, ge='ge_soma', gi='gi_soma')
-
         if self.model_variation is False:
             assert "noise_sigma" in self.output_neuron["namespace"].keys(), (
                 "Noise sigma is used in model_variation model, but it is not defined in the configuration file. "
@@ -875,9 +827,6 @@ class NeuronReference:
             )
 
         else:
-            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-            #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
@@ -938,9 +887,6 @@ class NeuronReference:
             )
 
         else:
-            # self.output_neuron['equation'] = eqt.EquationHelper(neuron_model=self.neuron_model,
-            #                                                     exc_model=self.excitation_model,
-            #                                                     inh_model=self.inhibition_model).get_membrane_equation()
             x = neuron_factory().get_class(self.neuron_model)
             x.set_excitatory_receptors(self.excitation_model)
             x.set_inhibitory_receptors(self.inhibition_model)
@@ -1125,11 +1071,6 @@ class NeuronReference:
                                 % neural_parameter
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                # else:
-                #     raise (
-                #                 'The syntax %s is not a valid syntax for physiological configuration file or
-                #                 the elements that comprise this syntax are not defined.' % next(
-                #             iter(df['Value'][df['Key'] == key_name])))
 
         except NameError:
             new_key = (
@@ -1208,9 +1149,6 @@ class SynapseReference:
             "custom_weight": custom_weight,
             "multiply_weight": multiply_weight,
         }
-        # self.output_synapse['namespace_type'] = namespace_type
-        # self.output_synapse['pre_type'] = pre_group_type
-        # self.output_synapse['post_type'] = post_group_type
         _name_space = SynapseParser(self.output_synapse, physio_config_df)
         self.output_synapse["namespace"] = {}
         self.output_synapse["namespace"] = _name_space.output_namespace
@@ -1218,7 +1156,6 @@ class SynapseReference:
             self.output_synapse["sparseness"] = _name_space.sparseness
         except:
             pass
-        # self.output_synapse['ilam'] = _name_space.ilam   # HH commented this, because it's not used right now
 
         # <editor-fold desc="...Model variation setup">
         try:
@@ -1534,8 +1471,6 @@ class SynapseReference:
                 "Fixed_multiply is only defined for model_variation = True (or 1)"
             )
         else:
-            # pre_eq_lines = ['%s += wght\n' % (true_receptor + str(self.output_synapse['post_comp_name']) + '_post')
-            #                 for true_receptor in self.true_receptors]
             pre_eq_lines = [
                 "%s += %s * wght\n"
                 % (
@@ -1607,14 +1542,7 @@ class SynapseReference:
                     + "_post"
                 )
             )
-            # Old version, fixed in 5/2019 for Brian 2.1.3->
-            # self.output_synapse['pre_eq'] = '''
-            # R = R + (1-R)*(1 - exp(-(t-lastupdate)/tau_d))
-            # %s += R * U * wght
-            # R = R - U * R
-            # ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         else:
-            # pre_eq_lines = ['R = R + (1-R)*(1 - exp(-(t-lastupdate)/tau_d))\n']
             pre_eq_lines = []
             for true_receptor in self.true_receptors:
                 new_line = "%s += R * U * wght\n" % (
@@ -1653,19 +1581,7 @@ class SynapseReference:
                     + "_post"
                 )
             )
-            # Old version, fixed in 5/2019 for Brian 2.1.3->
-            # self.output_synapse['pre_eq'] = '''
-            # R = R + (1-R)*(1 - exp(-(t-lastupdate)/tau_fd))
-            # u = u + (U_f-u)*(1 - exp(-(t-lastupdate)/tau_f))
-            # %s += R * u * wght
-            # R = R - u * R
-            # u = u + U_f * (1-u)
-            # ''' % (self.output_synapse['receptor'] + self.output_synapse['post_comp_name'] + '_post')
         else:
-            # pre_eq_lines = ['''
-            # R = R + (1-R)*(1 - exp(-(t-lastupdate)/tau_fd))
-            # u = u + (U_f-u)*(1 - exp(-(t-lastupdate)/tau_f))
-            # ''']
             pre_eq_lines = []
             for true_receptor in self.true_receptors:
                 new_line = "%s += R * u * wght\n" % (
@@ -1730,11 +1646,6 @@ class SynapseReference:
                                 % neural_parameter
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                # else:
-                #     raise (
-                #                 'The syntax %s is not a valid syntax for physiological configuration file or the elements that
-                #                 comprise this syntax are not defined.' % next(
-                #             iter(df['Value'][df['Key'] == key_name])))
 
         except NameError:
             new_key = (
