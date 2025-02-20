@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cxsystem2"
-version = "2.1.5"
+version = "2.1.6"
 description = "A cerebral cortex simulation framework"
 authors = ["Vafa Andalibi", "Henri Hokkanen", "Simo Vanni <simo.vanni@helsinki.fi>"]
 license = "MIT"
