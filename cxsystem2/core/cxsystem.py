@@ -598,7 +598,7 @@ class CxSystem:
         self.workspace.results["positions_all"]["w_coord"] = {}
         self.workspace.results["positions_all"]["z_coord"] = {}
         self.workspace.results["number_of_neurons"] = {}
-        self.workspace.results["runtime"] = self.runtime / self.runtime.get_best_unit()
+        self.workspace.results["runtime"] = self.runtime / second
         self.workspace.results["sys_mode"] = self.sys_mode
         try:
             self.workspace.results["scale"] = self.scale
