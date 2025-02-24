@@ -180,11 +180,13 @@ class ClusterRun:
                 new_path = (
                     Path("./").joinpath(imported_connections_file.name).as_posix()
                 )
+                parameters_to_change = {
+                    "import_connections_from": new_path,
+                }
                 change_anat_file_header_value(
                     anat_file_path.as_posix(),
                     self.local_cluster_folder.joinpath(anat_file_path.name),
-                    "import_connections_from",
-                    new_path,
+                    parameters_to_change,
                 )
                 anat_file_path = self.local_cluster_folder.joinpath(anat_file_path.name)
         except TypeError:  # this is when the value is # or -- for instance
