@@ -78,24 +78,35 @@ def parameter_finder(df, keyword):
         raise NameError("Variable %s not found in the configuration file." % keyword)
 
 
-def change_anat_file_header_value(filepath, save_path, parameter, new_value):
+def change_anat_file_header_value(
+    filepath: pl.Path | str,
+    save_path: pl.Path | str,
+    parameters_to_change: dict,
+) -> None:
     df = pd.read_csv(filepath, header=None)
-    location = np.where(df.values == parameter)
-    if location[0].size == 1:
-        row_index = int(location[0][0]) + 1
-        col_index = int(location[1][0])
-        df.at[row_index, col_index] = new_value
-        df.to_csv(save_path, header=False, index=False)
-    elif location[0].size == 0:
-        raise ParameterNotFoundError(
-            "Parameter {} not found in the configuration file.".format(parameter)
+
+    if not isinstance(parameters_to_change, dict):
+        raise ValueError(
+            "parameters_to_change must be a dictionary of parameter names and values"
         )
-    else:
-        raise ParameterNotFoundError(
-            "More than one instance of parameter {} found, cannot change the value".format(
-                parameter
+
+    for parameter, new_value in parameters_to_change.items():
+        location = np.where(df.values == parameter)
+        if location[0].size == 1:
+            row_index = int(location[0][0]) + 1
+            col_index = int(location[1][0])
+            df.at[row_index, col_index] = new_value
+            df.to_csv(save_path, header=False, index=False)
+        elif location[0].size == 0:
+            raise ParameterNotFoundError(
+                "Parameter {} not found in the configuration file.".format(parameter)
             )
-        )
+        else:
+            raise ParameterNotFoundError(
+                "More than one instance of parameter {} found, cannot change the value".format(
+                    parameter
+                )
+            )
 
 
 def read_config_file(conf, header=False):
