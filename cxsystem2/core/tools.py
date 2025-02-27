@@ -96,7 +96,6 @@ def change_anat_file_header_value(
             row_index = int(location[0][0]) + 1
             col_index = int(location[1][0])
             df.at[row_index, col_index] = new_value
-            df.to_csv(save_path, header=False, index=False)
         elif location[0].size == 0:
             raise ParameterNotFoundError(
                 "Parameter {} not found in the configuration file.".format(parameter)
@@ -107,6 +106,7 @@ def change_anat_file_header_value(
                     parameter
                 )
             )
+        df.to_csv(save_path, header=False, index=False)
 
 
 def read_config_file(conf, header=False):
