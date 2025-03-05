@@ -294,7 +294,7 @@ class CxSystem:
         )
         try:
             trials_per_config = int(
-                parameter_finder(self.anat_and_sys_conf_df, "trials_per_config")
+                float(parameter_finder(self.anat_and_sys_conf_df, "trials_per_config"))
             )
         except NameError:
             trials_per_config = 0
