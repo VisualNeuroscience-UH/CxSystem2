@@ -693,7 +693,7 @@ class ArrayRun:
         number_of_process = int(multiprocessing.cpu_count() * 3 / 4)
         try:
             number_of_process = int(
-                parameter_finder(self.anatomy_df, "number_of_process")
+                float(parameter_finder(self.anatomy_df, "number_of_process"))
             )
         except TypeError:
             print(
@@ -714,7 +714,7 @@ class ArrayRun:
         trials_per_config = 1
         try:
             trials_per_config = int(
-                parameter_finder(self.anatomy_df, "trials_per_config")
+                float(parameter_finder(self.anatomy_df, "trials_per_config"))
             )
         except TypeError:
             print(
@@ -757,7 +757,7 @@ class ArrayRun:
         cluster_number_of_nodes = 1
         try:
             cluster_number_of_nodes = int(
-                parameter_finder(self.anatomy_df, "cluster_number_of_nodes")
+                float(parameter_finder(self.anatomy_df, "cluster_number_of_nodes"))
             )
         except (TypeError, NameError):
             pass
