@@ -59,11 +59,19 @@ class Workspace:
         self.output_extension = self.compression_to_extension[compression_method]
 
     def create_simulation(self, sim_name):
-        self.simulation_name = sim_name
-        self.simulation_folder = self.workspace_path.joinpath(self.simulation_name)
+        match sim_name:
+            case "." | "" | "--" | None:
+                self.simulation_name = self.workspace_path.name
+                self.simulation_folder = self.workspace_path
+            case _:
+                self.simulation_name = sim_name
+                self.simulation_folder = self.workspace_path.joinpath(
+                    self.simulation_name
+                )
+
         print(" -  simulation folder {}".format(self.simulation_folder))
-        # if not self.simulation_folder.is_dir():
-        os.makedirs(self.simulation_folder.as_posix(), exist_ok=True)
+
+        self.simulation_folder.mkdir(parents=True, exist_ok=True)
         self.results_export_path = self.simulation_folder.joinpath(
             self.simulation_name + "_results" + self.suffix
         ).with_suffix(self.output_extension)
