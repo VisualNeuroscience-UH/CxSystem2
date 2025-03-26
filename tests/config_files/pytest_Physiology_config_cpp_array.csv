@@ -1,6 +1,5 @@
 Variable,Key,Value,Comment
 ### MODELING SETUP ###,,,
-model_variation,,1,# 0 not used? Remove from CxSystem?
 neuron_model,,'EIF',# EIF model defined in equation_template.py module
 excitation_model,,'SIMPLE_E',
 inhibition_model,,'SIMPLE_I_GABAB',
