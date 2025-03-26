@@ -354,8 +354,6 @@ class NeuronReference:
 
         """
 
-        # <editor-fold desc="...Old model variation equations">
-        # Old model variation equations using equation_templates (from November 2018)
         eq_template_soma = eqt.EquationHelper(
             neuron_model=self.pc_neuron_model,
             is_pyramidal=True,
