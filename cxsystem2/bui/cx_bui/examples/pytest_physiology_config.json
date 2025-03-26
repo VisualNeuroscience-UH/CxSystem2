@@ -1,11 +1,6 @@
 {
   "physio_data": [
     {
-      "Variable": "model_variation",
-      "Value": 1,
-      "Comment": "# 0 not used? Remove from CxSystem?"
-    },
-    {
       "Variable": "neuron_model",
       "Value": "'EIF'",
       "Comment": "# EIF model defined in equation_template.py module"

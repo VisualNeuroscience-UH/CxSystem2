@@ -1,11 +1,6 @@
 {
   "physio_data": [
     {
-      "Variable": "model_variation",
-      "Value": 1,
-      "Comment": ""
-    },
-    {
       "Variable": "neuron_model",
       "Value": "'EIF'",
       "Comment": ""
