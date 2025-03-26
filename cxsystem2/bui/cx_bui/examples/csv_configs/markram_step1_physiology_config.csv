@@ -1,5 +1,4 @@
 Variable,Key,Value,Comment
-model_variation,,1,
 neuron_model,,'EIF',
 excitation_model,,'SIMPLE_E',
 inhibition_model,,'SIMPLE_I_GABAB',
