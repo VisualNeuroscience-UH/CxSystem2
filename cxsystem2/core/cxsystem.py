@@ -154,17 +154,14 @@ class CxSystem:
             "params": [nan, self.set_runtime_parameters],
         }
         now = datetime.now()
-        self.timestamp = "_" + str(now).replace("-", "").replace(" ", "_").replace(
-            ":", ""
-        )
-        self.timestamp = self.timestamp[
-            0 : str(now).replace("-", "").replace(" ", "_").replace(":", "").index(".")
-            + 3
-        ].replace(".", "")
-        if output_file_suffix == "":
-            self.suffix = self.timestamp + output_file_suffix
-        else:
-            self.suffix = output_file_suffix
+        self.timestamp = now.strftime("_%y%m%d_%H%M%S")
+
+        match output_file_suffix:
+            case None | "":
+                self.suffix = self.timestamp
+            case _:
+                self.suffix = output_file_suffix
+
         print(" -  Current run filename suffix is: %s" % self.suffix[1:])
         self.scale = 1
         self.benchmark = 0
