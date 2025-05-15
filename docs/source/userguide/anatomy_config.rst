@@ -54,7 +54,7 @@ The necessary parameters for running simulations locally are:
 
         :code:`init_vms{True, False}`: If True, randomize initial membrane voltages between V_init_min and V_init_max. If False, the initial membrane voltage is set as V_init.
 
-        :code:`load_positions_only{True, False}`: Import neuron positions from connectivity file but randomize connections.
+        :code:`load_positions_only{True, False}`: Import unit positions from connectivity file but randomize connections.
 
         :code:`benchmark{True, False}`: Only for development. Needs modified copy of brian2 library.
 
@@ -88,10 +88,10 @@ External input
 --------------
 
 Currently, three types of inputs can be used, namely :code:`VPM` (referring to nucleus ventralis posteromedialis; produces synchronous spikes), \
-:code:`Video`, and :code:`spikes`. Note that external inputs use common indexing with the neuron groups. We recommend
-using the index 0 for the input group and indexing neuron groups from 1.
+:code:`Video`, and :code:`spikes`. Note that external inputs use common indexing with the unit groups. We recommend
+using the index 0 for the input group and indexing unit groups from 1.
 
-    :VPM: :code:`idx{int}`: Index of the neuron group.
+    :VPM: :code:`idx{int}`: Index of the unit group.
 
         :code:`type{VPM}`:
 
@@ -150,14 +150,16 @@ Neuron groups
 -------------
 
 Neuron groups (cell types) are defined using the following parameters. Note that biophysical parameters of the
-corresponding neuron groups are defined in the :ref:`Physiology configuration <cell_params>`. If you add a subtype,
+corresponding unit groups are defined in the :ref:`Physiology configuration <cell_params>`. If you add a subtype,
 you need to add a corresponding entry to the physiology configuration file.
+
+Brian uses name neurons for model neurons, we prefer to use units to separate them from biological neurons.
 
 There are five hard-coded (neocortical) cell types in CxSystem2. The two excitatory cell types are spiny stellate (SS) and
 PC (pyramidal cell). The three inhibitory cell types are basket cell (BC), Martinotti cell (MC) and
 L1 inhibitory cell (L1i). The user can easily define subtypes, e.g. L4_MC. Subtypes can have arbitrary names (e.g. MyFavouriteBasketCellType, L5_LBC).
 
-    :NeuronGroups: :code:`idx{int}`: Running index of the neuron group.
+    :NeuronGroups: :code:`idx{int}`: Running index of the unit group.
 
         :code:`number_of_neurons{int}`: Number of neurons.
 
@@ -165,14 +167,14 @@ L1 inhibitory cell (L1i). The user can easily define subtypes, e.g. L4_MC. Subty
 
         :code:`neuron_subtype{string}`: Neuron subtype (can be an arbitrary string, or -- if no subtype is needed).
 
-        :code:`layer_idx`: Layer where the neuron population is located (layer 2/3 = 2). For PCs, please use the [X->Y] syntax, where 
+        :code:`layer_idx`: Layer where the unit population is located (layer 2/3 = 2). For PCs, please use the [X->Y] syntax, where 
         X is soma layer and Y is the most distal apical compartment. Note that PC the [X->Y] syntax creates X minus Y compartments above soma layer.
         E.g. for [4->1], the PC will have 3 compartments at soma layer [basal (b), soma (s) and apical0 (a)] and 3 apical dendrite
         compartments above soma layer [a1 at layer idx 3, a2 at layer idx 2 and a3 at layer idx 1]
 
-        :code:`net_center{float+floatj}`: Center point of the neuron population in complex coordinates (e.g. 0+0j).
+        :code:`net_center{float+floatj}`: Center point of the unit population in complex coordinates (e.g. 0+0j).
 
-        :code:`monitors`: Monitors for recording spikes and neuron state variables, e.g. [Sp]. :ref:`More information on monitors <monitors>`
+        :code:`monitors`: Monitors for recording spikes and unit state variables, e.g. [Sp]. :ref:`More information on monitors <monitors>`
 
         :code:`n_background_inputs{int}`: Number of excitatory background synapses.
 
@@ -184,19 +186,19 @@ L1 inhibitory cell (L1i). The user can easily define subtypes, e.g. L4_MC. Subty
 Connections
 -----------
 
-Connections between neuron groups are defined using the following parameters. We currently have the following
+Connections between unit groups are defined using the following parameters. We currently have the following
 synapse types: *Fixed*, *Depressing* and *Facilitating*. Short-term plasticity (STP) parameters of the
 depressing and facilitating synapses are defined in the :ref:`Physiology configuration <connection_params>`.
 
     :Connections: :code:`receptor{ge,gi}`: Sets whether the connection is excitatory or inhibitory.
 
-        :code:`pre_syn_idx{int}`: Presynaptic neuron group index.
+        :code:`pre_syn_idx{int}`: Presynaptic unit group index.
 
-        :code:`post_syn_idx`: Postsynaptic neuron group index. When targeting a PC, please use the X[C]Y syntax, where X is the neuron group index and Y is the compartment index. See below for an example.
+        :code:`post_syn_idx`: Postsynaptic unit group index. When targeting a PC, please use the X[C]Y syntax, where X is the unit group index and Y is the compartment index. See below for an example.
 
         :code:`syn_type`: Synapse model.
 
-        :code:`p{float<=1}`: Connection probability.
+        :code:`p{float<=1}`: Connection probability. For retinocortical or other thalamic connections, use "--". Here, the connection probability will be read from physiology file paramater `sp` for sparseness
 
         :code:`n{int}`: Number of synapses per connection.
 
@@ -208,14 +210,14 @@ depressing and facilitating synapses are defined in the :ref:`Physiology configu
 
         :code:`custom_weight{float*unit}`: Synaptic weight for this specific connection, e.g. 1.5*nS. Overrides :ref:`more general weight definitions <connection_params>`.
 
-        :code:`spatial_decay{float,[ij],float[ij]}`: When sys_mode is expanded, provides lambda (spatial decay parameter) for  weight * p * exp(-lambda * d); d is the distance between neurons.
+        :code:`spatial_decay{float,[ij],float[ij]}`: When sys_mode is expanded, provides lambda (spatial decay parameter) for  weight * p * exp(-lambda * d); d is the distance between neurons in mm. [ij] stands for 1-to-1 connections, and useful only when you have the same N units in the pre- and postsynaptic groups.
 
 
-If the postsynaptic neuron is a multicompartmental neuron, the target compartment must be defined using the :code:`[C]` tag.
+If the postsynaptic unit is a multicompartmental neuron model, the target compartment must be defined using the :code:`[C]` tag.
 Compartmental indexing starts from zero at the soma layer and increases towards the distal apical dendrite. The soma, and the basal
 dendrites and the first apical dendrite compartment are located in the soma layer are distinguished with s, b and a tags, respectively.
 
-For example, if you have PC neuron with a :code:`layer_idx` of [6->1] (soma in layer 6 and apical dendrite extending up to layer 1),
+For example, if you have PC unit with a :code:`layer_idx` of [6->1] (soma in layer 6 and apical dendrite extending up to layer 1),
 the compartmental indexing is:
 
  .. csv-table::
@@ -240,7 +242,7 @@ neuron_group_index[C]4.
 Monitors
 ---------
 
-Both neuron groups and synapses can be monitored, i.e. their state variables can be recorded and stored for
+Both unit groups (neuron groups) and synapses can be monitored, i.e. their state variables can be recorded and stored for
 analysis. Most commonly users only need the spikes. Note that continuous state variables (like the membrane
 voltage) are recorded with the same resolution as the time step, and thus large networks can quickly create
 gigabytes of data.
@@ -260,14 +262,14 @@ You can combine a spike monitor with multiple state monitors like this (note the
 
 By default all neurons/synapses are being monitored. If you want to monitor specific neurons (or synapses),
 you should use the :code:`[rec]` tag followed by indices of interest. For example, to monitor the membrane voltage (vm)
-of the first 20 neurons (in the group) and the excitatory conductance (ge_soma) of every evenly indexed neuron between 0 and 100,
+of the first 20 neurons (in the group) and the excitatory conductance (ge_soma) of every evenly indexed unit between 0 and 100,
 you would write:
 
   :code:`[St]vm[rec](0-20)+ge_soma[rec](0-100-2)`
 
 
-Often you want to assign a specific type of monitor to several consecutive neuron groups (or connections). In this case, the monitor can be \
-defined for the first neuron group and a :code:`-->` tag should be written at the end of the line. :code:`-->` indicates that all the consecutive neuron groups should be \
+Often you want to assign a specific type of monitor to several consecutive unit groups (or connections). In this case, the monitor can be \
+defined for the first unit group and a :code:`-->` tag should be written at the end of the line. :code:`-->` indicates that all the consecutive unit groups should be \
 assigned with the same monitor. For finishing this assignment, a :code:`<--` symbol should be put at the last target line of interest. Note that it is \
 possible to overwrite the defined monitors of some lines between the :code:`-->` and :code:`<--` symbols simply by adding the monitor of the interest.
 
@@ -281,6 +283,6 @@ possible to overwrite the defined monitors of some lines between the :code:`-->`
    G4,[Sp]
    G5, <--
 
-In this example, a state monitor over *ge_soma* is assigned to neuron groups 1, 3 and 5 by using the :code:`-->` and :code:`<--` tags. For the second group, \
+In this example, a state monitor over *ge_soma* is assigned to unit groups 1, 3 and 5 by using the :code:`-->` and :code:`<--` tags. For the second group, \
 the usage of default state monitor is over-written by using the :code:`--` keyword, indicating that the second line is not monitored. For the fourth group, \
 however, the default monitor is overwritten by a spike monitor.
