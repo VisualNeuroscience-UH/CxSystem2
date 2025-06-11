@@ -7,6 +7,7 @@ from copy import deepcopy
 import brian2 as b2
 import numpy as np
 from brian2.units import Hz, mm, ms, mV, nS  # noqa: F401
+import pandas as pd
 
 # Local
 from cxsystem2.core import equation_templates as eqt
@@ -21,7 +22,6 @@ and the full version at the University of Helsinki 2013-2017. The software is di
 under the terms of the GNU General Public License. 
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
-nan = np.nan
 arange = np.arange
 
 
@@ -41,6 +41,7 @@ class NeuronReference:
         general_grid_radius,
         min_distance,
         physio_config_df,
+        unit_coords_df_path=None,
         network_center=0 + 0j,
         cell_subtype="--",
     ):
@@ -241,18 +242,29 @@ class NeuronReference:
         # </editor-fold>
 
         # <editor-fold desc="...Creating positions">
-        self.output_neuron["z_center"] = network_center
-        # TODO parametrize logpolarspace
-        self.output_neuron["w_center"] = 17 * np.log(self.output_neuron["z_center"] + 1)
-        self.output_neuron["w_positions"] = self._get_w_positions(
-            self.output_neuron["number_of_neurons"],
-            "fixed_grid",
-            general_grid_radius,
-            min_distance,
-        )
-        self.output_neuron["z_positions"] = list(
-            map(lambda x: np.e ** (x / 17) - 1, self.output_neuron["w_positions"])
-        )  # TODO parametrize logpolarspace
+        if unit_coords_df_path is not None:
+            unit_coords = pd.read_pickle(unit_coords_df_path)
+            mask = unit_coords.iloc[:, 0] == "G"
+            groups = unit_coords[mask]
+            groups = groups.rename(columns={"runtime": "idx"})
+            row = groups[groups["idx"] == str(idx)]
+            self.output_neuron["z_positions"] = [row.iloc[0, 16]]
+            self.output_neuron["w_positions"] = [row.iloc[0, 17]]
+        else:
+            self.output_neuron["z_center"] = network_center
+            self.output_neuron["w_center"] = 17 * np.log(
+                self.output_neuron["z_center"] + 1
+            )
+            self.output_neuron["w_positions"] = self._get_w_positions(
+                self.output_neuron["number_of_neurons"],
+                "fixed_grid",
+                general_grid_radius,
+                min_distance,
+            )
+            self.output_neuron["z_positions"] = list(
+                map(lambda x: np.e ** (x / 17) - 1, self.output_neuron["w_positions"])
+            )
+
         print(
             " -  Customized "
             + str(cell_type)
