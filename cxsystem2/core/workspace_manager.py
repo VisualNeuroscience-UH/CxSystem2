@@ -169,6 +169,8 @@ class Workspace:
             )
         )
 
+        return self.results
+
     def save_connections_to_file(self):
         print(" -  Saving connections to file ...")
         self.connections["Full path"] = self.connections_export_path.as_posix()
