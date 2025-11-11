@@ -675,7 +675,7 @@ class CxSystem:
                     self.saving_start_time - builtins.run_start
                 )
 
-            self.gather_result()
+            results = self.gather_result()
             self.end_time = time.time()
             if self.benchmark:
                 self.benchmarking_data["Extract and Save Result"] = (
@@ -717,6 +717,7 @@ class CxSystem:
                     .joinpath(self.suffix[1:])
                     .as_posix()
                 )
+        return results
 
     def set_runtime_parameters(self):
         if not np.any(self.current_parameters_s.str.contains("runtime")):
@@ -3276,8 +3277,8 @@ class CxSystem:
                 tmp_monitor = syntax.split(" ")[-1]
                 print(tmp_monitor)
                 print("     -> Gathering data for " + tmp_monitor.split(".")[0])
-                exec(syntax, locals=sys._getframe().f_locals)
-        self.workspace.save_results_to_file()
+                exec(syntax)
+        results = self.workspace.save_results_to_file()
         if self.do_save_connections:
             print(" -  Generating the syntaxes for saving connection data ...")
             for syntax in self.workspace.syntax_bank:
@@ -3291,6 +3292,8 @@ class CxSystem:
                 self.workspace.results["positions_all"]["z_coord"]
             )
             self.workspace.save_connections_to_file()
+
+        return results
 
 
 if __name__ == "__main__":
