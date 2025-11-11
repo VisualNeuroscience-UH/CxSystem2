@@ -446,6 +446,8 @@ class CxSystem:
             self.anat_and_sys_conf_df = self.awaited_conf_lines
             self.configuration_executor()
         print(" -  Cortical Module initialization Done.")
+        if self.device == "cpp":
+            print("Compiling the model. This may take several minutes...")
 
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:, 0][
