@@ -1,5 +1,5 @@
 row_type,runtime,device,sys_mode,scale,grid_radius,min_distance,init_vms,compression_method, workspace_path,simulation_title,import_connections_from,load_positions,benchmark,profiling,save_input_video,multidimension_array_run,number_of_process,trials_per_config,default_clock,run_in_cluster,cluster_job_file_path,cluster_number_of_nodes,cluster_address,cluster_username,cluster_workspace
-params,0.2*second,python,local,1,210*um,1*um,0,gzip,~/CxPytestWorkspace,sim_pytest,./tests/connection_files/connections_20190517_06115909_python_200ms.gz,0,0,0,0,0,1,1,0.1*ms,0,./csc_taito.job,1,taito.csc.fi,username,/homeappl/home/username/CxWork
+params,0.2*second,python,local,1,210*um,1*um,0,gzip,~/CxPytestWorkspace,sim_pytest,./tests/connection_files/connections_20190517_06115909_python_200ms.gz,0,0,0,0,0,1,1,0.1*ms,0,./csc_puhti.job,1,puhti.csc.fi,username,/homeappl/home/username/CxWork
 row_type,idx,type,number_of_neurons,radius,spike_times,net_center,monitors,,,,,,,,,,,,,,,,,,
 IN,0,VPM,60,92*um,[0.02]*second,--,[Sp],,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,
