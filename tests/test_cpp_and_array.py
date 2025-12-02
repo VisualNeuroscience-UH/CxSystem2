@@ -92,6 +92,7 @@ def test_outputfile(cxsystem_run_fixture2):
         for item in os.listdir(simulation_path.as_posix())
         if "tonic_depol_level" in item
     ]
+    pytest.set_trace()
     assert (
         len(
             [
@@ -110,15 +111,6 @@ def test_spikecount_10percent_tolerance(cxsystem_run_fixture2, capsys, get_spike
     for key in keys:
         spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
         assert 0.9 <= spike_count_proportion <= 1.1
-
-
-@pytest.mark.xfail(reason="The same spikes not attainable in a distinct run")
-def test_spikecount_strict(cxsystem_run_fixture2, get_spike_data):
-    spikes_all, new_spikes_all = get_spike_data
-    keys = list(spikes_all.keys())  # dict_keys is not indexable directly
-    for key in keys:
-        spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
-        assert spike_count_proportion == 1.0
 
 
 def test_spikecount_report(cxsystem_run_fixture2, capsys, get_spike_data):

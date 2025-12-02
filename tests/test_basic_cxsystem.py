@@ -58,9 +58,9 @@ def test_physiology_config_file_exist():
 
 def test_dataframe_delimiters():
     # Comma is the delimiter in csv and should not remain in dataframe
-    assert not "," in CM.anat_and_sys_conf_df.to_string()
+    assert "," not in CM.anat_and_sys_conf_df.to_string()
     # Windows local settings may save csv with semicolons
-    assert not ";" in CM.anat_and_sys_conf_df.to_string()
+    assert ";" not in CM.anat_and_sys_conf_df.to_string()
 
 
 class TestInit:
@@ -93,7 +93,7 @@ class TestConfigurationExecutor:
         )
 
     def test_set_runtime_parameters(self):
-        assert CM.runtime == 200.0 * msecond
+        assert CM.runtime == 200.0 * msecond  # noqa: F405
         assert CM.device.lower() == "python"
         assert CM.sys_mode == "local"
 
@@ -340,15 +340,6 @@ def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_
     for key in keys:
         spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
         assert 0.9 <= spike_count_proportion <= 1.1
-
-
-@pytest.mark.xfail(reason="The same spikes not attainable in a distinct run")
-def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
-    spikes_all, new_spikes_all = get_spike_data
-    keys = list(spikes_all.keys())  # dict_keys is not indexable directly
-    for key in keys:
-        spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
-        assert spike_count_proportion == 1.0
 
 
 def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
