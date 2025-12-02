@@ -37,8 +37,8 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-brian2 = "^2.7.1"
-brian2genn = "*"
+brian2 = "2.8.0"
+brian2cuda = "^1.0a7"
 cffi = "*"
 cycler = "*"
 cython = "*"
@@ -58,7 +58,7 @@ pynacl = "*"
 pyparsing = "*"
 pytest = "*"
 pytest-cov = "*"
-python = "^3.11"
+python = "^3.12"
 python-dateutil = "*"
 pytz = "*"
 pyyaml = "*"
