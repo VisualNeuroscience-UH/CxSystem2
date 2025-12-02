@@ -5,6 +5,10 @@ from brian2.units import *
 # Local
 import cxsystem2.neurodynlib.neuron_models as nd
 
+"""
+This module is a stub. It contains placeholders for multicompartment neuron models.
+"""
+
 
 class LeakyCompartment(nd.PointNeuron):
     """

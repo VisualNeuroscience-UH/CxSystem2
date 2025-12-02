@@ -74,10 +74,6 @@ notebook = "^7.3.3"
 optional = true
 
 [tool.poetry.group.full.dependencies]
-asn1crypto = "*"
-django = ">=5.0.9"
-django-extensions = "*"
-django-sslserver = "*"
 isort = "*"
 pyopenssl = "*"
 requests = "*"
@@ -96,7 +92,6 @@ cxsystem2 = "cxsystem2.cmd.cxsystem_cmd:main"
 cxconfig = "cxsystem2.cmd.cxconfig_cmd:main"
 cxcluster = "cxsystem2.cmd.cxcluster_cmd:main"
 cxvisualize = "cxsystem2.cmd.cxvisualize_cmd:main"
-cxserver = "cxsystem2.cmd.cxserver_cmd:main"
 cxmetadata = "cxsystem2.cmd.cxmetadata_cmd:main"
 
 [tool.isort]

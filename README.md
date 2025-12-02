@@ -146,10 +146,6 @@ Main functionalities of the `CxSystem2` are available in terminal. All of the fo
 
 This command (all in lower letters and case sensitive) can be used to run a simulation locally using anatomy and physiology configuration files.
 
-#### `cxserver`
-
-This command will run the `CxSystem2` BUI django server.
-
 #### `cxconfig`
 
 CxSystem2 supports `csv` and `json` for importing/exporting configuration files. To convert the configuration files, use the `cxconfig` and pass the path to the configuration file path as its argument. This command recognizes the file type and convert it to the alternative extension.
