@@ -4,9 +4,9 @@ Technical Overview
 Selecting Python, C++ or GPU device
 ------------------------------------
 
-The device is selected in the model and network configuration file. Set the "device" to either :code:`Python`, :code:`Cpp` or :code:`GeNN` (case insensitive). 
+The device is selected in the model and network configuration file. Set the "device" to either :code:`Python`, :code:`Cpp` or :code:`cuda` (case insensitive). 
 The :code:`Cpp` (C++) device is a safe bet for most applications. :code:`Python` skips compilation, and may be best for minor systems or when devices run into 
-problems. :code:`GeNN` may be beneficial for long non-array runs. 
+problems. :code:`cuda` may be beneficial for long non-array runs. 
 
 How the CxSystem works
 -----------------------
@@ -17,13 +17,12 @@ arguments for cxsystem2 command or python interpreter after cxsystem() call, or 
 One of the strengths of the CxSystem is the ability to dynamically compile the model. This bypasses the traditional way of hard coding much of the model which 
 would limit flexibility. This flexibility comes with some added complexity in the way the CxSystem builds the devices.
 
-The implemented system employs the Brian2GeNN python module to generate GeNN (GPU enhanced Neuronal Network simulation environment) code for eventually running 
-the Brian2 codes on GeNN. Note that using the GeNN device, CxSystem (via GeNN) only employs one of the GPUs in the system and therefore cannot be used in cluster. 
-In order to understand how this system works, one should initially understand how Brian2GeNN limits Brian2. Most of the exclusions are presented in `Brian2GeNN documentation
-<http://brian2genn.readthedocs.io/en/latest/introduction/exclusions.html>`_. Perhaps the most effective limitation is lack of support for using Multiple networks 
-in Brian2, i.e. only the *magic network* can be used. Using the *magic network*, only the "visible" objects, that are explicitly defined in the code will be collected. 
-In other words, any Brian2 object that is created in a custom class, will not be collected and will eventually raise an error. We have used two solutions to address 
-this issue, Syntax Bank and Global variables: 
+The implemented system employs the Brian2cuda python module to generate cuda code for eventually running the Brian2 codes on cuda.  For documentation, see `Brian2cuda documentation
+<https://brian2cuda.readthedocs.io/en/latest/index.html>`_. 
+
+Earlier there was a lack of support for using Multiple networks in Brian2 standalone (GeNN), i.e. only the *magic network* could be used. Thus, we started using only the *magic network*, 
+where only the "visible" objects, that are explicitly defined in the code will be collected. In other words, any Brian2 object that is created in a custom class, will not be collected 
+and will eventually raise an error. We have used two solutions to address this issue, Syntax Bank and Global variables: 
 
 Creating a Syntax Bank
 ````````````````````````

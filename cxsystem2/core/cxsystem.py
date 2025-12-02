@@ -73,7 +73,7 @@ class CxSystem:
         self,
         anatomy_and_system_config=None,
         physiology_config=None,
-        output_file_suffix="",
+        output_file_suffix="",  # Was GeNN related
         instantiated_from_array_run=0,
         cluster_run_start_idx=-1,
         cluster_run_step=-1,
@@ -85,7 +85,6 @@ class CxSystem:
 
         :param anatomy_and_system_config: could be either the path to the anatomy and system configuration file,
                                           or the dataframe containing the configuration data.
-        :param output_file_suffix: switch the GeNN mode on/off (1/0), by default GeNN is off
         :param instantiated_from_array_run: this flag, 0 by default, determines whether this instance of CxSystem is instantiated from
                                              another instance of CxSystem which is running an array run.
         :param stdout_file_path: this is only used for saving arrayrun stdout Main internal variables:
@@ -609,7 +608,7 @@ class CxSystem:
     def set_device(self, *args):
         device = args[0]
         self.device = device.lower()
-        assert self.device in ["cython", "genn", "cpp", "python"], (
+        assert self.device in ["cython", "cuda", "cpp", "python"], (
             " -  Device %s is not defined. " % self.device
         )
         if self.device == "cython":
@@ -620,24 +619,17 @@ class CxSystem:
             self.device = "python"
             b2.prefs.codegen.target = "numpy"
             print(" -  Brian Code Generator set to Numpy")
-        if self.device == "genn":
-            print(
-                " -  System is going to be run using GeNN devices, "
-                "Errors may rise if Brian2/Brian2GeNN/GeNN is not installed correctly or the limitations are not "
-                "taken in to account."
-            )
+        if self.device == "cuda":
+            print(" -  System is going to be run using cuda devices, ")
         print(" -  CxSystem is running on {} device".format(self.device))
 
     def run(self):
         if not self.array_run:
 
-            if self.device not in ["cpp", "genn"]:
+            if self.device not in ["cpp", "cuda"]:
                 b2.run(self.runtime, report="text", profile=True)
             else:
-                b2.run(
-                    self.runtime, report="text"
-                )  # genn doesn't support detailed profiling
-
+                b2.run(self.runtime, report="text")
             if self.profiling == 1:
                 print()
                 if len(b2.profiling_summary().names) < 20:
@@ -646,48 +638,43 @@ class CxSystem:
                     print(b2.profiling_summary(show=20))
                 self.workspace.results["profiling_data"] = b2.profiling_summary()
             if self.benchmark:
-                try:
-                    self.benchmarking_data = {}
-                    titles = [
-                        "Computer Name",
-                        "Device",
-                        "File Suffix",
-                        "Simulation Time",
-                        "Python Compilation",
-                        "Brian Code generation",
-                        "Device-Specific Compilation",
-                        "Run",
-                        "Extract and Save Result",
-                        "Total Time",
-                    ]
-                    self.benchmarking_data["Simulation Time"] = str(self.runtime)
-                    self.benchmarking_data["Device"] = self.device
-                    self.benchmarking_data["File Suffix"] = self.suffix[1:]
-                    if self.device != "python":
-                        self.benchmarking_data["Python Compilation"] = (
-                            builtins.code_generation_start - self.start_time
-                        )
-                        self.benchmarking_data["Brian Code generation"] = (
-                            builtins.compile_start - builtins.code_generation_start
-                        )
-                        self.benchmarking_data["Device-Specific Compilation"] = (
-                            builtins.run_start - builtins.compile_start
-                        )
-                    else:
-                        self.benchmarking_data["Python Compilation"] = (
-                            builtins.run_start - self.start_time
-                        )
-                        self.benchmarking_data["Brian Code generation"] = "-"
-                        self.benchmarking_data["Device-Specific Compilation"] = "-"
-                    self.saving_start_time = time.time()
-                    self.benchmarking_data["Run"] = (
-                        self.saving_start_time - builtins.run_start
+                self.benchmarking_data = {}
+                titles = [
+                    "Computer Name",
+                    "Device",
+                    "File Suffix",
+                    "Simulation Time",
+                    "Python Compilation",
+                    "Brian Code generation",
+                    "Device-Specific Compilation",
+                    "Run",
+                    "Extract and Save Result",
+                    "Total Time",
+                ]
+                self.benchmarking_data["Simulation Time"] = str(self.runtime)
+                self.benchmarking_data["Device"] = self.device
+                self.benchmarking_data["File Suffix"] = self.suffix[1:]
+                if self.device != "python":
+                    self.benchmarking_data["Python Compilation"] = (
+                        builtins.code_generation_start - self.start_time
                     )
-                except AttributeError:
-                    print(
-                        " -  The system could not perform the benchmarking since the brian2/brian2genn libraries are not modified to do so."
+                    self.benchmarking_data["Brian Code generation"] = (
+                        builtins.compile_start - builtins.code_generation_start
                     )
-                    self.benchmark = 0
+                    self.benchmarking_data["Device-Specific Compilation"] = (
+                        builtins.run_start - builtins.compile_start
+                    )
+                else:
+                    self.benchmarking_data["Python Compilation"] = (
+                        builtins.run_start - self.start_time
+                    )
+                    self.benchmarking_data["Brian Code generation"] = "-"
+                    self.benchmarking_data["Device-Specific Compilation"] = "-"
+                self.saving_start_time = time.time()
+                self.benchmarking_data["Run"] = (
+                    self.saving_start_time - builtins.run_start
+                )
+
             self.gather_result()
             self.end_time = time.time()
             if self.benchmark:
@@ -718,7 +705,7 @@ class CxSystem:
                 " -  Simulating %s took in total %f s"
                 % (str(self.runtime), self.end_time - self.start_time)
             )
-            if self.device == "genn":
+            if self.device == "cuda":
                 shutil.rmtree(
                     self.workspace.get_simulation_folder()
                     .joinpath(self.suffix[1:])
@@ -795,8 +782,8 @@ class CxSystem:
         target_directory = (
             self.workspace.get_simulation_folder().joinpath(self.suffix[1:]).as_posix()
         )
-        if self.device == "genn":
-            b2.set_device("genn", directory=target_directory)
+        if self.device == "cuda":
+            b2.set_device("cuda", directory=target_directory)
             b2.prefs.codegen.cpp.extra_compile_args_gcc = ["-O3", "-pipe"]
         elif self.device == "cpp":
             print(f"\nTarget directory is {target_directory}")
@@ -2362,7 +2349,6 @@ class CxSystem:
             if self.device == "python" and eval("sum(%s.wght)==0" % _dyn_syn_name):
                 print("WARNING: Synapses %s set to zero weight!" % _dyn_syn_name)
 
-            # the next two lines are commented out for GeNN and are added as a parameter when creating syn
             exec(
                 "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name)
             )  # set the delays
@@ -2481,12 +2467,7 @@ class CxSystem:
         relay group supports the locations. With this workaround, the synaptic connection between the input and the Neuron group can be implemented \
         based on the distance of the neurons then.
 
-        Note: extracting the input spikes and time sequences for using in a SpikeGeneratorGroup() is done in this method. \
-        This procedure needs using a "run()" method in brian2. However, one of the limitations of the Brian2GeNN is that \
-        the user cannot use multiple "run()" methods in the whole script. To address this issue, the GeNN device should be \
-        set after using the first run(), hence the unusual placement of "set_device('genn')" command in current method.
-
-        Note2: The radius of the VPM input is determined based on the Markram et al. 2015: The radius of the system is 210 um \
+        Note: The radius of the VPM input is determined based on the Markram et al. 2015: The radius of the system is 210 um \
         and the number of VPM input is 60 (page 19 of supplements). As for the radius of the VPM input, it is mentioned in the \
          paper (page 462) that "neurons were arranged in 310 mini-columns at horizontal positions". considering the area of the \
          circle with radius of 210um and 60/310 mini-columns, the radius will be equal to 92um.

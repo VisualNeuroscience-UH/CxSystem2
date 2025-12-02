@@ -26,7 +26,7 @@ The necessary parameters for running simulations locally are:
 
     :Simulation:  :code:`runtime{int*unit}`: Sets the duration of the simulation, e.g. 200*ms.
 
-        :code:`device{Python,Cython,Cpp,GeNN}`: Sets the device for Brian2 code generation.
+        :code:`device{Python,Cython,Cpp,cuda}`: Sets the device for Brian2 code generation.
 
         :code:`sys_mode{local, expanded}`: The system can be run in two modes: **local** and **expanded** mode. Expanded mode applies distance 
         dependence of connection probabilities.
