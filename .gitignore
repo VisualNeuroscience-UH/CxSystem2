@@ -68,7 +68,8 @@ cxsystem2/neurodynlib/tutorial/.ipynb_checkpoints
 # Test and build files
 # =========================
 .pytest_cache
-tests/__pycache__
+*/__pycache__
+*/*/__pycache__
 tests/temp_output_files
 tests/temp_connection_files
 cxsystem2.egg-info

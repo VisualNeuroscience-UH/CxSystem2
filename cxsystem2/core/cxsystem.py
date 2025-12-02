@@ -450,17 +450,6 @@ class CxSystem:
             self.configuration_executor()
         print(" -  Cortical Module initialization Done.")
 
-    try:
-        # Local
-        from cxsystem2.bui import bui
-
-        @staticmethod
-        def run_bui(ssl=False, port=None, nobrowser=False):
-            bui.RunServer(ssl=ssl, port=port, nobrowser=nobrowser)
-
-    except ImportError:
-        print(" -  Browser User Interface (BUI) is not installed.")
-
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:, 0][
             self.anat_and_sys_conf_df.loc[:, 0] == "row_type"

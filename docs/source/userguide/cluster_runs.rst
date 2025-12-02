@@ -2,8 +2,8 @@ Running on cluster
 ==================
 
 In Cluster Run mode, CxSystem connects to a connection node of a cluster via SSH and runs instances of array run 
-on pre-defined number of nodes in the cluster. Currently Cluster Run is tested on `Taito supercluster
-<https://research.csc.fi/taito-supercluster>`_ at Finnish IT Center for Science that employs Slurm workload manager.  
+on pre-defined number of nodes in the cluster. Currently Cluster Run is tested on `puhti supercluster
+<https://research.csc.fi/puhti-supercluster>`_ at Finnish IT Center for Science that employs Slurm workload manager.  
 However, with a slight modification to the Slurm template file, one can use the cluster run on other types of workload 
 manager systems, e.g. Torque.
 
@@ -28,7 +28,7 @@ which triggers the cluster run.
  .. csv-table::
 
    cluster_job_file_path
-   ./csc_taito.job
+   ./csc_puhti.job
 
 This parameter defines the address of the template workload management system file. In this case the a template 
 for Slurm system is made available in the Github page which can be used for any cluster that utilizes the Slurm. 
@@ -49,7 +49,7 @@ separate jobs to each node in the cluster. This has some advantages, including l
  .. csv-table::
 
    cluster_address
-   taito.csc.fi
+   puhti.csc.fi
 
 Defines the URL of the cluster.
 

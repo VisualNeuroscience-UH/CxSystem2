@@ -188,13 +188,6 @@ Configuration module
     .. automethod:: ConfigConverter.__init__
 
 
-BUI module
-------------------------------------
-.. module:: cxsystem2.bui.bui
-.. autoclass:: RunServer
-    :members:
-
-    .. automethod:: RunServer.__init__
 
 visualization module
 ------------------------------------

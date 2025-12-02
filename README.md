@@ -19,7 +19,6 @@
     * [Linux/Mac](#linuxmac)
     * [Development](#development)
 - [Interfaces](#interfaces)
-    * [Browser User Interface (BUI)](#browser-user-interface-bui)
     * [Command Line Interface (CLI)](#command-line-interface-cli)
 - [Documentation](#documentation)
 - [Citation](#citation)
@@ -103,7 +102,7 @@ Install dependencies (main only):
 poetry install
 ```
 
-Install dependencies (full, incl. doc and bui etc):
+Install dependencies (full, incl. doc etc):
 
 ```
 poetry install --with full
@@ -139,15 +138,9 @@ poetry install --sync
 
 ## Interfaces
 
-`CxSystem2` comes with two interfaces:
-
-### Browser User Interface (BUI)
-
-CxSystem's BUI is built to provide users with an interactive environment for changing the parameters for simulations.
-
 ### Command Line Interface (CLI)
 
-Beside the BUI, Some of the main functionalities of the `CxSystem2` are available in terminal, including the BUI itself. All of the following commands have built-in documentations available with `-h` or `--help` flags:
+Main functionalities of the `CxSystem2` are available in terminal. All of the following commands have built-in documentations available with `-h` or `--help` flags:
 
 #### `cxsystem2`
 

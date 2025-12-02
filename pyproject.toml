@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cxsystem2"
-version = "2.2.2"
+version = "2.2.5"
 description = "A cerebral cortex simulation framework"
 authors = ["Vafa Andalibi", "Henri Hokkanen", "Simo Vanni <simo.vanni@helsinki.fi>"]
 license = "MIT"
@@ -9,7 +9,7 @@ homepage = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 repository = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 documentation = "https://cxsystem2.readthedocs.io/en/latest/"
 
-include = ["**/csc_taito.job", "tests/**/*.py", "tests/**/*.csv", "tests/**/*.json", "tests/**/*.gz", "cxsystem2/**/*", "cxsystem2/gui/cx_gui/**/*.css", "cxsystem2/gui/cx_gui/**/*.js", "cxsystem2/gui/cx_gui/**/*.html", "cxsystem2/gui/cx_gui/**/*.json"]
+include = ["tests/**/*.py", "tests/**/*.csv", "tests/**/*.json", "tests/**/*.gz", "cxsystem2/**/*", "cxsystem2/gui/cx_gui/**/*.css", "cxsystem2/gui/cx_gui/**/*.js", "cxsystem2/gui/cx_gui/**/*.html", "cxsystem2/gui/cx_gui/**/*.json"]
 exclude = ["**/__pycache__", "**/*.pyc", "**/*.pyo"]
 
 classifiers = [
