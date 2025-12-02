@@ -12,20 +12,16 @@ import shutil
 import zlib
 from pathlib import Path
 
+import brian2.units as b2u
+
 # Third-party
 import numpy as np
-from brian2.units import *
-from scipy.stats import ks_2samp, wasserstein_distance
+from scipy.stats import wasserstein_distance
 
 # Local
 from cxsystem2.core import cxsystem as cx
 
 """
-To use this test you need to pip install -U pytest. 
-Note that the -U will upgrade necessary dependencies for pytest.
-
-Run pytest at CxSystem root, such as git repo root.
-
 This module tests C++ device and array run
 It requires: C++ compiler, 
 
@@ -92,7 +88,7 @@ def test_outputfile(cxsystem_run_fixture2):
         for item in os.listdir(simulation_path.as_posix())
         if "tonic_depol_level" in item
     ]
-    pytest.set_trace()
+
     assert (
         len(
             [
@@ -132,7 +128,7 @@ def test_spiketiming_report(cxsystem_run_fixture2, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
 
-    time_resolution = 0.1 * msecond
+    time_resolution = 0.1 * b2u.msecond
     time_vector_length = 2000
 
     with capsys.disabled():
@@ -176,7 +172,9 @@ def test_spiketiming_report(cxsystem_run_fixture2, capsys, get_spike_data):
             wass_dist = wasserstein_distance(spike_data, new_spike_data)
             cumulative_wd += wass_dist
 
-        mean_wd = (time_resolution / msecond) * cumulative_wd / len(all_spiking_neurons)
+        mean_wd = (
+            (time_resolution / b2u.msecond) * cumulative_wd / len(all_spiking_neurons)
+        )
 
         # report mean of these stats
         with capsys.disabled():

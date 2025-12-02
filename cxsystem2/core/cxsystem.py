@@ -784,9 +784,7 @@ class CxSystem:
         )
         if self.device == "cuda":
             b2.set_device("cuda", directory=target_directory)
-            b2.prefs.codegen.cpp.extra_compile_args_gcc = ["-O3", "-pipe"]
         elif self.device == "cpp":
-            print(f"\nTarget directory is {target_directory}")
             b2.set_device("cpp_standalone", directory=target_directory)
 
     def _set_runtime(self, *args):
@@ -2620,7 +2618,7 @@ class CxSystem:
                     ] = np.squeeze(inp.get_input_positions())
                     self.customized_neurons_list[self.video_input_idx][
                         "w_positions"
-                    ] = 17 * log(
+                    ] = 17 * np.log(
                         relay_group["z_positions"] + 1
                     )  # NOTE Hard coded scaling from z to w
 
@@ -2667,12 +2665,9 @@ class CxSystem:
                     setattr(self.Cxmodule, thread_sg_syn_name, eval(thread_sg_syn_name))
                 except AttributeError:
                     pass
-                # taking care of the monitors:
-                self.monitors(
-                    mons.split(" "), thread_ng_name
-                )  # , self.customized_neurons_list[-1]['equation'])
 
-            # input_neuron_group_idx = self.current_values_s[self.current_parameters_s[self.current_parameters_s=='idx'].index.item()]
+                self.monitors(mons.split(" "), thread_ng_name)
+
             syn_lines = self.anat_and_sys_conf_df[
                 self.anat_and_sys_conf_df[0].str.startswith("S") == True
             ]
@@ -2728,8 +2723,6 @@ class CxSystem:
             ).reset_index(drop=True)
             self.thr = threading.Thread(target=waitress, args=(self,))
             self.thr.start()
-            # if inp.file_exist_flag:
-            #     self.thr.join()
 
         def VPM(self):  # ventral posteromedial (VPM) thalamic nucleus
             spike_times_idx = next(
@@ -2918,9 +2911,9 @@ class CxSystem:
                 globals(),
                 locals(),
             )
-            if hasattr(self, "imported_connections"):  # load the positions if available
+            if hasattr(self, "imported_connections"):  # Load the positions if available
                 # in case the NG index are different. for example a MC_L2 neuron might have had
-                # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
+                # index 3 as NG3_MC_L2 and now it's NG10_MC_L2
                 group_type = _dyn_neurongroup_name[
                     _dyn_neurongroup_name.index("_") + 1 :
                 ]
@@ -2942,7 +2935,7 @@ class CxSystem:
                     ]
                 )
                 print(" -  Positions for the group %s loaded" % _dyn_neurongroup_name)
-            else:  # generating the positions:
+            else:  # Generating the positions
                 vpm_customized_neuron = NeuronReference(
                     current_idx,
                     int(number_of_neurons),
@@ -2959,7 +2952,7 @@ class CxSystem:
                 self.customized_neurons_list[current_idx]["w_positions"] = (
                     vpm_customized_neuron.output_neuron["w_positions"]
                 )
-            # setting the position of the neurons:
+            # Setting the position of the neurons
             exec(
                 "%s.x=b2.real(self.customized_neurons_list[%d]["
                 "'w_positions'])*mm\n"
@@ -2973,7 +2966,7 @@ class CxSystem:
                 globals(),
                 locals(),
             )
-            # saving the positions :
+            # Saving the positions
             self.workspace.results["positions_all"]["z_coord"][
                 _dyn_neurongroup_name
             ] = self.customized_neurons_list[current_idx]["z_positions"]
@@ -3004,10 +2997,7 @@ class CxSystem:
                 setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
             except AttributeError:
                 pass
-            # taking care of the monitors:
-            self.monitors(
-                mons.split(" "), _dyn_neurongroup_name
-            )  # , self.customized_neurons_list[-1]['equation'])
+            self.monitors(mons.split(" "), _dyn_neurongroup_name)
 
         def spikes(self):
             input_spikes_filename = self.current_values_s[
@@ -3198,7 +3188,6 @@ class CxSystem:
                 input_type_to_method_mapping[_input_type][1]
             ]
         )
-        # next(iter()) is equivalent to item() which is deprecated
         obligatory_indices = [
             next(iter(self.current_parameters_s[self.current_parameters_s == ii].index))
             for ii in obligatory_columns
@@ -3212,7 +3201,6 @@ class CxSystem:
             self.current_values_s
         ), " -  The number of columns for the input are not equal to number of values in the configuration file."
         try:
-            # next(iter()) is equivalent to item() which is deprecated
             mons = self.current_values_s[
                 next(
                     iter(
@@ -3225,7 +3213,6 @@ class CxSystem:
             ]
         except ValueError:
             mons = "--"
-        # next(iter()) is equivalent to item() which is deprecated
         group_idx = self.current_values_s[
             next(
                 iter(
@@ -3277,11 +3264,6 @@ class CxSystem:
                 self.workspace.results["positions_all"]["z_coord"]
             )
             self.workspace.save_connections_to_file()
-
-
-#    @staticmethod
-#    def import_optimizer():
-#        return [rand(), scprs.csr_matrix([])]
 
 
 if __name__ == "__main__":
