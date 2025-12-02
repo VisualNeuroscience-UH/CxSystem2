@@ -93,7 +93,6 @@ class TestConfigurationExecutor:
         )
 
     def test_set_runtime_parameters(self):
-        """Note, cpp and GeNN devices are not tested"""
         assert CM.runtime == 200.0 * msecond
         assert CM.device.lower() == "python"
         assert CM.sys_mode == "local"
