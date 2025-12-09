@@ -996,45 +996,45 @@ class SynapseReference:
 
         getattr(self, self.output_synapse["type"])()
 
-    def debrito(self):
-        """
-        The method for implementing the plasticity model from de Brito & Gerstner 2024 PLoSCB.
+    # def debrito(self):
+    #     """
+    #     The method for implementing the plasticity model from de Brito & Gerstner 2024 PLoSCB.
 
-        """
+    #     """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
-            wght : siemens
-            dapre/dt = -apre/taupre : siemens (event-driven) # r1 or x_moving_average_plus
-            dapost1/dt = -apost1/taupost1 : siemens (event-driven) # o1 or y_moving_average_minus
-            dapost2/dt = -apost2/taupost2 : siemens (event-driven) # o2 or y_moving_average_plus
-            dahomeo/dt = -ahomeo/tauhomeo : siemens (event-driven) # homeostatic term
-            """
-        )
+    #     self.output_synapse["equation"] = b2.Equations(
+    #         """
+    #         wght : siemens
+    #         dapre/dt = -apre/taupre : siemens (event-driven) # r1 or x_moving_average_plus
+    #         dapost1/dt = -apost1/taupost1 : siemens (event-driven) # o1 or y_moving_average_minus
+    #         dapost2/dt = -apost2/taupost2 : siemens (event-driven) # o2 or y_moving_average_plus
+    #         dahomeo/dt = -ahomeo/tauhomeo : siemens (event-driven) # homeostatic term
+    #         """
+    #     )
 
-        self.output_synapse["pre_eq"] = (
-            """
-            %s+=wght
-            apre += Apre
-            wght_minus = nu_ltd * ahomeo * apost1
-            wght = clip(wght - wght_minus, 0 * siemens, wght_max)
-            """
-            % (
-                self.output_synapse["receptor"]
-                + self.output_synapse["post_comp_name"]
-                + "_post"
-            )
-        )
+    #     self.output_synapse["pre_eq"] = (
+    #         """
+    #         %s+=wght
+    #         apre += Apre
+    #         wght_minus = nu_ltd * ahomeo * apost1
+    #         wght = clip(wght - wght_minus, 0 * siemens, wght_max)
+    #         """
+    #         % (
+    #             self.output_synapse["receptor"]
+    #             + self.output_synapse["post_comp_name"]
+    #             + "_post"
+    #         )
+    #     )
 
-        self.output_synapse[
-            "post_eq"
-        ] = """
-            wght_plus = nu_ltp * apost2 * apre
-            wght = clip(wght + wght_plus, 0 * siemens, wght_max)
-            apost1 += Apost1
-            apost2 += Apost2
-            dahomeo += Ahomeo
-            """
+    #     self.output_synapse[
+    #         "post_eq"
+    #     ] = """
+    #         wght_plus = nu_ltp * apost2 * apre
+    #         wght = clip(wght + wght_plus, 0 * siemens, wght_max)
+    #         apost1 += Apost1
+    #         apost2 += Apost2
+    #         dahomeo += Ahomeo
+    #         """
 
     def STDP(self):
         """
