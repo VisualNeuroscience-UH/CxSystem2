@@ -896,8 +896,3 @@ class NeuronParser:
                 .split("['")
             )
             return self.value_extractor(df, new_key)
-
-    @staticmethod
-    def import_fix():
-        tmp1 = [nan, array]
-        return tmp1
