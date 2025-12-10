@@ -11,6 +11,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 # Built-in
 import random as rnd
 from copy import deepcopy
+import sys
 
 # Third-party
 import brian2 as b2
@@ -809,7 +810,7 @@ class NeuronReference:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]))
+            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),locals=sys._getframe().f_locals)
         try:
             return eval(key_name)
         except (NameError, TypeError):
@@ -852,7 +853,7 @@ class NeuronReference:
                         ):
                             exec(
                                 "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter
+                                % neural_parameter, locals=sys._getframe().f_locals
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
 
@@ -1334,7 +1335,7 @@ class SynapseReference:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]))
+            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]), locals=sys._getframe().f_locals)
         try:
             return eval(key_name)
         except (NameError, TypeError):
@@ -1377,7 +1378,7 @@ class SynapseReference:
                         ):
                             exec(
                                 "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter
+                                % neural_parameter, locals=sys._getframe().f_locals
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
 

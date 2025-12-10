@@ -10,6 +10,8 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
+import sys
+
 # Third-party
 import numpy as np
 import pandas as pd
@@ -98,7 +100,7 @@ class SynapseParser:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]))
+            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]), locals=sys._getframe().f_locals)
         try:
             return eval(key_name)
         except (NameError, TypeError):
@@ -835,7 +837,7 @@ class NeuronParser:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]))
+            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]), locals=sys._getframe().f_locals)
         try:
             return eval(key_name)
         except (NameError, TypeError):
@@ -879,7 +881,7 @@ class NeuronParser:
                         ):
                             exec(
                                 "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter
+                                % neural_parameter, locals=sys._getframe().f_locals
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
                 except TypeError:
