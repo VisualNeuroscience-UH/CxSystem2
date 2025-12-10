@@ -12,6 +12,7 @@ import shutil
 import zlib
 from pathlib import Path
 
+import brian2 as b2
 import brian2.units as b2u
 
 # Third-party
@@ -40,20 +41,17 @@ CM = cx.CxSystem(anatomy_and_system_config, physiology_config)
 workspace_path = CM.workspace.get_workspace_folder()
 simulation_path = CM.workspace.get_simulation_folder()
 
+
 ###################
 # Integration tests
 ###################
-
-
 @pytest.fixture(scope="module")
-def cxsystem_run_fixture2():
+def cxsystem_run_fixture_python():
 
-    # Executing setup code
     CM.run()
 
-    yield  # Run the tests here
+    yield
 
-    # #Executing teardown code. Connections are already gone if run with basic test
     shutil.rmtree(simulation_path.as_posix())
 
 
@@ -81,8 +79,8 @@ def get_spike_data():
     return spikes_all, new_spikes_all
 
 
-def test_outputfile(cxsystem_run_fixture2):
-    """Test for 5 existing outputfiles"""
+def test_outputfile(cxsystem_run_fixture_python):
+    """Test for 6 existing outputfiles"""
     outputfilelist = [
         item
         for item in os.listdir(simulation_path.as_posix())
@@ -101,7 +99,8 @@ def test_outputfile(cxsystem_run_fixture2):
     )
 
 
-def test_spikecount_10percent_tolerance(cxsystem_run_fixture2, capsys, get_spike_data):
+# removed capsys argument as it is not used in this test
+def test_spikecount_10percent_tolerance(cxsystem_run_fixture_python, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
     for key in keys:
@@ -109,7 +108,7 @@ def test_spikecount_10percent_tolerance(cxsystem_run_fixture2, capsys, get_spike
         assert 0.9 <= spike_count_proportion <= 1.1
 
 
-def test_spikecount_report(cxsystem_run_fixture2, capsys, get_spike_data):
+def test_spikecount_report(cxsystem_run_fixture_python, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
     with capsys.disabled():
@@ -124,7 +123,7 @@ def test_spikecount_report(cxsystem_run_fixture2, capsys, get_spike_data):
             )
 
 
-def test_spiketiming_report(cxsystem_run_fixture2, capsys, get_spike_data):
+def test_spiketiming_report(cxsystem_run_fixture_python, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
 
