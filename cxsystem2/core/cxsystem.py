@@ -10,7 +10,6 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
 # Built-in
-import ast
 import builtins
 import csv
 import json
@@ -30,9 +29,7 @@ import brian2cuda
 import numpy as np
 import pandas as pd
 import scipy.sparse as scprs
-from brian2 import rand
 from brian2.units import *
-from numpy import nan
 
 # Local
 from cxsystem2.core import equation_templates as eqt
@@ -43,9 +40,12 @@ from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.tools import load_from_file, parameter_finder, read_config_file
 from cxsystem2.core.workspace_manager import Workspace
 
-b2.prefs.devices.cpp_standalone.extra_make_args_unix = []
-# ns = sys._getframe().f_locals # ns for namespace
-            
+b2.prefs.devices.cuda_standalone.cuda_backend.detect_gpus = False
+b2.prefs.devices.cuda_standalone.cuda_backend.compute_capability = 8.6
+b2.prefs.devices.cuda_standalone.cuda_backend.detect_cuda = True
+b2.prefs.devices.cuda_standalone.cuda_backend.gpu_id = 0
+
+
 class CxSystem:
     """
     The main object of cortical system module for building and running a customized model of cortical module based on \
@@ -148,10 +148,10 @@ class CxSystem:
             "cluster_workspace": [23, self.passer],
             "integration": [24, self.integration],
             # Line definitions:
-            "G": [nan, self.neuron_group],
-            "S": [nan, self.synapse],
-            "IN": [nan, self.relay],
-            "params": [nan, self.set_runtime_parameters],
+            "G": [np.nan, self.neuron_group],
+            "S": [np.nan, self.synapse],
+            "IN": [np.nan, self.relay],
+            "params": [np.nan, self.set_runtime_parameters],
         }
         now = datetime.now()
         self.timestamp = now.strftime("_%y%m%d_%H%M%S")
@@ -503,7 +503,10 @@ class CxSystem:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]), locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
+                locals=sys._getframe().f_locals,
+            )
         try:
             return eval(key_name, locals=sys._getframe().f_locals)
         except (NameError, TypeError):
@@ -982,7 +985,10 @@ class CxSystem:
                 )
                 exec(tmp_var_str, locals=sys._getframe().f_locals)
             except ValueError:
-                exec("local_namespace['%s']='--'" % column, locals=sys._getframe().f_locals)
+                exec(
+                    "local_namespace['%s']='--'" % column,
+                    locals=sys._getframe().f_locals,
+                )
 
         idx = local_namespace["idx"]
         net_center = local_namespace["net_center"]
@@ -1076,27 +1082,33 @@ class CxSystem:
         self.customized_neurons_list[current_idx]["object_name"] = _dyn_neurongroup_name
         exec(
             "%s=self.customized_neurons_list[%d]['number_of_neurons']"
-            % (_dyn_neuronnumber_name, current_idx), locals=sys._getframe().f_locals
+            % (_dyn_neuronnumber_name, current_idx),
+            locals=sys._getframe().f_locals,
         )
         exec(
             "%s=self.customized_neurons_list[%d]['equation']"
-            % (_dyn_neuron_eq_name, current_idx), locals=sys._getframe().f_locals
+            % (_dyn_neuron_eq_name, current_idx),
+            locals=sys._getframe().f_locals,
         )
         exec(
             "%s=self.customized_neurons_list[%d]['threshold']"
-            % (_dyn_neuron_thres_name, current_idx), locals=sys._getframe().f_locals
+            % (_dyn_neuron_thres_name, current_idx),
+            locals=sys._getframe().f_locals,
         )
         exec(
             "%s=self.customized_neurons_list[%d]['reset']"
-            % (_dyn_neuron_reset_name, current_idx), locals=sys._getframe().f_locals
+            % (_dyn_neuron_reset_name, current_idx),
+            locals=sys._getframe().f_locals,
         )
         exec(
             "%s=self.customized_neurons_list[%d]['refractory']"
-            % (_dyn_neuron_refra_name, current_idx), locals=sys._getframe().f_locals
+            % (_dyn_neuron_refra_name, current_idx),
+            locals=sys._getframe().f_locals,
         )
         exec(
             "%s=self.customized_neurons_list[%d]['namespace']"
-            % (_dyn_neuron_namespace_name, current_idx), locals=sys._getframe().f_locals
+            % (_dyn_neuron_namespace_name, current_idx),
+            locals=sys._getframe().f_locals,
         )
 
         # Creating the actual NeuronGroup() using the variables in the previous 6 lines
@@ -1111,7 +1123,8 @@ class CxSystem:
                 _dyn_neuron_reset_name,
                 _dyn_neuron_refra_name,
                 _dyn_neuron_namespace_name,
-            ), locals=sys._getframe().f_locals
+            ),
+            locals=sys._getframe().f_locals,
         )
         # </editor-fold>
 
@@ -1248,7 +1261,8 @@ class CxSystem:
                             n_background_inputs,
                             background_rate,
                             background_weight,
-                        ), locals=sys._getframe().f_locals
+                        ),
+                        locals=sys._getframe().f_locals,
                     )
 
                     try:
@@ -1269,7 +1283,8 @@ class CxSystem:
                             n_background_inhibition,
                             background_rate_inhibition,
                             background_weight_inhibition,
-                        ), locals=sys._getframe().f_locals
+                        ),
+                        locals=sys._getframe().f_locals,
                     )
                     try:
                         setattr(
@@ -1328,7 +1343,8 @@ class CxSystem:
                                 n_inputs_to_each_comp,
                                 background_rate,
                                 background_weight,
-                            ), locals=sys._getframe().f_locals
+                            ),
+                            locals=sys._getframe().f_locals,
                         )
                         try:
                             setattr(self.Cxmodule, poisson_target, eval(poisson_target))
@@ -1347,7 +1363,8 @@ class CxSystem:
                             n_background_inhibition,
                             background_rate_inhibition,
                             background_weight_inhibition,
-                        ), locals=sys._getframe().f_locals
+                        ),
+                        locals=sys._getframe().f_locals,
                     )
                     try:
                         setattr(
@@ -1387,7 +1404,8 @@ class CxSystem:
                     current_idx,
                     _dyn_neurongroup_name,
                     current_idx,
-                ), locals=sys._getframe().f_locals
+                ),
+                locals=sys._getframe().f_locals,
             )
         except ValueError as e:
             raise ValueError(
@@ -1436,7 +1454,8 @@ class CxSystem:
 
         if "initial_values" in self.customized_neurons_list[-1].keys():
             exec(
-                f'{_dyn_neurongroup_name}.set_states(self.customized_neurons_list[-1]["initial_values"])', locals=sys._getframe().f_locals
+                f'{_dyn_neurongroup_name}.set_states(self.customized_neurons_list[-1]["initial_values"])',
+                locals=sys._getframe().f_locals,
             )
 
         print(
@@ -2019,22 +2038,26 @@ class CxSystem:
 
             exec(
                 "%s=self.customized_synapses_list[%d]['equation']"
-                % (_dyn_syn_eq_name, current_idx), locals=sys._getframe().f_locals
+                % (_dyn_syn_eq_name, current_idx),
+                locals=sys._getframe().f_locals,
             )
             exec(
                 "%s=self.customized_synapses_list[%d]['pre_eq']"
-                % (_dyn_syn_pre_eq_name, current_idx), locals=sys._getframe().f_locals
+                % (_dyn_syn_pre_eq_name, current_idx),
+                locals=sys._getframe().f_locals,
             )
             try:  # in case of a fixed synapse there is no "on_post = ...", hence the pass
                 exec(
                     "%s=self.customized_synapses_list[%d]['post_eq']"
-                    % (_dyn_syn_post_eq_name, current_idx), locals=sys._getframe().f_locals
+                    % (_dyn_syn_post_eq_name, current_idx),
+                    locals=sys._getframe().f_locals,
                 )
             except KeyError:
                 pass
             exec(
                 "%s=self.customized_synapses_list[%d]['namespace']"
-                % (_dyn_syn_namespace_name, current_idx), locals=sys._getframe().f_locals
+                % (_dyn_syn_namespace_name, current_idx),
+                locals=sys._getframe().f_locals,
             )
 
             # creating the initial synaptic connection :
@@ -2051,7 +2074,8 @@ class CxSystem:
                             _dyn_syn_pre_eq_name,
                             _dyn_syn_post_eq_name,
                             _dyn_syn_namespace_name,
-                        ), locals=sys._getframe().f_locals
+                        ),
+                        locals=sys._getframe().f_locals,
                     )
                 except (
                     NameError
@@ -2065,7 +2089,8 @@ class CxSystem:
                             _dyn_syn_eq_name,
                             _dyn_syn_pre_eq_name,
                             _dyn_syn_namespace_name,
-                        ), locals=sys._getframe().f_locals
+                        ),
+                        locals=sys._getframe().f_locals,
                     )
             else:
                 try:
@@ -2080,7 +2105,8 @@ class CxSystem:
                             _dyn_syn_post_eq_name,
                             _dyn_syn_namespace_name,
                             eval(_dyn_syn_namespace_name)["delay"],
-                        ), locals=sys._getframe().f_locals
+                        ),
+                        locals=sys._getframe().f_locals,
                     )
                 except (
                     NameError
@@ -2096,7 +2122,8 @@ class CxSystem:
                             _dyn_syn_pre_eq_name,
                             _dyn_syn_namespace_name,
                             eval(_dyn_syn_namespace_name)["delay"],
-                        ), locals=sys._getframe().f_locals
+                        ),
+                        locals=sys._getframe().f_locals,
                     )
 
             # Connecting synapses
@@ -2330,10 +2357,13 @@ class CxSystem:
             ):
                 # Weight set for de novo connections
                 exec(
-                    "%s.wght=%s['init_wght']" % (_dyn_syn_name, _dyn_syn_namespace_name), locals=sys._getframe().f_locals
+                    "%s.wght=%s['init_wght']"
+                    % (_dyn_syn_name, _dyn_syn_namespace_name),
+                    locals=sys._getframe().f_locals,
                 )  #
                 exec(
-                    "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name), locals=sys._getframe().f_locals
+                    "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name),
+                    locals=sys._getframe().f_locals,
                 )  #
 
                 # set the weights for STDP connections
@@ -2342,14 +2372,16 @@ class CxSystem:
                 ):  # A more sophisticated if: 'wght0' in self.customized_synapses_list[-1]['equation']
                     exec(
                         "%s.wght0=%s['init_wght']"
-                        % (_dyn_syn_name, _dyn_syn_namespace_name), locals=sys._getframe().f_locals
+                        % (_dyn_syn_name, _dyn_syn_namespace_name),
+                        locals=sys._getframe().f_locals,
                     )
 
             if self.device == "python" and eval("sum(%s.wght)==0" % _dyn_syn_name):
                 print("WARNING: Synapses %s set to zero weight!" % _dyn_syn_name)
 
             exec(
-                "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name), locals=sys._getframe().f_locals
+                "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name),
+                locals=sys._getframe().f_locals,
             )  # set the delays
             setattr(self.main_module, _dyn_syn_name, eval(_dyn_syn_name))
             try:
@@ -2363,7 +2395,10 @@ class CxSystem:
 
             if self.device == "python":
                 tmp_namespace = {"num_tmp": 0}
-                exec("tmp_namespace['num_tmp'] = len(%s.i)" % _dyn_syn_name, locals=sys._getframe().f_locals)
+                exec(
+                    "tmp_namespace['num_tmp'] = len(%s.i)" % _dyn_syn_name,
+                    locals=sys._getframe().f_locals,
+                )
                 num_tmp = tmp_namespace["num_tmp"]
                 self.total_number_of_synapses += num_tmp
                 try:
@@ -2572,10 +2607,20 @@ class CxSystem:
                     globals(),
                     locals=sys._getframe().f_locals,
                 )
-                exec("%s=%s" % (thread_ne_name, eq), globals(), locals=sys._getframe().f_locals)
-                exec("%s=%s" % (thread_nt_name, "'emit_spike>=1'"), globals(), locals=sys._getframe().f_locals)
                 exec(
-                    "%s=%s" % (thread_n_res_name, "'emit_spike=0'"), globals(), locals=sys._getframe().f_locals
+                    "%s=%s" % (thread_ne_name, eq),
+                    globals(),
+                    locals=sys._getframe().f_locals,
+                )
+                exec(
+                    "%s=%s" % (thread_nt_name, "'emit_spike>=1'"),
+                    globals(),
+                    locals=sys._getframe().f_locals,
+                )
+                exec(
+                    "%s=%s" % (thread_n_res_name, "'emit_spike=0'"),
+                    globals(),
+                    locals=sys._getframe().f_locals,
                 )
                 exec(
                     "%s= b2.NeuronGroup(%s, model=%s,method='%s', "
@@ -2657,7 +2702,9 @@ class CxSystem:
                     locals=sys._getframe().f_locals,
                 )  # connecting the b2.SpikeGeneratorGroup() and relay group.
                 exec(
-                    "%s.connect(j='i')" % thread_sg_syn_name, globals(), locals=sys._getframe().f_locals
+                    "%s.connect(j='i')" % thread_sg_syn_name,
+                    globals(),
+                    locals=sys._getframe().f_locals,
                 )  # SV change
                 setattr(self.main_module, thread_ng_name, eval(thread_ng_name))
                 setattr(self.main_module, thread_sg_syn_name, eval(thread_sg_syn_name))
@@ -2735,7 +2782,6 @@ class CxSystem:
                 )
             )
             spike_times = self.current_values_s[spike_times_idx].replace(" ", ",")
-            # spike_times_list = ast.literal_eval(spike_times[0 : spike_times.index("*")])
 
             spike_times_tmp = spike_times[0 : spike_times.index("*")]
             spike_times_list = eval(spike_times_tmp, locals=sys._getframe().f_locals)
@@ -2845,18 +2891,24 @@ class CxSystem:
                     number_of_active_neurons,
                     spike_times_unit,
                 )
-            exec(times_str, globals(), locals=sys._getframe().f_locals)  # running the string
+            exec(
+                times_str, globals(), locals=sys._getframe().f_locals
+            )  # running the string
             # containing the syntax for time indices in the input neuron group.
             spikes_str = "GEN_SP=b2.tile(%s,%d)" % (
                 active_neurons_str,
                 b2.asarray(spike_times_list).size,
             )  # len(spike_times_) should be 1 if unit is Hz
-            exec(spikes_str, globals(), locals=sys._getframe().f_locals)  # running the string
+            exec(
+                spikes_str, globals(), locals=sys._getframe().f_locals
+            )  # running the string
             sg_str = (
                 "GEN = b2.SpikeGeneratorGroup(%s, GEN_SP, GEN_TI, period=GEN_PE)"
                 % number_of_neurons
             )
-            exec(sg_str, globals(), locals=sys._getframe().f_locals)  # running the string
+            exec(
+                sg_str, globals(), locals=sys._getframe().f_locals
+            )  # running the string
             # containing the syntax for creating the b2.SpikeGeneratorGroup() based on the input .mat file.
 
             setattr(self.main_module, sg_name, eval(sg_name))
@@ -3044,10 +3096,22 @@ class CxSystem:
             # In order to use the dynamic compiler in a sub-routine, the scope in which the syntax is going to be run
             # should be defined, hence the globals(), locals(). They indicate that the syntaxes should be run in both
             # global and local scope
-            exec("%s=%s" % (nn_name, number_of_neurons), globals(), locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (nn_name, number_of_neurons),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
             exec("%s=%s" % (ne_name, eq), globals(), locals=sys._getframe().f_locals)
-            exec("%s=%s" % (nt_name, "'emit_spike>=1'"), globals(), locals=sys._getframe().f_locals)
-            exec("%s=%s" % (n_res_name, "'emit_spike=0'"), globals(), locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (nt_name, "'emit_spike>=1'"),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            exec(
+                "%s=%s" % (n_res_name, "'emit_spike=0'"),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
             exec(
                 "%s= b2.NeuronGroup(%s, model=%s,method='%s', threshold=%s, "
                 "reset=%s)"
@@ -3122,7 +3186,11 @@ class CxSystem:
                 locals=sys._getframe().f_locals,
             )
             # connecting the b2.SpikeGeneratorGroup() and relay group.
-            exec("%s.connect(j='i')" % sg_syn_name, globals(), locals=sys._getframe().f_locals)  #
+            exec(
+                "%s.connect(j='i')" % sg_syn_name,
+                globals(),
+                locals=sys._getframe().f_locals,
+            )  #
             # SV change
             setattr(self.main_module, ng_name, eval(ng_name))
             setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
