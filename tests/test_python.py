@@ -1,41 +1,27 @@
 # Built-in
 import os
-import sys
-
-# Third-party
-import pytest
-
-[sys.path.append(i) for i in [".", ".."]]
-# Built-in
 import pickle
 import shutil
 import zlib
 from pathlib import Path
 
-import brian2 as b2
 import brian2.units as b2u
 
 # Third-party
 import numpy as np
+import pytest
 from scipy.stats import wasserstein_distance
 
 # Local
 from cxsystem2.core import cxsystem as cx
 
-"""
-This module tests C++ device and array run
-It requires: C++ compiler, 
-
-Simo Vanni 2019
-"""
-
 cwd = os.getcwd()
 path = Path(os.getcwd())
 anatomy_and_system_config = path.joinpath(
-    "tests", "config_files", "pytest_Anatomy_config_cpp_array.csv"
+    "tests", "config_files", "pytest_Anatomy_config_python_array.csv"
 ).as_posix()
 physiology_config = path.joinpath(
-    "tests", "config_files", "pytest_Physiology_config_cpp_array.csv"
+    "tests", "config_files", "pytest_Physiology_config_python_array.csv"
 ).as_posix()
 CM = cx.CxSystem(anatomy_and_system_config, physiology_config)
 workspace_path = CM.workspace.get_workspace_folder()

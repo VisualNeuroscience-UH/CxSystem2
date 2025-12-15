@@ -1,14 +1,5 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-__author__ = "Andalibi, V., Hokkanen H., Vanni, S."
-
-"""
-The preliminary version of this software has been developed at Aalto University 2012-2015,
-and the full version at the University of Helsinki 2013-2017. The software is distributed
-under the terms of the GNU General Public License.
-Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
-"""
-
 # Built-in
 import builtins
 import csv
@@ -25,11 +16,11 @@ from pathlib import Path
 
 # Third-party
 import brian2 as b2
-import brian2cuda
+import brian2cuda  # noqa: F401
 import numpy as np
 import pandas as pd
-import scipy.sparse as scprs
-from brian2.units import *
+import scipy.sparse as scprs  # noqa: F401
+from brian2.units import *  # noqa: F403
 
 # Local
 from cxsystem2.core import equation_templates as eqt
@@ -40,10 +31,21 @@ from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.tools import load_from_file, parameter_finder, read_config_file
 from cxsystem2.core.workspace_manager import Workspace
 
+# Brian2 preferences and settings
 b2.prefs.devices.cuda_standalone.cuda_backend.detect_gpus = False
 b2.prefs.devices.cuda_standalone.cuda_backend.compute_capability = 8.6
 b2.prefs.devices.cuda_standalone.cuda_backend.detect_cuda = True
 b2.prefs.devices.cuda_standalone.cuda_backend.gpu_id = 0
+nan = np.nan  # necessary to have as top-level variable for the brian2.
+
+__author__ = "Andalibi, V., Hokkanen H., Vanni, S."
+
+"""
+The preliminary version of this software has been developed at Aalto University 2012-2015,
+and the full version at the University of Helsinki 2013-2017. The software is distributed
+under the terms of the GNU General Public License.
+Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
+"""
 
 
 class CxSystem:
@@ -213,24 +215,18 @@ class CxSystem:
 
         self.anat_and_sys_conf_df = read_config_file(anatomy_and_system_config)
         self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.map(
-            lambda x: x.strip() if type(x) == str else x
+            lambda x: x.strip() if isinstance(x, str) else x
         )
 
         # dropping the commented lines :
-        self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.drop(
-            self.anat_and_sys_conf_df[0].index[
-                self.anat_and_sys_conf_df[0][
-                    self.anat_and_sys_conf_df[0].str.contains("#") == True
-                ].index.tolist()
-            ]
-        ).reset_index(drop=True)
-        self.physio_config_df = self.physio_config_df.drop(
-            self.physio_config_df["Variable"].index[
-                self.physio_config_df["Variable"][
-                    self.physio_config_df["Variable"].str.contains("#") == True
-                ].index.tolist()
-            ]
-        ).reset_index(drop=True)
+        # breakpoint()
+        self.anat_and_sys_conf_df = self.anat_and_sys_conf_df[
+            ~self.anat_and_sys_conf_df[0].str.contains("#", na=False)
+        ].reset_index(drop=True)
+        self.physio_config_df = self.physio_config_df[
+            ~self.physio_config_df["Variable"].str.contains("#", na=False)
+        ].reset_index(drop=True)
+
         # merging the params lines into one row:
         params_indices = np.where(self.anat_and_sys_conf_df.values == "params")
         if params_indices[0].size > 1:
@@ -348,14 +344,14 @@ class CxSystem:
                 # during cluster run, we need to save the current job suffix for removal of the tmp files later
                 self.current_cluster_job_suffix = self.suffix
 
-            if type(anatomy_and_system_config) == dict:
+            if isinstance(anatomy_and_system_config, dict):
                 tmp_anat_path2 = tmp_folder_path.joinpath(
                     "tmp_anat_2_" + self.suffix + ".json"
                 ).as_posix()
                 with open(tmp_anat_path2, "w") as f:
                     json.dump(anatomy_and_system_config, f)
                 anatomy_and_system_config = tmp_anat_path2
-            if type(physiology_config) == dict:
+            if isinstance(physiology_config, dict):
                 tmp_physio_path2 = tmp_folder_path.joinpath(
                     "tmp_phys_2_" + self.suffix + ".json"
                 ).as_posix()
@@ -442,7 +438,7 @@ class CxSystem:
             except NameError:
                 pass
         self.configuration_executor()
-        if type(self.awaited_conf_lines) != list:
+        if not isinstance(self.awaited_conf_lines, list):
             if self.thr.is_alive():
                 print(" -  Waiting for the video input ...")
                 self.thr.join()
@@ -472,9 +468,8 @@ class CxSystem:
                     except IndexError:
                         next_def_line_idx = self.anat_and_sys_conf_df[0].__len__()
                     for self.value_line_idx in range(def_idx + 1, next_def_line_idx):
-                        if (
-                            type(self.anat_and_sys_conf_df.loc[self.value_line_idx, 0])
-                            == str
+                        if isinstance(
+                            self.anat_and_sys_conf_df.loc[self.value_line_idx, 0], str
                         ):
                             if (
                                 self.anat_and_sys_conf_df.loc[self.value_line_idx, 0]
@@ -512,7 +507,7 @@ class CxSystem:
         except (NameError, TypeError):
             pass
         try:
-            if type(key_name) == list:
+            if isinstance(key_name, list):
                 variable_start_idx = df["Variable"][
                     df["Variable"] == key_name[0]
                 ].index[0]
@@ -581,7 +576,7 @@ class CxSystem:
         self.workspace.create_results_key("Neuron_Groups_Parameters")
         self.workspace.results["Anatomy_configuration"] = self.conf_df_to_save
         self.workspace.results["Physiology_configuration"] = self.physio_df_to_save
-        self.workspace.results["time_vector"] = arange(
+        self.workspace.results["time_vector"] = np.arange(
             0, self.runtime, b2.defaultclock.dt
         )
         self.workspace.results["positions_all"]["w_coord"] = {}

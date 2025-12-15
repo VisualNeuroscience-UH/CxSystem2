@@ -1,12 +1,5 @@
 # Built-in
 import os
-import sys
-
-# Third-party
-import pytest
-
-[sys.path.append(i) for i in [".", ".."]]
-# Built-in
 import pickle
 import shutil
 import zlib
@@ -14,22 +7,14 @@ from pathlib import Path
 
 # Third-party
 import brian2
+import brian2.units as b2u
 import numpy as np
-from brian2.units import *
+import pytest
 from scipy.stats import wasserstein_distance
 
 # Local
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core import equation_templates as eqt
-
-"""
-To use this test you need to pip install -U pytest. 
-Note that the -U will upgrade necessary dependencies for pytest.
-
-Run pytest at CxSystem root, such as git repo root.
-
-Simo Vanni 2019
-"""
 
 cwd = os.getcwd()
 path = Path(os.getcwd())
@@ -93,7 +78,7 @@ class TestConfigurationExecutor:
         )
 
     def test_set_runtime_parameters(self):
-        assert CM.runtime == 200.0 * msecond  # noqa: F405
+        assert CM.runtime == 200.0 * b2u.msecond
         assert CM.device.lower() == "python"
         assert CM.sys_mode == "local"
 
@@ -104,7 +89,9 @@ class TestConfigurationExecutor:
         assert len(CM.customized_neurons_list[0]["z_positions"]) == 60
         assert len(CM.customized_neurons_list[1]["z_positions"]) == 267
         assert len(CM.customized_neurons_list[2]["z_positions"]) == 109
-        assert type(CM.customized_neurons_list[0]["z_positions"][0]) == np.complex128
+        assert isinstance(
+            CM.customized_neurons_list[0]["z_positions"][0], np.complex128
+        )
         assert len(CM.customized_neurons_list[0].keys()) == 5
         assert len(CM.customized_neurons_list[1].keys()) == 18
         assert len(CM.customized_neurons_list[2].keys()) == 18
@@ -361,7 +348,7 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
 
-    time_resolution = 0.1 * msecond
+    time_resolution = 0.1 * b2u.msecond
     time_vector_length = 2000
 
     with capsys.disabled():
@@ -406,7 +393,9 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
 
             cumulative_wd += wass_dist
 
-        mean_wd = (time_resolution / msecond) * cumulative_wd / len(all_spiking_neurons)
+        mean_wd = (
+            (time_resolution / b2u.msecond) * cumulative_wd / len(all_spiking_neurons)
+        )
 
         # report mean of these stats
         with capsys.disabled():

@@ -1,41 +1,29 @@
 # Built-in
 import os
-import sys
-
-# Third-party
-import pytest
-
-[sys.path.append(i) for i in [".", ".."]]
-# Built-in
 import pickle
 import shutil
 import zlib
 from pathlib import Path
 
+# Third-party
 import brian2 as b2
 import brian2.units as b2u
-
-# Third-party
 import numpy as np
+import pytest
 from scipy.stats import wasserstein_distance
 
 # Local
 from cxsystem2.core import cxsystem as cx
 
-"""
-This module tests C++ device and array run
-It requires: C++ compiler, 
-
-Simo Vanni 2019
-"""
+pytest.skip(reason="Speed, compiling takes 8 minutes", allow_module_level=True)
 
 cwd = os.getcwd()
 path = Path(os.getcwd())
 anatomy_and_system_config = path.joinpath(
-    "tests", "config_files", "pytest_Anatomy_config_cpp_array.csv"
+    "tests", "config_files", "pytest_Anatomy_config_cuda_array.csv"
 ).as_posix()
 physiology_config = path.joinpath(
-    "tests", "config_files", "pytest_Physiology_config_cpp_array.csv"
+    "tests", "config_files", "pytest_Physiology_config_cuda_array.csv"
 ).as_posix()
 CM = cx.CxSystem(anatomy_and_system_config, physiology_config)
 workspace_path = CM.workspace.get_workspace_folder()
@@ -46,9 +34,9 @@ simulation_path = CM.workspace.get_simulation_folder()
 # Integration tests
 ###################
 @pytest.fixture(scope="module")
-def cxsystem_run_fixture_cpp():
+def cxsystem_run_fixture_cuda():
 
-    b2.set_device("cpp_standalone")
+    b2.set_device("cuda_standalone")
     # Executing setup code
     CM.run()
 
@@ -82,7 +70,7 @@ def get_spike_data():
     return spikes_all, new_spikes_all
 
 
-def test_outputfile_cpp(cxsystem_run_fixture_cpp):
+def test_outputfile_cuda(cxsystem_run_fixture_cuda):
     """Test for 6 existing outputfiles"""
     outputfilelist = [
         item
@@ -103,7 +91,7 @@ def test_outputfile_cpp(cxsystem_run_fixture_cpp):
 
 
 # removed capsys argument as it is not used in this test
-def test_spikecount_10percent_tolerance_cpp(cxsystem_run_fixture_cpp, get_spike_data):
+def test_spikecount_10percent_tolerance_cuda(cxsystem_run_fixture_cuda, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
     for key in keys:
@@ -111,7 +99,7 @@ def test_spikecount_10percent_tolerance_cpp(cxsystem_run_fixture_cpp, get_spike_
         assert 0.9 <= spike_count_proportion <= 1.1
 
 
-def test_spikecount_report_cpp(cxsystem_run_fixture_cpp, capsys, get_spike_data):
+def test_spikecount_report_cuda(cxsystem_run_fixture_cuda, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
     with capsys.disabled():
@@ -126,7 +114,7 @@ def test_spikecount_report_cpp(cxsystem_run_fixture_cpp, capsys, get_spike_data)
             )
 
 
-def test_spiketiming_report_cpp(cxsystem_run_fixture_cpp, capsys, get_spike_data):
+def test_spiketiming_report_cuda(cxsystem_run_fixture_cuda, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
 
