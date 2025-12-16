@@ -625,7 +625,7 @@ class CxSystem:
         if not self.array_run:
 
             if self.device not in ["cpp", "cuda"]:
-                b2.run(self.runtime, report="text", profile=True)
+                b2.run(self.runtime, report="text")
             else:
                 b2.run(self.runtime, report="text")
             if self.profiling == 1:

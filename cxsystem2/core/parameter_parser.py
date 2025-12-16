@@ -279,7 +279,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / nS
+            / nS  # noqa: F405
         )
         mu_wght = std_wght / 2.0
         self.output_namespace["init_wght"] = "(%f * rand() + %f) * nS" % (
@@ -295,7 +295,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         min_delay = std_delay / 2.0
         self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (
@@ -343,7 +343,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / nS
+            / nS  # noqa: F405
         )
         self.output_namespace["init_wght"] = f"{std_wght} * nS"
 
@@ -356,7 +356,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         self.output_namespace["delay"] = f"{std_delay} * ms"
 
@@ -410,7 +410,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / nS
+            / nS  # noqa: F405
         )
         mu_wght = std_wght / 2.0
         self.output_namespace["init_wght"] = "(%f * rand() + %f) * nS" % (
@@ -426,7 +426,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         min_delay = std_delay / 2.0
         self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (
@@ -441,7 +441,7 @@ class SynapseParser:
 
         # Weight
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
@@ -453,7 +453,7 @@ class SynapseParser:
                         self.output_synapse["post_group_type"],
                     ),
                 )
-                / nS
+                / nS  # noqa: F405
             )
         min_wght = mean_wght / 2.0
         self.output_namespace["init_wght"] = "(%f * rand() + %f) * nS" % (
@@ -471,7 +471,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         min_delay = mean_delay / 2.0
         self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (
@@ -486,7 +486,7 @@ class SynapseParser:
 
         # Weight
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
@@ -498,7 +498,7 @@ class SynapseParser:
                         self.output_synapse["post_group_type"],
                     ),
                 )
-                / nS
+                / nS  # noqa: F405
             )
         self.output_namespace["init_wght"] = "%f * nS" % (mean_wght)
 
@@ -512,7 +512,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (0, mean_delay)
 
@@ -530,7 +530,7 @@ class SynapseParser:
         """
 
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
@@ -542,7 +542,7 @@ class SynapseParser:
                         self.output_synapse["post_group_type"],
                     ),
                 )
-                / nS
+                / nS  # noqa: F405
             )
 
         min_wght = mean_wght / 2.0
@@ -573,7 +573,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         min_delay = mean_delay / 2.0
         self.output_namespace["delay"] = "(%f + %f * rand()) * ms" % (
@@ -589,7 +589,7 @@ class SynapseParser:
 
         # GET weight params
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
@@ -601,7 +601,7 @@ class SynapseParser:
                         self.output_synapse["post_group_type"],
                     ),
                 )
-                / nS
+                / nS  # noqa: F405
             )
 
         min_wght = mean_wght / 2.0
@@ -632,7 +632,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         min_delay = mean_delay / 2.0
         self.output_namespace["delay"] = "(%f + %f * rand()) * ms" % (
@@ -647,7 +647,7 @@ class SynapseParser:
         """
 
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
@@ -659,7 +659,7 @@ class SynapseParser:
                         self.output_synapse["post_group_type"],
                     ),
                 )
-                / nS
+                / nS  # noqa: F405
             )
 
         min_wght = mean_wght / 2.0
@@ -694,7 +694,7 @@ class SynapseParser:
                     self.output_synapse["post_group_type"],
                 ),
             )
-            / ms
+            / ms  # noqa: F405
         )
         min_delay = mean_delay / 2.0
         self.output_namespace["delay"] = "(%f + %f * rand()) * ms" % (
