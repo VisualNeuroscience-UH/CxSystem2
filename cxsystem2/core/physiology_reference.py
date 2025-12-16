@@ -75,10 +75,8 @@ class NeuronReference:
         ), " -  The distance between cells should be less than the grid radius"
         assert cell_type in NeuronReference._celltypes, (
             " -  Cell type '%s' is not defined" % cell_type
-        )  # check cell type
-        assert (
-            len(layers_idx) < 3
-        ), " -  Length of layers_idx array is larger than 2"  # check layer index
+        )
+        assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"
         if len(layers_idx) == 2:
             assert (
                 layers_idx[1] <= layers_idx[0]
@@ -87,6 +85,7 @@ class NeuronReference:
             assert (
                 cell_type != "PC"
             ), " -  Cell type is PC but the start and end of the neuron is not defined in layers_idx"
+
         # final neuron is the output neuron containing equation, parameters
         self.output_neuron = {
             "idx": int(idx),
@@ -99,9 +98,10 @@ class NeuronReference:
             "soma_layer": int(layers_idx[0]),
         }
         if self.output_neuron["type"] == "PC":
+            # N layers above soma. Only main layers 1, 2, 3, 4, 5 and 6 count.
             self.output_neuron["dends_layer"] = np.array(
                 list(range(layers_idx[0] - 1, layers_idx[1] - 1, -1))
-            )  # N layers above soma. Only main layers 1, 2, 3, 4, 5 and 6 count.
+            )
             self.output_neuron["dend_comp_num"] = len(self.output_neuron["dends_layer"])
             self.output_neuron["total_comp_num"] = (
                 self.output_neuron["dend_comp_num"] + 3
@@ -111,7 +111,6 @@ class NeuronReference:
             self.output_neuron["dends_layer"] = self.output_neuron["soma_layer"]
             self.output_neuron["dend_comp_num"] = np.array([0])
             self.output_neuron["total_comp_num"] = np.array([1])
-            # number of compartments if applicable
 
         self.output_neuron["namespace"] = NeuronParser(
             self.output_neuron, physio_config_df

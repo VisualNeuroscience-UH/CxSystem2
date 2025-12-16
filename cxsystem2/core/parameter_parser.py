@@ -3,8 +3,6 @@ import sys
 # Third-party
 import numpy as np
 import pandas as pd
-
-# from brian2.units import *
 from brian2.units import *  # noqa: F403
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
@@ -18,6 +16,209 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 
 nan = np.nan
 array = np.array
+
+
+class NeuronParser:
+    """This class embeds all parameter sets associated to all neuron types and will return it as a namespace in form of dictionary"""
+
+    def __init__(self, output_neuron, physio_config_df):
+        self.physio_config_df = physio_config_df
+        NeuronParser.type_ref = np.array(
+            ["PC", "SS", "BC", "MC", "L1i", "VPM", "HH_E", "HH_I", "NDNEURON", "CI"]
+        )
+        assert output_neuron["type"] in NeuronParser.type_ref, (
+            " -  Cell type '%s' is not defined." % output_neuron["type"]
+        )
+
+        # Handling of "neuron subtype" parameters; new since Aug 2018
+        if output_neuron["subtype"] == "--":
+            neuron_type_to_find = output_neuron["type"]
+        else:
+            neuron_type_to_find = output_neuron["subtype"]
+            # ...but fall back to neuron_type if subtype parameters are not defined
+            try:
+                variable_start_idx = self.physio_config_df["Variable"][
+                    self.physio_config_df["Variable"] == neuron_type_to_find
+                ].index[0]
+            except IndexError:
+                print(
+                    " !  No parameters for %s found, using %s parameters instead"
+                    % (output_neuron["subtype"], output_neuron["type"])
+                )
+                neuron_type_to_find = output_neuron["type"]
+
+        self.output_namespace = {}
+        variable_start_idx = self.physio_config_df["Variable"][
+            self.physio_config_df["Variable"] == neuron_type_to_find
+        ].index[0]
+        try:
+            variable_end_idx = (
+                self.physio_config_df["Variable"]
+                .dropna()
+                .index.tolist()[
+                    self.physio_config_df["Variable"]
+                    .dropna()
+                    .index.tolist()
+                    .index(variable_start_idx)
+                    + 1
+                ]
+            )
+            cropped_df = self.physio_config_df.loc[
+                variable_start_idx : variable_end_idx - 1
+            ]
+        except IndexError:
+            cropped_df = self.physio_config_df.loc[variable_start_idx:]
+
+        # "Root variables" extracted so that neuron parameters can refer to variables globals in physio config
+        # Assumes that root variables have NaN in "Key" column
+        root_variables = self.physio_config_df[
+            self.physio_config_df["Key"].isnull()
+        ].dropna(subset=["Variable"])
+        cropped_with_root = pd.concat([root_variables, cropped_df])
+
+        for neural_parameter in cropped_df["Key"].dropna():
+            try:
+                self.output_namespace[neural_parameter] = self.value_extractor(
+                    cropped_with_root, neural_parameter
+                )
+            except (
+                IndexError
+            ):  # otherwise neuron parameters cannot be of the form reversal_potentials['E_nmda']
+                self.output_namespace[neural_parameter] = self.value_extractor(
+                    physio_config_df, neural_parameter
+                )
+
+        getattr(self, "_" + output_neuron["type"])(output_neuron)
+
+    def _NDNEURON(self, output_neuron):
+        pass
+
+    def _CI(self, output_neuron):
+        pass
+
+    def _PC(self, output_neuron):
+        """
+        :param parameters_type: The type of parameters associated to compartmental neurons. 'Generic' is the common type.
+                        Other types could be defined when discovered in literature.
+        :type parameters_type: String
+        :return:
+        :rtype:
+        """
+
+        if "spine_factor" not in self.output_namespace:
+            self.output_namespace["spine_factor"] = 2
+            print(" ! Parameter spine_factor missing, using 2")
+
+        # TODO - In this legacy version, only capacitance is corrected with spine_factor
+        fract_areas = self.output_namespace["fract_areas"][
+            output_neuron["dend_comp_num"]
+        ]
+        self.output_namespace["C"] = (
+            fract_areas
+            * self.output_namespace["Cm"]
+            * self.output_namespace["Area_tot_pyram"]
+            * self.output_namespace["spine_factor"]
+        )
+        self.output_namespace["gL"] = (
+            fract_areas
+            * self.output_namespace["gL"]
+            * self.output_namespace["Area_tot_pyram"]
+        )
+        self.output_namespace["taum_soma"] = (
+            self.output_namespace["C"][1] / self.output_namespace["gL"][1]
+        )
+
+    def _BC(self, output_neuron):
+        pass
+
+    def _L1i(self, output_neuron):
+        pass
+
+    def _VPM(self, output_neuron):
+        pass
+
+    def _MC(self, output_neuron):
+        pass
+
+    def _SS(self, output_neuron):
+        pass
+
+    def _HH_E(self, output_neuron):
+        pass
+
+    def _HH_I(self, output_neuron):
+        pass
+
+    def value_extractor(self, df, key_name):
+        # breakpoint()
+        non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
+        for non_dict_idx in non_dict_indices:
+            exec(
+                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
+                locals=sys._getframe().f_locals,
+            )
+        try:
+            return eval(key_name)
+        except (NameError, TypeError):
+            pass
+        try:
+            if isinstance(key_name, list):
+                # breakpoint()
+                variable_start_idx = df["Variable"][
+                    df["Variable"] == key_name[0]
+                ].index[0]
+                try:
+                    variable_end_idx = (
+                        df["Variable"]
+                        .dropna()
+                        .index.tolist()[
+                            df["Variable"]
+                            .dropna()
+                            .index.tolist()
+                            .index(variable_start_idx)
+                            + 1
+                        ]
+                    )
+                    cropped_df = df.loc[variable_start_idx : variable_end_idx - 1]
+                except IndexError:
+                    cropped_df = df.loc[variable_start_idx:]
+                return eval(
+                    cropped_df["Value"][cropped_df["Key"] == key_name[1]].item()
+                )
+            else:
+                try:
+                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
+                except NameError:
+                    df_reset_index = df.reset_index(drop=True)
+                    df_reset_index = df_reset_index[
+                        0 : df_reset_index[df_reset_index["Key"] == key_name].index[0]
+                    ]
+                    for neural_parameter in df_reset_index["Key"].dropna():
+                        if neural_parameter in next(
+                            iter(df["Value"][df["Key"] == key_name])
+                        ):
+                            exec(
+                                "%s =self.value_extractor(df,neural_parameter)"
+                                % neural_parameter,
+                                locals=sys._getframe().f_locals,
+                            )
+                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
+                except TypeError:
+                    raise TypeError(
+                        "The syntax %s is not a valid syntax for physiological configuration file or the "
+                        "elements that comprise this syntax are not defined."
+                        % df["Value"][df["Key"] == key_name].item()
+                    )
+
+        except NameError:
+            new_key = (
+                next(iter(df["Value"][df["Key"] == key_name]))
+                .replace("']", "")
+                .split("['")
+            )
+            print(f"new_key = {new_key}")
+            # breakpoint()
+            return self.value_extractor(df, new_key)
 
 
 class SynapseParser:
@@ -701,206 +902,3 @@ class SynapseParser:
             min_delay,
             mean_delay,
         )
-
-
-class NeuronParser:
-    """This class embeds all parameter sets associated to all neuron types and will return it as a namespace in form of dictionary"""
-
-    def __init__(self, output_neuron, physio_config_df):
-        self.physio_config_df = physio_config_df
-        NeuronParser.type_ref = np.array(
-            ["PC", "SS", "BC", "MC", "L1i", "VPM", "HH_E", "HH_I", "NDNEURON", "CI"]
-        )
-        assert output_neuron["type"] in NeuronParser.type_ref, (
-            " -  Cell type '%s' is not defined." % output_neuron["type"]
-        )
-
-        # Handling of "neuron subtype" parameters; new since Aug 2018
-        if output_neuron["subtype"] == "--":
-            neuron_type_to_find = output_neuron["type"]
-        else:
-            neuron_type_to_find = output_neuron["subtype"]
-            # ...but fall back to neuron_type if subtype parameters are not defined
-            try:
-                variable_start_idx = self.physio_config_df["Variable"][
-                    self.physio_config_df["Variable"] == neuron_type_to_find
-                ].index[0]
-            except IndexError:
-                print(
-                    " !  No parameters for %s found, using %s parameters instead"
-                    % (output_neuron["subtype"], output_neuron["type"])
-                )
-                neuron_type_to_find = output_neuron["type"]
-
-        self.output_namespace = {}
-        variable_start_idx = self.physio_config_df["Variable"][
-            self.physio_config_df["Variable"] == neuron_type_to_find
-        ].index[0]
-        try:
-            variable_end_idx = (
-                self.physio_config_df["Variable"]
-                .dropna()
-                .index.tolist()[
-                    self.physio_config_df["Variable"]
-                    .dropna()
-                    .index.tolist()
-                    .index(variable_start_idx)
-                    + 1
-                ]
-            )
-            cropped_df = self.physio_config_df.loc[
-                variable_start_idx : variable_end_idx - 1
-            ]
-        except IndexError:
-            cropped_df = self.physio_config_df.loc[variable_start_idx:]
-
-        # "Root variables" extracted so that neuron parameters can refer to variables globals in physio config
-        # Assumes that root variables have NaN in "Key" column
-        root_variables = self.physio_config_df[
-            self.physio_config_df["Key"].isnull()
-        ].dropna(subset=["Variable"])
-        cropped_with_root = pd.concat([root_variables, cropped_df])
-
-        for neural_parameter in cropped_df["Key"].dropna():
-            try:
-                self.output_namespace[neural_parameter] = self.value_extractor(
-                    cropped_with_root, neural_parameter
-                )
-            except (
-                IndexError
-            ):  # otherwise neuron parameters cannot be of the form reversal_potentials['E_nmda']
-                self.output_namespace[neural_parameter] = self.value_extractor(
-                    physio_config_df, neural_parameter
-                )
-
-        getattr(self, "_" + output_neuron["type"])(output_neuron)
-
-    def _NDNEURON(self, output_neuron):
-        pass
-
-    def _CI(self, output_neuron):
-        pass
-
-    def _PC(self, output_neuron):
-        """
-        :param parameters_type: The type of parameters associated to compartmental neurons. 'Generic' is the common type.
-                        Other types could be defined when discovered in literature.
-        :type parameters_type: String
-        :return:
-        :rtype:
-        """
-
-        if "spine_factor" not in self.output_namespace:
-            self.output_namespace["spine_factor"] = 2
-            print(" ! Parameter spine_factor missing, using 2")
-
-        # TODO - In this legacy version, only capacitance is corrected with spine_factor
-        fract_areas = self.output_namespace["fract_areas"][
-            output_neuron["dend_comp_num"]
-        ]
-        self.output_namespace["C"] = (
-            fract_areas
-            * self.output_namespace["Cm"]
-            * self.output_namespace["Area_tot_pyram"]
-            * self.output_namespace["spine_factor"]
-        )
-        self.output_namespace["gL"] = (
-            fract_areas
-            * self.output_namespace["gL"]
-            * self.output_namespace["Area_tot_pyram"]
-        )
-        self.output_namespace["taum_soma"] = (
-            self.output_namespace["C"][1] / self.output_namespace["gL"][1]
-        )
-
-    def _BC(self, output_neuron):
-        pass
-
-    def _L1i(self, output_neuron):
-        pass
-
-    def _VPM(self, output_neuron):
-        pass
-
-    def _MC(self, output_neuron):
-        pass
-
-    def _SS(self, output_neuron):
-        pass
-
-    def _HH_E(self, output_neuron):
-        pass
-
-    def _HH_I(self, output_neuron):
-        pass
-
-    def value_extractor(self, df, key_name):
-        # breakpoint()
-        non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        for non_dict_idx in non_dict_indices:
-            exec(
-                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
-                locals=sys._getframe().f_locals,
-            )
-        try:
-            return eval(key_name)
-        except (NameError, TypeError):
-            pass
-        try:
-            if isinstance(key_name, list):
-                # breakpoint()
-                variable_start_idx = df["Variable"][
-                    df["Variable"] == key_name[0]
-                ].index[0]
-                try:
-                    variable_end_idx = (
-                        df["Variable"]
-                        .dropna()
-                        .index.tolist()[
-                            df["Variable"]
-                            .dropna()
-                            .index.tolist()
-                            .index(variable_start_idx)
-                            + 1
-                        ]
-                    )
-                    cropped_df = df.loc[variable_start_idx : variable_end_idx - 1]
-                except IndexError:
-                    cropped_df = df.loc[variable_start_idx:]
-                return eval(
-                    cropped_df["Value"][cropped_df["Key"] == key_name[1]].item()
-                )
-            else:
-                try:
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                except NameError:
-                    df_reset_index = df.reset_index(drop=True)
-                    df_reset_index = df_reset_index[
-                        0 : df_reset_index[df_reset_index["Key"] == key_name].index[0]
-                    ]
-                    for neural_parameter in df_reset_index["Key"].dropna():
-                        if neural_parameter in next(
-                            iter(df["Value"][df["Key"] == key_name])
-                        ):
-                            exec(
-                                "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter,
-                                locals=sys._getframe().f_locals,
-                            )
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                except TypeError:
-                    raise TypeError(
-                        "The syntax %s is not a valid syntax for physiological configuration file or the "
-                        "elements that comprise this syntax are not defined."
-                        % df["Value"][df["Key"] == key_name].item()
-                    )
-
-        except NameError:
-            new_key = (
-                next(iter(df["Value"][df["Key"] == key_name]))
-                .replace("']", "")
-                .split("['")
-            )
-            print(f"new_key = {new_key}")
-            # breakpoint()
-            return self.value_extractor(df, new_key)

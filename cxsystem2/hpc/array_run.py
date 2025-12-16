@@ -147,9 +147,7 @@ class ArrayRun:
             self.spawn_processes(self.cluster_start_idx, self.cluster_step)
 
         elif self._is_running_locally():
-            self.spawn_processes(
-                0, len(self.final_namings) * self.trials_per_config
-            )  # this runs when not in cluster
+            self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
 
     def _save_tmp_anat_phys_to_downloads(self, tmp_folder_path):
         # After ClusterRun call metadata master file has been created earlier, we read it here to get the downloads folder address
@@ -263,8 +261,6 @@ class ArrayRun:
             ]
 
     def _prepare_one_dim_arrun_metadata(self):
-        # since we are running the experiments in one dimension,
-        # initializing the metadata :
         meta_columns = []
         meta_columns.extend(["Dimension-1 Parameter", "Dimension-1 Value", "Full path"])
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
@@ -489,9 +485,7 @@ class ArrayRun:
         variables_to_iterate = [
             template_of_variable.replace("^^^", str(vv)) for vv in variables_to_iterate
         ]
-        for var_idx, var in enumerate(
-            variables_to_iterate
-        ):  # this iteration is unclear, but seems to work
+        for var_idx, var in enumerate(variables_to_iterate):
             if isinstance(var, str):
                 var = var.strip()
             temp_df = original_df.copy()
@@ -565,8 +559,7 @@ class ArrayRun:
 
         def _get_title_and_unique_values(tmp_value_list):
 
-            unique_values_raw = list(set(tmp_value_list))  # Unsorted list of strings
-            # Check for unit stripping
+            unique_values_raw = list(set(tmp_value_list))
             if "*" in unique_values_raw[0]:
                 unique_values_numerical = [
                     nn[: nn.find("*")] for nn in unique_values_raw
@@ -577,18 +570,12 @@ class ArrayRun:
             try:
                 unique_values_sorted = np.sort(
                     np.array([float(nn) for nn in unique_values_numerical])
-                )  # Sorted array of floats
+                )
             except:  # noqa: E722
-                unique_values_sorted = sorted(
-                    unique_values_numerical
-                )  # Sorted array -- allows strings to be arrayed, such as input file names
+                unique_values_sorted = sorted(unique_values_numerical)
 
-            unique_values = [
-                str(nn) for nn in unique_values_sorted
-            ]  # Sorted list of strings
-            title, value, naming = self.filename_generator(
-                df, [idx], ""
-            )  # this is for title only, df can be any df
+            unique_values = [str(nn) for nn in unique_values_sorted]
+            title, value, naming = self.filename_generator(df, [idx], "")
             return title, unique_values
 
         tmp_value_list = []
