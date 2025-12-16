@@ -1,5 +1,11 @@
-# -*- coding: utf-8 -*-
+import sys
 
+# Third-party
+import numpy as np
+import pandas as pd
+
+# from brian2.units import *
+from brian2.units import *  # noqa: F403
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
@@ -10,13 +16,8 @@ under the terms of the GNU General Public License.
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
-import sys
-
-# Third-party
-import numpy as np
-import pandas as pd
-from brian2.units import *
-from numpy import array, nan
+nan = np.nan
+array = np.array
 
 
 class SynapseParser:
@@ -83,14 +84,14 @@ class SynapseParser:
                 "sp_%s_%s"
                 % (output_synapse["pre_group_type"], output_synapse["post_group_type"]),
             )
-        except:
+        except:  # noqa: E722
             pass
 
         try:
             self.calcium_concentration = self.value_extractor(
                 self.physio_config_df, "calcium_concentration"
             )
-        except:
+        except:  # noqa: E722
             self.calcium_concentration = 2.0  # default value that doesn't scale weights
         self._set_calcium_dependency()
 
@@ -100,13 +101,16 @@ class SynapseParser:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]), locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
+                locals=sys._getframe().f_locals,
+            )
         try:
             return eval(key_name)
         except (NameError, TypeError):
             pass
         try:
-            if type(key_name) == list:
+            if isinstance(key_name, list):
                 variable_start_idx = df["Variable"][
                     df["Variable"] == key_name[0]
                 ].index[0]
@@ -341,9 +345,8 @@ class SynapseParser:
             )
             / nS
         )
-        mu_wght = std_wght / 2.0
         self.output_namespace["init_wght"] = f"{std_wght} * nS"
-        # self.output_namespace['init_wght'] = '(%f * rand() + %f) * nS' % (std_wght, mu_wght)
+
         std_delay = (
             self.value_extractor(
                 self.physio_config_df,
@@ -355,9 +358,7 @@ class SynapseParser:
             )
             / ms
         )
-        min_delay = std_delay / 2.0
         self.output_namespace["delay"] = f"{std_delay} * ms"
-        # self. = '(%f * rand() + %f) * ms' % (std_delay, min_delay)
 
     def STDP_with_scaling(self):
         """
@@ -442,7 +443,7 @@ class SynapseParser:
         try:
             mean_wght = eval(self.output_synapse["custom_weight"]) / nS
             print(" ! Using custom weight: %f nS" % mean_wght)
-        except:
+        except:  # noqa: E722
             mean_wght = (
                 self.value_extractor(
                     self.physio_config_df,
@@ -487,7 +488,7 @@ class SynapseParser:
         try:
             mean_wght = eval(self.output_synapse["custom_weight"]) / nS
             print(" ! Using custom weight: %f nS" % mean_wght)
-        except:
+        except:  # noqa: E722
             mean_wght = (
                 self.value_extractor(
                     self.physio_config_df,
@@ -513,8 +514,6 @@ class SynapseParser:
             )
             / ms
         )
-        min_delay = mean_delay / 2.0
-        # self.output_namespace['delay'] = '%f * ms' % (mean_delay) # This has ceased to correctly save connections, scipy.sparse matrix generation cannot accept a skalar. However, the syntax below creates same values
         self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (0, mean_delay)
 
     def Fixed_multiply(self):
@@ -533,7 +532,7 @@ class SynapseParser:
         try:
             mean_wght = eval(self.output_synapse["custom_weight"]) / nS
             print(" ! Using custom weight: %f nS" % mean_wght)
-        except:
+        except:  # noqa: E722
             mean_wght = (
                 self.value_extractor(
                     self.physio_config_df,
@@ -592,7 +591,7 @@ class SynapseParser:
         try:
             mean_wght = eval(self.output_synapse["custom_weight"]) / nS
             print(" ! Using custom weight: %f nS" % mean_wght)
-        except:
+        except:  # noqa: E722
             mean_wght = (
                 self.value_extractor(
                     self.physio_config_df,
@@ -646,11 +645,11 @@ class SynapseParser:
         Facilitating synapse
 
         """
-        # GET weight params
+
         try:
             mean_wght = eval(self.output_synapse["custom_weight"]) / nS
             print(" ! Using custom weight: %f nS" % mean_wght)
-        except:
+        except:  # noqa: E722
             mean_wght = (
                 self.value_extractor(
                     self.physio_config_df,
@@ -756,6 +755,7 @@ class NeuronParser:
             cropped_df = self.physio_config_df.loc[variable_start_idx:]
 
         # "Root variables" extracted so that neuron parameters can refer to variables globals in physio config
+        # Assumes that root variables have NaN in "Key" column
         root_variables = self.physio_config_df[
             self.physio_config_df["Key"].isnull()
         ].dropna(subset=["Variable"])
@@ -835,15 +835,20 @@ class NeuronParser:
         pass
 
     def value_extractor(self, df, key_name):
+        # breakpoint()
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]), locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
+                locals=sys._getframe().f_locals,
+            )
         try:
             return eval(key_name)
         except (NameError, TypeError):
             pass
         try:
-            if type(key_name) == list:
+            if isinstance(key_name, list):
+                # breakpoint()
                 variable_start_idx = df["Variable"][
                     df["Variable"] == key_name[0]
                 ].index[0]
@@ -867,9 +872,7 @@ class NeuronParser:
                 )
             else:
                 try:
-                    return eval(
-                        next(iter(df["Value"][df["Key"] == key_name]))
-                    )  # next(iter()) is equivalent to item() which is depricated
+                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
                 except NameError:
                     df_reset_index = df.reset_index(drop=True)
                     df_reset_index = df_reset_index[
@@ -881,7 +884,8 @@ class NeuronParser:
                         ):
                             exec(
                                 "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter, locals=sys._getframe().f_locals
+                                % neural_parameter,
+                                locals=sys._getframe().f_locals,
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
                 except TypeError:
@@ -897,4 +901,6 @@ class NeuronParser:
                 .replace("']", "")
                 .split("['")
             )
+            print(f"new_key = {new_key}")
+            # breakpoint()
             return self.value_extractor(df, new_key)

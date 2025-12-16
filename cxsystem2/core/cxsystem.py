@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Built-in
 import builtins
 import csv
@@ -20,7 +18,7 @@ import brian2cuda  # noqa: F401
 import numpy as np
 import pandas as pd
 import scipy.sparse as scprs  # noqa: F401
-from brian2.units import *  # noqa: F403
+from brian2.units import Hz, mm, ms, mV, nS, nsiemens, second, siemens, um  # noqa: F401
 
 # Local
 from cxsystem2.core import equation_templates as eqt
@@ -37,6 +35,7 @@ b2.prefs.devices.cuda_standalone.cuda_backend.compute_capability = 8.6
 b2.prefs.devices.cuda_standalone.cuda_backend.detect_cuda = True
 b2.prefs.devices.cuda_standalone.cuda_backend.gpu_id = 0
 nan = np.nan  # necessary to have as top-level variable for the brian2.
+arange = np.arange  # necessary to have as top-level variable for the brian2.
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
@@ -1143,7 +1142,7 @@ class CxSystem:
                     ]["Value"]
                 )
             )
-        except:
+        except ValueError:
             background_rate = None
             background_rate_inhibition = None
 
@@ -1526,7 +1525,7 @@ class CxSystem:
                 )  # The tags in configuration file that are specified for a StateMonitor(), e.g.
                 # in record=True which is specified by [rec]True in configuration file, [rec] is saved in sub_mon_tags
                 if (
-                    not ("[" in sub_mon_arg) and sub_mon_arg != ""
+                    not ("[" in sub_mon_arg) and sub_mon_arg != ""  # noqa: E713
                 ):  # if there is no tag,
                     # it means that the only tag that should be there is record = true
                     sub_mon_arg = sub_mon_arg.split()
@@ -1874,9 +1873,7 @@ class CxSystem:
                         [self.current_values_s, pd.Series(["_a" + str(_post_com_idx)])],
                         ignore_index=True,
                     )
-            if (
-                type(self.current_values_s[0]) != list
-            ):  # type of self.current_values_s[0] would be list in case
+            if not isinstance(self.current_values_s[0], list):
                 # of multiple synaptic targets in soma area
                 self.current_values_s = [self.current_values_s]
         else:
@@ -2268,7 +2265,7 @@ class CxSystem:
             else:
 
                 def exp_distance_function(p_arg=None, spatial_decay="0"):
-                    if p_arg == None or p_arg == "--":
+                    if p_arg is None or p_arg == "--":
                         print(
                             " !  No predefined connection probability, "
                             "using custom connection rule"
@@ -2326,7 +2323,7 @@ class CxSystem:
 
                 if (
                     "_relay_vpm" in self.neurongroups_list[int(current_pre_syn_idx)]
-                    and p_arg == None
+                    and p_arg is None
                 ):
                     spatial_decay = str(1 / (2 * 0.025**2))
 
@@ -2712,17 +2709,21 @@ class CxSystem:
                 self.monitors(mons.split(" "), thread_ng_name)
 
             syn_lines = self.anat_and_sys_conf_df[
-                self.anat_and_sys_conf_df[0].str.startswith("S") == True
+                self.anat_and_sys_conf_df[0].str.startswith("S")
             ]
             input_synaptic_lines = syn_lines[syn_lines[2] == "0"]
-            row_type_lines = (
-                self.anat_and_sys_conf_df.loc[: input_synaptic_lines.index[0]][
-                    0
-                ].str.startswith("row_type")
-                == True
-            )
+            row_type_lines = self.anat_and_sys_conf_df.loc[
+                : input_synaptic_lines.index[0], 0
+            ].str.startswith("row_type")
+
+            # row_type_lines = (
+            #     self.anat_and_sys_conf_df.loc[: input_synaptic_lines.index[0]][
+            #         0
+            #     ].str.startswith("row_type")
+            #     == True
+            # )
             synapse_def_line = self.anat_and_sys_conf_df.loc[
-                row_type_lines[row_type_lines == True].index[-1]
+                row_type_lines[row_type_lines].index[-1]
             ]
             load_conn_idx = synapse_def_line[
                 synapse_def_line == "load_connection"
@@ -2768,7 +2769,6 @@ class CxSystem:
             self.thr.start()
 
         def VPM(self):  # ventral posteromedial (VPM) thalamic nucleus
-            # ns = sys._getframe().f_locals
             spike_times_idx = next(
                 iter(
                     self.current_parameters_s[
@@ -2844,8 +2844,6 @@ class CxSystem:
                 " -  Creating an input based on the central %s neurons "
                 "..." % number_of_neurons
             )
-            spikes_name = "GEN_SP"  # Not used elsewhere in this namespace?
-            time_name = "GEN_TI"
             sg_name = "GEN"
             # If spike times unit is Hz, add period keyword for repetitive firing starting at t=half the period.
             if spike_times_unit == "Hz":

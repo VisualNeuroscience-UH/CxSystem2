@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*-
+# Built-in
+from string import Template
+
+# Third-party
+import brian2 as b2
+
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
 """
@@ -7,12 +12,6 @@ and the full version at the University of Helsinki 2013-2017. The software is di
 under the terms of the GNU General Public License. 
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
-
-# Built-in
-from string import Template
-
-# Third-party
-import brian2 as b2
 
 
 class EquationHelper:

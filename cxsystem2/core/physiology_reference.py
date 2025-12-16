@@ -1,4 +1,18 @@
-# -*- coding: utf-8 -*-
+# Built-in
+import random as rnd
+import sys
+from copy import deepcopy
+
+# Third-party
+import brian2 as b2
+import numpy as np
+from brian2.units import Hz, mm, ms, mV, nS  # noqa: F401
+
+# Local
+from cxsystem2.core import equation_templates as eqt
+from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser
+from cxsystem2.neurodynlib.neuron_models import neuron_factory
+
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
 """
@@ -7,22 +21,8 @@ and the full version at the University of Helsinki 2013-2017. The software is di
 under the terms of the GNU General Public License. 
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
-
-# Built-in
-import random as rnd
-from copy import deepcopy
-import sys
-
-# Third-party
-import brian2 as b2
-import numpy as np
-from brian2.units import *
-from numpy import nan
-
-# Local
-from cxsystem2.core import equation_templates as eqt
-from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser
-from cxsystem2.neurodynlib.neuron_models import neuron_factory
+nan = np.nan
+arange = np.arange
 
 
 class NeuronReference:
@@ -124,7 +124,7 @@ class NeuronReference:
                 self.pc_neuron_model = self.value_extractor(
                     self.physio_config_df, "pc_neuron_model"
                 ).upper()
-            except:
+            except:  # noqa: E722
                 self.pc_neuron_model = self.neuron_model
                 print(
                     " !  No pyramidal cell neuron model defined, using %s"
@@ -135,7 +135,7 @@ class NeuronReference:
                 self.pc_excitation_model = self.value_extractor(
                     self.physio_config_df, "pc_excitation_model"
                 ).upper()
-            except:
+            except:  # noqa: E722
                 self.pc_excitation_model = self.excitation_model
                 print(
                     " !  No pyramidal cell excitation model defined, using %s"
@@ -146,7 +146,7 @@ class NeuronReference:
                 self.pc_inhibition_model = self.value_extractor(
                     self.physio_config_df, "pc_inhibition_model"
                 ).upper()
-            except:
+            except:  # noqa: E722
                 self.pc_inhibition_model = self.inhibition_model
                 print(
                     " !  No pyramidal cell inhibition model defined, using %s"
@@ -160,7 +160,7 @@ class NeuronReference:
                     self.physio_config_df, "ci_neuron_model"
                 ).upper()
                 print(" -  CI neuron model is %s " % self.ci_neuron_model)
-            except:
+            except:  # noqa: E722
                 self.ci_neuron_model = "EIF"
                 print(" !  No CI neuron model defined, using EIF")
 
@@ -168,7 +168,7 @@ class NeuronReference:
                 self.ci_excitation_model = self.value_extractor(
                     self.physio_config_df, "ci_excitation_model"
                 ).upper()
-            except:
+            except:  # noqa: E722
                 self.ci_excitation_model = "SIMPLE_E"
                 print(" !  No CI neuron excitation model defined, using simple")
 
@@ -176,7 +176,7 @@ class NeuronReference:
                 self.ci_inhibition_model = self.value_extractor(
                     self.physio_config_df, "ci_inhibition_model"
                 ).upper()
-            except:
+            except:  # noqa: E722
                 self.ci_inhibition_model = "SIMPLE_I"
                 print(" !  No CI neuron inhibition model defined, using simple")
 
@@ -187,7 +187,7 @@ class NeuronReference:
                     self.physio_config_df, "neuron_model"
                 ).upper()
                 print(" -  Neuron model is %s " % self.neuron_model)
-            except:
+            except:  # noqa: E722
                 self.neuron_model = "EIF"
                 print(" !  No point neuron model defined, using EIF")
 
@@ -195,7 +195,7 @@ class NeuronReference:
                 self.excitation_model = self.value_extractor(
                     self.physio_config_df, "excitation_model"
                 ).upper()
-            except:
+            except:  # noqa: E722
                 self.excitation_model = "SIMPLE_E"
                 print(" !  No point neuron excitation model defined, using simple")
 
@@ -203,7 +203,7 @@ class NeuronReference:
                 self.inhibition_model = self.value_extractor(
                     self.physio_config_df, "inhibition_model"
                 ).upper()
-            except:
+            except:  # noqa: E722
                 self.inhibition_model = "SIMPLE_I"
                 print(" !  No point neuron inhibition model defined, using simple")
 
@@ -214,7 +214,7 @@ class NeuronReference:
             variable_start_idx = self.physio_config_df["Variable"][
                 self.physio_config_df["Variable"] == self.output_neuron["subtype"]
             ].index[0]
-        except:  # falling back to general cell type
+        except:  # noqa: E722 falling back to general cell type
             variable_start_idx = self.physio_config_df["Variable"][
                 self.physio_config_df["Variable"] == self.output_neuron["type"]
             ].index[0]
@@ -810,13 +810,16 @@ class NeuronReference:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
+                locals=sys._getframe().f_locals,
+            )
         try:
             return eval(key_name)
         except (NameError, TypeError):
             pass
         try:
-            if type(key_name) == list:
+            if isinstance(key_name, list):
                 variable_start_idx = df["Variable"][
                     df["Variable"] == key_name[0]
                 ].index[0]
@@ -853,7 +856,8 @@ class NeuronReference:
                         ):
                             exec(
                                 "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter, locals=sys._getframe().f_locals
+                                % neural_parameter,
+                                locals=sys._getframe().f_locals,
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
 
@@ -939,7 +943,7 @@ class SynapseReference:
         self.output_synapse["namespace"] = _name_space.output_namespace
         try:
             self.output_synapse["sparseness"] = _name_space.sparseness
-        except:
+        except:  # noqa: E722
             pass
 
         # <editor-fold desc="Extract model names">
@@ -949,14 +953,14 @@ class SynapseReference:
             self.excitation_model = self.value_extractor(
                 physio_config_df, "excitation_model"
             ).upper()
-        except:
+        except:  # noqa: E722
             self.excitation_model = "SIMPLE_E"
 
         try:
             self.inhibition_model = self.value_extractor(
                 physio_config_df, "inhibition_model"
             ).upper()
-        except:
+        except:  # noqa: E722
             self.inhibition_model = "SIMPLE_I"
 
         # For pyramidal groups
@@ -964,14 +968,14 @@ class SynapseReference:
             self.pc_excitation_model = self.value_extractor(
                 physio_config_df, "pc_excitation_model"
             ).upper()
-        except:
+        except:  # noqa: E722
             self.pc_excitation_model = self.excitation_model
 
         try:
             self.pc_inhibition_model = self.value_extractor(
                 physio_config_df, "pc_inhibition_model"
             ).upper()
-        except:
+        except:  # noqa: E722
             self.pc_inhibition_model = self.inhibition_model
         # </editor-fold>
 
@@ -1335,13 +1339,16 @@ class SynapseReference:
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
         for non_dict_idx in non_dict_indices:
-            exec("%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]), locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
+                locals=sys._getframe().f_locals,
+            )
         try:
             return eval(key_name)
         except (NameError, TypeError):
             pass
         try:
-            if type(key_name) == list:
+            if isinstance(key_name, list):
                 variable_start_idx = df["Variable"][
                     df["Variable"] == key_name[0]
                 ].index[0]
@@ -1378,7 +1385,8 @@ class SynapseReference:
                         ):
                             exec(
                                 "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter, locals=sys._getframe().f_locals
+                                % neural_parameter,
+                                locals=sys._getframe().f_locals,
                             )
                     return eval(next(iter(df["Value"][df["Key"] == key_name])))
 

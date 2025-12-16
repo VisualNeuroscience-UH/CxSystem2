@@ -29,7 +29,7 @@ def _remove_timed_arrays(obj):
 
 
 def write_to_file(save_path, data):
-    if type(save_path) != pl.PosixPath:
+    if not isinstance(save_path, pl.PosixPath):
         save_path = pl.Path(save_path)
     if save_path.suffix == ".gz":
         # Check data dictionary for TimedArray objects and remove them
@@ -47,7 +47,7 @@ def write_to_file(save_path, data):
 
 
 def load_from_file(load_path):
-    if type(load_path) != pl.PosixPath:
+    if not isinstance(load_path, pl.PosixPath):
         load_path = pl.Path(load_path)
     if load_path.suffix == ".gz":
         with open(load_path.as_posix(), "rb") as fb:
@@ -118,19 +118,23 @@ def read_config_file(conf, header=False):
     :param conf:
     :return:
     """
-    if type(conf) == str:
+    if isinstance(conf, str):
         if ".json" in conf.lower():
             converter = file_converter.ConfigConverter(conf)
             data = converter.get_csv()
         else:
             data = pd.read_csv(conf, header=None)
     else:
-        if type(conf) == dict:  # it means we've received json data
+        if isinstance(conf, dict):  # it means we've received json data
             converter = file_converter.ConfigConverter(conf)
             data = converter.get_csv_from_json_data()
-        else:
+        elif isinstance(conf, pd.DataFrame):
             data = conf
-    if header is True and (type(conf) == dict or type(conf) == str):
+        else:
+            raise TypeError(
+                "Configuration file must be a path to csv or json file, a dictionary or a dataframe"
+            )
+    if header is True and (type(conf) == dict or type(conf) == str):  # noqa: E721
         new_header = data.iloc[0]  # grab the first row for the header
         data = data[1:]  # take the data less the header row
         data.columns = new_header  # set the header row as the df header

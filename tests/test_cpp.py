@@ -1,12 +1,5 @@
 # Built-in
 import os
-import sys
-
-# Third-party
-import pytest
-
-[sys.path.append(i) for i in [".", ".."]]
-# Built-in
 import pickle
 import shutil
 import zlib
@@ -14,20 +7,12 @@ from pathlib import Path
 
 import brian2 as b2
 import brian2.units as b2u
-
-# Third-party
 import numpy as np
+import pytest
 from scipy.stats import wasserstein_distance
 
 # Local
 from cxsystem2.core import cxsystem as cx
-
-"""
-This module tests C++ device and array run
-It requires: C++ compiler, 
-
-Simo Vanni 2019
-"""
 
 cwd = os.getcwd()
 path = Path(os.getcwd())

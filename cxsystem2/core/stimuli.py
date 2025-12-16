@@ -1,4 +1,16 @@
-# -*- coding: utf-8 -*-
+# Built-in
+import os
+import shutil
+
+# Third-party
+import brian2 as b2
+import numpy as np
+from brian2.units import ms, second
+from scipy import io
+
+# Local
+from cxsystem2.core.tools import load_from_file, write_to_file
+
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
 """
@@ -7,19 +19,6 @@ and the full version at the University of Helsinki 2013-2017. The software is di
 under the terms of the GNU General Public License. 
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
-
-# Built-in
-import os
-import shutil
-
-# Third-party
-import brian2 as b2
-import numpy as np
-from brian2.units import *
-from scipy import io
-
-# Local
-from cxsystem2.core.tools import load_from_file, write_to_file
 
 
 class Stimuli:
@@ -82,7 +81,7 @@ class Stimuli:
             frameduration = b2.double(_V1_mats["frameduration"])
             # Assuming different stimulus at every frame
             sparse_stimulus = dense_stimulus
-        except:
+        except:  # noqa: E722
             # Assuming frameduration = 15 ms and different stimulus at 60 ms intervals
             soa = 60  # in ms
             stimulus_epoch_duration = 15  # in ms, duration of Burbank whole stimulus
@@ -123,9 +122,8 @@ class Stimuli:
         # inputdt = b2.defaultclock.dt
         spikemons = []
         n0 = len(self.i_patterns[0].T)
-        frames = self.frames
-        factor = self.factor
-        # tmp_group = b2.NeuronGroup(n0, 'rate = frames(t,i)*factor : Hz', threshold='b2.rand()<rate*dt')
+        frames = self.frames  # noqa: F841
+        factor = self.factor  # noqa: F841
         tmp_group = b2.NeuronGroup(
             n0, "rate = frames(t,i)*factor : Hz", threshold="rand()<rate*dt"
         )
