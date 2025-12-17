@@ -6,8 +6,8 @@ from copy import deepcopy
 # Third-party
 import brian2 as b2
 import numpy as np
-from brian2.units import Hz, mm, ms, mV, nS  # noqa: F401
 import pandas as pd
+from brian2.units import *  # noqa: F403
 
 # Local
 from cxsystem2.core import equation_templates as eqt
@@ -187,7 +187,8 @@ class NeuronReference:
                     self.physio_config_df, "neuron_model"
                 ).upper()
                 print(" -  Neuron model is %s " % self.neuron_model)
-            except:  # noqa: E722
+            except:
+                # breakpoint()
                 self.neuron_model = "EIF"
                 print(" !  No point neuron model defined, using EIF")
 
@@ -820,15 +821,9 @@ class NeuronReference:
 
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        for non_dict_idx in non_dict_indices:
-            exec(
-                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
-                locals=sys._getframe().f_locals,
-            )
-        try:
-            return eval(key_name)
-        except (NameError, TypeError):
-            pass
+        idx = df["Variable"][df["Variable"] == key_name].index
+        if idx in non_dict_indices:
+            return df["Value"][idx].values[0].strip("'")
         try:
             if isinstance(key_name, list):
                 variable_start_idx = df["Variable"][
@@ -1349,15 +1344,9 @@ class SynapseReference:
 
     def value_extractor(self, df, key_name):
         non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        for non_dict_idx in non_dict_indices:
-            exec(
-                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
-                locals=sys._getframe().f_locals,
-            )
-        try:
-            return eval(key_name)
-        except (NameError, TypeError):
-            pass
+        idx = df["Variable"][df["Variable"] == key_name].index
+        if idx in non_dict_indices:
+            return df["Value"][idx].values[0].strip("'")
         try:
             if isinstance(key_name, list):
                 variable_start_idx = df["Variable"][
