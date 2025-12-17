@@ -207,7 +207,6 @@ class CxSystem:
         self.array_run_stdout_file = array_run_stdout_file
 
         self.physio_config_df = read_config_file(physiology_config, header=True)
-
         self.physio_config_df = self.physio_config_df.map(
             lambda x: np.nan if str(x)[0] == "#" else x
         )
@@ -217,8 +216,7 @@ class CxSystem:
             lambda x: x.strip() if isinstance(x, str) else x
         )
 
-        # dropping the commented lines :
-        # breakpoint()
+        # removing comment lines from both dataframes
         self.anat_and_sys_conf_df = self.anat_and_sys_conf_df[
             ~self.anat_and_sys_conf_df[0].str.contains("#", na=False)
         ].reset_index(drop=True)
@@ -228,10 +226,11 @@ class CxSystem:
 
         # merging the params lines into one row:
         params_indices = np.where(self.anat_and_sys_conf_df.values == "params")
+
         if params_indices[0].size > 1:
+
             for row_idx in params_indices[0][1:]:
                 number_of_new_columns = len(self.anat_and_sys_conf_df.columns)
-                # number_of_rows = len(self.anat_and_sys_conf_df.index)
                 existing_rows = self.anat_and_sys_conf_df.index
                 new_columns = list(
                     np.arange(number_of_new_columns, number_of_new_columns * 2)
@@ -256,6 +255,7 @@ class CxSystem:
                     .reset_index(drop=True)
                 )
                 self.anat_and_sys_conf_df = new_anat_and_sys_conf_df
+
             for row in reversed(params_indices[0][1:]):
                 self.anat_and_sys_conf_df = self.anat_and_sys_conf_df.drop(
                     row - 1
