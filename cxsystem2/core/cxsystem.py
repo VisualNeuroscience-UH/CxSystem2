@@ -18,7 +18,7 @@ import brian2cuda  # noqa: F401
 import numpy as np
 import pandas as pd
 import scipy.sparse as scprs  # noqa: F401
-from brian2.units import Hz, mm, ms, mV, nS, nsiemens, second, siemens, um  # noqa: F401
+from brian2.units import *  # noqa: F403
 
 # Local
 from cxsystem2.core import equation_templates as eqt
@@ -719,7 +719,7 @@ class CxSystem:
                     .joinpath(self.suffix[1:])
                     .as_posix()
                 )
-        return results
+            return results
 
     def set_runtime_parameters(self):
         if not np.any(self.current_parameters_s.str.contains("runtime")):
