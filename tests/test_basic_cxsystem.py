@@ -283,7 +283,7 @@ def cxsystem_run_fixture():
 
     yield
 
-    # shutil.rmtree(CM.workspace.get_simulation_folder_as_posix())
+    shutil.rmtree(CM.workspace.get_simulation_folder_as_posix())
 
 
 @pytest.fixture(scope="module")
