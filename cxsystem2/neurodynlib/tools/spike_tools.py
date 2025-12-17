@@ -25,7 +25,6 @@ Relevant book chapters:
 # Cambridge University Press, 2014.
 
 
-
 # Built-in
 import math
 
@@ -34,8 +33,7 @@ import brian2 as b2
 import numpy as np
 
 
-def get_spike_time(voltage_monitor,
-                   spike_threshold):
+def get_spike_time(voltage_monitor, spike_threshold):
     """
     Not implemented!
     Detects the spike times in the voltage. Here, the spike time is DEFINED as the value in
@@ -51,9 +49,12 @@ def get_spike_time(voltage_monitor,
     Returns:
         A list of spike times (Quantity)
     """
-    assert isinstance(voltage_monitor, b2.StateMonitor), "voltage_monitor is not of type StateMonitor"
-    assert b2.units.fundamentalunits.have_same_dimensions(spike_threshold, b2.volt),\
-        "spike_threshold must be a voltage. e.g. brian2.mV"
+    assert isinstance(
+        voltage_monitor, b2.StateMonitor
+    ), "voltage_monitor is not of type StateMonitor"
+    assert b2.units.fundamentalunits.have_same_dimensions(
+        spike_threshold, b2.volt
+    ), "spike_threshold must be a voltage. e.g. brian2.mV"
 
     v_above_th = np.asarray(voltage_monitor.v[0] > spike_threshold, dtype=int)
     diffs = np.diff(v_above_th)
@@ -85,12 +86,12 @@ def get_spike_stats(voltage_monitor, spike_threshold):
     nr_of_spikes = len(spike_times)
     # init with nan, compute values only if 2 or more spikes are detected
     mean_isi = np.nan * b2.ms
-    var_isi = np.nan * (b2.ms ** 2)
+    var_isi = np.nan * (b2.ms**2)
     spike_rate = np.nan * b2.Hz
     if nr_of_spikes >= 2:
         mean_isi = np.mean(isi)
         var_isi = np.var(isi)
-        spike_rate = 1. / mean_isi
+        spike_rate = 1.0 / mean_isi
     return nr_of_spikes, spike_times, isi, mean_isi, spike_rate, var_isi
 
 
@@ -106,8 +107,9 @@ def pretty_print_spike_train_stats(voltage_monitor, spike_threshold):
     Returns:
         tuple: (nr_of_spikes, spike_times, isi, mean_isi, spike_rate)
     """
-    nr_of_spikes, spike_times, ISI, mean_isi, spike_freq, var_isi = \
-        get_spike_stats(voltage_monitor, spike_threshold)
+    nr_of_spikes, spike_times, ISI, mean_isi, spike_freq, var_isi = get_spike_stats(
+        voltage_monitor, spike_threshold
+    )
     print("nr of spikes: {}".format(nr_of_spikes))
     print("mean ISI: {}".format(mean_isi))
     print("ISI variance: {}".format(var_isi))
@@ -125,6 +127,7 @@ class PopulationSpikeStats:
     """
     Not implemented! Wraps a few spike-train related properties.
     """
+
     def __init__(self, nr_neurons, nr_spikes, all_ISI, filtered_spike_trains):
         """
 
@@ -171,7 +174,7 @@ class PopulationSpikeStats:
         """
         Mean Inter Spike Interval
         """
-        mean_isi = np.mean(self._all_ISI)*b2.second
+        mean_isi = np.mean(self._all_ISI) * b2.second
         return mean_isi
 
     @property
@@ -179,7 +182,7 @@ class PopulationSpikeStats:
         """
         Standard deviation of the ISI
         """
-        std_isi = np.std(self._all_ISI)*b2.second
+        std_isi = np.std(self._all_ISI) * b2.second
         return std_isi
 
     @property
@@ -195,15 +198,14 @@ class PopulationSpikeStats:
         Coefficient of Variation
         """
         cv = np.nan  # init with nan
-        if self.mean_isi > 0.:
+        if self.mean_isi > 0.0:
             cv = self.std_isi / self.mean_isi
         return cv
 
 
-def filter_spike_trains(spike_trains,
-                        window_t_min=0.*b2.ms,
-                        window_t_max=None,
-                        idx_subset=None):
+def filter_spike_trains(
+    spike_trains, window_t_min=0.0 * b2.ms, window_t_max=None, idx_subset=None
+):
     """
     Not implemented!
     creates a new dictionary neuron_idx=>spike_times where all spike_times are in the
@@ -222,8 +224,7 @@ def filter_spike_trains(spike_trains,
     Returns:
         a filtered copy of spike_trains
     """
-    assert isinstance(spike_trains, dict), \
-        "spike_trains is not of type dict"
+    assert isinstance(spike_trains, dict), "spike_trains is not of type dict"
 
     if idx_subset is None:
         idx_subset = spike_trains.keys()
@@ -232,28 +233,25 @@ def filter_spike_trains(spike_trains,
     for k in idx_subset:
         spike_trains_subset[k] = spike_trains[k].copy()
 
-    nr_neurons = len(idx_subset)
+    # nr_neurons = len(idx_subset)
     filtered_spike_trains = dict()
-    if (window_t_min == 0.*b2.ms) & (window_t_max is None):
-        # print("just copy")
+    if (window_t_min == 0.0 * b2.ms) & (window_t_max is None):
         filtered_spike_trains = spike_trains_subset
-    elif (window_t_max is None):
-        # print("only lower bound")
+    elif window_t_max is None:
         for i in idx_subset:
-            idx = (spike_trains_subset[i] >= window_t_min)
+            idx = spike_trains_subset[i] >= window_t_min
             filtered_spike_trains[i] = spike_trains_subset[i][idx]
     else:
-        # print("lower and upper bound")
         for i in idx_subset:
-            idx = (spike_trains_subset[i] >= window_t_min) & (spike_trains_subset[i] < window_t_max)
+            idx = (spike_trains_subset[i] >= window_t_min) & (
+                spike_trains_subset[i] < window_t_max
+            )
             filtered_spike_trains[i] = spike_trains_subset[i][idx]
 
     return filtered_spike_trains
 
 
-def get_spike_train_stats(spike_monitor,
-                          window_t_min=0.*b2.ms,
-                          window_t_max=None):
+def get_spike_train_stats(spike_monitor, window_t_min=0.0 * b2.ms, window_t_max=None):
     """
     Not implemented!
     Analyses the spike monitor and returns a PopulationSpikeStats instance.
@@ -268,13 +266,16 @@ def get_spike_train_stats(spike_monitor,
     Returns:
         PopulationSpikeStats
     """
-    assert isinstance(spike_monitor, b2.SpikeMonitor), \
-        "spike_monitor is not of type SpikeMonitor"
-    filtered_spike_trains = filter_spike_trains(spike_monitor.spike_trains(), window_t_min, window_t_max)
+    assert isinstance(
+        spike_monitor, b2.SpikeMonitor
+    ), "spike_monitor is not of type SpikeMonitor"
+    filtered_spike_trains = filter_spike_trains(
+        spike_monitor.spike_trains(), window_t_min, window_t_max
+    )
     nr_neurons = len(filtered_spike_trains)
     all_ISI = []
     for i in range(nr_neurons):
-        spike_times = filtered_spike_trains[i]/b2.ms
+        spike_times = filtered_spike_trains[i] / b2.ms
         nr_spikes = len(spike_times)
         if nr_spikes >= 2:
             isi = np.diff(spike_times)
@@ -282,14 +283,14 @@ def get_spike_train_stats(spike_monitor,
             # if maxISI > 400:
             #     print(maxISI)
             all_ISI = np.hstack([all_ISI, isi])
-    all_ISI = all_ISI*b2.ms
-    stats = PopulationSpikeStats(nr_neurons, spike_monitor.num_spikes, all_ISI, filtered_spike_trains)
+    all_ISI = all_ISI * b2.ms
+    stats = PopulationSpikeStats(
+        nr_neurons, spike_monitor.num_spikes, all_ISI, filtered_spike_trains
+    )
     return stats
 
 
-def _spike_train_2_binary_vector(spike_train,
-                                 vector_length,
-                                 discretization_dt):
+def _spike_train_2_binary_vector(spike_train, vector_length, discretization_dt):
     """
     Not implemented!
     Convert the time-stamps of the spike_train into a binary vector of the given length.
@@ -311,24 +312,29 @@ def _spike_train_2_binary_vector(spike_train,
 
 
 def _get_spike_train_power_spectrum(spike_train, delta_t, subtract_mean=False):
-    st = spike_train/b2.ms
+    st = spike_train / b2.ms
     if subtract_mean:
-        data = st-np.mean(st)
+        data = st - np.mean(st)
     else:
         data = st
     N_signal = data.size
-    ps = np.abs(np.fft.fft(data))**2
+    ps = np.abs(np.fft.fft(data)) ** 2
     # normalize
     ps = ps * delta_t / N_signal  # TODO: verify: subtract 1 (N_signal-1)?
     freqs = np.fft.fftfreq(N_signal, delta_t)
-    ps = ps[:(N_signal/2)]
-    freqs = freqs[:(N_signal/2)]
+    ps = ps[: (N_signal / 2)]
+    freqs = freqs[: (N_signal / 2)]
     return ps, freqs
 
 
-def get_averaged_single_neuron_power_spectrum(spike_monitor, sampling_frequency,
-                                              window_t_min, window_t_max,
-                                              nr_neurons_average=100, subtract_mean=False):
+def get_averaged_single_neuron_power_spectrum(
+    spike_monitor,
+    sampling_frequency,
+    window_t_min,
+    window_t_max,
+    nr_neurons_average=100,
+    subtract_mean=False,
+):
     """
     Not implemented!
     averaged power-spectrum of spike trains in the time window [window_t_min, window_t_max).
@@ -350,8 +356,9 @@ def get_averaged_single_neuron_power_spectrum(spike_monitor, sampling_frequency,
         freq, mean_ps, all_ps_dict, mean_firing_rate, mean_firing_freqs_per_neuron
     """
 
-    assert isinstance(spike_monitor, b2.SpikeMonitor), \
-        "spike_monitor is not of type SpikeMonitor"
+    assert isinstance(
+        spike_monitor, b2.SpikeMonitor
+    ), "spike_monitor is not of type SpikeMonitor"
 
     spiketrains = spike_monitor.spike_trains()
     nr_neurons = len(spiketrains)
@@ -367,22 +374,31 @@ def get_averaged_single_neuron_power_spectrum(spike_monitor, sampling_frequency,
         sample_neurons = idxs[:(nr_neurons_average)]
         nr_samples = nr_neurons_average
 
-    sptrs = filter_spike_trains(spike_monitor.spike_trains(), window_t_min, window_t_max, sample_neurons)
+    sptrs = filter_spike_trains(
+        spike_monitor.spike_trains(), window_t_min, window_t_max, sample_neurons
+    )
     time_window_size = window_t_max - window_t_min
-    discretization_dt = 1./sampling_frequency
+    discretization_dt = 1.0 / sampling_frequency
     if window_t_max is None:
         window_t_max = max(spike_monitor.t)
-    vector_length = 1+int(math.ceil(time_window_size/discretization_dt))  # +1: space for rounding issues
+    vector_length = 1 + int(
+        math.ceil(time_window_size / discretization_dt)
+    )  # +1: space for rounding issues
     freq = 0
     spike_count = 0
-    all_ps = np.zeros([nr_samples, vector_length/2], float)
+    all_ps = np.zeros([nr_samples, vector_length / 2], float)
     all_ps_dict = dict()
     mean_firing_freqs_per_neuron = dict()
     for i in range(nr_samples):
         idx = sample_neurons[i]
         vec = _spike_train_2_binary_vector(
-            sptrs[idx]-window_t_min, vector_length, discretization_dt=discretization_dt)
-        ps, freq = _get_spike_train_power_spectrum(vec, discretization_dt, subtract_mean)
+            sptrs[idx] - window_t_min,
+            vector_length,
+            discretization_dt=discretization_dt,
+        )
+        ps, freq = _get_spike_train_power_spectrum(
+            vec, discretization_dt, subtract_mean
+        )
         all_ps[i, :] = ps
         all_ps_dict[idx] = ps
         nr_spikes = len(sptrs[idx])
@@ -398,7 +414,12 @@ def get_averaged_single_neuron_power_spectrum(spike_monitor, sampling_frequency,
 
 
 def get_population_activity_power_spectrum(
-        rate_monitor, delta_f, k_repetitions, T_init=100*b2.ms, subtract_mean_activity=False):
+    rate_monitor,
+    delta_f,
+    k_repetitions,
+    T_init=100 * b2.ms,
+    subtract_mean_activity=False,
+):
     """
     Not implemented!
     Computes the power spectrum of the population activity A(t) (=rate_monitor.rate)
@@ -416,19 +437,21 @@ def get_population_activity_power_spectrum(
     Returns:
         freqs, ps, average_population_rate
     """
-    data = rate_monitor.rate/b2.Hz
+    data = rate_monitor.rate / b2.Hz
     delta_t = rate_monitor.clock.dt
-    f_max = 1./(2. * delta_t)
+    f_max = 1.0 / (2.0 * delta_t)
     N_signal = int(2 * f_max / delta_f)
-    T_signal = N_signal * delta_t
-    N_init = int(T_init/delta_t)
+    # T_signal = N_signal * delta_t
+    N_init = int(T_init / delta_t)
     N_required = k_repetitions * N_signal + N_init
     N_data = len(data)
 
     # print("N_data={}, N_required={}".format(N_data,N_required))
-    if (N_data < N_required):
-        err_msg = "Inconsistent parameters. k_repetitions require {} samples." \
-                  " rate_monitor.rate contains {} samples.".format(N_required, N_data)
+    if N_data < N_required:
+        err_msg = (
+            "Inconsistent parameters. k_repetitions require {} samples."
+            " rate_monitor.rate contains {} samples.".format(N_required, N_data)
+        )
         raise ValueError(err_msg)
     if N_data > N_required:
         # print("drop samples")
@@ -440,12 +463,14 @@ def get_population_activity_power_spectrum(
     if subtract_mean_activity:
         data = data - average_population_rate
     average_population_rate *= b2.Hz
-    data = data.reshape(k_repetitions, N_signal)  # reshape into one row per repetition (k)
-    k_ps = np.abs(np.fft.fft(data))**2
+    data = data.reshape(
+        k_repetitions, N_signal
+    )  # reshape into one row per repetition (k)
+    k_ps = np.abs(np.fft.fft(data)) ** 2
     ps = np.mean(k_ps, 0)
     # normalize
     ps = ps * delta_t / N_signal  # TODO: verify: subtract 1 (N_signal-1)?
     freqs = np.fft.fftfreq(N_signal, delta_t)
-    ps = ps[:(N_signal/2)]
-    freqs = freqs[:(N_signal/2)]
+    ps = ps[: (N_signal / 2)]
+    freqs = freqs[: (N_signal / 2)]
     return freqs, ps, average_population_rate

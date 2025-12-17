@@ -10,8 +10,7 @@ This configuration consists of
 * :ref:`Neuron groups (cell types) <neuron_groups>`
 * :ref:`Connections (pathways) <connections>`
 
-In the browser user interface these are divided into separate tabs, while in the
-csv file interface, they are all located in the same “anatomy configuration file”. This configuration includes 
+In the csv file interface, they are all located in the same “anatomy configuration file”. This configuration includes 
 also :ref:`recording monitors <monitors>` for state variables.
 
 If you are using the csv file interface to construct your model, please start from the anatomy and physiology
@@ -27,7 +26,7 @@ The necessary parameters for running simulations locally are:
 
     :Simulation:  :code:`runtime{int*unit}`: Sets the duration of the simulation, e.g. 200*ms.
 
-        :code:`device{Python,Cython,Cpp,GeNN}`: Sets the device for Brian2 code generation.
+        :code:`device{Python,Cython,Cpp,cuda}`: Sets the device for Brian2 code generation.
 
         :code:`sys_mode{local, expanded}`: The system can be run in two modes: **local** and **expanded** mode. Expanded mode applies distance 
         dependence of connection probabilities.
@@ -73,9 +72,9 @@ If you want to run simulations on a cluster, you will also need to define:
 
         :code:`cluster_number_of_nodes{int}`: Number of nodes to be employed on the HPC server.
 
-        :code:`cluster_address{string}`: Address of the HPC server (e.g. daint.cscs.ch).
+        :code:`cluster_address{string}`: Address of the HPC server.
 
-        :code:`cluster_login_node{string}`: Address of the login node in case there is one (e.g. ela.cscs.ch).
+        :code:`cluster_login_node{string}`: Address of the login node in case there is one.
 
         :code:`cluster_username{string}`: Username on the HPC system.
 

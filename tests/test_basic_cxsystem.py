@@ -1,12 +1,5 @@
 # Built-in
 import os
-import sys
-
-# Third-party
-import pytest
-
-[sys.path.append(i) for i in [".", ".."]]
-# Built-in
 import pickle
 import shutil
 import zlib
@@ -14,22 +7,14 @@ from pathlib import Path
 
 # Third-party
 import brian2
+import brian2.units as b2u
 import numpy as np
-from brian2.units import *
+import pytest
 from scipy.stats import wasserstein_distance
 
 # Local
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core import equation_templates as eqt
-
-"""
-To use this test you need to pip install -U pytest. 
-Note that the -U will upgrade necessary dependencies for pytest.
-
-Run pytest at CxSystem root, such as git repo root.
-
-Simo Vanni 2019
-"""
 
 cwd = os.getcwd()
 path = Path(os.getcwd())
@@ -58,9 +43,9 @@ def test_physiology_config_file_exist():
 
 def test_dataframe_delimiters():
     # Comma is the delimiter in csv and should not remain in dataframe
-    assert not "," in CM.anat_and_sys_conf_df.to_string()
+    assert "," not in CM.anat_and_sys_conf_df.to_string()
     # Windows local settings may save csv with semicolons
-    assert not ";" in CM.anat_and_sys_conf_df.to_string()
+    assert ";" not in CM.anat_and_sys_conf_df.to_string()
 
 
 class TestInit:
@@ -93,8 +78,7 @@ class TestConfigurationExecutor:
         )
 
     def test_set_runtime_parameters(self):
-        """Note, cpp and GeNN devices are not tested"""
-        assert CM.runtime == 200.0 * msecond
+        assert CM.runtime == 200.0 * b2u.msecond
         assert CM.device.lower() == "python"
         assert CM.sys_mode == "local"
 
@@ -105,7 +89,9 @@ class TestConfigurationExecutor:
         assert len(CM.customized_neurons_list[0]["z_positions"]) == 60
         assert len(CM.customized_neurons_list[1]["z_positions"]) == 267
         assert len(CM.customized_neurons_list[2]["z_positions"]) == 109
-        assert type(CM.customized_neurons_list[0]["z_positions"][0]) == np.complex128
+        assert isinstance(
+            CM.customized_neurons_list[0]["z_positions"][0], np.complex128
+        )
         assert len(CM.customized_neurons_list[0].keys()) == 5
         assert len(CM.customized_neurons_list[1].keys()) == 18
         assert len(CM.customized_neurons_list[2].keys()) == 18
@@ -343,15 +329,6 @@ def test_spikecount_10percent_tolerance(cxsystem_run_fixture, capsys, get_spike_
         assert 0.9 <= spike_count_proportion <= 1.1
 
 
-@pytest.mark.xfail(reason="The same spikes not attainable in a distinct run")
-def test_spikecount_strict(cxsystem_run_fixture, get_spike_data):
-    spikes_all, new_spikes_all = get_spike_data
-    keys = list(spikes_all.keys())  # dict_keys is not indexable directly
-    for key in keys:
-        spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
-        assert spike_count_proportion == 1.0
-
-
 def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
@@ -371,7 +348,7 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
     spikes_all, new_spikes_all = get_spike_data
     keys = list(spikes_all.keys())  # dict_keys is not indexable directly
 
-    time_resolution = 0.1 * msecond
+    time_resolution = 0.1 * b2u.msecond
     time_vector_length = 2000
 
     with capsys.disabled():
@@ -416,7 +393,9 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
 
             cumulative_wd += wass_dist
 
-        mean_wd = (time_resolution / msecond) * cumulative_wd / len(all_spiking_neurons)
+        mean_wd = (
+            (time_resolution / b2u.msecond) * cumulative_wd / len(all_spiking_neurons)
+        )
 
         # report mean of these stats
         with capsys.disabled():

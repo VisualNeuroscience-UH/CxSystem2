@@ -14,8 +14,7 @@ CxSystem2 embraces the main goal of Brian -- minimizing development time -- by p
 a simplified interface. While many simple models can be written in pure Brian code, more complex models can get
 hard to manage due to the large number of biological details.
 
-We currently provide two interfaces for constructing networks: a browser-based interface (locally or via the BSP),
-and a file-based interface (json or csv). Before incorporating neuron models into a network,
+We currently provide a file-based interface (json or csv). Before incorporating neuron models into a network,
 the user can explore their behavior using the :ref:`neurodynlib` submodule. Spike output and 3D structure of network simulations can be
 visualized using `ViSimpl <http://gmrv.es/gmrvvis/visimpl/>`_, a visualization tool developed by the
 `GMRV Lab <http://gmrv.es/gmrvvis/>`_.

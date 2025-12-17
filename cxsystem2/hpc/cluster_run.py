@@ -1,14 +1,3 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-__author__ = "Andalibi, V., Hokkanen H., Vanni, S."
-
-"""
-The preliminary version of this software has been developed at Aalto University 2012-2015, 
-and the full version at the University of Helsinki 2013-2017. The software is distributed 
-under the terms of the GNU General Public License. 
-Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
-"""
-
 # Built-in
 import getpass
 import os
@@ -34,6 +23,15 @@ from cxsystem2.core.exceptions import (
     RelativePathError,
 )
 from cxsystem2.core.tools import change_anat_file_header_value, parameter_finder
+
+__author__ = "Andalibi, V., Hokkanen H., Vanni, S."
+
+"""
+The preliminary version of this software has been developed at Aalto University 2012-2015, 
+and the full version at the University of Helsinki 2013-2017. The software is distributed 
+under the terms of the GNU General Public License. 
+Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
+"""
 
 
 class ClusterRun:
@@ -423,7 +421,7 @@ class ClusterRun:
             print(
                 f" -  The git repo is {git_basename}    branch is {git_branch}    commit HEAD hash is {commit_HEAD_hash}"
             )
-            print(f" -  No need to download/install")
+            print(" -  No need to download/install")
         else:
             print(" -  Updating CxSystem2 on cluster")
             print(
@@ -594,7 +592,7 @@ class ClusterDownloader:
                 "squeue -l -u {}".format(self.metadata["cluster_username"]),
                 0,
             ).decode("utf-8")
-            if not self.metadata["cluster_username"] in check_remote:
+            if self.metadata["cluster_username"] not in check_remote:
                 # here it means there is no folder in result folder and therefore all simulations are done
                 # so we copy back the result and remove the files on cluster
 

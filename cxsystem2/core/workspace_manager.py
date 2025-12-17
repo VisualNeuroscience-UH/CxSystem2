@@ -1,4 +1,10 @@
-# -*- coding: utf-8 -*-
+# Built-in
+import os
+from pathlib import Path
+
+# Local
+from cxsystem2.core.tools import load_from_file, write_to_file
+
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
 """
@@ -7,13 +13,6 @@ and the full version at the University of Helsinki 2013-2017. The software is di
 under the terms of the GNU General Public License. 
 Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
-
-# Built-in
-import os
-from pathlib import Path
-
-# Local
-from cxsystem2.core.tools import load_from_file, write_to_file
 
 
 class Workspace:

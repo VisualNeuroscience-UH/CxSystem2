@@ -14,7 +14,6 @@ change the CxSystem2 code e.g. for adding new neuron or synapse types.
    ./developersguide/documentation
    ./developersguide/pypi
    ./developersguide/continuous_integration
-   ./developersguide/browser_user_interface
    ./developersguide/command_line_interface
    ./developersguide/parameters_and_models
 

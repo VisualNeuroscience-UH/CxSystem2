@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cxsystem2"
-version = "2.2.4"
+version = "2.2.7"
 description = "A cerebral cortex simulation framework"
 authors = ["Vafa Andalibi", "Henri Hokkanen", "Simo Vanni <simo.vanni@helsinki.fi>"]
 license = "MIT"
@@ -9,7 +9,7 @@ homepage = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 repository = "https://github.com/VisualNeuroscience-UH/CxSystem2"
 documentation = "https://cxsystem2.readthedocs.io/en/latest/"
 
-include = ["**/csc_taito.job", "tests/**/*.py", "tests/**/*.csv", "tests/**/*.json", "tests/**/*.gz", "cxsystem2/**/*", "cxsystem2/gui/cx_gui/**/*.css", "cxsystem2/gui/cx_gui/**/*.js", "cxsystem2/gui/cx_gui/**/*.html", "cxsystem2/gui/cx_gui/**/*.json"]
+include = ["tests/**/*.py", "tests/**/*.csv", "tests/**/*.json", "tests/**/*.gz", "cxsystem2/**/*", "cxsystem2/gui/cx_gui/**/*.css", "cxsystem2/gui/cx_gui/**/*.js", "cxsystem2/gui/cx_gui/**/*.html", "cxsystem2/gui/cx_gui/**/*.json"]
 exclude = ["**/__pycache__", "**/*.pyc", "**/*.pyo"]
 
 classifiers = [
@@ -29,7 +29,7 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: Unix",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
     "Topic :: Software Development :: Libraries",
@@ -37,52 +37,32 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-brian2 = "^2.7.1"
-brian2genn = "*"
-cffi = "*"
-cycler = "*"
-cython = "*"
-docopt = "*"
-ipython = "*"
-jinja2 = "*"
-kiwisolver = "*"
-markupsafe = "*"
+python = "^3.14"
+
+[tool.poetry.group.compute.dependencies]
+brian2 = "2.10.1"
+brian2cuda = "^1.0b1"
 matplotlib = "*"
-mpmath = "*"
 numpy = "*"
 pandas = "*"
-paramiko = "*"
-ping3 = "*"
-pycparser = "*"
-pynacl = "*"
-pyparsing = "*"
+paramiko = "*" # necessary for cluster run
+ping3 = "*" # necessary for cluster run
 pytest = "*"
-pytest-cov = "*"
-python = "^3.11"
-python-dateutil = "*"
-pytz = "*"
-pyyaml = "*"
-scp = "*"
 scipy = "*"
-sqlparse = "*"
-sympy = "*"
-jupyter = "^1.1.1"
-jupyterlab = "^4.3.6"
-notebook = "^7.3.3"
+scp = "*" # necessary for cluster run
 
-[tool.poetry.group.full]
+[tool.poetry.group.standard]
 optional = true
 
-[tool.poetry.group.full.dependencies]
-asn1crypto = "*"
-django = ">=5.0.9"
-django-extensions = "*"
-django-sslserver = "*"
+[tool.poetry.group.standard.dependencies]
+ipython = "*"
+jupyterlab = "^4.3.6"
+
+[tool.poetry.group.development]
+optional = true
+
+[tool.poetry.group.development.dependencies]
 isort = "*"
-pyopenssl = "*"
-requests = "*"
-six = "*"
-werkzeug = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 wheel = "*"
@@ -96,7 +76,6 @@ cxsystem2 = "cxsystem2.cmd.cxsystem_cmd:main"
 cxconfig = "cxsystem2.cmd.cxconfig_cmd:main"
 cxcluster = "cxsystem2.cmd.cxcluster_cmd:main"
 cxvisualize = "cxsystem2.cmd.cxvisualize_cmd:main"
-cxserver = "cxsystem2.cmd.cxserver_cmd:main"
 cxmetadata = "cxsystem2.cmd.cxmetadata_cmd:main"
 
 [tool.isort]

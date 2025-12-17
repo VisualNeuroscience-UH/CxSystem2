@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-__author__ = "Andalibi, V., Hokkanen H., Vanni, S."
-
-"""
-The preliminary version of this software has been developed at Aalto University 2012-2015, 
-and the full version at the University of Helsinki 2013-2017. The software is distributed 
-under the terms of the GNU General Public License. 
-Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
-"""
-
 # Built-in
 import decimal
 import itertools
@@ -28,6 +18,15 @@ from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import load_from_file, parameter_finder, write_to_file
 from cxsystem2.hpc.cluster_run import ClusterRun
+
+__author__ = "Andalibi, V., Hokkanen H., Vanni, S."
+
+"""
+The preliminary version of this software has been developed at Aalto University 2012-2015, 
+and the full version at the University of Helsinki 2013-2017. The software is distributed 
+under the terms of the GNU General Public License. 
+Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
+"""
 
 
 class ArrayRun:
@@ -66,12 +65,12 @@ class ArrayRun:
         # these two are the original config files containing the array_run info:
         self.anatomy_df = (
             pd.read_csv(anatomy_dataframe, header=None)
-            if type(anatomy_dataframe) == str
+            if isinstance(anatomy_dataframe, str)
             else anatomy_dataframe
         )
         self.physiology_df = (
             pd.read_csv(physiology_dataframe)
-            if type(physiology_dataframe) == str
+            if isinstance(physiology_dataframe, str)
             else physiology_dataframe
         )
 
@@ -148,9 +147,7 @@ class ArrayRun:
             self.spawn_processes(self.cluster_start_idx, self.cluster_step)
 
         elif self._is_running_locally():
-            self.spawn_processes(
-                0, len(self.final_namings) * self.trials_per_config
-            )  # this runs when not in cluster
+            self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
 
     def _save_tmp_anat_phys_to_downloads(self, tmp_folder_path):
         # After ClusterRun call metadata master file has been created earlier, we read it here to get the downloads folder address
@@ -264,8 +261,6 @@ class ArrayRun:
             ]
 
     def _prepare_one_dim_arrun_metadata(self):
-        # since we are running the experiments in one dimension,
-        # initializing the metadata :
         meta_columns = []
         meta_columns.extend(["Dimension-1 Parameter", "Dimension-1 Value", "Full path"])
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
@@ -333,23 +328,7 @@ class ArrayRun:
         np.random.seed(idx)
         tr = idx % self.trials_per_config
         idx = int(idx / self.trials_per_config)
-        device = parameter_finder(self.list_of_anatomy_dfs[idx], "device")
-        if self.number_of_process == 1 and self.benchmark == 1 and device == "Python":
-            # this should be used to clear the cache of weave for benchmarking. otherwise weave will mess it up
-            if sys.platform == "win32":
-                shutil.rmtree(
-                    os.path.join(
-                        os.environ["USERPROFILE"],
-                        "AppData",
-                        "Local",
-                        "Temp",
-                        os.environ["USERNAME"],
-                        "python27_compiled",
-                    )
-                )
-            else:
-                shutil.rmtree(os.path.join(os.environ["HOME"], ".cache/scipy"))
-            print(" -  scipy cache deleted to prevent benchmarking issues.")
+
         print(
             "################### Trial %d/%d started running for "
             "simulation number %d: %s ##########################"
@@ -384,11 +363,12 @@ class ArrayRun:
                 str(self.final_namings).replace("_", ""),
             )
         )
+
         manager = multiprocessing.Manager()
         jobs = []
-        working = manager.Value("i", 0)
+        working = manager.Value("i", 0, lock=True)
         paths = manager.dict()
-        # number_of_runs = len(self.final_messages) * self.trials_per_config
+
         self.final_metadata_df = self.final_metadata_df.loc[
             np.repeat(self.final_metadata_df.index.values, self.trials_per_config)
         ].reset_index(drop=True)
@@ -396,7 +376,6 @@ class ArrayRun:
             " -  The array run is trying to run more than 1000 simulations, this is not allowed unless you"
             " REALLY want it and if you REALLY want it you should know what to do."
         )
-        # while len(jobs) < number_of_runs:
         while len(jobs) < steps_from_start:
             time.sleep(1.5)
             if working.value < self.number_of_process:
@@ -410,20 +389,19 @@ class ArrayRun:
         for j in jobs:
             j.join()
 
+        if len(paths) == 0:
+            raise RuntimeError(
+                "No paths were written by any process. Check your process logic."
+            )
+
         for item in list(paths.keys()):
             self.final_metadata_df.loc[item, "Full path"] = paths[item]
-        write_to_file(
-            os.path.join(
-                os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename
-            ),
-            self.final_metadata_df,
+
+        metadata_path = os.path.join(
+            os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename
         )
-        print(
-            " -  Array run metadata saved at: %s"
-            % os.path.join(
-                os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename
-            )
-        )
+        write_to_file(metadata_path, self.final_metadata_df)
+        print(" -  Array run metadata saved at: %s" % metadata_path)
 
         if self._is_running_locally() is True:
             tmp_folder_path = (
@@ -507,10 +485,8 @@ class ArrayRun:
         variables_to_iterate = [
             template_of_variable.replace("^^^", str(vv)) for vv in variables_to_iterate
         ]
-        for var_idx, var in enumerate(
-            variables_to_iterate
-        ):  # this iteration is unclear, but seems to work
-            if type(var) == str:
+        for var_idx, var in enumerate(variables_to_iterate):
+            if isinstance(var, str):
                 var = var.strip()
             temp_df = original_df.copy()
             temp_df.iloc[
@@ -583,8 +559,7 @@ class ArrayRun:
 
         def _get_title_and_unique_values(tmp_value_list):
 
-            unique_values_raw = list(set(tmp_value_list))  # Unsorted list of strings
-            # Check for unit stripping
+            unique_values_raw = list(set(tmp_value_list))
             if "*" in unique_values_raw[0]:
                 unique_values_numerical = [
                     nn[: nn.find("*")] for nn in unique_values_raw
@@ -595,18 +570,12 @@ class ArrayRun:
             try:
                 unique_values_sorted = np.sort(
                     np.array([float(nn) for nn in unique_values_numerical])
-                )  # Sorted array of floats
-            except:
-                unique_values_sorted = sorted(
-                    unique_values_numerical
-                )  # Sorted array -- allows strings to be arrayed, such as input file names
+                )
+            except:  # noqa: E722
+                unique_values_sorted = sorted(unique_values_numerical)
 
-            unique_values = [
-                str(nn) for nn in unique_values_sorted
-            ]  # Sorted list of strings
-            title, value, naming = self.filename_generator(
-                df, [idx], ""
-            )  # this is for title only, df can be any df
+            unique_values = [str(nn) for nn in unique_values_sorted]
+            title, value, naming = self.filename_generator(df, [idx], "")
             return title, unique_values
 
         tmp_value_list = []
@@ -782,7 +751,7 @@ class ArrayRun:
         arrun_search_result = df[
             df.map(lambda x: True if ("|" in str(x) or "&" in str(x)) else False)
         ]
-        arrays_indices = np.where(arrun_search_result.isnull().values != True)
+        arrays_indices = np.where(~arrun_search_result.isnull().values)
         arrays_indices = [
             (arrays_indices[0][i], arrays_indices[1][i])
             for i in range(len(arrays_indices[0]))
