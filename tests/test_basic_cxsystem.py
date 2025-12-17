@@ -53,7 +53,9 @@ class TestInit:
         assert CM.anat_and_sys_conf_df.shape[1] == 27
 
     def test_number_of_input_arguments(self):
-        assert CM.__init__.__code__.co_argcount == 9, "Number of arguments have changed"
+        assert (
+            CM.__init__.__code__.co_argcount == 10
+        ), "Number of arguments have changed"
 
     def test_input_argument_types(self):
         assert isinstance(CM.timestamp, str)
@@ -281,7 +283,7 @@ def cxsystem_run_fixture():
 
     yield
 
-    shutil.rmtree(CM.workspace.get_simulation_folder_as_posix())
+    # shutil.rmtree(CM.workspace.get_simulation_folder_as_posix())
 
 
 @pytest.fixture(scope="module")
