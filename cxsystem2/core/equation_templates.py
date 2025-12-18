@@ -14,7 +14,7 @@ Copyright 2017 Vafa Andalibi, Henri Hokkanen and Simo Vanni.
 """
 
 
-class EquationHelper:
+class PCEquationHelper:
     """
     Helper class for switching swiftly between neuron/receptor models in CxSystem.
     Currently used only for the pyramidal cell (PC) cell type; point neuron models
@@ -362,10 +362,14 @@ class EquationHelper:
             self.compartment_type = "dendrite"
 
         assert neuron_model in list(
-            EquationHelper.NeuronModels.keys()
+            PCEquationHelper.NeuronModels.keys()
         ), "Neuron model must be defined in NeuronModels"
-        assert exc_model in EquationHelper.ExcModelNames, "Undefined excitation model!"
-        assert inh_model in EquationHelper.InhModelNames, "Undefined inhibition model!"
+        assert (
+            exc_model in PCEquationHelper.ExcModelNames
+        ), "Undefined excitation model!"
+        assert (
+            inh_model in PCEquationHelper.InhModelNames
+        ), "Undefined inhibition model!"
 
         # Add neuron model specific keys&strings to default strings; overlapping definitions will be taken
         # from model specific dict
@@ -375,40 +379,44 @@ class EquationHelper:
                 "dendrite",
             ], "Compartment must be defined (soma or dendrite)"
             if self.compartment_type == "soma":
-                self.neuron_model_strings = dict(EquationHelper.default_soma_strings)
+                self.neuron_model_strings = dict(PCEquationHelper.default_soma_strings)
             else:
                 self.neuron_model_strings = dict(
-                    EquationHelper.default_dendrite_strings
+                    PCEquationHelper.default_dendrite_strings
                 )
 
             self.neuron_model_strings.update(
-                EquationHelper.NeuronModels[neuron_model + "_PC"][self.compartment_type]
+                PCEquationHelper.NeuronModels[neuron_model + "_PC"][
+                    self.compartment_type
+                ]
             )
         else:
-            self.neuron_model_strings = dict(EquationHelper.default_soma_strings)
-            self.neuron_model_strings.update(EquationHelper.NeuronModels[neuron_model])
+            self.neuron_model_strings = dict(PCEquationHelper.default_soma_strings)
+            self.neuron_model_strings.update(
+                PCEquationHelper.NeuronModels[neuron_model]
+            )
 
         # Add synaptic E/I model specific keys&strings to default strings
         # Pyramidal cells are assumed to have alpha synapses (non-zero rise time)
         self.synaptic_excinh_model_strings = dict(
-            EquationHelper.default_synaptic_excinh_strings
+            PCEquationHelper.default_synaptic_excinh_strings
         )
         self.synaptic_excinh_model_strings.update(
-            EquationHelper.SynapticExcInhModels[exc_model]
+            PCEquationHelper.SynapticExcInhModels[exc_model]
         )
         self.synaptic_excinh_model_strings.update(
-            EquationHelper.SynapticExcInhModels[inh_model]
+            PCEquationHelper.SynapticExcInhModels[inh_model]
         )
 
         # Aggregate all compartment-specific variables to a common list
         self.comp_specific_vars = (
-            EquationHelper.CompSpecificVariables[exc_model]
-            + EquationHelper.CompSpecificVariables[inh_model]
+            PCEquationHelper.CompSpecificVariables[exc_model]
+            + PCEquationHelper.CompSpecificVariables[inh_model]
         )
 
     def get_membrane_equation(self, return_string=False):
 
-        membrane_equation = Template(EquationHelper.membrane_eq_template)
+        membrane_equation = Template(PCEquationHelper.membrane_eq_template)
         all_membrane_model_strings = dict(self.neuron_model_strings)
         all_membrane_model_strings.update(self.synaptic_excinh_model_strings)
         if self.custom_strings is not None:
@@ -447,7 +455,7 @@ class EquationHelper:
 
 
 if __name__ == "__main__":
-    x = EquationHelper(
+    x = PCEquationHelper(
         neuron_model="EIF",
         is_pyramidal=True,
         compartment="a0",

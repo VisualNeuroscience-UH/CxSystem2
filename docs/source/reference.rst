@@ -41,10 +41,10 @@ Core module
     .. automethod:: Workspace.__init__
 
 .. module:: cxsystem2.core.equation_templates
-.. autoclass:: EquationHelper
+.. autoclass:: PCEquationHelper
     :members:
 
-    .. automethod:: EquationHelper.__init__
+    .. automethod:: PCEquationHelper.__init__
 
 
 .. module:: cxsystem2.core.stimuli

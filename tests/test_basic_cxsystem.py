@@ -250,8 +250,8 @@ class TestPhysiologyReference:
 class TestEquationHelper:
 
     def test_neuron_model(self):
-        assert len(eqt.EquationHelper.NeuronModels.keys()) == 4
-        assert isinstance(eqt.EquationHelper.NeuronModels["EIF"], dict)
+        assert len(eqt.PCEquationHelper.NeuronModels.keys()) == 4
+        assert isinstance(eqt.PCEquationHelper.NeuronModels["EIF"], dict)
 
     excitation_model = CM.value_extractor(CM.physio_config_df, "excitation_model")
     inhibition_model = CM.value_extractor(CM.physio_config_df, "inhibition_model")
@@ -263,11 +263,11 @@ class TestEquationHelper:
         assert self.inhibition_model == "SIMPLE_I_GABAB"
 
     def test_exc_receptors(self):
-        exc_receptors = eqt.EquationHelper.BackgroundReceptors[self.excitation_model]
+        exc_receptors = eqt.PCEquationHelper.BackgroundReceptors[self.excitation_model]
         assert exc_receptors == ["ge"]
 
     def test_inh_receptors(self):
-        inh_receptors = eqt.EquationHelper.BackgroundReceptors[self.inhibition_model]
+        inh_receptors = eqt.PCEquationHelper.BackgroundReceptors[self.inhibition_model]
         assert inh_receptors == ["gi"]
 
 

@@ -1168,10 +1168,9 @@ class CxSystem:
             except ValueError:
                 flag_bg_calcium_scaling = 0
 
-            # NOTE Hard coded Fixed receptor type to bg input
             bg_synapse = SynapseParser(
                 {
-                    "type": "Fixed",
+                    "type": "Fixed_rand_wght",
                     "pre_group_type": "SS",
                     "post_group_type": neuron_type,
                 },
@@ -1179,7 +1178,7 @@ class CxSystem:
             )
             bg_synapse_inh = SynapseParser(
                 {
-                    "type": "Fixed",
+                    "type": "Fixed_rand_wght",
                     "pre_group_type": "BC",
                     "post_group_type": neuron_type,
                 },
@@ -1245,8 +1244,12 @@ class CxSystem:
                 except ValueError:
                     inhibition_model = "SIMPLE_I"
 
-                exc_receptors = eqt.EquationHelper.BackgroundReceptors[excitation_model]
-                inh_receptors = eqt.EquationHelper.BackgroundReceptors[inhibition_model]
+                exc_receptors = eqt.PCEquationHelper.BackgroundReceptors[
+                    excitation_model
+                ]
+                inh_receptors = eqt.PCEquationHelper.BackgroundReceptors[
+                    inhibition_model
+                ]
 
                 # Background excitation for non-PC neurons
                 # Go through all excitatory receptors (unfortunately different binomial distrib for every receptor)
@@ -1307,10 +1310,10 @@ class CxSystem:
                 except ValueError:
                     pc_inhibition_model = "SIMPLE_I"
 
-                exc_receptors = eqt.EquationHelper.BackgroundReceptors[
+                exc_receptors = eqt.PCEquationHelper.BackgroundReceptors[
                     pc_excitation_model
                 ]
-                inh_receptors = eqt.EquationHelper.BackgroundReceptors[
+                inh_receptors = eqt.PCEquationHelper.BackgroundReceptors[
                     pc_inhibition_model
                 ]
 

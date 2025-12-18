@@ -186,7 +186,7 @@ Connections
 -----------
 
 Connections between unit groups are defined using the following parameters. We currently have the following
-synapse types: *Fixed*, *Depressing* and *Facilitating*. Short-term plasticity (STP) parameters of the
+synapse types: *Fixed_rand_wght*, *Depressing* and *Facilitating*. Short-term plasticity (STP) parameters of the
 depressing and facilitating synapses are defined in the :ref:`Physiology configuration <connection_params>`.
 
     :Connections: :code:`receptor{ge,gi}`: Sets whether the connection is excitatory or inhibitory.

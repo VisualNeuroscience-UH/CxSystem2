@@ -34,10 +34,10 @@ Both excitatory and inhibitory cell sub-groups were fully connected to all the o
      G,0,3200,HH_E,4,--,[Sp]
      G,1,800,HH_I,4,--,[Sp]
      row_type,receptor,pre_syn_idx,post_syn_idx,syn_type,p,n
-     S,ge,0,0,Fixed,0.02,1
-     S,ge,0,1,Fixed,0.02,1
-     S,gi,1,0,Fixed,0.02,1
-     S,gi,1,1,Fixed,0.02,1
+     S,ge,0,0,Fixed_rand_wght,0.02,1
+     S,ge,0,1,Fixed_rand_wght,0.02,1
+     S,gi,1,0,Fixed_rand_wght,0.02,1
+     S,gi,1,1,Fixed_rand_wght,0.02,1
 
 Next, we created a copy of physiological parameters and modified the `HH_E` and `HH_I` neuron parameters, e.g. Vr, El, Vt, etc., according to the COBAHH example. The synaptic weights were also set accordingly. Finally, the essential network parameters, e.g. simulation duration, device, system mode, output folder, was set and the CxSystem was run using the two new csv files. The physiological configuration file for COBAHH example is available in CxSystem Github page. The physiological configuration file is illustrated in the following table:
 

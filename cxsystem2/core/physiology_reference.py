@@ -367,14 +367,14 @@ class NeuronReference:
 
         """
 
-        eq_template_soma = eqt.EquationHelper(
+        eq_template_soma = eqt.PCEquationHelper(
             neuron_model=self.pc_neuron_model,
             is_pyramidal=True,
             compartment="soma",
             exc_model=self.pc_excitation_model,
             inh_model=self.pc_inhibition_model,
         ).get_membrane_equation(return_string=True)
-        eq_template_dend = eqt.EquationHelper(
+        eq_template_dend = eqt.PCEquationHelper(
             neuron_model=self.pc_neuron_model,
             is_pyramidal=True,
             compartment="dend",
@@ -902,7 +902,7 @@ class SynapseReference:
         :param receptor: defines the type of the receptor in the synaptic connection. Currently ge and gi are implemented.
         :param pre_group_idx: The index of the pre-synaptic group.
         :param post_group_idx: The index of the post-synaptic group.
-        :param syn_type: Type of the synaptic connection, currently STDP and Fixed are implemented.
+        :param syn_type: Type of the synaptic connection.
         :param pre_type: Type of the pre-synaptic NeuronGroup.
         :param post_type: Type of the post-synaptic NeuronGroup.
         :param post_comp_name: Name of the target compartment in the cells of the post-synaptic NeuronGroup.
@@ -921,11 +921,9 @@ class SynapseReference:
             [
                 "STDP",
                 "CPlastic",
-                "STDP_with_scaling",
-                "Fixed",
+                "Fixed_rand_wght",
                 "Fixed_const_wght",
                 "Fixed_multiply",
-                "Fixed_calcium",
                 "Depressing",
                 "Facilitating",
             ]
@@ -988,20 +986,20 @@ class SynapseReference:
         # NOW the if-else jungle
         if self.output_synapse["post_group_type"] == "PC":
             if self.output_synapse["receptor"] == "ge":
-                self.true_receptors = eqt.EquationHelper.Receptors[
+                self.true_receptors = eqt.PCEquationHelper.Receptors[
                     self.pc_excitation_model
                 ]
             else:
-                self.true_receptors = eqt.EquationHelper.Receptors[
+                self.true_receptors = eqt.PCEquationHelper.Receptors[
                     self.pc_inhibition_model
                 ]
         else:
             if self.output_synapse["receptor"] == "ge":
-                self.true_receptors = eqt.EquationHelper.Receptors[
+                self.true_receptors = eqt.PCEquationHelper.Receptors[
                     self.excitation_model
                 ]
             else:
-                self.true_receptors = eqt.EquationHelper.Receptors[
+                self.true_receptors = eqt.PCEquationHelper.Receptors[
                     self.inhibition_model
                 ]
 
@@ -1145,69 +1143,9 @@ class SynapseReference:
                     wght = clip(wght + w_plus, 0 * siemens, wght_max)                                                           # hard bounds
                     """
 
-    def STDP_with_scaling(self):
+    def Fixed_rand_wght(self):
         """
-        The method for implementing the STDP synaptic connection.
-
-        """
-        # TODO scaling to all synapses in a cell. Invert for inhibitory synapses. Check hertz for spike monitor,
-        # TODO check scaling factors with simulations.
-        self.output_synapse["equation"] = b2.Equations(
-            """
-            wght0 : siemens
-            dwght/dt = scaling_speed * wght * (ap_target_frequency - spike_sensor)  : siemens (event-driven)
-            dapre/dt = -apre/taupre : siemens (event-driven)
-            dapost/dt = -apost/taupost : siemens (event-driven)
-            dspike_sensor/dt = -spike_sensor/tau_synaptic_scaling : hertz (event-driven)
-            """
-        )
-
-        if self.output_synapse["namespace"]["Apre"] >= 0:
-            self.output_synapse["pre_eq"] = (
-                """
-                        %s+=wght
-                        apre += Apre * wght0 * Cp
-                        wght = clip(wght + apost, 0 * siemens, wght_max)
-                        """
-                % (
-                    self.output_synapse["receptor"]
-                    + self.output_synapse["post_comp_name"]
-                    + "_post"
-                )
-            )
-        else:
-            self.output_synapse["pre_eq"] = (
-                """
-                        %s+=wght
-                        apre += Apre * wght * Cd
-                        wght = clip(wght + apost, 0 * siemens, wght_max)
-                        """
-                % (
-                    self.output_synapse["receptor"]
-                    + self.output_synapse["post_comp_name"]
-                    + "_post"
-                )
-            )
-        if self.output_synapse["namespace"]["Apost"] <= 0:
-            self.output_synapse[
-                "post_eq"
-            ] = """
-                        apost += Apost * wght * Cd
-                        wght = clip(wght + apre, 0 * siemens, wght_max)
-                        spike_sensor += 1 * hertz
-                        """
-        else:
-            self.output_synapse[
-                "post_eq"
-            ] = """
-                        apost += Apost * wght0 * Cp
-                        wght = clip(wght + apre, 0 * siemens, wght_max)
-                        spike_sensor += 1 * hertz
-                        """
-
-    def Fixed(self):
-        """
-        The method for implementing the Fixed synaptic connection.
+        The method for implementing the fixed randomized synaptic connection weights    .
 
         """
 
@@ -1227,7 +1165,7 @@ class SynapseReference:
 
     def Fixed_const_wght(self):
         """
-        The method for implementing the Fixed synaptic connection.
+        The method for implementing one constant weight across all connections.
 
         """
 
@@ -1247,8 +1185,8 @@ class SynapseReference:
 
     def Fixed_multiply(self):
         """
-        The method for implementing the Fixed synaptic connection which is multiplied with factor coming from Anatomy csv.
-
+        The method for implementing the fixed random synaptic connection weights which are multiplied
+        with factor coming from Anatomy csv.
         """
 
         self.output_synapse["equation"] = b2.Equations(
@@ -1265,26 +1203,6 @@ class SynapseReference:
                 true_receptor + str(self.output_synapse["post_comp_name"]) + "_post",
                 str(self.output_synapse["multiply_weight"]),
             )
-            for true_receptor in self.true_receptors
-        ]
-        pre_eq = "".join(pre_eq_lines).rstrip()
-        self.output_synapse["pre_eq"] = pre_eq
-
-    def Fixed_calcium(self):
-        """
-        The method for implementing the Fixed synaptic connection.
-
-        """
-
-        self.output_synapse["equation"] = b2.Equations(
-            """
-            wght:siemens
-            """
-        )
-
-        pre_eq_lines = [
-            "%s += wght\n"
-            % (true_receptor + str(self.output_synapse["post_comp_name"]) + "_post")
             for true_receptor in self.true_receptors
         ]
         pre_eq = "".join(pre_eq_lines).rstrip()

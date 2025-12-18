@@ -37,8 +37,7 @@ void VPM()
 class SynapseReference{
 output_synapse{}
 void STDP()
-void STDP_with_scaling()
-void Fixed()
+void Fixed_rand_wght()
 }
 SynapseReference <-up- N2
 N2 -- CxSystem
@@ -54,8 +53,7 @@ output_namespace{}
 ....
 void _change_calcium()
 void STDP()
-void STDP_with_scaling()
-void Fixed()
+void Fixed_rand_wght()
 }
 class "NeuronParser"{
 
