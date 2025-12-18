@@ -916,7 +916,9 @@ class CxSystem:
                     is generated and put in this variable, the running of which will lead to initialization of current NeuronGroup().
         """
 
-        # <editor-fold desc="...Parameter preprocessing">
+        ###################################################
+        ###            Parameter preprocessing          ###
+        ###################################################
         assert self.sys_mode != "", " -  System mode is not defined."
         _all_columns = [
             "idx",
@@ -1028,9 +1030,10 @@ class CxSystem:
             number_of_neurons = str(round(float(number_of_neurons) * self.scale))
         except AttributeError:
             pass
-        # </editor-fold>
 
-        # <editor-fold desc="...Generation of neuron reference">
+        ###################################################
+        ###        Generation of neuron reference       ###
+        ###################################################
         self.customized_neurons_list.append(
             NeuronReference(
                 idx,
@@ -1126,10 +1129,10 @@ class CxSystem:
             ),
             locals=sys._getframe().f_locals,
         )
-        # </editor-fold>
 
-        # <editor-fold desc="...Poisson-distributed background input">
-        # TODO - Move this out of cxsystem.py & clean up
+        ###################################################
+        ###     Poisson-distributed background input    ###
+        ###################################################
 
         try:
             background_rate = next(
@@ -1376,9 +1379,10 @@ class CxSystem:
                     except AttributeError:
                         print("Error in generating PoissonInput")
 
-        # </editor-fold>
+        ###################################################
+        ###           Loading neuron positions          ###
+        ###################################################
 
-        # <editor-fold desc="...Loading neuron positions">
         if hasattr(self, "imported_connections"):
             # in case the NG index are different.
             # for example a MC_L2 neuron might have had index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
@@ -1425,9 +1429,11 @@ class CxSystem:
         self.workspace.results["number_of_neurons"][_dyn_neurongroup_name] = eval(
             _dyn_neuronnumber_name
         )
-        # </editor-fold>
 
-        # <editor-fold desc="Initialization of neuron group compartment potentials and conductances">
+        ###################################################################################
+        ###   Initialization of neuron group compartment potentials and conductances    ###
+        ###################################################################################
+
         # NeuronGroups() should be initialized with a random vm, ge and gi values.
         # To address this, a 6-line code is generated and put in ng_init variable,
         # the running of which will lead to initialization of current NeuronGroup().
@@ -1453,7 +1459,6 @@ class CxSystem:
                 _dyn_neuron_namespace_name,
             )
             exec(ng_init, locals=sys._getframe().f_locals)
-        # </editor-fold>
 
         if "initial_values" in self.customized_neurons_list[-1].keys():
             exec(

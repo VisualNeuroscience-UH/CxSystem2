@@ -1,6 +1,7 @@
 class ReceptorModel:
-    # <editor-fold desc="SYNAPTIC EXC/INH MODEL COMPONENTS">
-    default_synaptic_excinh_strings = {}
+    ############################################################
+    ###           SYNAPTIC EXC/INH MODEL COMPONENTS          ###
+    ############################################################
 
     ExcModelNames = [
         "SIMPLE_E",
@@ -25,7 +26,9 @@ class ReceptorModel:
 
     SynapticExcInhModels = dict()
 
-    # <editor-fold desc="...NeCo excitation/inhibition models">
+    ############################################################
+    ###           NeCo excitation/inhibition models          ###
+    ############################################################
 
     # Simple synaptic current models
     SynapticExcInhModels["SIMPLE_E"] = {
@@ -117,9 +120,10 @@ class ReceptorModel:
                                                      dg_gabab/dt = -g_gabab/tau_decay_gabab : siemens
                                                   """,
     }
-    # </editor-fold>
 
-    # <editor-fold desc="...Other excitation/inhibition models">
+    ############################################################
+    ###          Other excitation/inhibition models          ###
+    ############################################################
 
     # Single-exponential AMPA+NMDA and GABA-A+GABA-B
     SynapticExcInhModels["AMPA_NMDA"] = {
@@ -161,7 +165,6 @@ class ReceptorModel:
                                                           g_gabab_alpha = (tau_decay_gabab/tau_rise_gabab)**(tau_rise_gabab/(tau_decay_gabab-tau_rise_gabab)) * g_gabab_alpha1 : siemens
                                                           """,
     }
-    # </editor-fold>
 
     # Variables that are compartment-specific; will have compartment name attached to them
     CompSpecificVariables = {
@@ -251,8 +254,6 @@ class ReceptorModel:
         "E_ALPHA_NMDA": ["ge"],
         "I_ALPHA_GABAB": ["gi"],
     }
-
-    # </editor-fold>
 
     def __init__(self, receptor_model):
         self.receptor_model = receptor_model

@@ -29,7 +29,9 @@ class PCEquationHelper:
     $TONIC_EQ
     """
 
-    # <editor-fold desc="NEURON MODEL COMPONENTS">
+    ###################################################
+    ###          Neuron model components            ###
+    ###################################################
     # General strings will be added to all models
     default_soma_strings = {
         "I_TONIC": "+ tonic_current*(1-exp(-t/(50*msecond)))",
@@ -73,9 +75,10 @@ class PCEquationHelper:
         },
         "dendrite": {"I_NEURON_MODEL": "gL*(EL-vm) + I_dendr", "NEURON_MODEL_EQ": ""},
     }
-    # </editor-fold>
 
-    # <editor-fold desc="SYNAPTIC EXC/INH MODEL COMPONENTS">
+    ############################################################
+    ###    Synaptic excitation/inhibition model components   ###
+    ############################################################
     default_synaptic_excinh_strings = {}
 
     ExcModelNames = [
@@ -101,7 +104,9 @@ class PCEquationHelper:
 
     SynapticExcInhModels = dict()
 
-    # <editor-fold desc="...NeCo excitation/inhibition models">
+    ############################################################
+    ###         NeCo excitation/inhibition models            ###
+    ############################################################
 
     # Simple synaptic current models
     SynapticExcInhModels["SIMPLE_E"] = {
@@ -197,9 +202,10 @@ class PCEquationHelper:
                                                      dg_gabab/dt = -g_gabab/tau_decay_gabab : siemens
                                                   """,
     }
-    # </editor-fold>
 
-    # <editor-fold desc="...Other excitation/inhibition models">
+    ############################################################
+    ###          Other excitation/inhibition models          ###
+    ############################################################
 
     # Single-exponential AMPA+NMDA and GABA-A+GABA-B
     SynapticExcInhModels["AMPA_NMDA"] = {
@@ -247,7 +253,6 @@ class PCEquationHelper:
                                                                     * g_gabab_alpha1 : siemens
                                                   """,
     }
-    # </editor-fold>
 
     # Variables that are compartment-specific; will have compartment name attached to them
     CompSpecificVariables = {
@@ -337,8 +342,6 @@ class PCEquationHelper:
         "E_ALPHA_NMDA": ["ge"],
         "I_ALPHA_GABAB": ["gi"],
     }
-
-    # </editor-fold>
 
     def __init__(
         self,

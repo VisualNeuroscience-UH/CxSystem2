@@ -66,7 +66,10 @@ class NeuronReference:
                          positions (both in cortical and visual coordinates).
         """
 
-        # <editor-fold desc="...General neuron model initialization">
+        ############################################################
+        ###        Initialization of general neuron model        ###
+        ############################################################
+
         self.physio_config_df = physio_config_df
         NeuronReference._celltypes = np.array(
             ["PC", "SS", "BC", "MC", "L1i", "VPM", "HH_I", "HH_E", "NDNEURON", "CI"]
@@ -207,9 +210,9 @@ class NeuronReference:
                 self.inhibition_model = "SIMPLE_I"
                 print(" !  No point neuron inhibition model defined, using simple")
 
-        # </editor-fold>
-
-        # <editor-fold desc="...Extracting parameters from physiological config file">
+        ############################################################
+        ### Extracting parameters from physiological config file ###
+        ############################################################
         try:
             variable_start_idx = self.physio_config_df["Variable"][
                 self.physio_config_df["Variable"] == self.output_neuron["subtype"]
@@ -239,9 +242,11 @@ class NeuronReference:
                 variable_start_idx:
             ]
         getattr(self, self.output_neuron["type"])()
-        # </editor-fold>
 
-        # <editor-fold desc="...Creating positions">
+        ############################################################
+        ###                Creating positions                   ###
+        ############################################################
+
         if unit_coords_df_path is not None:
             unit_coords = pd.read_pickle(unit_coords_df_path)
             mask = unit_coords.iloc[:, 0] == "G"
@@ -541,8 +546,6 @@ class NeuronReference:
                 vmself="vm_a0",
                 vmpre="vm",
             )
-
-        # </editor-fold>
 
         self.output_neuron["equation"] += b2.Equations(
             """x : meter
@@ -949,7 +952,10 @@ class SynapseReference:
         except:  # noqa: E722
             pass
 
-        # <editor-fold desc="Extract model names">
+        ############################################################
+        ###                Extract model names                  ###
+        ############################################################
+
         # Just extract everything like in NeuronReference (otherwise many if-elses)
         # For non-pyramidal groups
         try:
@@ -980,7 +986,6 @@ class SynapseReference:
             ).upper()
         except:  # noqa: E722
             self.pc_inhibition_model = self.inhibition_model
-        # </editor-fold>
 
         # NOW the if-else jungle
         if self.output_synapse["post_group_type"] == "PC":
