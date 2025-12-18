@@ -1477,9 +1477,7 @@ class CxSystem:
             pass
 
         # passing remainder of the arguments to monitors() method to take care of the arguments.
-        self.monitors(
-            str(monitors).split(" "), _dyn_neurongroup_name
-        )  # , self.customized_neurons_list[-1]['equation'])
+        self.monitors(str(monitors).split(" "), _dyn_neurongroup_name)
 
     def synapse(self):
         """
