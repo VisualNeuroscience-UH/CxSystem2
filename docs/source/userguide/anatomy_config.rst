@@ -197,7 +197,7 @@ depressing and facilitating synapses are defined in the :ref:`Physiology configu
 
         :code:`syn_type`: Synapse model.
 
-        :code:`p{float<=1}`: Connection probability. For retinocortical or other thalamic connections, use "--". Here, the connection probability will be read from physiology file paramater `sp` for sparseness
+        :code:`p{float<=1}`: Connection probability. 
 
         :code:`n{int}`: Number of synapses per connection.
 

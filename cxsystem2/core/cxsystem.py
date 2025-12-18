@@ -26,7 +26,12 @@ from cxsystem2.core.exceptions import ParameterNotFoundError
 from cxsystem2.core.parameter_parser import SynapseParser
 from cxsystem2.core.physiology_reference import NeuronReference, SynapseReference
 from cxsystem2.core.stimuli import Stimuli
-from cxsystem2.core.tools import load_from_file, parameter_finder, read_config_file
+from cxsystem2.core.tools import (
+    load_from_file,
+    parameter_finder,
+    read_config_file,
+    value_extractor,
+)
 from cxsystem2.core.workspace_manager import Workspace
 
 # Brian2 preferences and settings
@@ -497,54 +502,6 @@ class CxSystem:
                                     ]
                                 ][1]()
                     break
-
-    def value_extractor(self, df, key_name):
-        non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        for non_dict_idx in non_dict_indices:
-            exec(
-                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
-                locals=sys._getframe().f_locals,
-            )
-        try:
-            return eval(key_name, locals=sys._getframe().f_locals)
-        except (NameError, TypeError):
-            pass
-        try:
-            if isinstance(key_name, list):
-                variable_start_idx = df["Variable"][
-                    df["Variable"] == key_name[0]
-                ].index[0]
-                try:
-                    variable_end_idx = (
-                        df["Variable"]
-                        .dropna()
-                        .index.tolist()[
-                            df["Variable"]
-                            .dropna()
-                            .index.tolist()
-                            .index(variable_start_idx)
-                            + 1
-                        ]
-                    )
-                    cropped_df = df.loc[variable_start_idx : variable_end_idx - 1]
-                except IndexError:
-                    cropped_df = df.loc[variable_start_idx:]
-                return eval(
-                    cropped_df["Value"][cropped_df["Key"] == key_name[1]].item()
-                )
-            else:
-                return eval(next(iter(df["Value"][df["Key"] == key_name])))
-        except NameError:
-            new_key = (
-                df["Value"][df["Key"] == key_name].item().replace("']", "").split("['")
-            )
-            return self.value_extractor(df, new_key)
-        except ValueError:
-            raise ValueError(
-                "Parameter %s not found in the configuration file." % key_name
-            )
-        except Exception as e:
-            print(e)
 
     @staticmethod
     def set_default_clock(*args):
@@ -1158,14 +1115,12 @@ class CxSystem:
         if (background_rate is not None) or (background_rate_inhibition is not None):
             # For changing connection weight of background input according to calcium level
             try:
-                ca = self.value_extractor(
-                    self.physio_config_df, "calcium_concentration"
-                )
+                ca = value_extractor(self.physio_config_df, "calcium_concentration")
             except ValueError:
                 ca = 2.0  # default value that doesn't scale connection weights
 
             try:
-                flag_bg_calcium_scaling = self.value_extractor(
+                flag_bg_calcium_scaling = value_extractor(
                     self.physio_config_df, "flag_background_calcium_scaling"
                 )
             except ValueError:
@@ -1189,10 +1144,10 @@ class CxSystem:
             )
 
             if neuron_type in ["L1i", "BC", "MC"]:
-                background_weight = self.value_extractor(
+                background_weight = value_extractor(
                     self.physio_config_df, "background_E_I_weight"
                 )
-                background_weight_inhibition = self.value_extractor(
+                background_weight_inhibition = value_extractor(
                     self.physio_config_df, "background_I_I_weight"
                 )
 
@@ -1211,10 +1166,10 @@ class CxSystem:
                     background_weight_inhibition = repr(background_weight_inhibition)
 
             else:
-                background_weight = self.value_extractor(
+                background_weight = value_extractor(
                     self.physio_config_df, "background_E_E_weight"
                 )
-                background_weight_inhibition = self.value_extractor(
+                background_weight_inhibition = value_extractor(
                     self.physio_config_df, "background_I_E_weight"
                 )
 
@@ -1234,14 +1189,14 @@ class CxSystem:
 
             if neuron_type != "PC":
                 try:
-                    excitation_model = self.value_extractor(
+                    excitation_model = value_extractor(
                         self.physio_config_df, "excitation_model"
                     )
                 except ValueError:
                     excitation_model = "SIMPLE_E"
 
                 try:
-                    inhibition_model = self.value_extractor(
+                    inhibition_model = value_extractor(
                         self.physio_config_df, "inhibition_model"
                     )
                 except ValueError:
@@ -1301,13 +1256,13 @@ class CxSystem:
 
             else:
                 try:
-                    pc_excitation_model = self.value_extractor(
+                    pc_excitation_model = value_extractor(
                         self.physio_config_df, "pc_excitation_model"
                     )
                 except ValueError:
                     pc_excitation_model = "SIMPLE_E"
                 try:
-                    pc_inhibition_model = self.value_extractor(
+                    pc_inhibition_model = value_extractor(
                         self.physio_config_df, "pc_inhibition_model"
                     )
                 except ValueError:
@@ -2090,11 +2045,12 @@ class CxSystem:
 
                 def exp_distance_function(p_arg=None, spatial_decay="0"):
                     if p_arg is None or p_arg == "--":
+                        p_arg = 0.0
+                        # warn about no connection probability set
                         print(
-                            " !  No predefined connection probability, "
-                            "using custom connection rule"
+                            " -  No connection probability 'p' defined for the following synapse. Setting p=0 for synapse %s",
+                            _dyn_syn_name,
                         )
-                        p_arg = self.customized_synapses_list[-1]["sparseness"]
 
                     # spatial_decay is assumed to be in 1/mm. At 1/spatial_decay distance, the connection probability is about 37%
 

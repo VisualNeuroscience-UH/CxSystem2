@@ -88,11 +88,6 @@ cw,cw_in_SS,_weights['w_TC_E-E_connections'],# Connection weight from input grou
 ,cw_L1i_PC,_weights['w_All_other_I-E_connections'],
 ,cw_L1i_L1i,_weights['w_All_I-I_connections'],
 ,,,
-sp,sp_in_SS,0.8,# Scale connection weight probability from input to ss
-,sp_in_PC,0.1125,
-,sp_in_BC,0.1125,
-,sp_in_L1i,0.1125,
-,,,
 ### SYNAPTIC DELAYS ###,,,
 delay,delay_in_SS,3.0*ms,
 ,delay_in_PC,3.0*ms,

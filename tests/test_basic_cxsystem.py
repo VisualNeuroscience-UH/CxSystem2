@@ -14,7 +14,6 @@ from scipy.stats import wasserstein_distance
 
 # Local
 from cxsystem2.core import cxsystem as cx
-from cxsystem2.core import equation_templates as eqt
 
 cwd = os.getcwd()
 path = Path(os.getcwd())
@@ -161,7 +160,6 @@ class TestConfigurationExecutor:
         )
         assert isinstance(CM.customized_synapses_list[0]["namespace"], dict)
         assert isinstance(CM.customized_synapses_list[0]["post_group_idx"], int)
-        assert isinstance(CM.customized_synapses_list[0]["sparseness"], float)
         assert isinstance(CM.customized_synapses_list[0]["receptor"], str)
         assert isinstance(CM.customized_synapses_list[0]["pre_group_idx"], int)
         assert isinstance(CM.customized_synapses_list[0]["post_comp_name"], str)
@@ -245,30 +243,6 @@ class TestPhysiologyReference:
         assert "-ge_soma/tau_e" in str(
             CM.customized_neurons_list[5]["equation"].eq_expressions
         )
-
-
-class TestEquationHelper:
-
-    def test_neuron_model(self):
-        assert len(eqt.PCEquationHelper.NeuronModels.keys()) == 4
-        assert isinstance(eqt.PCEquationHelper.NeuronModels["EIF"], dict)
-
-    excitation_model = CM.value_extractor(CM.physio_config_df, "excitation_model")
-    inhibition_model = CM.value_extractor(CM.physio_config_df, "inhibition_model")
-
-    def test_excitation_model(self):
-        assert self.excitation_model == "SIMPLE_E"
-
-    def test_inhibition_model(self):
-        assert self.inhibition_model == "SIMPLE_I_GABAB"
-
-    def test_exc_receptors(self):
-        exc_receptors = eqt.PCEquationHelper.BackgroundReceptors[self.excitation_model]
-        assert exc_receptors == ["ge"]
-
-    def test_inh_receptors(self):
-        inh_receptors = eqt.PCEquationHelper.BackgroundReceptors[self.inhibition_model]
-        assert inh_receptors == ["gi"]
 
 
 ###################

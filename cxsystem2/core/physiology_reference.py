@@ -1,6 +1,5 @@
 # Built-in
 import random as rnd
-import sys
 from copy import deepcopy
 
 # Third-party
@@ -12,6 +11,7 @@ from brian2.units import *  # noqa: F403
 # Local
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser
+from cxsystem2.core.tools import value_extractor
 from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
@@ -124,7 +124,7 @@ class NeuronReference:
         # For pyramidal groups
         if cell_type == "PC":
             try:
-                self.pc_neuron_model = self.value_extractor(
+                self.pc_neuron_model = value_extractor(
                     self.physio_config_df, "pc_neuron_model"
                 ).upper()
             except:  # noqa: E722
@@ -135,7 +135,7 @@ class NeuronReference:
                 )
 
             try:
-                self.pc_excitation_model = self.value_extractor(
+                self.pc_excitation_model = value_extractor(
                     self.physio_config_df, "pc_excitation_model"
                 ).upper()
             except:  # noqa: E722
@@ -146,7 +146,7 @@ class NeuronReference:
                 )
 
             try:
-                self.pc_inhibition_model = self.value_extractor(
+                self.pc_inhibition_model = value_extractor(
                     self.physio_config_df, "pc_inhibition_model"
                 ).upper()
             except:  # noqa: E722
@@ -159,7 +159,7 @@ class NeuronReference:
         # For other non-pyramidal groups
         elif cell_type == "CI":
             try:
-                self.ci_neuron_model = self.value_extractor(
+                self.ci_neuron_model = value_extractor(
                     self.physio_config_df, "ci_neuron_model"
                 ).upper()
                 print(" -  CI neuron model is %s " % self.ci_neuron_model)
@@ -168,7 +168,7 @@ class NeuronReference:
                 print(" !  No CI neuron model defined, using EIF")
 
             try:
-                self.ci_excitation_model = self.value_extractor(
+                self.ci_excitation_model = value_extractor(
                     self.physio_config_df, "ci_excitation_model"
                 ).upper()
             except:  # noqa: E722
@@ -176,7 +176,7 @@ class NeuronReference:
                 print(" !  No CI neuron excitation model defined, using simple")
 
             try:
-                self.ci_inhibition_model = self.value_extractor(
+                self.ci_inhibition_model = value_extractor(
                     self.physio_config_df, "ci_inhibition_model"
                 ).upper()
             except:  # noqa: E722
@@ -186,7 +186,7 @@ class NeuronReference:
         # For other non-pyramidal groups
         else:
             try:
-                self.neuron_model = self.value_extractor(
+                self.neuron_model = value_extractor(
                     self.physio_config_df, "neuron_model"
                 ).upper()
                 print(" -  Neuron model is %s " % self.neuron_model)
@@ -195,7 +195,7 @@ class NeuronReference:
                 print(" !  No point neuron model defined, using EIF")
 
             try:
-                self.excitation_model = self.value_extractor(
+                self.excitation_model = value_extractor(
                     self.physio_config_df, "excitation_model"
                 ).upper()
             except:  # noqa: E722
@@ -203,7 +203,7 @@ class NeuronReference:
                 print(" !  No point neuron excitation model defined, using simple")
 
             try:
-                self.inhibition_model = self.value_extractor(
+                self.inhibition_model = value_extractor(
                     self.physio_config_df, "inhibition_model"
                 ).upper()
             except:  # noqa: E722
@@ -821,62 +821,6 @@ class NeuronReference:
         """
         self.output_neuron["equation"] = ""
 
-    def value_extractor(self, df, key_name):
-        non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        idx = df["Variable"][df["Variable"] == key_name].index
-        if idx in non_dict_indices:
-            return df["Value"][idx].values[0].strip("'")
-        try:
-            if isinstance(key_name, list):
-                variable_start_idx = df["Variable"][
-                    df["Variable"] == key_name[0]
-                ].index[0]
-                try:
-                    variable_end_idx = (
-                        df["Variable"]
-                        .dropna()
-                        .index.tolist()[
-                            df["Variable"]
-                            .dropna()
-                            .index.tolist()
-                            .index(variable_start_idx)
-                            + 1
-                        ]
-                    )
-                    cropped_df = df.loc[variable_start_idx : variable_end_idx - 1]
-                except IndexError:
-                    cropped_df = df.loc[variable_start_idx:]
-                return eval(
-                    next(iter(cropped_df["Value"][cropped_df["Key"] == key_name[1]]))
-                )
-            else:
-                try:
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                except NameError:
-                    df_reset_index = df.reset_index(drop=True)
-                    df_reset_index = df_reset_index[
-                        0 : df_reset_index[df_reset_index["Key"] == key_name].index[0]
-                    ]
-                    for neural_parameter in df_reset_index["Key"].dropna():
-                        if (
-                            neural_parameter
-                            in df["Value"][df["Key"] == key_name].item()
-                        ):
-                            exec(
-                                "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter,
-                                locals=sys._getframe().f_locals,
-                            )
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-
-        except NameError:
-            new_key = (
-                next(iter(df["Value"][df["Key"] == key_name]))
-                .replace("']", "")
-                .split("['")
-            )
-            return self.value_extractor(df, new_key)
-
 
 class SynapseReference:
     """
@@ -915,7 +859,7 @@ class SynapseReference:
 
         * output_synapse: the main dictionary containing all the data about current customized_synapse_group including: synaptic equations
                           (model, pre, post), type of synapse, type of receptor, index and type of pre- and post-synaptic group, namespace
-                          for the Synapses() object, sparseness, spatial_decay.
+                          for the Synapses() object, spatial_decay.
         * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
 
         """
@@ -947,10 +891,6 @@ class SynapseReference:
         _name_space = SynapseParser(self.output_synapse, physio_config_df)
         self.output_synapse["namespace"] = {}
         self.output_synapse["namespace"] = _name_space.output_namespace
-        try:
-            self.output_synapse["sparseness"] = _name_space.sparseness
-        except:  # noqa: E722
-            pass
 
         ############################################################
         ###                Extract model names                  ###
@@ -959,14 +899,14 @@ class SynapseReference:
         # Just extract everything like in NeuronReference (otherwise many if-elses)
         # For non-pyramidal groups
         try:
-            self.excitation_model = self.value_extractor(
+            self.excitation_model = value_extractor(
                 physio_config_df, "excitation_model"
             ).upper()
         except:  # noqa: E722
             self.excitation_model = "SIMPLE_E"
 
         try:
-            self.inhibition_model = self.value_extractor(
+            self.inhibition_model = value_extractor(
                 physio_config_df, "inhibition_model"
             ).upper()
         except:  # noqa: E722
@@ -974,14 +914,14 @@ class SynapseReference:
 
         # For pyramidal groups
         try:
-            self.pc_excitation_model = self.value_extractor(
+            self.pc_excitation_model = value_extractor(
                 physio_config_df, "pc_excitation_model"
             ).upper()
         except:  # noqa: E722
             self.pc_excitation_model = self.excitation_model
 
         try:
-            self.pc_inhibition_model = self.value_extractor(
+            self.pc_inhibition_model = value_extractor(
                 physio_config_df, "pc_inhibition_model"
             ).upper()
         except:  # noqa: E722
@@ -1263,59 +1203,3 @@ class SynapseReference:
         )
         pre_eq = "".join(pre_eq_lines).strip()
         self.output_synapse["pre_eq"] = pre_eq
-
-    def value_extractor(self, df, key_name):
-        non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        idx = df["Variable"][df["Variable"] == key_name].index
-        if idx in non_dict_indices:
-            return df["Value"][idx].values[0].strip("'")
-        try:
-            if isinstance(key_name, list):
-                variable_start_idx = df["Variable"][
-                    df["Variable"] == key_name[0]
-                ].index[0]
-                try:
-                    variable_end_idx = (
-                        df["Variable"]
-                        .dropna()
-                        .index.tolist()[
-                            df["Variable"]
-                            .dropna()
-                            .index.tolist()
-                            .index(variable_start_idx)
-                            + 1
-                        ]
-                    )
-                    cropped_df = df.loc[variable_start_idx : variable_end_idx - 1]
-                except IndexError:
-                    cropped_df = df.loc[variable_start_idx:]
-                return eval(
-                    next(iter(cropped_df["Value"][cropped_df["Key"] == key_name[1]]))
-                )
-            else:
-                try:
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                except NameError:
-                    df_reset_index = df.reset_index(drop=True)
-                    df_reset_index = df_reset_index[
-                        0 : df_reset_index[df_reset_index["Key"] == key_name].index[0]
-                    ]
-                    for neural_parameter in df_reset_index["Key"].dropna():
-                        if (
-                            neural_parameter
-                            in df["Value"][df["Key"] == key_name].item()
-                        ):
-                            exec(
-                                "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter,
-                                locals=sys._getframe().f_locals,
-                            )
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-
-        except NameError:
-            new_key = (
-                next(iter(df["Value"][df["Key"] == key_name]))
-                .replace("']", "")
-                .split("['")
-            )
-            return self.value_extractor(df, new_key)

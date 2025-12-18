@@ -8,10 +8,15 @@ import zlib
 import numpy as np
 import pandas as pd
 from brian2.input.timedarray import TimedArray
+from brian2.units import *  # noqa: F403
 
 # Local
 from cxsystem2.configuration import config_file_converter as file_converter
 from cxsystem2.core.exceptions import ParameterNotFoundError
+
+# nan = np.nan  # necessary to have as top-level variable for the brian2.
+# arange = np.arange  # necessary to have as top-level variable for the brian2.
+array = np.array  # necessary to have as top-level variable for the brian2.
 
 
 def _remove_timed_arrays(obj):
@@ -137,3 +142,97 @@ def read_config_file(conf, header=False):
         data = data[1:]  # take the data less the header row
         data.columns = new_header  # set the header row as the df header
     return data
+
+
+def value_extractor(df, key_name):
+    """
+    This method parses the physiology configuration dataframe.
+
+    Allowed syntaxes for for key_name:
+    1. Top-level variable name, e.g., "k"
+    2. Second-level key name, e.g., "w_TC_E-I_connections"
+    3. Multiplication of two terms, e.g., "k_I*J_I"
+    4. Dictionary notation for second-level keys, e.g., "_weights['w_TC_E-I_connections']"
+
+    Allowed syntaxes for values in the "Value" column:
+    1. Direct numerical or unit value, e.g., "0.1", "0.1 * second"
+    2. Reference to another top-level variable, e.g., "k"
+    3. Reference to another second-level key, e.g., "w_TC_E-I_connections"
+    4. Multiplication or division of two terms, e.g., "k_I*J_I", "k_I/J_I"
+    5. Dictionary notation for second-level keys, e.g., "_weights['w_TC_E-I_connections']"
+    """
+    key_name = key_name.strip()
+    variables = df["Variable"].dropna()
+    keys = df["Key"].dropna().str.replace(" ", "")
+    value = None
+
+    def check_special_cases(df, value):
+        # Get nested top-level reference value
+        if value in variables.to_list():
+            value = value_extractor(df, value)
+
+        # Get reference value with multiplication mark
+        if "*" in str(value):
+            first_term = value.split("*")[0]
+            second_term = value.split("*")[1]
+            # Handle case where first term is a reference, such as k or k_I
+            if first_term.isalpha() or first_term.split("_")[0].isalpha():
+                first_value = value_extractor(df, first_term)
+                second_value = value_extractor(df, second_term)
+                value = f"({repr(first_value)}) * ({repr(second_value)})"
+            else:
+                # Pass the value as is, such as "0.1 * second"
+                pass
+
+        # Get reference value with division mark
+        if "/" in str(value):
+            first_term = value.split("/")[0]
+            second_term = value.split("/")[1]
+            # Handle case where first term is a reference, such as k or k_I
+            if first_term.isalpha() or first_term.split("_")[0].isalpha():
+                first_value = value_extractor(df, first_term)
+                second_value = value_extractor(df, second_term)
+                value = f"({repr(first_value)}) / ({repr(second_value)})"
+            else:
+                # Pass the value as is, such as "0.1 / second"
+                pass
+
+        # Check for dictionary notation references, such as _weights['w_TC_E-I_connections']
+        if "['" in str(value) or '["' in str(value):
+            first_term = value.split("[")[0]
+            if first_term in variables.to_list():
+                parts = value.split("'")[1].split("'")
+                key = parts[0]
+                if key in keys.to_list():
+                    value = value_extractor(df, key)
+
+        return value
+
+    # Get values for "Variables" column (top-level) variabes
+    if key_name in variables.to_list():
+        index = variables[variables == key_name].index[0]
+        value = df["Value"][index]
+        value = check_special_cases(df, value)
+
+    # Get values for "Key" column (second-level) variabes
+    # Assumes cropped df input (only one top-level variable with multiple second-level keys)
+    elif key_name in keys.to_list():
+        index = keys[keys == key_name].index[0]
+        value = df["Value"][index]
+        value = check_special_cases(df, value)
+
+        # Get second level variables that reference other second level variables
+        if value in keys.to_list():
+            index = keys[keys == value].index[0]
+            value = df["Value"][index]
+            value = check_special_cases(df, value)
+    else:
+        raise ParameterNotFoundError(
+            "Parameter %s not found in the configuration file." % key_name
+        )
+
+    # Strings need to be evaluated to brian unit quantities or numbers
+    if not isinstance(value, (Quantity, float, int, bool)):  # noqa: F405
+        value = eval(value)
+
+    return value

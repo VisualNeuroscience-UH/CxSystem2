@@ -1,9 +1,9 @@
-import sys
-
 # Third-party
 import numpy as np
 import pandas as pd
 from brian2.units import *  # noqa: F403
+
+from cxsystem2.core.tools import value_extractor
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
@@ -78,13 +78,14 @@ class NeuronParser:
 
         for neural_parameter in cropped_df["Key"].dropna():
             try:
-                self.output_namespace[neural_parameter] = self.value_extractor(
+                self.output_namespace[neural_parameter] = value_extractor(
                     cropped_with_root, neural_parameter
                 )
             except (
                 IndexError
             ):  # otherwise neuron parameters cannot be of the form reversal_potentials['E_nmda']
-                self.output_namespace[neural_parameter] = self.value_extractor(
+
+                self.output_namespace[neural_parameter] = value_extractor(
                     physio_config_df, neural_parameter
                 )
 
@@ -149,77 +150,6 @@ class NeuronParser:
     def _HH_I(self, output_neuron):
         pass
 
-    def value_extractor(self, df, key_name):
-        # breakpoint()
-        non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        for non_dict_idx in non_dict_indices:
-            exec(
-                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
-                locals=sys._getframe().f_locals,
-            )
-        try:
-            return eval(key_name)
-        except (NameError, TypeError):
-            pass
-        try:
-            if isinstance(key_name, list):
-                # breakpoint()
-                variable_start_idx = df["Variable"][
-                    df["Variable"] == key_name[0]
-                ].index[0]
-                try:
-                    variable_end_idx = (
-                        df["Variable"]
-                        .dropna()
-                        .index.tolist()[
-                            df["Variable"]
-                            .dropna()
-                            .index.tolist()
-                            .index(variable_start_idx)
-                            + 1
-                        ]
-                    )
-                    cropped_df = df.loc[variable_start_idx : variable_end_idx - 1]
-                except IndexError:
-                    cropped_df = df.loc[variable_start_idx:]
-                return eval(
-                    cropped_df["Value"][cropped_df["Key"] == key_name[1]].item()
-                )
-            else:
-                try:
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                except NameError:
-                    df_reset_index = df.reset_index(drop=True)
-                    df_reset_index = df_reset_index[
-                        0 : df_reset_index[df_reset_index["Key"] == key_name].index[0]
-                    ]
-                    for neural_parameter in df_reset_index["Key"].dropna():
-                        if neural_parameter in next(
-                            iter(df["Value"][df["Key"] == key_name])
-                        ):
-                            exec(
-                                "%s =self.value_extractor(df,neural_parameter)"
-                                % neural_parameter,
-                                locals=sys._getframe().f_locals,
-                            )
-                    return eval(next(iter(df["Value"][df["Key"] == key_name])))
-                except TypeError:
-                    raise TypeError(
-                        "The syntax %s is not a valid syntax for physiological configuration file or the "
-                        "elements that comprise this syntax are not defined."
-                        % df["Value"][df["Key"] == key_name].item()
-                    )
-
-        except NameError:
-            new_key = (
-                next(iter(df["Value"][df["Key"] == key_name]))
-                .replace("']", "")
-                .split("['")
-            )
-            print(f"new_key = {new_key}")
-            # breakpoint()
-            return self.value_extractor(df, new_key)
-
 
 class SynapseParser:
     """
@@ -227,7 +157,6 @@ class SynapseParser:
     There are several reference dictionaries in this class for:
 
     * cw: connection weights for any connection between NeuronGroup()s.
-    * sp: Sparseness values for any connection between NeuronGroup()s.
     * STDP: values for A_pre, A_post, tau_pre and tau_post for any connection between NeuronGroup()s.
 
     There are also some important internal variables:
@@ -254,7 +183,7 @@ class SynapseParser:
         :param output_synapse: This is the dictionary created in NeuronReference() in brian2_obj_namespaces module. This contains all the
                                information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to
                                it. Following values are set after initialization:
-                               Cp, Cd, sparseness, spatial_decay. Other variables are then set based on the type of the synaptic connection.
+                               Cp, Cd, spatial_decay. Other variables are then set based on the type of the synaptic connection.
 
         """
         self.output_synapse = output_synapse
@@ -275,17 +204,9 @@ class SynapseParser:
             " -  Synapse type '%s' is not defined." % output_synapse["type"]
         )
         self.output_namespace = {}
-        try:
-            self.sparseness = self.value_extractor(
-                self.physio_config_df,
-                "sp_%s_%s"
-                % (output_synapse["pre_group_type"], output_synapse["post_group_type"]),
-            )
-        except:  # noqa: E722
-            pass
 
         try:
-            self.calcium_concentration = self.value_extractor(
+            self.calcium_concentration = value_extractor(
                 self.physio_config_df, "calcium_concentration"
             )
         except:  # noqa: E722
@@ -294,56 +215,6 @@ class SynapseParser:
 
         # Set (initial) weights for chosen synapse type
         getattr(SynapseParser, output_synapse["type"])(self)
-
-    def value_extractor(self, df, key_name):
-        non_dict_indices = df["Variable"].dropna()[df["Key"].isnull()].index.tolist()
-        for non_dict_idx in non_dict_indices:
-            exec(
-                "%s=%s" % (df["Variable"][non_dict_idx], df["Value"][non_dict_idx]),
-                locals=sys._getframe().f_locals,
-            )
-        try:
-            return eval(key_name)
-        except (NameError, TypeError):
-            pass
-        try:
-            if isinstance(key_name, list):
-                variable_start_idx = df["Variable"][
-                    df["Variable"] == key_name[0]
-                ].index[0]
-                try:
-                    variable_end_idx = (
-                        df["Variable"]
-                        .dropna()
-                        .index.tolist()[
-                            df["Variable"]
-                            .dropna()
-                            .index.tolist()
-                            .index(variable_start_idx)
-                            + 1
-                        ]
-                    )
-                    cropped_df = df.loc[variable_start_idx : variable_end_idx - 1]
-                except IndexError:
-                    cropped_df = df.loc[variable_start_idx:]
-                return eval(
-                    next(iter(cropped_df["Value"][cropped_df["Key"] == key_name[1]]))
-                )  # next(iter()) is equivalent to item() which is depricated
-            else:
-                # print(f'key_name = {key_name}')
-                return eval(
-                    next(iter(df["Value"][df["Key"] == key_name]))
-                )  # next(iter()) is equivalent to item() which is depricated
-        except NameError:
-            tmp_key = next(
-                iter(df["Value"][df["Key"] == key_name]), "no match"
-            )  # next(iter()) is equivalent to item() which is depricated
-            new_key = tmp_key.replace("']", "").split("['")
-            return self.value_extractor(df, new_key)
-        except ValueError:
-            raise ValueError(
-                "Parameter %s not found in the configuration file." % key_name
-            )
 
     def _set_calcium_dependency(self):
         """
@@ -408,8 +279,8 @@ class SynapseParser:
         inhibitory_groups = ["BC", "MC", "L1i"]
 
         if is_facilitating is False:
-            u_e = self.value_extractor(self.physio_config_df, "U_E")
-            u_i = self.value_extractor(self.physio_config_df, "U_I")
+            u_e = value_extractor(self.physio_config_df, "U_E")
+            u_i = value_extractor(self.physio_config_df, "U_I")
 
             if self.output_synapse["pre_group_type"] in excitatory_groups:
                 self.output_namespace["U"] = self.scale_by_calcium(ca, u_e)
@@ -425,66 +296,36 @@ class SynapseParser:
                 self.output_namespace["U"] = self.scale_by_calcium(ca, u)
 
         else:
-            u_f = self.value_extractor(self.physio_config_df, "U_f")
+            u_f = value_extractor(self.physio_config_df, "U_f")
             self.output_namespace["U_f"] = self.scale_by_calcium(ca, u_f)
 
     def STDP(self):
         """
         Method for assigning the spike timing dependent plasticity parameters to the customized_synapses() object.
 
-        This contains all the information about the synaptic connection. 
+        This contains all the information about the synaptic connection.
         Following values are set in this method: Apre, Apost, tau_pre, tau_post, wght_max, wght0.
         """
-        self.output_namespace["Cp"] = self.value_extractor(self.physio_config_df, "Cp")
-        self.output_namespace["Cd"] = self.value_extractor(self.physio_config_df, "Cd")
-
-        (
-            self.output_namespace["Apre"],
-            self.output_namespace["Apost"],
-            self.output_namespace["taupre"],
-            self.output_namespace["taupost"],
-        ) = self.value_extractor(
-            self.physio_config_df,
-            "stdp_%s_%s"
-            % (
-                self.output_synapse["pre_group_type"],
-                self.output_synapse["post_group_type"]
-                + self.output_synapse["post_comp_name"],
-            ),
+        self.output_namespace["Cp"] = value_extractor(self.physio_config_df, "Cp")
+        self.output_namespace["Cd"] = value_extractor(self.physio_config_df, "Cd")
+        self.output_namespace["Apre"] = value_extractor(self.physio_config_df, "Apre")
+        self.output_namespace["Apost"] = value_extractor(self.physio_config_df, "Apost")
+        self.output_namespace["taupre"] = value_extractor(
+            self.physio_config_df, "taupre"
+        )
+        self.output_namespace["taupost"] = value_extractor(
+            self.physio_config_df, "taupost"
+        )
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "wght_max"
         )
 
-        stdp_max_strength_coefficient = self.value_extractor(
-            self.physio_config_df, "stdp_max_strength_coefficient"
+        self.output_namespace["init_wght"] = value_extractor(
+            self.physio_config_df, "init_wght"
         )
-        self.output_namespace["wght_max"] = (
-            self.value_extractor(
-                self.physio_config_df,
-                "cw_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            * stdp_max_strength_coefficient
-        )
-        std_wght = (
-            self.value_extractor(
-                self.physio_config_df,
-                "cw_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / nS  # noqa: F405
-        )
-        mu_wght = std_wght / 2.0
-        self.output_namespace["init_wght"] = "(%f * rand() + %f) * nS" % (
-            std_wght,
-            mu_wght,
-        )
-        std_delay = (
-            self.value_extractor(
+
+        delay = (
+            value_extractor(
                 self.physio_config_df,
                 "delay_%s_%s"
                 % (
@@ -494,11 +335,7 @@ class SynapseParser:
             )
             / ms  # noqa: F405
         )
-        min_delay = std_delay / 2.0
-        self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (
-            std_delay,
-            min_delay,
-        )
+        self.output_namespace["delay"] = f"{delay} * ms"
 
     def CPlastic(self):
         """
@@ -508,7 +345,7 @@ class SynapseParser:
         Following values are set in this method: Apre, Apost, tau_pre, tau_post, wght_max, wght0.
         """
         self.output_namespace["A_LTD"], self.output_namespace["A_LTP"] = (
-            self.value_extractor(
+            value_extractor(
                 self.physio_config_df,
                 "cplastic_%s_%s"
                 % (
@@ -519,20 +356,20 @@ class SynapseParser:
             )
         )
 
-        self.output_namespace["Theta_low"] = self.value_extractor(
+        self.output_namespace["Theta_low"] = value_extractor(
             self.physio_config_df, "Theta_low"
         )
-        self.output_namespace["v_target"] = self.value_extractor(
+        self.output_namespace["v_target"] = value_extractor(
             self.physio_config_df, "v_target"
         )
-        self.output_namespace["ampa_max_cond"] = self.value_extractor(
+        self.output_namespace["ampa_max_cond"] = value_extractor(
             self.physio_config_df, "ampa_max_cond"
         )
-        self.output_namespace["wght_max"] = self.value_extractor(
+        self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "w_max"
         )
         std_wght = (
-            self.value_extractor(
+            value_extractor(
                 self.physio_config_df,
                 "cw_%s_%s"
                 % (
@@ -545,7 +382,7 @@ class SynapseParser:
         self.output_namespace["init_wght"] = f"{std_wght} * nS"
 
         std_delay = (
-            self.value_extractor(
+            value_extractor(
                 self.physio_config_df,
                 "delay_%s_%s"
                 % (
@@ -567,17 +404,15 @@ class SynapseParser:
             mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
-            mean_wght = (
-                self.value_extractor(
-                    self.physio_config_df,
-                    "cw_%s_%s"
-                    % (
-                        self.output_synapse["pre_group_type"],
-                        self.output_synapse["post_group_type"],
-                    ),
-                )
-                / nS  # noqa: F405
+            mean_wght = value_extractor(
+                self.physio_config_df,
+                "cw_%s_%s"
+                % (
+                    self.output_synapse["pre_group_type"],
+                    self.output_synapse["post_group_type"],
+                ),
             )
+            mean_wght = mean_wght / nS  # noqa: F405
         min_wght = mean_wght / 2.0
         self.output_namespace["init_wght"] = "(%f * rand() + %f) * nS" % (
             mean_wght,
@@ -586,7 +421,7 @@ class SynapseParser:
 
         # Delay
         mean_delay = (
-            self.value_extractor(
+            value_extractor(
                 self.physio_config_df,
                 "delay_%s_%s"
                 % (
@@ -613,7 +448,7 @@ class SynapseParser:
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
-                self.value_extractor(
+                value_extractor(
                     self.physio_config_df,
                     "cw_%s_%s"
                     % (
@@ -627,7 +462,7 @@ class SynapseParser:
 
         # Delay
         mean_delay = (
-            self.value_extractor(
+            value_extractor(
                 self.physio_config_df,
                 "delay_%s_%s"
                 % (
@@ -658,7 +493,7 @@ class SynapseParser:
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
-                self.value_extractor(
+                value_extractor(
                     self.physio_config_df,
                     "cw_%s_%s"
                     % (
@@ -672,7 +507,7 @@ class SynapseParser:
         min_wght = mean_wght / 2.0
 
         # GET time constant
-        tau_d = self.value_extractor(self.physio_config_df, "tau_d")
+        tau_d = value_extractor(self.physio_config_df, "tau_d")
         self.output_namespace["tau_d"] = tau_d
 
         # SET utilization factor & SCALE it wrt calcium level
@@ -689,7 +524,7 @@ class SynapseParser:
         # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
         # NB!! Same applies here, see assignment of init_wght
         mean_delay = (
-            self.value_extractor(
+            value_extractor(
                 self.physio_config_df,
                 "delay_%s_%s"
                 % (
@@ -716,7 +551,7 @@ class SynapseParser:
             print(" ! Using custom weight: %f nS" % mean_wght)
         except:  # noqa: E722
             mean_wght = (
-                self.value_extractor(
+                value_extractor(
                     self.physio_config_df,
                     "cw_%s_%s"
                     % (
@@ -730,9 +565,9 @@ class SynapseParser:
         min_wght = mean_wght / 2.0
 
         # GET time constants
-        tau_fd = self.value_extractor(self.physio_config_df, "tau_fd")
+        tau_fd = value_extractor(self.physio_config_df, "tau_fd")
         self.output_namespace["tau_fd"] = tau_fd
-        tau_f = self.value_extractor(self.physio_config_df, "tau_f")
+        tau_f = value_extractor(self.physio_config_df, "tau_f")
         self.output_namespace["tau_f"] = tau_f
 
         # SET utilization factor & SCALE it wrt calcium level
@@ -751,7 +586,7 @@ class SynapseParser:
         # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
         # NB!! Same applies here, see assignment of init_wght
         mean_delay = (
-            self.value_extractor(
+            value_extractor(
                 self.physio_config_df,
                 "delay_%s_%s"
                 % (
