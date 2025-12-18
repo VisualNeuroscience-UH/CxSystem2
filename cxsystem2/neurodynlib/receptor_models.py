@@ -1,4 +1,8 @@
 class ReceptorModel:
+    """
+    Receptor models are added to neuron unit membrane equations.
+    """
+
     ############################################################
     ###           SYNAPTIC EXC/INH MODEL COMPONENTS          ###
     ############################################################
