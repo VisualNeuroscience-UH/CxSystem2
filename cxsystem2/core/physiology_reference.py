@@ -187,8 +187,7 @@ class NeuronReference:
                     self.physio_config_df, "neuron_model"
                 ).upper()
                 print(" -  Neuron model is %s " % self.neuron_model)
-            except:
-                # breakpoint()
+            except:  # noqa: E722
                 self.neuron_model = "EIF"
                 print(" !  No point neuron model defined, using EIF")
 
@@ -279,8 +278,8 @@ class NeuronReference:
     def _get_w_positions(self, n, layout, general_grid_radius, min_distance):
 
         # w position = position in cortex, in millimeters
-        r = general_grid_radius / mm
-        possible_pos_idx = arange(-r, r, min_distance / mm)
+        r = general_grid_radius / mm  # noqa: F405
+        possible_pos_idx = arange(-r, r, min_distance / mm)  # noqa: F405
         _positions = []
         if layout == "fixed_grid":
             _positions = [

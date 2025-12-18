@@ -732,7 +732,7 @@ class CxSystem:
             print(
                 " -  Runtime duration is not defined in the configuration file. The default runtime duration is 500*ms"
             )
-            self.runtime = 500 * ms
+            self.runtime = 500 * ms  # noqa: F405
 
         if not np.any(self.current_parameters_s.str.contains("device")):
             print(
@@ -2053,7 +2053,7 @@ class CxSystem:
                             / int(self.imported_connections[_syn_ref_name]["n"]),
                             int(self.imported_connections[_syn_ref_name]["n"]),
                         )
-                        * siemens
+                        * siemens  # noqa: F405
                     )
                     # Load delays. The if statement is for files created before 15.4.2021, when delays were not saved yet / SV
                     if "delay" in self.imported_connections[_syn_ref_name].keys():
@@ -2063,7 +2063,7 @@ class CxSystem:
                                 / int(self.imported_connections[_syn_ref_name]["n"]),
                                 int(self.imported_connections[_syn_ref_name]["n"]),
                             )
-                            * second
+                            * second  # noqa: F405
                         )
                     _load_str = "Connections loaded from "
                 except ValueError:
@@ -2832,7 +2832,7 @@ class CxSystem:
                 ), "More than one value for unit 'Hz', confused, aborting..."
                 # period must be integer multiple of dt
                 period_init = 1 / b2.asarray(spike_times_list)
-                dt_unitless = b2.defaultclock.dt / second
+                dt_unitless = b2.defaultclock.dt / second  # noqa: F405
                 if np.mod(period_init, (dt_unitless)) != 0:
                     period = dt_unitless * round(period_init / dt_unitless)
                 else:
@@ -2848,7 +2848,7 @@ class CxSystem:
                 )
             else:
                 assert b2.units.is_dimensionless(
-                    eval(spike_times_unit) / second
+                    eval(spike_times_unit) / second  # noqa: F405
                 ), "Unknown unit, should be second, ms etc, or Hz"
                 period_str = "GEN_PE = 0*second"  # default
                 # running the syntax for period of the input neuron group
