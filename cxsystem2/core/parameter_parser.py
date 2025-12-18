@@ -228,7 +228,7 @@ class SynapseParser:
 
     * cw: connection weights for any connection between NeuronGroup()s.
     * sp: Sparseness values for any connection between NeuronGroup()s.
-    * STDP: values for A_pre, A_post, Tau_pre and Tau_post for any connection between NeuronGroup()s.
+    * STDP: values for A_pre, A_post, tau_pre and tau_post for any connection between NeuronGroup()s.
     * dist: distribution of the neurons for connection between NeuronGroup()s.
 
     There are also some important internal variables:
@@ -434,7 +434,7 @@ class SynapseParser:
         The STDP method for assigning the STDP parameters to the customized_synapses() object.
 
         This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
-        Following STDP values are set in this method: Apre, Apost, Tau_pre, Tau_post, wght_max, wght0.
+        Following STDP values are set in this method: Apre, Apost, tau_pre, tau_post, wght_max, wght0.
         """
         self.output_namespace["Cp"] = self.value_extractor(self.physio_config_df, "Cp")
         self.output_namespace["Cd"] = self.value_extractor(self.physio_config_df, "Cd")
@@ -506,7 +506,7 @@ class SynapseParser:
         The CPlastic method for assigning the parameters to the customized_synapses() object.
 
         This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
-        Following values are set in this method: Apre, Apost, Tau_pre, Tau_post, wght_max, wght0.
+        Following values are set in this method: Apre, Apost, tau_pre, tau_post, wght_max, wght0.
         """
         self.output_namespace["A_LTD"], self.output_namespace["A_LTP"] = (
             self.value_extractor(
