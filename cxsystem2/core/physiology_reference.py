@@ -997,52 +997,29 @@ class SynapseReference:
         self.output_synapse["equation"] = b2.Equations(
             """
             wght : siemens
-            wght0 : siemens
-            dapre/dt = -apre/taupre : siemens (event-driven)
-            dapost/dt = -apost/taupost : siemens (event-driven)
+            dapre/dt = -apre/taupre : siemens (event-driven) # r1 or x_moving_average_plus
+            dapost/dt = -apost/taupost : siemens (event-driven) # o1 or y_moving_average_minus
             """
         )
 
-        if self.output_synapse["namespace"]["Apre"] >= 0:
-            self.output_synapse["pre_eq"] = (
-                """
-                        %s+=wght
-                        apre += Apre * wght0 * Cp
-                        wght = clip(wght + apost, 0 * siemens, wght_max)
-                        """
-                % (
-                    self.output_synapse["receptor"]
-                    + self.output_synapse["post_comp_name"]
-                    + "_post"
-                )
+        self.output_synapse["pre_eq"] = (
+            """
+            %s+=wght
+            apre += Apre
+            wght =- eta_ltd * apost
+            """
+            % (
+                self.output_synapse["receptor"]
+                + self.output_synapse["post_comp_name"]
+                + "_post"
             )
-        else:
-            self.output_synapse["pre_eq"] = (
-                """
-                        %s+=wght
-                        apre += Apre * wght * Cd
-                        wght = clip(wght + apost, 0* siemens, wght_max)
-                        """
-                % (
-                    self.output_synapse["receptor"]
-                    + self.output_synapse["post_comp_name"]
-                    + "_post"
-                )
-            )
-        if self.output_synapse["namespace"]["Apost"] <= 0:
-            self.output_synapse[
-                "post_eq"
-            ] = """
-                        apost += Apost * wght * Cd
-                        wght = clip(wght + apre, 0* siemens, wght_max)
-                        """
-        else:
-            self.output_synapse[
-                "post_eq"
-            ] = """
-                        apost += Apost * wght0 * Cp
-                        wght = clip(wght + apre, 0* siemens, wght_max)
-                        """
+        )
+        self.output_synapse[
+            "post_eq"
+        ] = """
+            apost += Apost
+            wght =+ eta_ltp * apre
+            """
 
     def CPlastic(self):
         """

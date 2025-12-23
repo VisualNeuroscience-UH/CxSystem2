@@ -1420,9 +1420,9 @@ class CxSystem:
                 locals=sys._getframe().f_locals,
             )
 
-        print(
-            f"\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron model is:\n{eval(_dyn_neuron_eq_name)}\n"
-        )
+        # print(
+        #     f"\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron model is:\n{eval(_dyn_neuron_eq_name)}\n"
+        # )
 
         setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
         try:
@@ -2135,14 +2135,6 @@ class CxSystem:
                     "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name),
                     locals=sys._getframe().f_locals,
                 )
-
-                # set the weights for STDP connections
-                if syn_type == "STDP":
-                    exec(
-                        "%s.wght0=%s['init_wght']"
-                        % (_dyn_syn_name, _dyn_syn_namespace_name),
-                        locals=sys._getframe().f_locals,
-                    )
 
             if self.device == "python" and eval("sum(%s.wght)==0" % _dyn_syn_name):
                 print("WARNING: Synapses %s set to zero weight!" % _dyn_syn_name)

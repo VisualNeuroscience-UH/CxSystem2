@@ -397,10 +397,14 @@ class SynapseParser:
         Method for assigning the spike timing dependent plasticity parameters to the customized_synapses() object.
 
         This contains all the information about the synaptic connection.
-        Following values are set in this method: Apre, Apost, tau_pre, tau_post, wght_max, wght0.
+        Following values are set in this method: eta_ltp, eta_ltd, Apre, Apost, tau_pre, tau_post, wght_max.
         """
-        self.output_namespace["Cp"] = value_extractor(self.physio_config_df, "Cp")
-        self.output_namespace["Cd"] = value_extractor(self.physio_config_df, "Cd")
+        self.output_namespace["eta_ltp"] = value_extractor(
+            self.physio_config_df, "eta_ltp"
+        )
+        self.output_namespace["eta_ltd"] = value_extractor(
+            self.physio_config_df, "eta_ltd"
+        )
         self.output_namespace["Apre"] = value_extractor(self.physio_config_df, "Apre")
         self.output_namespace["Apost"] = value_extractor(self.physio_config_df, "Apost")
         self.output_namespace["taupre"] = value_extractor(
