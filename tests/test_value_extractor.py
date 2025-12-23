@@ -3,7 +3,7 @@ import pytest
 from brian2.units import *  # noqa: F403
 
 from cxsystem2.core.exceptions import ParameterNotFoundError
-from cxsystem2.core.tools import value_extractor
+from cxsystem2.core.parameter_parser import value_extractor
 
 
 # Sample dataframe for testing

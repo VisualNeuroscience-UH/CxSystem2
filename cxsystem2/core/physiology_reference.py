@@ -10,8 +10,7 @@ from brian2.units import *  # noqa: F403
 
 # Local
 from cxsystem2.core import equation_templates as eqt
-from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser
-from cxsystem2.core.tools import value_extractor
+from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser, value_extractor
 from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."

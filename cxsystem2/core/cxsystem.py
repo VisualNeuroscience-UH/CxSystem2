@@ -23,14 +23,13 @@ from brian2.units import *  # noqa: F403
 # Local
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.exceptions import ParameterNotFoundError
-from cxsystem2.core.parameter_parser import SynapseParser
+from cxsystem2.core.parameter_parser import SynapseParser, value_extractor
 from cxsystem2.core.physiology_reference import NeuronReference, SynapseReference
 from cxsystem2.core.stimuli import Stimuli
 from cxsystem2.core.tools import (
     load_from_file,
     parameter_finder,
     read_config_file,
-    value_extractor,
 )
 from cxsystem2.core.workspace_manager import Workspace
 
