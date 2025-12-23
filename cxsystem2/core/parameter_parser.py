@@ -250,15 +250,6 @@ class SynapseParser:
 
     * cw: connection weights for any connection between NeuronGroup()s.
     * STDP: values for A_pre, A_post, tau_pre and tau_post for any connection between NeuronGroup()s.
-
-    There are also some important internal variables:
-
-    * Cp: Synaptic potentiation coefficient according to van Rossum J Neurosci 2000
-    * Cd: Synaptic depression coefficient according to van Rossum J Neurosci 2000
-    * stdp_Nsweeps: 60 in papers one does multiple trials to reach +-50% change in synapse strength. A-coefficient will be divided by this number
-    * stdp_max_strength_coefficient: This value is to avoid runaway plasticity.
-    * conn_prob_gain: This is used for compensation of small number of neurons and thus incoming synapses
-
     """
 
     # For _change_calcium()
@@ -274,9 +265,7 @@ class SynapseParser:
 
         :param output_synapse: This is the dictionary created in NeuronReference() in brian2_obj_namespaces module. This contains all the
                                information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to
-                               it. Following values are set after initialization:
-                               Cp, Cd, spatial_decay. Other variables are then set based on the type of the synaptic connection.
-
+                               it.
         """
 
         self.output_synapse = output_synapse
@@ -285,6 +274,8 @@ class SynapseParser:
         SynapseParser.type_ref = np.array(
             [
                 "STDP",
+                "Vogels",
+                "deBrito",
                 "CPlastic",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
@@ -419,6 +410,99 @@ class SynapseParser:
 
         self.output_namespace["init_wght"] = value_extractor(
             self.physio_config_df, "init_wght"
+        )
+
+        delay = (
+            value_extractor(
+                self.physio_config_df,
+                "delay_%s_%s"
+                % (
+                    self.output_synapse["pre_group_type"],
+                    self.output_synapse["post_group_type"],
+                ),
+            )
+            / ms  # noqa: F405
+        )
+        self.output_namespace["delay"] = f"{delay} * ms"
+
+    def Vogels(self):
+        """
+        Method for assigning the plasticity from Vogels_2011_Science parameters to the customized_synapses() object.
+        """
+        self.output_namespace["eta"] = value_extractor(self.physio_config_df, "vog_eta")
+        self.output_namespace["Apre"] = value_extractor(
+            self.physio_config_df, "vog_Apre"
+        )
+        self.output_namespace["Apost"] = value_extractor(
+            self.physio_config_df, "vog_Apost"
+        )
+        self.output_namespace["taupre"] = value_extractor(
+            self.physio_config_df, "vog_taupre"
+        )
+        self.output_namespace["taupost"] = value_extractor(
+            self.physio_config_df, "vog_taupost"
+        )
+
+        self.output_namespace["init_wght"] = value_extractor(
+            self.physio_config_df, "vog_init_wght"
+        )
+
+        _alpha = value_extractor(self.physio_config_df, "vog_alpha")
+        self.output_namespace["alpha"] = (
+            _alpha * self.output_namespace["taupre"] * 2 * siemens  # noqa: F405
+        )
+
+        delay = (
+            value_extractor(
+                self.physio_config_df,
+                "delay_%s_%s"
+                % (
+                    self.output_synapse["pre_group_type"],
+                    self.output_synapse["post_group_type"],
+                ),
+            )
+            / ms  # noqa: F405
+        )
+        self.output_namespace["delay"] = f"{delay} * ms"
+
+    def deBrito(self):
+        """
+        Method for assigning the plasticity from deBrito_2024_PLoSComputBiol parameters to the customized_synapses() object.
+        """
+        self.output_namespace["eta_ltp"] = value_extractor(
+            self.physio_config_df, "deb_eta_ltp"
+        )
+        self.output_namespace["eta_ltd"] = value_extractor(
+            self.physio_config_df, "deb_eta_ltd"
+        )
+        self.output_namespace["Apre"] = value_extractor(
+            self.physio_config_df, "deb_Apre"
+        )
+        self.output_namespace["Apost"] = value_extractor(
+            self.physio_config_df, "deb_Apost"
+        )
+
+        self.output_namespace["tau_x"] = value_extractor(
+            self.physio_config_df, "deb_tau_x"
+        )
+        self.output_namespace["tau_y"] = value_extractor(
+            self.physio_config_df, "deb_tau_y"
+        )
+        self.output_namespace["tau_x_avg"] = value_extractor(
+            self.physio_config_df, "deb_tau_x_avg"
+        )
+        self.output_namespace["tau_y_avg"] = value_extractor(
+            self.physio_config_df, "deb_tau_y_avg"
+        )
+        self.output_namespace["tauhomeo"] = value_extractor(
+            self.physio_config_df, "deb_tauhomeo"
+        )
+        self.output_namespace["tau_wght"] = value_extractor(
+            self.physio_config_df, "deb_tau_wght"
+        )
+
+        self.output_namespace["init_wght"] = value_extractor(
+            self.physio_config_df, "deb_init_wght"
         )
 
         delay = (

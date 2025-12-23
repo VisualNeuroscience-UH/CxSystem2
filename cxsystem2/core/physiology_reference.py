@@ -865,6 +865,8 @@ class SynapseReference:
         SynapseReference.syntypes = np.array(
             [
                 "STDP",
+                "Vogels",
+                "deBrito",
                 "CPlastic",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
@@ -1019,6 +1021,74 @@ class SynapseReference:
         ] = """
             apost += Apost
             wght =+ eta_ltp * apre
+            """
+
+    def Vogels(self):
+        """
+        The method for implementing the Vogels_2011_Science synaptic connection.
+        """
+
+        self.output_synapse["equation"] = b2.Equations(
+            """
+            wght : siemens
+            dapre/dt = -apre/taupre : siemens (event-driven)
+            dapost/dt = -apost/taupost : siemens (event-driven)
+            """
+        )
+
+        self.output_synapse["pre_eq"] = (
+            """
+            %s+=wght
+            apre += Apre
+            wght += eta * (apost - alpha)
+            """
+            % (
+                self.output_synapse["receptor"]
+                + self.output_synapse["post_comp_name"]
+                + "_post"
+            )
+        )
+        self.output_synapse[
+            "post_eq"
+        ] = """
+            apost += Apost
+            wght += eta * apre
+            """
+
+    def deBrito(self):
+        """
+        The method for implementing the deBrito_2024_PLoSComputBiol synaptic connection.
+        """
+
+        self.output_synapse["equation"] = b2.Equations(
+            """
+            dwght/dt = -wght/tau_wght : siemens (clock-driven)    
+            dx_dirac/dt = -x_dirac/tau_x : 1  (clock-driven) # apre
+            dy_dirac/dt = -y_dirac/tau_y : 1  (clock-driven) # apost
+            
+            dx_avg/dt = (x_dirac - x_avg)/tau_x_avg : 1 (clock-driven)
+            dy_avg/dt = (y_dirac - y_avg)/tau_y_avg : 1 (clock-driven)
+            dahomeo/dt = (y_dirac * y_dirac - ahomeo)/tauhomeo : 1 (clock-driven)
+            """
+        )
+
+        self.output_synapse["pre_eq"] = (
+            """
+            %s+=wght
+            x_dirac += Apre
+            wght =- eta_ltd * ahomeo * x_dirac * y_avg * siemens
+            """
+            % (
+                self.output_synapse["receptor"]
+                + self.output_synapse["post_comp_name"]
+                + "_post"
+            )
+        )
+        self.output_synapse[
+            "post_eq"
+        ] = """
+            y_dirac += Apost
+            wght =+ eta_ltp * y_dirac * y_avg * x_avg * siemens
             """
 
     def CPlastic(self):
