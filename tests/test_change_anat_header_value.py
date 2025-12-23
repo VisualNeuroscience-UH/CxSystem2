@@ -7,7 +7,8 @@ import pandas as pd
 import pytest
 
 # Local
-from cxsystem2.core.tools import ParameterNotFoundError, change_anat_file_header_value
+from cxsystem2.core.exceptions import ParameterNotFoundError
+from cxsystem2.core.tools import change_anat_file_header_value
 
 
 @pytest.fixture
