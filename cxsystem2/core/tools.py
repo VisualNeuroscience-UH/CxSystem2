@@ -12,6 +12,7 @@ from brian2.units import *  # noqa: F403
 
 # Local
 from cxsystem2.configuration import config_file_converter as file_converter
+from cxsystem2.core.exceptions import ParameterNotFoundError
 
 array = np.array  # necessary to have as top-level variable for the brian2.
 
