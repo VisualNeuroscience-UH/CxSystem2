@@ -106,7 +106,7 @@ class SpikeData:
         #            'NG15_L6_PC3_L6toL2': 0.05, 'NG16_L6_BC_L6': 0.05, 'NG17_L6_MC_L6': 0.05}
         try:
             layer_number = int(
-                re.findall("^.*_L(\d)\w*$", group_name)[0]
+                re.findall(r"^.*_L(\d)\w*$", group_name)[0]
             )  # by convention, L2/3 is "L2"
         except IndexError:
             layer_number = 0

@@ -20,33 +20,43 @@ Description:
 
 """
 
-# Built-in
+import argparse
 import sys
 from pathlib import Path
 
-# Third-party
 import pandas as pd
-from docopt import docopt
-
-pd.set_option("display.max_columns", 30)
-pd.set_option("display.max_colwidth", -1)
-# Built-in
-from pprint import pprint
 
 # Local
 from cxsystem2.core.tools import load_from_file
 
+pd.set_option("display.max_columns", 30)
+pd.set_option("display.max_colwidth", None)
+
 
 def main():
-    arguments = docopt(__doc__)
-    # print(arguments)
+    parser = argparse.ArgumentParser(
+        description="Load and display metadata from a file.",
+        usage=""" cxmetadata (-h | --help)
+        cxmetadata META_FILE_PATH
+        """,
+    )
 
-    metadata_path = Path(arguments["META_FILE_PATH"])
+    if len(sys.argv) == 1:
+        parser.print_usage()
+        sys.exit(1)
+
+    parser.add_argument("META_FILE_PATH", type=Path, help="Path to the metadata file")
+
+    args = parser.parse_args()
+
+    metadata_path = args.META_FILE_PATH
+
     if not metadata_path.is_file():
         print("Error: metadata file {} not found".format(metadata_path.as_posix()))
-    else:
-        metadata_df = load_from_file(metadata_path.as_posix())
-        print(metadata_df)
+        sys.exit(1)
+
+    metadata_df = load_from_file(metadata_path.as_posix())
+    print(metadata_df)
 
 
 if __name__ == "__main__":

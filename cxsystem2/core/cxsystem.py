@@ -3115,6 +3115,7 @@ class CxSystem:
             self.monitors(
                 mons.split(" "), ng_name
             )  # , self.customized_neurons_list[-1]['equation'])
+            print(f"Monitor name(s) for the input group {ng_name}: {mons.split(' ')}")
 
         assert self.sys_mode != "", " -  System mode not defined."
         assert np.any(
