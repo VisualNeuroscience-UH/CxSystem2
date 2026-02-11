@@ -130,6 +130,7 @@ def main():
     )
 
     parser.add_argument(
+        "-s",
         "--sampling-rate",
         type=str,
         default="1%",

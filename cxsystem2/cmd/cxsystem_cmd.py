@@ -49,12 +49,14 @@ def main():
         parser.print_usage()
         sys.exit(1)
 
-    parser.add_argument("--anatomy", type=Path, help="Path to the anatomy file")
-
-    parser.add_argument("--physiology", type=Path, help="Path to the physiology file")
+    parser.add_argument("-a", "--anatomy", type=Path, help="Path to the anatomy file")
 
     parser.add_argument(
-        "--version", action="store_true", help="Display the version of CxSystem2"
+        "-p", "--physiology", type=Path, help="Path to the physiology file"
+    )
+
+    parser.add_argument(
+        "-v", "--version", action="store_true", help="Display the version of CxSystem2"
     )
 
     args = parser.parse_args()
