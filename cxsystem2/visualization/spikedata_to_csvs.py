@@ -5,9 +5,10 @@ import re
 import zlib
 from pathlib import Path
 
+import brian2.units as b2u
+
 # Third-party
 import numpy as np
-from brian2.units import *
 
 
 class SpikeData:
@@ -81,7 +82,7 @@ class SpikeData:
                 self.data["spikes_all"][group]["i"] + abs_start_index[group_ix]
             )
             spikelist[list_ix : list_ix + N_spikes_in_group, 1] = (
-                self.data["spikes_all"][group]["t"] / second
+                self.data["spikes_all"][group]["t"] / b2u.second
             )
 
             list_ix += N_spikes_in_group
