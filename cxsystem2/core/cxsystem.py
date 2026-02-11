@@ -2368,6 +2368,7 @@ class CxSystem:
                         len(sub_mon_arg) == len(sub_mon_tags) + 1
                     ), " -  Error in monitor tag definition."
                 if sub_mon_arg[0] == "":
+                    # Spike monitor
                     assert (
                         mon_tag == "[Sp]"
                     ), " -  The monitor state variable is not defined properly"
@@ -2379,7 +2380,6 @@ class CxSystem:
                         + "_"
                         + object_name
                     )
-
                     self.workspace.syntax_bank.append(
                         "self.workspace.results['spikes_all']['%s'] = %s.get_states()"
                         % (object_name, mon_name)
@@ -3117,6 +3117,159 @@ class CxSystem:
             )  # , self.customized_neurons_list[-1]['equation'])
             print(f"Monitor name(s) for the input group {ng_name}: {mons.split(' ')}")
 
+        def LGN(self):
+            """
+            LGN can take multiple input spike files, each corresponding to a different type of LGN neurons.
+            """
+            input_spikes_filename = self.current_values_s[
+                self.current_parameters_s[
+                    self.current_parameters_s == "input_spikes_filename"
+                ].index.item()
+            ]
+            spikes_data = load_from_file(
+                self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
+            )
+            print(
+                " -   Spike file loaded from: %s"
+                % self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
+            )
+            spk_generator_sp = spikes_data["spikes_0"][0]
+            spk_generator_ti = spikes_data["spikes_0"][1]
+            number_of_neurons = len(spikes_data["w_coord"])
+            spk_generator = b2.SpikeGeneratorGroup(
+                number_of_neurons, spk_generator_sp, spk_generator_ti
+            )
+            self.spike_input_group_idx = len(self.neurongroups_list)
+            ng_idx = self.spike_input_group_idx
+            setattr(self.main_module, f"spk_generator_{ng_idx}", spk_generator)
+            # global tmp_obj
+            # breakpoint()
+            # tmp_obj = self.main_module.spk_generator
+            # breakpoint()
+            try:
+                setattr(self.Cxmodule, f"spk_generator_{ng_idx}", spk_generator)
+            except AttributeError:
+                pass
+            # Generated variable name for the NeuronGroup, Neuron_number,Equation, Threshold, Reset
+            ng_name = self._NeuronGroup_prefix + str(ng_idx) + "_relay_spikes"
+            self.neurongroups_list.append(ng_name)
+            nn_name = self._NeuronNumber_prefix + str(ng_idx)
+            ne_name = self._NeuronEquation_prefix + str(ng_idx)
+            nt_name = self._NeuronThreshold_prefix + str(ng_idx)
+            n_res_name = self._NeuronReset_prefix + str(ng_idx)
+            eq = """'''emit_spike : 1
+                                x : meter
+                                y : meter'''"""
+            # In order to use the dynamic compiler in a sub-routine, the scope in which the syntax is going to be run
+            # should be defined, hence the globals(), locals(). They indicate that the syntaxes should be run in both
+            # global and local scope
+            exec(
+                "%s=%s" % (nn_name, number_of_neurons),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            exec("%s=%s" % (ne_name, eq), globals(), locals=sys._getframe().f_locals)
+            exec(
+                "%s=%s" % (nt_name, "'emit_spike>=1'"),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            exec(
+                "%s=%s" % (n_res_name, "'emit_spike=0'"),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            exec(
+                "%s= b2.NeuronGroup(%s, model=%s,method='%s', threshold=%s, "
+                "reset=%s)"
+                % (
+                    ng_name,
+                    nn_name,
+                    ne_name,
+                    self.numerical_integration_method,
+                    nt_name,
+                    n_res_name,
+                ),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            if hasattr(self, "imported_connections"):
+                # in case the NG index are different. for example a MC_L2 neuron might have had
+                # index 3 as NG3_MC_L2 and now it's NG10_MC_L2 :
+                group_type = ng_name[ng_name.index("_") + 1 :]
+                group_key_name = [
+                    kk
+                    for kk in list(
+                        self.imported_connections["positions_all"]["w_coord"].keys()
+                    )
+                    if group_type in kk
+                ][0]
+                self.customized_neurons_list[self.spike_input_group_idx][
+                    "w_positions"
+                ] = self.imported_connections["positions_all"]["w_coord"][
+                    group_key_name
+                ]
+                self.customized_neurons_list[self.spike_input_group_idx][
+                    "z_positions"
+                ] = self.imported_connections["positions_all"]["z_coord"][
+                    group_key_name
+                ]
+                print(" -  Position for the group %s loaded" % ng_name)
+            else:  # load the positions:
+                self.customized_neurons_list[self.spike_input_group_idx][
+                    "z_positions"
+                ] = np.squeeze(spikes_data["z_coord"])
+                self.customized_neurons_list[self.spike_input_group_idx][
+                    "w_positions"
+                ] = np.squeeze(spikes_data["w_coord"])
+
+            # setting the position of the neurons based on the positions in the .mat input file:
+            exec(
+                "%s.x=b2.real(self.customized_neurons_list[%d]["
+                "'w_positions'])*mm\n"
+                "%s.y=b2.imag(self.customized_neurons_list[%d]['w_positions'])*mm"
+                % (
+                    ng_name,
+                    self.spike_input_group_idx,
+                    ng_name,
+                    self.spike_input_group_idx,
+                ),
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            self.workspace.results["positions_all"]["z_coord"][ng_name] = (
+                self.customized_neurons_list[self.spike_input_group_idx]["z_positions"]
+            )
+            self.workspace.results["positions_all"]["w_coord"][ng_name] = (
+                self.customized_neurons_list[self.spike_input_group_idx]["w_positions"]
+            )
+            self.workspace.results["number_of_neurons"][ng_name] = eval(nn_name)
+            # variable name for the Synapses() object
+            sg_syn_name = f"SGEN_Syn_{ng_idx}"
+            # that connects b2.SpikeGeneratorGroup() and relay neurons.
+            exec(
+                f"{sg_syn_name} = b2.Synapses(spk_generator_{ng_idx}, {ng_name}, on_pre='emit_spike+=1')",
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            # connecting the b2.SpikeGeneratorGroup() and relay group.
+            exec(
+                "%s.connect(j='i')" % sg_syn_name,
+                globals(),
+                locals=sys._getframe().f_locals,
+            )
+            setattr(self.main_module, ng_name, eval(ng_name))
+            setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
+            try:
+                setattr(self.Cxmodule, ng_name, eval(ng_name))
+                setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
+            except AttributeError:
+                pass
+
+            # taking care of the monitors:
+            self.monitors(mons.split(" "), ng_name)
+            print(f"Monitor name(s) for the input group {ng_name}: {mons.split(' ')}")
+
         assert self.sys_mode != "", " -  System mode not defined."
         assert np.any(
             self.current_parameters_s.str.contains("type")
@@ -3142,14 +3295,17 @@ class CxSystem:
                 [0, 1, 2],
                 spikes,
             ],
+            "LGN": [
+                ["idx", "type", "input_spikes_filename", "monitors"],
+                [0, 1, 2],
+                LGN,
+            ],
         }
         param_idx = next(
             iter(self.current_parameters_s[self.current_parameters_s == "type"].index)
-        )  # this is equivalent to item() which is deprecated
+        )
         _input_type = self.current_values_s[param_idx]
-        _all_columns = input_type_to_method_mapping[_input_type][
-            0
-        ]  # all possible columns of parameters for the current type of input in configuration fil
+        _all_columns = input_type_to_method_mapping[_input_type][0]
         assert _input_type in list(input_type_to_method_mapping.keys()), (
             " -  The input type %s of the configuration file is "
             "not defined" % _input_type

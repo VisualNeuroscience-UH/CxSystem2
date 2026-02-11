@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cxsystem2"
-version = "2.2.11"
+version = "2.2.12"
 description = "A cerebral cortex simulation framework"
 authors = ["Vafa Andalibi", "Henri Hokkanen", "Simo Vanni <simo.vanni@helsinki.fi>"]
 license = "MIT"
@@ -38,6 +38,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.14"
+pyqt5 = "^5.15.11"
 
 [tool.poetry.group.compute.dependencies]
 brian2 = "2.10.1"
