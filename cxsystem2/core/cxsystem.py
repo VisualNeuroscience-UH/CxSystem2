@@ -3112,9 +3112,7 @@ class CxSystem:
             except AttributeError:
                 pass
             # taking care of the monitors:
-            self.monitors(
-                mons.split(" "), ng_name
-            )  # , self.customized_neurons_list[-1]['equation'])
+            self.monitors(mons.split(" "), ng_name)
             print(f"Monitor name(s) for the input group {ng_name}: {mons.split(' ')}")
 
         def LGN(self):
@@ -3142,10 +3140,6 @@ class CxSystem:
             self.spike_input_group_idx = len(self.neurongroups_list)
             ng_idx = self.spike_input_group_idx
             setattr(self.main_module, f"spk_generator_{ng_idx}", spk_generator)
-            # global tmp_obj
-            # breakpoint()
-            # tmp_obj = self.main_module.spk_generator
-            # breakpoint()
             try:
                 setattr(self.Cxmodule, f"spk_generator_{ng_idx}", spk_generator)
             except AttributeError:
