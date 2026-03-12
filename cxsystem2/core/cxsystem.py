@@ -3322,10 +3322,20 @@ class CxSystem:
                 input_type_to_method_mapping[_input_type][1]
             ]
         )
-        obligatory_indices = [
-            next(iter(self.current_parameters_s[self.current_parameters_s == ii].index))
-            for ii in obligatory_columns
-        ]
+        try:
+            obligatory_indices = [
+                next(
+                    iter(
+                        self.current_parameters_s[self.current_parameters_s == ii].index
+                    )
+                )
+                for ii in obligatory_columns
+            ]
+        except StopIteration:
+            raise ValueError(
+                " -  Anatomy config: One or more of the obligatory columns for input definition is missing. Following obligatory columns should be defined:\n%s\n"
+                % str([_all_columns[ii] for ii in _obligatory_params])
+            )
         assert not np.any(
             self.current_values_s.loc[obligatory_indices] == "--"
         ), ' -  Following obligatory values cannot be "--":\n%s' % str(
