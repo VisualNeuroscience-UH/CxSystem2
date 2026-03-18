@@ -463,7 +463,7 @@ class SynapseParser:
             )
             / ms  # noqa: F405
         )
-        self.output_namespace["delay"] = f"{delay} * ms"
+        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
 
     def deBrito(self):
         """
@@ -516,7 +516,7 @@ class SynapseParser:
             )
             / ms  # noqa: F405
         )
-        self.output_namespace["delay"] = f"{delay} * ms"
+        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
 
     def CPlastic(self):
         """
