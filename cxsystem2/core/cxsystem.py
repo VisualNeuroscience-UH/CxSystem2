@@ -2127,7 +2127,7 @@ class CxSystem:
             ):
                 # Weight set for de novo connections
                 exec(
-                    "%s.wght=%s['init_wght']"
+                    "%s.wght=%s['wght_init']"
                     % (_dyn_syn_name, _dyn_syn_namespace_name),
                     locals=sys._getframe().f_locals,
                 )

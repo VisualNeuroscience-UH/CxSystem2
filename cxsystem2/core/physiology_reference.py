@@ -1041,6 +1041,7 @@ class SynapseReference:
             %s+=wght
             apre += Apre
             wght += eta * (apost - alpha)
+            wght = clip(wght, 0 * siemens, wght_max)
             """
             % (
                 self.output_synapse["receptor"]
@@ -1053,6 +1054,7 @@ class SynapseReference:
         ] = """
             apost += Apost
             wght += eta * apre
+            wght = clip(wght, 0 * siemens, wght_max)
             """
 
     def deBrito(self):
@@ -1077,6 +1079,7 @@ class SynapseReference:
             %s+=wght
             x_dirac += Apre
             wght =- eta_ltd * ahomeo * x_dirac * y_avg * siemens
+            wght = clip(wght, 0 * siemens, wght_max)
             """
             % (
                 self.output_synapse["receptor"]
@@ -1089,6 +1092,7 @@ class SynapseReference:
         ] = """
             y_dirac += Apost
             wght =+ eta_ltp * y_dirac * y_avg * x_avg * siemens
+            wght = clip(wght, 0 * siemens, wght_max)
             """
 
     def CPlastic(self):
