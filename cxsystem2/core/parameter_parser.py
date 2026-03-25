@@ -443,10 +443,13 @@ class SynapseParser:
             self.physio_config_df, "vog_taupost"
         )
 
-        self.output_namespace["wght_init"] = value_extractor(
-            self.physio_config_df, "vog_wght_init"
-        )
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
+            print(" ! Using custom weight: %f nS" % mean_wght)
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "vog_wght_init")
 
+        self.output_namespace["wght_init"] = mean_wght
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "vog_wght_max"
         )
@@ -505,9 +508,12 @@ class SynapseParser:
             self.physio_config_df, "deb_tau_wght"
         )
 
-        self.output_namespace["wght_init"] = value_extractor(
-            self.physio_config_df, "deb_wght_init"
-        )
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
+            print(" ! Using custom weight: %f nS" % mean_wght)
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "deb_wght_init")
+        self.output_namespace["wght_init"] = mean_wght
 
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "deb_wght_max"
