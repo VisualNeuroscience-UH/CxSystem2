@@ -456,7 +456,7 @@ class SynapseParser:
 
         _alpha = value_extractor(self.physio_config_df, "vog_alpha")
         self.output_namespace["alpha"] = (
-            _alpha * self.output_namespace["taupre"] * 2 * siemens  # noqa: F405
+            _alpha * self.output_namespace["taupre"] * 2 * nS  # noqa: F405
         )
 
         delay = (
