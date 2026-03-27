@@ -80,7 +80,7 @@ class CxSystem:
         anatomy_and_system_config=None,
         physiology_config=None,
         output_file_suffix="",
-        unit_coords_df_path=None,
+        unit_coords_df=None,
         instantiated_from_array_run=0,
         cluster_run_start_idx=-1,
         cluster_run_step=-1,
@@ -112,7 +112,7 @@ class CxSystem:
         if anatomy_and_system_config is None or physiology_config is None:
             return
 
-        self.unit_coords_df_path = unit_coords_df_path
+        self.unit_coords_df = unit_coords_df
         self.start_time = time.time()
         self.main_module = sys.modules["__main__"]
         try:  # try to find the Cxmodule in the sys.modules, to find if the __main__ is CxSystem.py or not
@@ -999,7 +999,7 @@ class CxSystem:
                 self.general_grid_radius,
                 self.min_distance,
                 self.physio_config_df,
-                self.unit_coords_df_path,
+                self.unit_coords_df,
                 network_center=net_center,
                 cell_subtype=neuron_subtype,
             ).output_neuron
@@ -2911,7 +2911,7 @@ class CxSystem:
                     eval(radius),
                     self.min_distance,
                     self.physio_config_df,
-                    self.unit_coords_df_path,
+                    self.unit_coords_df,
                     network_center=net_center,
                 )
                 self.customized_neurons_list[current_idx]["z_positions"] = (

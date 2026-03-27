@@ -5,7 +5,6 @@ from copy import deepcopy
 # Third-party
 import brian2 as b2
 import numpy as np
-import pandas as pd
 from brian2.units import *  # noqa: F403
 
 # Local
@@ -40,7 +39,7 @@ class NeuronReference:
         general_grid_radius,
         min_distance,
         physio_config_df,
-        unit_coords_df_path=None,
+        unit_coords_df=None,
         network_center=0 + 0j,
         cell_subtype="--",
     ):
@@ -246,14 +245,15 @@ class NeuronReference:
         ###                Creating positions                   ###
         ############################################################
 
-        if unit_coords_df_path is not None:
-            unit_coords = pd.read_pickle(unit_coords_df_path)
-            mask = unit_coords.iloc[:, 0] == "G"
-            groups = unit_coords[mask]
-            groups = groups.rename(columns={"runtime": "idx"})
-            row = groups[groups["idx"] == str(idx)]
-            self.output_neuron["z_positions"] = [row.iloc[0, 16]]
-            self.output_neuron["w_positions"] = [row.iloc[0, 17]]
+        if unit_coords_df is not None:
+            self.output_neuron["z_positions"] = unit_coords_df.loc[
+                unit_coords_df["idx"].astype("int") == self.output_neuron.get("idx"),
+                "z_coords",
+            ].values[0]
+            self.output_neuron["w_positions"] = unit_coords_df.loc[
+                unit_coords_df["idx"].astype("int") == self.output_neuron.get("idx"),
+                "w_coords",
+            ].values[0]
         else:
             self.output_neuron["z_center"] = network_center
             self.output_neuron["w_center"] = 17 * np.log(
