@@ -2973,9 +2973,23 @@ class CxSystem:
                     self.current_parameters_s == "input_spikes_filename"
                 ].index.item()
             ]
-            spikes_data = load_from_file(
-                self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
+            # Add the input spike data (unit positions + spikes) to the simulation results
+            full_input_filename = self.workspace.get_simulation_folder().joinpath(
+                input_spikes_filename
             )
+            spikes_data = load_from_file(full_input_filename)
+            self.workspace.create_results_key("input_spikes_data")
+            self.workspace.results["input_spikes_data"] = spikes_data
+
+            # Extract whether the retina input was parasol or midget cells, and add it to the input spike data
+            input_filename_stem = full_input_filename.stem.lower()
+            cell_type = "unknown"
+            for candidate in ("parasol", "midget"):
+                if candidate in input_filename_stem:
+                    cell_type = candidate
+                    break
+            self.workspace.results["input_spikes_data"]["cell_type"] = cell_type
+
             print(
                 " -   Spike file loaded from: %s"
                 % self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
