@@ -415,21 +415,6 @@ class CxSystem:
 
             self.array_run = 1
             return
-        try:
-            self.conn_prob_gain = int(
-                next(
-                    iter(
-                        self.physio_config_df.loc[
-                            np.where(self.physio_config_df.values == "conn_prob_gain")[
-                                0
-                            ]
-                        ]["Value"]
-                    ),
-                    "no match",
-                )
-            )
-        except ValueError:
-            self.conn_prob_gain = 1
 
         if self.array_run == 0:
             try:
@@ -1498,7 +1483,6 @@ class CxSystem:
             "[C]": self.neuron_group,
         }
 
-        # getting the connection probability gain from the namespace and apply it on all the connections:
         index_of_receptor = int(
             np.where(self.current_parameters_s.values == "receptor")[0][0]
         )
@@ -1707,7 +1691,7 @@ class CxSystem:
             post_syn_idx = syn[index_of_post_syn_idx]
             syn_type = syn[index_of_syn_type]
             try:
-                p_arg = float(syn[index_of_p]) * self.conn_prob_gain
+                p_arg = float(syn[index_of_p])
             except (ValueError, NameError):
                 p_arg = "--"
             try:
@@ -1879,8 +1863,10 @@ class CxSystem:
                         ),
                         locals=sys._getframe().f_locals,
                     )
+                    breakpoint()
                 except NameError:
                     # for when there is no "on_post =...", i.e. fixed connection
+                    # try:
                     exec(
                         "%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, "
                         "namespace= %s, delay = %s)"
@@ -1895,7 +1881,8 @@ class CxSystem:
                         ),
                         locals=sys._getframe().f_locals,
                     )
-
+                    # except:
+                    #     breakpoint()
             # Connecting synapses
 
             # Technical preparations & parameter parsing first
