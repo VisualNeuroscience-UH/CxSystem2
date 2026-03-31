@@ -408,8 +408,8 @@ class SynapseParser:
             self.physio_config_df, "wght_max"
         )
 
-        self.output_namespace["init_wght"] = value_extractor(
-            self.physio_config_df, "init_wght"
+        self.output_namespace["wght_init"] = value_extractor(
+            self.physio_config_df, "wght_init"
         )
 
         delay = (
@@ -443,13 +443,20 @@ class SynapseParser:
             self.physio_config_df, "vog_taupost"
         )
 
-        self.output_namespace["init_wght"] = value_extractor(
-            self.physio_config_df, "vog_init_wght"
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
+            print(" ! Using custom weight: %f nS" % mean_wght)
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "vog_wght_init")
+
+        self.output_namespace["wght_init"] = mean_wght
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "vog_wght_max"
         )
 
         _alpha = value_extractor(self.physio_config_df, "vog_alpha")
         self.output_namespace["alpha"] = (
-            _alpha * self.output_namespace["taupre"] * 2 * siemens  # noqa: F405
+            _alpha * self.output_namespace["taupre"] * 2 * nS  # noqa: F405
         )
 
         delay = (
@@ -463,7 +470,7 @@ class SynapseParser:
             )
             / ms  # noqa: F405
         )
-        self.output_namespace["delay"] = f"{delay} * ms"
+        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
 
     def deBrito(self):
         """
@@ -501,8 +508,15 @@ class SynapseParser:
             self.physio_config_df, "deb_tau_wght"
         )
 
-        self.output_namespace["init_wght"] = value_extractor(
-            self.physio_config_df, "deb_init_wght"
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
+            print(" ! Using custom weight: %f nS" % mean_wght)
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "deb_wght_init")
+        self.output_namespace["wght_init"] = mean_wght
+
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "deb_wght_max"
         )
 
         delay = (
@@ -516,7 +530,7 @@ class SynapseParser:
             )
             / ms  # noqa: F405
         )
-        self.output_namespace["delay"] = f"{delay} * ms"
+        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
 
     def CPlastic(self):
         """
@@ -560,7 +574,7 @@ class SynapseParser:
             )
             / nS  # noqa: F405
         )
-        self.output_namespace["init_wght"] = f"{std_wght} * nS"
+        self.output_namespace["wght_init"] = f"{std_wght} * nS"
 
         std_delay = (
             value_extractor(
@@ -595,7 +609,7 @@ class SynapseParser:
             )
             mean_wght = mean_wght / nS  # noqa: F405
         min_wght = mean_wght / 2.0
-        self.output_namespace["init_wght"] = "(%f * rand() + %f) * nS" % (
+        self.output_namespace["wght_init"] = "(%f * rand() + %f) * nS" % (
             mean_wght,
             min_wght,
         )
@@ -639,7 +653,7 @@ class SynapseParser:
                 )
                 / nS  # noqa: F405
             )
-        self.output_namespace["init_wght"] = "%f * nS" % (mean_wght)
+        self.output_namespace["wght_init"] = "%f * nS" % (mean_wght)
 
         # Delay
         mean_delay = (
@@ -697,13 +711,13 @@ class SynapseParser:
         # SET the weight (uniform distribution [min_wght, min_wght+mean_wght])
         # NB!! You might think (min_wght, mean_wght) should be the other way around, but remember that rand gives
         # values between 0 and 1, NOT values with mean 0 like randn!
-        self.output_namespace["init_wght"] = "(%f + %f * rand()) * nS" % (
+        self.output_namespace["wght_init"] = "(%f + %f * rand()) * nS" % (
             min_wght,
             mean_wght,
         )
 
         # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
-        # NB!! Same applies here, see assignment of init_wght
+        # NB!! Same applies here, see assignment of wght_init
         mean_delay = (
             value_extractor(
                 self.physio_config_df,
@@ -759,13 +773,13 @@ class SynapseParser:
         # SET the weight (uniform distribution [min_wght, min_wght+mean_wght])
         # NB!! You might think (min_wght, mean_wght) should be the other way around, but remember that rand gives
         # values between 0 and 1, NOT values with mean 0 like randn!
-        self.output_namespace["init_wght"] = "(%f + %f * rand()) * nS" % (
+        self.output_namespace["wght_init"] = "(%f + %f * rand()) * nS" % (
             min_wght,
             mean_wght,
         )
 
         # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
-        # NB!! Same applies here, see assignment of init_wght
+        # NB!! Same applies here, see assignment of wght_init
         mean_delay = (
             value_extractor(
                 self.physio_config_df,

@@ -23,33 +23,47 @@ Description:
 
 """
 
-# Built-in
+import argparse
 import sys
 from pathlib import Path
-
-# Third-party
-from docopt import docopt
 
 # Local
 from cxsystem2.configuration.config_file_converter import ConfigConverter
 
 
 def main():
-    arguments = docopt(__doc__)
-    # print(arguments)
+    parser = argparse.ArgumentParser(
+        description="Convert configuration files between JSON and CSV formats.\n\n"
+        "Converts the specified file to the opposite format (JSON <-> CSV).",
+        usage=""" cxconfig (-h | --help)
+        cxconfig  FILEPATH
+        """,
+    )
 
-    filepath = Path(arguments["FILEPATH"])
+    if len(sys.argv) == 1:
+        parser.print_usage()
+        sys.exit(1)
+
+    parser.add_argument(
+        "FILEPATH",
+        type=Path,
+        help="Path to the KUKKUU configuration file (JSON or CSV)",
+    )
+
+    args = parser.parse_args()
+
+    filepath = args.FILEPATH
     if not filepath.is_file():
-        print("Error: file {} not found".format(filepath.as_posix()))
+        print(f"Error: file {filepath.as_posix()} not found")
+        sys.exit(1)
 
-    else:
-        if filepath.suffix == ".json":
-            converted = ConfigConverter(filepath)
-            converted.save_as_csv()
+    if filepath.suffix == ".json":
+        converted = ConfigConverter(filepath)
+        converted.save_as_csv()
 
-        if filepath.suffix == ".csv":
-            converted = ConfigConverter(filepath)
-            converted.save_as_json()
+    if filepath.suffix == ".csv":
+        converted = ConfigConverter(filepath)
+        converted.save_as_json()
 
 
 if __name__ == "__main__":
