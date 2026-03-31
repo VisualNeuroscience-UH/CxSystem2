@@ -5,9 +5,10 @@ import re
 import zlib
 from pathlib import Path
 
+import brian2.units as b2u
+
 # Third-party
 import numpy as np
-from brian2.units import *
 
 
 class SpikeData:
@@ -81,7 +82,7 @@ class SpikeData:
                 self.data["spikes_all"][group]["i"] + abs_start_index[group_ix]
             )
             spikelist[list_ix : list_ix + N_spikes_in_group, 1] = (
-                self.data["spikes_all"][group]["t"] / second
+                self.data["spikes_all"][group]["t"] / b2u.second
             )
 
             list_ix += N_spikes_in_group
@@ -106,7 +107,7 @@ class SpikeData:
         #            'NG15_L6_PC3_L6toL2': 0.05, 'NG16_L6_BC_L6': 0.05, 'NG17_L6_MC_L6': 0.05}
         try:
             layer_number = int(
-                re.findall("^.*_L(\d)\w*$", group_name)[0]
+                re.findall(r"^.*_L(\d)\w*$", group_name)[0]
             )  # by convention, L2/3 is "L2"
         except IndexError:
             layer_number = 0

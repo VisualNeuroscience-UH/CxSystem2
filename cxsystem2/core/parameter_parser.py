@@ -250,15 +250,6 @@ class SynapseParser:
 
     * cw: connection weights for any connection between NeuronGroup()s.
     * STDP: values for A_pre, A_post, tau_pre and tau_post for any connection between NeuronGroup()s.
-
-    There are also some important internal variables:
-
-    * Cp: Synaptic potentiation coefficient according to van Rossum J Neurosci 2000
-    * Cd: Synaptic depression coefficient according to van Rossum J Neurosci 2000
-    * stdp_Nsweeps: 60 in papers one does multiple trials to reach +-50% change in synapse strength. A-coefficient will be divided by this number
-    * stdp_max_strength_coefficient: This value is to avoid runaway plasticity.
-    * conn_prob_gain: This is used for compensation of small number of neurons and thus incoming synapses
-
     """
 
     # For _change_calcium()
@@ -274,9 +265,7 @@ class SynapseParser:
 
         :param output_synapse: This is the dictionary created in NeuronReference() in brian2_obj_namespaces module. This contains all the
                                information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to
-                               it. Following values are set after initialization:
-                               Cp, Cd, spatial_decay. Other variables are then set based on the type of the synaptic connection.
-
+                               it.
         """
 
         self.output_synapse = output_synapse
@@ -285,6 +274,8 @@ class SynapseParser:
         SynapseParser.type_ref = np.array(
             [
                 "STDP",
+                "Vogels",
+                "deBrito",
                 "CPlastic",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
@@ -397,10 +388,14 @@ class SynapseParser:
         Method for assigning the spike timing dependent plasticity parameters to the customized_synapses() object.
 
         This contains all the information about the synaptic connection.
-        Following values are set in this method: Apre, Apost, tau_pre, tau_post, wght_max, wght0.
+        Following values are set in this method: eta_ltp, eta_ltd, Apre, Apost, tau_pre, tau_post, wght_max.
         """
-        self.output_namespace["Cp"] = value_extractor(self.physio_config_df, "Cp")
-        self.output_namespace["Cd"] = value_extractor(self.physio_config_df, "Cd")
+        self.output_namespace["eta_ltp"] = value_extractor(
+            self.physio_config_df, "eta_ltp"
+        )
+        self.output_namespace["eta_ltd"] = value_extractor(
+            self.physio_config_df, "eta_ltd"
+        )
         self.output_namespace["Apre"] = value_extractor(self.physio_config_df, "Apre")
         self.output_namespace["Apost"] = value_extractor(self.physio_config_df, "Apost")
         self.output_namespace["taupre"] = value_extractor(
@@ -413,8 +408,8 @@ class SynapseParser:
             self.physio_config_df, "wght_max"
         )
 
-        self.output_namespace["init_wght"] = value_extractor(
-            self.physio_config_df, "init_wght"
+        self.output_namespace["wght_init"] = value_extractor(
+            self.physio_config_df, "wght_init"
         )
 
         delay = (
@@ -429,6 +424,113 @@ class SynapseParser:
             / ms  # noqa: F405
         )
         self.output_namespace["delay"] = f"{delay} * ms"
+
+    def Vogels(self):
+        """
+        Method for assigning the plasticity from Vogels_2011_Science parameters to the customized_synapses() object.
+        """
+        self.output_namespace["eta"] = value_extractor(self.physio_config_df, "vog_eta")
+        self.output_namespace["Apre"] = value_extractor(
+            self.physio_config_df, "vog_Apre"
+        )
+        self.output_namespace["Apost"] = value_extractor(
+            self.physio_config_df, "vog_Apost"
+        )
+        self.output_namespace["taupre"] = value_extractor(
+            self.physio_config_df, "vog_taupre"
+        )
+        self.output_namespace["taupost"] = value_extractor(
+            self.physio_config_df, "vog_taupost"
+        )
+
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
+            print(" ! Using custom weight: %f nS" % mean_wght)
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "vog_wght_init")
+
+        self.output_namespace["wght_init"] = mean_wght
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "vog_wght_max"
+        )
+
+        _alpha = value_extractor(self.physio_config_df, "vog_alpha")
+        self.output_namespace["alpha"] = (
+            _alpha * self.output_namespace["taupre"] * 2 * nS  # noqa: F405
+        )
+
+        delay = (
+            value_extractor(
+                self.physio_config_df,
+                "delay_%s_%s"
+                % (
+                    self.output_synapse["pre_group_type"],
+                    self.output_synapse["post_group_type"],
+                ),
+            )
+            / ms  # noqa: F405
+        )
+        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
+
+    def deBrito(self):
+        """
+        Method for assigning the plasticity from deBrito_2024_PLoSComputBiol parameters to the customized_synapses() object.
+        """
+        self.output_namespace["eta_ltp"] = value_extractor(
+            self.physio_config_df, "deb_eta_ltp"
+        )
+        self.output_namespace["eta_ltd"] = value_extractor(
+            self.physio_config_df, "deb_eta_ltd"
+        )
+        self.output_namespace["Apre"] = value_extractor(
+            self.physio_config_df, "deb_Apre"
+        )
+        self.output_namespace["Apost"] = value_extractor(
+            self.physio_config_df, "deb_Apost"
+        )
+
+        self.output_namespace["tau_x"] = value_extractor(
+            self.physio_config_df, "deb_tau_x"
+        )
+        self.output_namespace["tau_y"] = value_extractor(
+            self.physio_config_df, "deb_tau_y"
+        )
+        self.output_namespace["tau_x_avg"] = value_extractor(
+            self.physio_config_df, "deb_tau_x_avg"
+        )
+        self.output_namespace["tau_y_avg"] = value_extractor(
+            self.physio_config_df, "deb_tau_y_avg"
+        )
+        self.output_namespace["tauhomeo"] = value_extractor(
+            self.physio_config_df, "deb_tauhomeo"
+        )
+        self.output_namespace["tau_wght"] = value_extractor(
+            self.physio_config_df, "deb_tau_wght"
+        )
+
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
+            print(" ! Using custom weight: %f nS" % mean_wght)
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "deb_wght_init")
+        self.output_namespace["wght_init"] = mean_wght
+
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "deb_wght_max"
+        )
+
+        delay = (
+            value_extractor(
+                self.physio_config_df,
+                "delay_%s_%s"
+                % (
+                    self.output_synapse["pre_group_type"],
+                    self.output_synapse["post_group_type"],
+                ),
+            )
+            / ms  # noqa: F405
+        )
+        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
 
     def CPlastic(self):
         """
@@ -472,7 +574,7 @@ class SynapseParser:
             )
             / nS  # noqa: F405
         )
-        self.output_namespace["init_wght"] = f"{std_wght} * nS"
+        self.output_namespace["wght_init"] = f"{std_wght} * nS"
 
         std_delay = (
             value_extractor(
@@ -507,7 +609,7 @@ class SynapseParser:
             )
             mean_wght = mean_wght / nS  # noqa: F405
         min_wght = mean_wght / 2.0
-        self.output_namespace["init_wght"] = "(%f * rand() + %f) * nS" % (
+        self.output_namespace["wght_init"] = "(%f * rand() + %f) * nS" % (
             mean_wght,
             min_wght,
         )
@@ -551,7 +653,7 @@ class SynapseParser:
                 )
                 / nS  # noqa: F405
             )
-        self.output_namespace["init_wght"] = "%f * nS" % (mean_wght)
+        self.output_namespace["wght_init"] = "%f * nS" % (mean_wght)
 
         # Delay
         mean_delay = (
@@ -609,13 +711,13 @@ class SynapseParser:
         # SET the weight (uniform distribution [min_wght, min_wght+mean_wght])
         # NB!! You might think (min_wght, mean_wght) should be the other way around, but remember that rand gives
         # values between 0 and 1, NOT values with mean 0 like randn!
-        self.output_namespace["init_wght"] = "(%f + %f * rand()) * nS" % (
+        self.output_namespace["wght_init"] = "(%f + %f * rand()) * nS" % (
             min_wght,
             mean_wght,
         )
 
         # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
-        # NB!! Same applies here, see assignment of init_wght
+        # NB!! Same applies here, see assignment of wght_init
         mean_delay = (
             value_extractor(
                 self.physio_config_df,
@@ -671,13 +773,13 @@ class SynapseParser:
         # SET the weight (uniform distribution [min_wght, min_wght+mean_wght])
         # NB!! You might think (min_wght, mean_wght) should be the other way around, but remember that rand gives
         # values between 0 and 1, NOT values with mean 0 like randn!
-        self.output_namespace["init_wght"] = "(%f + %f * rand()) * nS" % (
+        self.output_namespace["wght_init"] = "(%f + %f * rand()) * nS" % (
             min_wght,
             mean_wght,
         )
 
         # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
-        # NB!! Same applies here, see assignment of init_wght
+        # NB!! Same applies here, see assignment of wght_init
         mean_delay = (
             value_extractor(
                 self.physio_config_df,
