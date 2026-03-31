@@ -80,7 +80,7 @@ class CxSystem:
         anatomy_and_system_config=None,
         physiology_config=None,
         output_file_suffix="",
-        unit_coords_df_path=None,
+        unit_coords_df=None,
         instantiated_from_array_run=0,
         cluster_run_start_idx=-1,
         cluster_run_step=-1,
@@ -112,7 +112,7 @@ class CxSystem:
         if anatomy_and_system_config is None or physiology_config is None:
             return
 
-        self.unit_coords_df_path = unit_coords_df_path
+        self.unit_coords_df = unit_coords_df
         self.start_time = time.time()
         self.main_module = sys.modules["__main__"]
         try:  # try to find the Cxmodule in the sys.modules, to find if the __main__ is CxSystem.py or not
@@ -999,7 +999,7 @@ class CxSystem:
                 self.general_grid_radius,
                 self.min_distance,
                 self.physio_config_df,
-                self.unit_coords_df_path,
+                self.unit_coords_df,
                 network_center=net_center,
                 cell_subtype=neuron_subtype,
             ).output_neuron
@@ -2911,7 +2911,7 @@ class CxSystem:
                     eval(radius),
                     self.min_distance,
                     self.physio_config_df,
-                    self.unit_coords_df_path,
+                    self.unit_coords_df,
                     network_center=net_center,
                 )
                 self.customized_neurons_list[current_idx]["z_positions"] = (
@@ -2973,9 +2973,23 @@ class CxSystem:
                     self.current_parameters_s == "input_spikes_filename"
                 ].index.item()
             ]
-            spikes_data = load_from_file(
-                self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
+            # Add the input spike data (unit positions + spikes) to the simulation results
+            full_input_filename = self.workspace.get_simulation_folder().joinpath(
+                input_spikes_filename
             )
+            spikes_data = load_from_file(full_input_filename)
+            self.workspace.create_results_key("input_spikes_data")
+            self.workspace.results["input_spikes_data"] = spikes_data
+
+            # Extract whether the retina input was parasol or midget cells, and add it to the input spike data
+            input_filename_stem = full_input_filename.stem.lower()
+            cell_type = "unknown"
+            for candidate in ("parasol", "midget"):
+                if candidate in input_filename_stem:
+                    cell_type = candidate
+                    break
+            self.workspace.results["input_spikes_data"]["cell_type"] = cell_type
+
             print(
                 " -   Spike file loaded from: %s"
                 % self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
