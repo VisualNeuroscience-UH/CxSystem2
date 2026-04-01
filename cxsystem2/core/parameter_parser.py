@@ -276,12 +276,12 @@ class SynapseParser:
                 "STDP",
                 "Vogels",
                 "deBrito",
-                "CPlastic",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
                 "Fixed_multiply",
                 "Depressing",
                 "Facilitating",
+                "Gap_junction",
             ]
         )
         assert output_synapse["type"] in SynapseParser.type_ref, (
@@ -383,36 +383,26 @@ class SynapseParser:
             u_f = value_extractor(self.physio_config_df, "U_f")
             self.output_namespace["U_f"] = self.scale_by_calcium(ca, u_f)
 
-    def STDP(self):
+    def _mean_to_rand_delay(self, mean_delay: float) -> str:
         """
-        Method for assigning the spike timing dependent plasticity parameters to the customized_synapses() object.
+        Method for assigning randomized delay to the customized_synapses() object.
 
-        This contains all the information about the synaptic connection.
-        Following values are set in this method: eta_ltp, eta_ltd, Apre, Apost, tau_pre, tau_post, wght_max.
+        :param mean_delay: The mean value of the delay in ms.
+        :return: A string representing the randomized delay in ms.
         """
-        self.output_namespace["eta_ltp"] = value_extractor(
-            self.physio_config_df, "eta_ltp"
+        delay_str = "(%f + %f * rand()) * ms" % (
+            mean_delay / 2.0,
+            mean_delay,
         )
-        self.output_namespace["eta_ltd"] = value_extractor(
-            self.physio_config_df, "eta_ltd"
-        )
-        self.output_namespace["Apre"] = value_extractor(self.physio_config_df, "Apre")
-        self.output_namespace["Apost"] = value_extractor(self.physio_config_df, "Apost")
-        self.output_namespace["taupre"] = value_extractor(
-            self.physio_config_df, "taupre"
-        )
-        self.output_namespace["taupost"] = value_extractor(
-            self.physio_config_df, "taupost"
-        )
-        self.output_namespace["wght_max"] = value_extractor(
-            self.physio_config_df, "wght_max"
-        )
+        return delay_str
 
-        self.output_namespace["wght_init"] = value_extractor(
-            self.physio_config_df, "wght_init"
-        )
+    def _get_mean_delay(self) -> float:
+        """
+        Method for extracting the mean delay value from the physiology configuration dataframe.
 
-        delay = (
+        :return: The mean delay value in ms.
+        """
+        mean_delay = (
             value_extractor(
                 self.physio_config_df,
                 "delay_%s_%s"
@@ -423,7 +413,78 @@ class SynapseParser:
             )
             / ms  # noqa: F405
         )
-        self.output_namespace["delay"] = f"{delay} * ms"
+        return mean_delay
+
+    def _get_mean_wght(self) -> float:
+        """
+        Method for extracting the initial weight value from the physiology configuration dataframe.
+
+        :return: The initial weight value in nS.
+        """
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
+            print(f"\n -  Using custom weight: {mean_wght:.2f} nS")
+        except:  # noqa: E722
+            mean_wght = value_extractor(
+                self.physio_config_df,
+                "cw_%s_%s"
+                % (
+                    self.output_synapse["pre_group_type"],
+                    self.output_synapse["post_group_type"],
+                ),
+            )
+            mean_wght = mean_wght / nS  # noqa: F405
+
+        return mean_wght
+
+    def _mean_rand_wght_init(self, mean_wght: float) -> str:
+        """
+        Method for assigning randomized initial weight to the customized_synapses() object.
+
+        :param mean_wght: The mean value of the initial weight in nS.
+        :return: A string representing the randomized initial weight in nS.
+        """
+        wght_init_str = "(%f + %f * rand()) * nS" % (
+            mean_wght / 2.0,
+            mean_wght,
+        )
+        return wght_init_str
+
+    def STDP(self):
+        """
+        Method for assigning the spike timing dependent plasticity parameters to the customized_synapses() object.
+
+        This contains all the information about the synaptic connection.
+        Following values are set in this method: eta_ltp, eta_ltd, Apre, Apost, tau_pre, tau_post, wght_max.
+        """
+        self.output_namespace["eta_ltp"] = value_extractor(
+            self.physio_config_df, "stdp_eta_ltp"
+        )
+        self.output_namespace["eta_ltd"] = value_extractor(
+            self.physio_config_df, "stdp_eta_ltd"
+        )
+        self.output_namespace["Apre"] = value_extractor(
+            self.physio_config_df, "stdp_Apre"
+        )
+        self.output_namespace["Apost"] = value_extractor(
+            self.physio_config_df, "stdp_Apost"
+        )
+        self.output_namespace["taupre"] = value_extractor(
+            self.physio_config_df, "stdp_taupre"
+        )
+        self.output_namespace["taupost"] = value_extractor(
+            self.physio_config_df, "stdp_taupost"
+        )
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "stdp_wght_max"
+        )
+
+        self.output_namespace["wght_init"] = value_extractor(
+            self.physio_config_df, "stdp_wght_init"
+        )
+
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
     def Vogels(self):
         """
@@ -444,12 +505,12 @@ class SynapseParser:
         )
 
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
-            print(" ! Using custom weight: %f nS" % mean_wght)
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
+            print(f"\n -  Using custom weight: {mean_wght:.2f} nS")
         except:  # noqa: E722
             mean_wght = value_extractor(self.physio_config_df, "vog_wght_init")
 
-        self.output_namespace["wght_init"] = mean_wght
+        self.output_namespace["wght_init"] = mean_wght * nS  # noqa: F405
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "vog_wght_max"
         )
@@ -459,18 +520,8 @@ class SynapseParser:
             _alpha * self.output_namespace["taupre"] * 2 * nS  # noqa: F405
         )
 
-        delay = (
-            value_extractor(
-                self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / ms  # noqa: F405
-        )
-        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
     def deBrito(self):
         """
@@ -509,85 +560,18 @@ class SynapseParser:
         )
 
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"])  # noqa: F405
-            print(" ! Using custom weight: %f nS" % mean_wght)
+            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
+            print(f"\n -  Using custom weight: {mean_wght:.2f} nS")
         except:  # noqa: E722
             mean_wght = value_extractor(self.physio_config_df, "deb_wght_init")
-        self.output_namespace["wght_init"] = mean_wght
+        self.output_namespace["wght_init"] = mean_wght * nS  # noqa: F405
 
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "deb_wght_max"
         )
 
-        delay = (
-            value_extractor(
-                self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / ms  # noqa: F405
-        )
-        self.output_namespace["delay"] = "(%f + 0 * rand()) * ms" % (delay)
-
-    def CPlastic(self):
-        """
-        The CPlastic method for assigning the parameters to the customized_synapses() object.
-
-        This contains all the information about the synaptic connection. In this method, STDP parameters are directly added to this variable.
-        Following values are set in this method: Apre, Apost, tau_pre, tau_post, wght_max, wght0.
-        """
-        self.output_namespace["A_LTD"], self.output_namespace["A_LTP"] = (
-            value_extractor(
-                self.physio_config_df,
-                "cplastic_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"]
-                    + self.output_synapse["post_comp_name"],
-                ),
-            )
-        )
-
-        self.output_namespace["Theta_low"] = value_extractor(
-            self.physio_config_df, "Theta_low"
-        )
-        self.output_namespace["v_target"] = value_extractor(
-            self.physio_config_df, "v_target"
-        )
-        self.output_namespace["ampa_max_cond"] = value_extractor(
-            self.physio_config_df, "ampa_max_cond"
-        )
-        self.output_namespace["wght_max"] = value_extractor(
-            self.physio_config_df, "w_max"
-        )
-        std_wght = (
-            value_extractor(
-                self.physio_config_df,
-                "cw_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / nS  # noqa: F405
-        )
-        self.output_namespace["wght_init"] = f"{std_wght} * nS"
-
-        std_delay = (
-            value_extractor(
-                self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / ms  # noqa: F405
-        )
-        self.output_namespace["delay"] = f"{std_delay} * ms"
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
     def Fixed_rand_wght(self):
         """
@@ -595,42 +579,12 @@ class SynapseParser:
         """
 
         # Weight
-        try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
-            print(" ! Using custom weight: %f nS" % mean_wght)
-        except:  # noqa: E722
-            mean_wght = value_extractor(
-                self.physio_config_df,
-                "cw_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            mean_wght = mean_wght / nS  # noqa: F405
-        min_wght = mean_wght / 2.0
-        self.output_namespace["wght_init"] = "(%f * rand() + %f) * nS" % (
-            mean_wght,
-            min_wght,
-        )
+        mean_wght = self._get_mean_wght()
+        self.output_namespace["wght_init"] = self._mean_rand_wght_init(mean_wght)
 
         # Delay
-        mean_delay = (
-            value_extractor(
-                self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / ms  # noqa: F405
-        )
-        min_delay = mean_delay / 2.0
-        self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (
-            mean_delay,
-            min_delay,
-        )
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
     def Fixed_const_wght(self):
         """
@@ -638,36 +592,11 @@ class SynapseParser:
         """
 
         # Weight
-        try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
-            print(" ! Using custom weight: %f nS" % mean_wght)
-        except:  # noqa: E722
-            mean_wght = (
-                value_extractor(
-                    self.physio_config_df,
-                    "cw_%s_%s"
-                    % (
-                        self.output_synapse["pre_group_type"],
-                        self.output_synapse["post_group_type"],
-                    ),
-                )
-                / nS  # noqa: F405
-            )
+        mean_wght = self._get_mean_wght()
         self.output_namespace["wght_init"] = "%f * nS" % (mean_wght)
 
-        # Delay
-        mean_delay = (
-            value_extractor(
-                self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / ms  # noqa: F405
-        )
-        self.output_namespace["delay"] = "(%f * rand() + %f) * ms" % (0, mean_delay)
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
     def Fixed_multiply(self):
         """
@@ -682,25 +611,6 @@ class SynapseParser:
 
         """
 
-        # GET weight params
-        try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
-            print(" ! Using custom weight: %f nS" % mean_wght)
-        except:  # noqa: E722
-            mean_wght = (
-                value_extractor(
-                    self.physio_config_df,
-                    "cw_%s_%s"
-                    % (
-                        self.output_synapse["pre_group_type"],
-                        self.output_synapse["post_group_type"],
-                    ),
-                )
-                / nS  # noqa: F405
-            )
-
-        min_wght = mean_wght / 2.0
-
         # GET time constant
         tau_d = value_extractor(self.physio_config_df, "tau_d")
         self.output_namespace["tau_d"] = tau_d
@@ -708,56 +618,17 @@ class SynapseParser:
         # SET utilization factor & SCALE it wrt calcium level
         self._set_utilization_factor(ca=self.calcium_concentration)
 
-        # SET the weight (uniform distribution [min_wght, min_wght+mean_wght])
-        # NB!! You might think (min_wght, mean_wght) should be the other way around, but remember that rand gives
-        # values between 0 and 1, NOT values with mean 0 like randn!
-        self.output_namespace["wght_init"] = "(%f + %f * rand()) * nS" % (
-            min_wght,
-            mean_wght,
-        )
+        mean_wght = self._get_mean_wght()
+        self.output_namespace["wght_init"] = self._mean_rand_wght_init(mean_wght)
 
-        # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
-        # NB!! Same applies here, see assignment of wght_init
-        mean_delay = (
-            value_extractor(
-                self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
-            )
-            / ms  # noqa: F405
-        )
-        min_delay = mean_delay / 2.0
-        self.output_namespace["delay"] = "(%f + %f * rand()) * ms" % (
-            min_delay,
-            mean_delay,
-        )
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
     def Facilitating(self):
         """
         Facilitating synapse
 
         """
-
-        try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
-            print(" ! Using custom weight: %f nS" % mean_wght)
-        except:  # noqa: E722
-            mean_wght = (
-                value_extractor(
-                    self.physio_config_df,
-                    "cw_%s_%s"
-                    % (
-                        self.output_synapse["pre_group_type"],
-                        self.output_synapse["post_group_type"],
-                    ),
-                )
-                / nS  # noqa: F405
-            )
-
-        min_wght = mean_wght / 2.0
 
         # GET time constants
         tau_fd = value_extractor(self.physio_config_df, "tau_fd")
@@ -770,29 +641,24 @@ class SynapseParser:
             is_facilitating=True, ca=self.calcium_concentration
         )
 
-        # SET the weight (uniform distribution [min_wght, min_wght+mean_wght])
-        # NB!! You might think (min_wght, mean_wght) should be the other way around, but remember that rand gives
-        # values between 0 and 1, NOT values with mean 0 like randn!
-        self.output_namespace["wght_init"] = "(%f + %f * rand()) * nS" % (
-            min_wght,
-            mean_wght,
-        )
+        mean_wght = self._get_mean_wght()
+        self.output_namespace["wght_init"] = self._mean_rand_wght_init(mean_wght)
 
-        # SET the synaptic delay (uniform distribution [min_delay, min_delay+mean_delay])
-        # NB!! Same applies here, see assignment of wght_init
-        mean_delay = (
-            value_extractor(
-                self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
+
+    def Gap_junction(self):
+        """
+        Method for assigning gap junction connection to the customized_synapses() object.
+        """
+
+        # Weight
+        try:
+            wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
+            print(f"\n -  Using custom weight: {wght:.2f} nS")
+        except:  # noqa: E722
+            wght = (
+                value_extractor(self.physio_config_df, "gap_junction_weight")
+                / nS  # noqa: F405
             )
-            / ms  # noqa: F405
-        )
-        min_delay = mean_delay / 2.0
-        self.output_namespace["delay"] = "(%f + %f * rand()) * ms" % (
-            min_delay,
-            mean_delay,
-        )
+        self.output_namespace["wght_init"] = "%f * nS" % (wght)

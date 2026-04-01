@@ -124,9 +124,7 @@ class PointNeuron:
         self.integration_method = "euler"
 
         # Add other defaults
-        self.initial_values = {
-            "vm": "EL"
-        }  # was vm : None, but this was not tolerated by added set_state() method in cxsystem.py
+        self.initial_values = {"vm": "EL"}
         self.states_to_monitor = ["vm"]
         self.neuron_name = (
             self.__class__.__name__ + "_" + datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -778,81 +776,6 @@ class LifNeuron(PointNeuron):
         super().__init__()
 
 
-class ClopathAdexNeuron(PointNeuron):
-    """
-    Adaptive Exponential Integrate-and-Fire (ADEX) model including CLopath_2010_NatNeurosci extra variables.
-    See Clopath et al. Nature Neuroscience 13 (2010) 344-352 <http://dx.doi.org/10.1038/nn.2479>`_.
-
-    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut, a, b, tau_w,
-    Isp, tau_z, tau_VT, VTmax, tau_lowpass1, tau_lowpass2, tau_homeo, x_reset, taux.
-    """
-
-    # The large gL and capacitance are from the original code
-    default_neuron_parameters = {
-        "EL": -70.0 * mV,
-        "V_res": -51.0 * mV,
-        "VTrest": -50.0 * mV,
-        "gL": 2 * nS,
-        "C": 10 * pF,
-        "DeltaT": 2 * mV,
-        "a": 0.5 * nS,
-        "b": 7.0 * pA,
-        "Isp": 40.0 * pA,
-        "tau_w": 100.0 * ms,
-        "tau_z": 40.0 * ms,
-        "refractory_period": 2.0 * ms,
-        "Vcut": -30.0 * mV,
-        "tau_VT": 50 * ms,
-        "VTmax": 30 * mV,
-        "tau_lowpass1": 40 * ms,  # timeconstant for low-pass filtered voltage
-        "tau_lowpass2": 30 * ms,  # timeconstant for low-pass filtered voltage
-        "tau_homeo": 1000 * ms,  # homeostatic timeconstant
-        "x_reset": 1.0,  # spike trace reset value
-        "taux": 15.0 * ms,  # spike trace time constant
-    }
-
-    neuron_model_defns = {
-        "I_NEURON_MODEL": "gL*(EL-vm) - w + z + gL * DeltaT * exp((vm-VT) / DeltaT)",
-        "NEURON_MODEL_EQS": """
-            dw/dt = (a*(vm-EL) - w) / tau_w : amp
-            dz/dt = -z / tau_z : amp                                        
-            dVT/dt = (VTrest-VT) / tau_VT : volt
-            dv_lowpass1 / dt = (vm - v_lowpass1) / tau_lowpass1 : volt      # low-pass filter of the voltage
-            dv_lowpass2 / dt = (vm - v_lowpass2) / tau_lowpass2 : volt      # low-pass filter of the voltage
-            dv_homeo / dt = (vm - EL - v_homeo) / tau_homeo : volt          # low-pass filter of the voltage
-            dx_trace / dt = -x_trace / taux :1                              # spike trace
-            """,
-    }
-    model_info_url = "https://brian2.readthedocs.io/en/stable/examples/frompapers.Clopath_et_al_2010_homeostasis.html"
-
-    def __init__(self):
-        super().__init__()
-        self.threshold_condition = "vm > VT"
-        self.reset_statements = (
-            "vm = V_res; w += b; x_trace += x_reset / (taux / ms); z = Isp; VT = VTmax"
-        )
-        self.initial_values = {
-            "vm": "EL",
-            "w": 0.0 * pA,
-            "z": 0.0 * pA,
-            "x_trace": 0.0,
-            "v_lowpass1": -70.0 * mvolt,
-            "v_lowpass2": -70.0 * mvolt,
-            "v_homeo": 0.0,
-            "VT": -50.0 * mvolt,
-        }
-        # self.states_to_monitor = ['vm', 'w']
-        new_parameter_units = {
-            "DeltaT": mV,
-            "Vcut": mV,
-            "a": nS,
-            "b": pA,
-            "tau_w": ms,
-            "tau_z": ms,
-        }
-        self.parameter_units.update(new_parameter_units)
-
-
 class EifNeuron(PointNeuron):
     """
     Exponential Integrate-and-Fire (EIF) model.
@@ -893,6 +816,56 @@ class EifNeuron(PointNeuron):
         sine_dc=1.3 * nA,
     ):
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
+
+
+class AdexGapNeuron(PointNeuron):
+    """
+    Adaptive Exponential Integrate-and-Fire (ADEX) model.
+    See Neuronal Dynamics, `Chapter 6 Section 1 <http://neuronaldynamics.epfl.ch/online/Ch6.S1.html>`_.
+
+    Requires setting the following parameters: EL, gL, C, V_res, VT, DeltaT, Vcut, a, b, tau_w.
+    """
+
+    # Default values (see Table 6.1, Initial Burst)
+    # http://neuronaldynamics.epfl.ch/online/Ch6.S2.html#Ch6.F3
+    default_neuron_parameters = {
+        "EL": -70.0 * mV,
+        "V_res": -51.0 * mV,
+        "VT": -50.0 * mV,
+        "gL": 2 * nS,
+        "C": 10 * pF,
+        "DeltaT": 2 * mV,
+        "a": 0.5 * nS,
+        "b": 7.0 * pA,
+        "tau_w": 100.0 * ms,
+        "refractory_period": 2.0 * ms,
+        "Vcut": -30.0 * mV,
+    }
+
+    neuron_model_defns = {
+        "I_NEURON_MODEL": "gL*(EL - vm) + Igap - w + gL * DeltaT * exp((vm - VT) / DeltaT)",
+        "NEURON_MODEL_EQS": """
+        dw/dt = (a*(vm-EL) - w) / tau_w : amp
+        Igap : amp
+        """,
+    }
+    model_info_url = "http://neuronaldynamics.epfl.ch/online/Ch6.S1.html"
+
+    def __init__(self):
+
+        super().__init__()
+        self.threshold_condition = "vm > Vcut"
+        self.reset_statements = "vm = V_res; w += b"
+        self.initial_values = {"vm": "EL", "w": 0 * pA}
+        self.states_to_monitor = ["vm", "w"]
+        new_parameter_units = {
+            "DeltaT": mV,
+            "Vcut": mV,
+            "a": nS,
+            "b": pA,
+            "tau_w": ms,
+        }
+        self.parameter_units.update(new_parameter_units)
 
 
 class AdexNeuron(PointNeuron):
@@ -1300,12 +1273,12 @@ class neuron_factory:
         self.name_to_class = {
             "LIF": LifNeuron,
             "LifNeuron": LifNeuron,
-            "CADEX": ClopathAdexNeuron,
-            "ClopathAdexNeuron": ClopathAdexNeuron,
             "EIF": EifNeuron,
             "EifNeuron": EifNeuron,
             "ADEX": AdexNeuron,
             "AdexNeuron": AdexNeuron,
+            "ADEXGAP": AdexGapNeuron,
+            "AdexGapNeuron": AdexGapNeuron,
             "SIMPLE_HH": HodgkinHuxleyNeuron,
             "HodgkinHuxleyNeuron": HodgkinHuxleyNeuron,
             "IZHIKEVICH": IzhikevichNeuron,

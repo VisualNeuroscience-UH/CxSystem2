@@ -44,16 +44,6 @@ class ReceptorModel:
         "SYNAPTIC_INH_EQS": "dgi/dt = -gi/tau_i : siemens",
     }
 
-    # No driving force current models, will be connection weight x conductance change, exponential synapse
-    SynapticExcInhModels["E_NDF"] = {
-        "I_SYNAPTIC_EXC": "+ ge * mV",
-        "SYNAPTIC_EXC_EQS": "dge/dt = -ge/tau_e : siemens",
-    }
-    SynapticExcInhModels["I_NDF"] = {
-        "I_SYNAPTIC_INH": "- gi * mV",
-        "SYNAPTIC_INH_EQS": "dgi/dt = -gi/tau_i : siemens",
-    }
-
     # Alpha synapses
     # Non-scaled versions provided for backwards compatibility (were used in VCX model);
     # reach only 1/e = 37% of given peak conductance
@@ -128,6 +118,18 @@ class ReceptorModel:
     ############################################################
     ###          Other excitation/inhibition models          ###
     ############################################################
+
+    # Gap junctions.
+
+    # No driving force current models, will be connection weight x conductance change, exponential synapse
+    SynapticExcInhModels["E_NDF"] = {
+        "I_SYNAPTIC_EXC": "+ ge * mV",
+        "SYNAPTIC_EXC_EQS": "dge/dt = -ge/tau_e : siemens",
+    }
+    SynapticExcInhModels["I_NDF"] = {
+        "I_SYNAPTIC_INH": "- gi * mV",
+        "SYNAPTIC_INH_EQS": "dgi/dt = -gi/tau_i : siemens",
+    }
 
     # Single-exponential AMPA+NMDA and GABA-A+GABA-B
     SynapticExcInhModels["AMPA_NMDA"] = {

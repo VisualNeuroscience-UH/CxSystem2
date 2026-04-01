@@ -867,12 +867,12 @@ class SynapseReference:
                 "STDP",
                 "Vogels",
                 "deBrito",
-                "CPlastic",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
                 "Fixed_multiply",
                 "Depressing",
                 "Facilitating",
+                "Gap_junction",
             ]
         )
         assert syn_type in SynapseReference.syntypes, (
@@ -1095,48 +1095,6 @@ class SynapseReference:
             wght = clip(wght, 0 * siemens, wght_max)
             """
 
-    def CPlastic(self):
-        """
-        The method for implementing the plastic synaptic connection according to Clopath_2010_NatNeurosci.
-
-        """
-
-        self.output_synapse["equation"] = b2.Equations(
-            """
-            # wght:siemens
-            wght:siemens
-            w_minus : siemens
-            w_plus : siemens
-            A_LTD_u : 1
-            """
-        )
-
-        # Assigning the multiplier here enables later addition of wght equation into this method .
-
-        self.output_synapse["pre_eq"] = (
-            """
-                    %s += wght * ampa_max_cond                                                                                  # increment synaptic conductance
-                    A_LTD_u = A_LTD * (v_homeo**2 / v_target)                                                                   # metaplasticity: If membrane_voltage - resting potential equals sqrt(12) => Au equals A
-                    w_minus = A_LTD_u * (v_lowpass1_post / mV - Theta_low / mV) * int(v_lowpass1_post / mV - Theta_low / mV > 0) * siemens  # depression
-                    wght = clip(wght - w_minus, 0 * siemens, wght_max)                                                           # hard bounds
-                    """
-            % (
-                self.output_synapse["receptor"]
-                + self.output_synapse["post_comp_name"]
-                + "_post"
-            )
-        )
-        # Note that the following variables are calculated for each synapse. For 100 incoming synapses, += 1 becomes += 100
-        self.output_synapse[
-            "post_eq"
-        ] = """
-                    v_lowpass1 += (10 * mV) / N_incoming
-                    v_lowpass2 += (10 * mV) / N_incoming                                                                        # mimics the depolarisation effect due to a spike
-                    v_homeo += (0.1 * mV) / N_incoming                                                                           # mimics the depolarisation effect due to a spike
-                    w_plus = A_LTP * x_trace_pre * (v_lowpass2_post / mV - Theta_low / mV) * int(v_lowpass2_post / mV - Theta_low / mV > 0) * siemens  # potentiation
-                    wght = clip(wght + w_plus, 0 * siemens, wght_max)                                                           # hard bounds
-                    """
-
     def Fixed_rand_wght(self):
         """
         The method for implementing the fixed randomized synaptic connection weights    .
@@ -1253,3 +1211,19 @@ class SynapseReference:
         )
         pre_eq = "".join(pre_eq_lines).strip()
         self.output_synapse["pre_eq"] = pre_eq
+
+    def Gap_junction(self):
+        """
+        The method for implementing gap junctions.
+
+        """
+
+        self.output_synapse["equation"] = b2.Equations(
+            """
+            wght:siemens
+            Igap_post = wght * (vm_pre - vm_post) : amp (summed)
+            """
+        )
+
+        self.output_synapse["post_eq"] = ""
+        self.output_synapse["pre_eq"] = ""
