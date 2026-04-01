@@ -438,6 +438,37 @@ class CxSystem:
         if self.device == "cpp":
             print("Compiling the model. This may take several minutes...")
 
+        if self.device == "python":
+            self._get_total_conductances()
+            self._report_total_conductances()
+            self._report_total_number_of_synapses_and_connections()
+
+    def _get_total_conductances(self):
+        self.total_conductance_dict = {
+            ng["subtype"]: {"ge": 0 * nS, "gi": 0 * nS}
+            for ng in self.customized_neurons_list
+            if "subtype" in ng
+        }
+        for synapse, params in zip(
+            self.synapses_name_list, self.customized_synapses_list
+        ):
+            post_syn_idx = params["post_group_idx"]
+            subtype = self.customized_neurons_list[int(post_syn_idx)]["subtype"]
+            self.total_conductance_dict[subtype][params["receptor"]] += eval(
+                synapse
+            ).mean_conductance_per_post_unit
+
+    def _report_total_conductances(self):
+        print("\n")
+        for synapse_name, total_conductance in self.total_conductance_dict.items():
+            print(f"Total conductance for {synapse_name}: {total_conductance}")
+
+    def _report_total_number_of_synapses_and_connections(self):
+        print(
+            f"\nTotal number of synapses: {self.total_number_of_synapses}"
+            f"\nTotal number of connections: {self.total_number_of_connections}\n"
+        )
+
     def configuration_executor(self):
         definition_lines_idx = self.anat_and_sys_conf_df.loc[:, 0][
             self.anat_and_sys_conf_df.loc[:, 0] == "row_type"
@@ -1098,6 +1129,7 @@ class CxSystem:
 
         if (background_rate is not None) or (background_rate_inhibition is not None):
             # For changing connection weight of background input according to calcium level
+
             try:
                 ca = value_extractor(self.physio_config_df, "calcium_concentration")
             except ValueError:
@@ -1817,73 +1849,36 @@ class CxSystem:
             )
 
             # creating the initial synaptic connection :
-            if "rand" in eval("%s['delay']" % _dyn_syn_namespace_name):
-                # Do NOT set delay yet
-                try:
-                    exec(
-                        "%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s)"
-                        % (
-                            _dyn_syn_name,
-                            _pre_group_idx,
-                            _post_group_idx,
-                            _dyn_syn_eq_name,
-                            _dyn_syn_pre_eq_name,
-                            _dyn_syn_post_eq_name,
-                            _dyn_syn_namespace_name,
-                        ),
-                        locals=sys._getframe().f_locals,
-                    )
-                except NameError:
-                    # for when there is no "on_post =...", i.e. fixed connection
-                    exec(
-                        "%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, namespace= %s)"
-                        % (
-                            _dyn_syn_name,
-                            _pre_group_idx,
-                            _post_group_idx,
-                            _dyn_syn_eq_name,
-                            _dyn_syn_pre_eq_name,
-                            _dyn_syn_namespace_name,
-                        ),
-                        locals=sys._getframe().f_locals,
-                    )
-            else:
-                try:
-                    exec(
-                        "%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s, delay= %s )"
-                        % (
-                            _dyn_syn_name,
-                            _pre_group_idx,
-                            _post_group_idx,
-                            _dyn_syn_eq_name,
-                            _dyn_syn_pre_eq_name,
-                            _dyn_syn_post_eq_name,
-                            _dyn_syn_namespace_name,
-                            eval(_dyn_syn_namespace_name)["delay"],
-                        ),
-                        locals=sys._getframe().f_locals,
-                    )
-                    breakpoint()
-                except NameError:
-                    # for when there is no "on_post =...", i.e. fixed connection
-                    # try:
-                    exec(
-                        "%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, "
-                        "namespace= %s, delay = %s)"
-                        % (
-                            _dyn_syn_name,
-                            _pre_group_idx,
-                            _post_group_idx,
-                            _dyn_syn_eq_name,
-                            _dyn_syn_pre_eq_name,
-                            _dyn_syn_namespace_name,
-                            eval(_dyn_syn_namespace_name)["delay"],
-                        ),
-                        locals=sys._getframe().f_locals,
-                    )
-                    # except:
-                    #     breakpoint()
-            # Connecting synapses
+            # if "rand" in eval("%s['delay']" % _dyn_syn_namespace_name):
+            #     # Do NOT set delay yet
+            try:
+                exec(
+                    "%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, on_post = %s, namespace= %s)"
+                    % (
+                        _dyn_syn_name,
+                        _pre_group_idx,
+                        _post_group_idx,
+                        _dyn_syn_eq_name,
+                        _dyn_syn_pre_eq_name,
+                        _dyn_syn_post_eq_name,
+                        _dyn_syn_namespace_name,
+                    ),
+                    locals=sys._getframe().f_locals,
+                )
+            except NameError:
+                # for when there is no "on_post =...", i.e. fixed connection
+                exec(
+                    "%s = b2.Synapses(%s,%s,model = %s, on_pre = %s, namespace= %s)"
+                    % (
+                        _dyn_syn_name,
+                        _pre_group_idx,
+                        _post_group_idx,
+                        _dyn_syn_eq_name,
+                        _dyn_syn_pre_eq_name,
+                        _dyn_syn_namespace_name,
+                    ),
+                    locals=sys._getframe().f_locals,
+                )
 
             # Technical preparations & parameter parsing first
             _syn_ref_name = (
@@ -2118,19 +2113,17 @@ class CxSystem:
                     % (_dyn_syn_name, _dyn_syn_namespace_name),
                     locals=sys._getframe().f_locals,
                 )
-                exec(
-                    "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name),
-                    locals=sys._getframe().f_locals,
-                )
 
             if self.device == "python" and eval("sum(%s.wght)==0" % _dyn_syn_name):
                 print("WARNING: Synapses %s set to zero weight!" % _dyn_syn_name)
 
             # set the delays
-            exec(
-                "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name),
-                locals=sys._getframe().f_locals,
-            )
+            if "delay" in eval(_dyn_syn_namespace_name).keys():
+                exec(
+                    "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name),
+                    locals=sys._getframe().f_locals,
+                )
+
             setattr(self.main_module, _dyn_syn_name, eval(_dyn_syn_name))
             try:
                 setattr(self.Cxmodule, _dyn_syn_name, eval(_dyn_syn_name))
@@ -2140,6 +2133,24 @@ class CxSystem:
             self.monitors(monitors.split(" "), _dyn_syn_name)
 
             if self.device == "python":
+                # Calculate and report added mean conductance per postsynaptic unit
+                _postsyn_ng = self.customized_neurons_list[int(post_syn_idx)]
+                N_post_units = _postsyn_ng["number_of_neurons"]
+
+                weights = eval(_dyn_syn_name).wght
+                total_conductance = sum(weights)
+                mean_conductance_per_post_unit = total_conductance / N_post_units
+
+                eval(_dyn_syn_name).add_attribute("mean_conductance_per_post_unit")
+                eval(_dyn_syn_name).mean_conductance_per_post_unit = (
+                    mean_conductance_per_post_unit
+                )
+
+                subtype = _postsyn_ng["subtype"]
+                print(
+                    f" -  Group {subtype}: added {mean_conductance_per_post_unit / nS :.1f} nS {receptor} conductance per unit"  # noqa: F405
+                )
+
                 tmp_namespace = {"num_tmp": 0}
                 exec(
                     "tmp_namespace['num_tmp'] = len(%s.i)" % _dyn_syn_name,
@@ -2168,30 +2179,25 @@ class CxSystem:
                 self.total_number_of_connections += _current_connections
                 try:
                     print(
-                        " -  %s%s to %s: Number of synapses %d \t Number "
-                        "of connections: %d \t Total synapses: %d \t "
-                        "Total connections: %d"
+                        " -  %s%s to %s:  \n -  Number of synapses %d \t Number "
+                        "of connections: %d \t "
                         % (
                             _load_str,
                             _pre_group_idx,
                             _post_group_idx,
                             num_tmp,
                             _current_connections,
-                            self.total_number_of_synapses,
-                            self.total_number_of_connections,
                         )
                     )
                 except (ValueError, UnboundLocalError):
                     print(
-                        " -  Connection created from %s to %s: Number of "
-                        "synapses %d \t Number of connections: %d \t Total synapses: %d \t Total connections: %d"
+                        " -  Connection created from %s to %s:"
+                        "\n -  Number of synapses %d \t Number of connections: %d \t"
                         % (
                             _pre_group_idx,
                             _post_group_idx,
                             num_tmp,
                             _current_connections,
-                            self.total_number_of_synapses,
-                            self.total_number_of_connections,
                         )
                     )
             else:
@@ -2204,6 +2210,7 @@ class CxSystem:
                         " -  Connection created from %s to %s"
                         % (_pre_group_idx, _post_group_idx)
                     )
+
             if self.default_save_flag == 1 or (
                 self.default_save_flag == -1 and _do_save
             ):
