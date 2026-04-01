@@ -461,7 +461,7 @@ class CxSystem:
     def _report_total_conductances(self):
         print("\n")
         for synapse_name, total_conductance in self.total_conductance_dict.items():
-            print(f"Total conductance for {synapse_name}: {total_conductance}")
+            print(f"Unitwise total conductance for {synapse_name}: {total_conductance}")
 
     def _report_total_number_of_synapses_and_connections(self):
         print(
@@ -3121,7 +3121,6 @@ class CxSystem:
                 pass
             # taking care of the monitors:
             self.monitors(mons.split(" "), ng_name)
-            print(f"Monitor name(s) for the input group {ng_name}: {mons.split(' ')}")
 
         def LGN(self):
             """
@@ -3270,7 +3269,6 @@ class CxSystem:
 
             # taking care of the monitors:
             self.monitors(mons.split(" "), ng_name)
-            print(f"Monitor name(s) for the input group {ng_name}: {mons.split(' ')}")
 
         assert self.sys_mode != "", " -  System mode not defined."
         assert np.any(
