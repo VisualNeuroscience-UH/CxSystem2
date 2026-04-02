@@ -505,12 +505,12 @@ class SynapseParser:
         )
 
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
-            print(f"\n -  Using custom weight: {mean_wght:.2f} nS")
+            mean_wght = eval(self.output_synapse["custom_weight"])
+            print(f"\n -  Using custom weight: {mean_wght / nS:.2f} nS")  # noqa: F405
         except:  # noqa: E722
             mean_wght = value_extractor(self.physio_config_df, "vog_wght_init")
 
-        self.output_namespace["wght_init"] = mean_wght * nS  # noqa: F405
+        self.output_namespace["wght_init"] = mean_wght
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "vog_wght_max"
         )
@@ -560,11 +560,11 @@ class SynapseParser:
         )
 
         try:
-            mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
-            print(f"\n -  Using custom weight: {mean_wght:.2f} nS")
+            mean_wght = eval(self.output_synapse["custom_weight"])
+            print(f"\n -  Using custom weight: {mean_wght / nS:.2f} nS")  # noqa: F405
         except:  # noqa: E722
             mean_wght = value_extractor(self.physio_config_df, "deb_wght_init")
-        self.output_namespace["wght_init"] = mean_wght * nS  # noqa: F405
+        self.output_namespace["wght_init"] = mean_wght
 
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "deb_wght_max"
