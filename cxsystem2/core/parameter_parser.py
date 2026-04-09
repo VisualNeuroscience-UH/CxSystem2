@@ -654,11 +654,8 @@ class SynapseParser:
 
         # Weight
         try:
-            wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
-            print(f"\n -  Using custom weight: {wght:.2f} nS")
+            wght = eval(self.output_synapse["custom_weight"])
+            print(f"\n -  Using custom weight: {wght / nS:.2f} nS")  # noqa: F405
         except:  # noqa: E722
-            wght = (
-                value_extractor(self.physio_config_df, "gap_junction_weight")
-                / nS  # noqa: F405
-            )
-        self.output_namespace["wght_init"] = "%f * nS" % (wght)
+            wght = value_extractor(self.physio_config_df, "gap_junction_weight")
+        self.output_namespace["wght_init"] = wght
