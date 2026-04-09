@@ -114,11 +114,7 @@ class CxSystem:
 
         self.unit_coords_df = unit_coords_df
         self.start_time = time.time()
-        self.main_module = sys.modules["__main__"]
-        try:  # try to find the Cxmodule in the sys.modules, to find if the __main__ is CxSystem.py or not
-            self.Cxmodule = sys.modules["cxsystem2.core.cxsystem"]
-        except KeyError:
-            pass
+        self.Cxmodule = sys.modules[__name__]
         self.parameter_to_method_mapping = {
             # system parameter definitions:
             # Parameter_name : [set priority (0 is highest),function_to_run]
@@ -1242,10 +1238,7 @@ class CxSystem:
                         locals=sys._getframe().f_locals,
                     )
 
-                    try:
-                        setattr(self.Cxmodule, poisson_target, eval(poisson_target))
-                    except AttributeError:
-                        print("Error in generating PoissonInput")
+                    setattr(self.Cxmodule, poisson_target, eval(poisson_target))
 
                 # Background inhibition for non-PC neurons
                 # Go through all inhibitory receptors
@@ -1263,12 +1256,8 @@ class CxSystem:
                         ),
                         locals=sys._getframe().f_locals,
                     )
-                    try:
-                        setattr(
-                            self.Cxmodule, poisson_target_inh, eval(poisson_target_inh)
-                        )
-                    except AttributeError:
-                        print("Error in generating PoissonInput")
+
+                    setattr(self.Cxmodule, poisson_target_inh, eval(poisson_target_inh))
 
             else:
                 try:
@@ -1323,10 +1312,7 @@ class CxSystem:
                             ),
                             locals=sys._getframe().f_locals,
                         )
-                        try:
-                            setattr(self.Cxmodule, poisson_target, eval(poisson_target))
-                        except AttributeError:
-                            print("Error in generating PoissonInput")
+                        setattr(self.Cxmodule, poisson_target, eval(poisson_target))
 
                 # Background inhibition for PC neurons (targeting soma)
                 for receptor in inh_receptors:
@@ -1343,12 +1329,7 @@ class CxSystem:
                         ),
                         locals=sys._getframe().f_locals,
                     )
-                    try:
-                        setattr(
-                            self.Cxmodule, poisson_target_inh, eval(poisson_target_inh)
-                        )
-                    except AttributeError:
-                        print("Error in generating PoissonInput")
+                    setattr(self.Cxmodule, poisson_target_inh, eval(poisson_target_inh))
 
         ###################################################
         ###           Loading neuron positions          ###
@@ -1441,11 +1422,7 @@ class CxSystem:
         #     f"\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron model is:\n{eval(_dyn_neuron_eq_name)}\n"
         # )
 
-        setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
-        try:
-            setattr(self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
-        except AttributeError:
-            pass
+        setattr(self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
 
         # passing remainder of the arguments to monitors() method to take care of the arguments.
         self.monitors(str(monitors).split(" "), _dyn_neurongroup_name)
@@ -2407,11 +2384,7 @@ class CxSystem:
                 mon_str += ")"
                 # create the Monitor() object
                 exec(mon_str, locals=sys._getframe().f_locals)
-                setattr(self.main_module, mon_name, eval(mon_name))
-                try:
-                    setattr(self.Cxmodule, mon_name, eval(mon_name))
-                except AttributeError:
-                    pass
+                setattr(self.Cxmodule, mon_name, eval(mon_name))
                 self.monitor_idx += 1
 
     def relay(self):
@@ -2500,11 +2473,7 @@ class CxSystem:
                 spk_generator = b2.SpikeGeneratorGroup(
                     thread_number_of_neurons, spk_generator_sp, spk_generator_ti
                 )
-                setattr(self.main_module, "spk_generator", spk_generator)
-                try:
-                    setattr(self.Cxmodule, "spk_generator", spk_generator)
-                except AttributeError:
-                    pass
+                setattr(self.Cxmodule, "spk_generator", spk_generator)
                 # Generated variable name for the NeuronGroup, Neuron_number,Equation, Threshold, Reset
                 thread_ng_name = (
                     self._NeuronGroup_prefix
@@ -2628,13 +2597,8 @@ class CxSystem:
                     globals(),
                     locals=sys._getframe().f_locals,
                 )
-                setattr(self.main_module, thread_ng_name, eval(thread_ng_name))
-                setattr(self.main_module, thread_sg_syn_name, eval(thread_sg_syn_name))
-                try:
-                    setattr(self.Cxmodule, thread_ng_name, eval(thread_ng_name))
-                    setattr(self.Cxmodule, thread_sg_syn_name, eval(thread_sg_syn_name))
-                except AttributeError:
-                    pass
+                setattr(self.Cxmodule, thread_ng_name, eval(thread_ng_name))
+                setattr(self.Cxmodule, thread_sg_syn_name, eval(thread_sg_syn_name))
 
                 self.monitors(mons.split(" "), thread_ng_name)
 
@@ -2819,12 +2783,7 @@ class CxSystem:
             )
             # running the string containing the syntax for creating the b2.SpikeGeneratorGroup() based on the input .mat file.
             exec(sg_str, globals(), locals=sys._getframe().f_locals)
-
-            setattr(self.main_module, sg_name, eval(sg_name))
-            try:
-                setattr(self.Cxmodule, sg_name, eval(sg_name))
-            except AttributeError:
-                pass
+            setattr(self.Cxmodule, sg_name, eval(sg_name))
 
             # Generate variable name for the NeuronGroup() object in brian2.
             _dyn_neurongroup_name = (
@@ -2948,17 +2907,8 @@ class CxSystem:
             )
             # connecting the b2.SpikeGeneratorGroup() and relay group.
             eval(sg_syn_name).connect(j="i")
-            setattr(
-                self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name)
-            )
-            setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
-            try:
-                setattr(
-                    self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name)
-                )
-                setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
-            except AttributeError:
-                pass
+            setattr(self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
+            setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
             self.monitors(mons.split(" "), _dyn_neurongroup_name)
 
         def spikes(self):
@@ -2994,11 +2944,8 @@ class CxSystem:
             spk_generator = b2.SpikeGeneratorGroup(
                 number_of_neurons, spk_generator_sp, spk_generator_ti
             )
-            setattr(self.main_module, "spk_generator", spk_generator)
-            try:
-                setattr(self.Cxmodule, "spk_generator", spk_generator)
-            except AttributeError:
-                pass
+            setattr(self.Cxmodule, "spk_generator", spk_generator)
+
             # Generated variable name for the NeuronGroup, Neuron_number,Equation, Threshold, Reset
             self.spike_input_group_idx = len(self.neurongroups_list)
             ng_name = (
@@ -3112,13 +3059,9 @@ class CxSystem:
                 globals(),
                 locals=sys._getframe().f_locals,
             )
-            setattr(self.main_module, ng_name, eval(ng_name))
-            setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
-            try:
-                setattr(self.Cxmodule, ng_name, eval(ng_name))
-                setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
-            except AttributeError:
-                pass
+            setattr(self.Cxmodule, ng_name, eval(ng_name))
+            setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
+
             # taking care of the monitors:
             self.monitors(mons.split(" "), ng_name)
 
@@ -3146,11 +3089,8 @@ class CxSystem:
             )
             self.spike_input_group_idx = len(self.neurongroups_list)
             ng_idx = self.spike_input_group_idx
-            setattr(self.main_module, f"spk_generator_{ng_idx}", spk_generator)
-            try:
-                setattr(self.Cxmodule, f"spk_generator_{ng_idx}", spk_generator)
-            except AttributeError:
-                pass
+            setattr(self.Cxmodule, f"spk_generator_{ng_idx}", spk_generator)
+
             # Generated variable name for the NeuronGroup, Neuron_number,Equation, Threshold, Reset
             ng_name = self._NeuronGroup_prefix + str(ng_idx) + "_relay_spikes"
             self.neurongroups_list.append(ng_name)
@@ -3259,13 +3199,8 @@ class CxSystem:
                 globals(),
                 locals=sys._getframe().f_locals,
             )
-            setattr(self.main_module, ng_name, eval(ng_name))
-            setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
-            try:
-                setattr(self.Cxmodule, ng_name, eval(ng_name))
-                setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
-            except AttributeError:
-                pass
+            setattr(self.Cxmodule, ng_name, eval(ng_name))
+            setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
 
             # taking care of the monitors:
             self.monitors(mons.split(" "), ng_name)
