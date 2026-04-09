@@ -114,7 +114,6 @@ class CxSystem:
 
         self.unit_coords_df = unit_coords_df
         self.start_time = time.time()
-        self.main_module = sys.modules["__main__"]
         try:  # try to find the Cxmodule in the sys.modules, to find if the __main__ is CxSystem.py or not
             self.Cxmodule = sys.modules["cxsystem2.core.cxsystem"]
         except KeyError:
@@ -1441,7 +1440,6 @@ class CxSystem:
         #     f"\nFor neuron group: {_dyn_neurongroup_name}: \nthe neuron model is:\n{eval(_dyn_neuron_eq_name)}\n"
         # )
 
-        setattr(self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
         try:
             setattr(self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
         except AttributeError:
@@ -2407,7 +2405,6 @@ class CxSystem:
                 mon_str += ")"
                 # create the Monitor() object
                 exec(mon_str, locals=sys._getframe().f_locals)
-                setattr(self.main_module, mon_name, eval(mon_name))
                 try:
                     setattr(self.Cxmodule, mon_name, eval(mon_name))
                 except AttributeError:
@@ -2500,7 +2497,6 @@ class CxSystem:
                 spk_generator = b2.SpikeGeneratorGroup(
                     thread_number_of_neurons, spk_generator_sp, spk_generator_ti
                 )
-                setattr(self.main_module, "spk_generator", spk_generator)
                 try:
                     setattr(self.Cxmodule, "spk_generator", spk_generator)
                 except AttributeError:
@@ -2628,8 +2624,6 @@ class CxSystem:
                     globals(),
                     locals=sys._getframe().f_locals,
                 )
-                setattr(self.main_module, thread_ng_name, eval(thread_ng_name))
-                setattr(self.main_module, thread_sg_syn_name, eval(thread_sg_syn_name))
                 try:
                     setattr(self.Cxmodule, thread_ng_name, eval(thread_ng_name))
                     setattr(self.Cxmodule, thread_sg_syn_name, eval(thread_sg_syn_name))
@@ -2820,7 +2814,6 @@ class CxSystem:
             # running the string containing the syntax for creating the b2.SpikeGeneratorGroup() based on the input .mat file.
             exec(sg_str, globals(), locals=sys._getframe().f_locals)
 
-            setattr(self.main_module, sg_name, eval(sg_name))
             try:
                 setattr(self.Cxmodule, sg_name, eval(sg_name))
             except AttributeError:
@@ -2948,10 +2941,6 @@ class CxSystem:
             )
             # connecting the b2.SpikeGeneratorGroup() and relay group.
             eval(sg_syn_name).connect(j="i")
-            setattr(
-                self.main_module, _dyn_neurongroup_name, eval(_dyn_neurongroup_name)
-            )
-            setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
             try:
                 setattr(
                     self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name)
@@ -2994,7 +2983,6 @@ class CxSystem:
             spk_generator = b2.SpikeGeneratorGroup(
                 number_of_neurons, spk_generator_sp, spk_generator_ti
             )
-            setattr(self.main_module, "spk_generator", spk_generator)
             try:
                 setattr(self.Cxmodule, "spk_generator", spk_generator)
             except AttributeError:
@@ -3112,8 +3100,6 @@ class CxSystem:
                 globals(),
                 locals=sys._getframe().f_locals,
             )
-            setattr(self.main_module, ng_name, eval(ng_name))
-            setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
             try:
                 setattr(self.Cxmodule, ng_name, eval(ng_name))
                 setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
@@ -3146,7 +3132,6 @@ class CxSystem:
             )
             self.spike_input_group_idx = len(self.neurongroups_list)
             ng_idx = self.spike_input_group_idx
-            setattr(self.main_module, f"spk_generator_{ng_idx}", spk_generator)
             try:
                 setattr(self.Cxmodule, f"spk_generator_{ng_idx}", spk_generator)
             except AttributeError:
@@ -3259,8 +3244,6 @@ class CxSystem:
                 globals(),
                 locals=sys._getframe().f_locals,
             )
-            setattr(self.main_module, ng_name, eval(ng_name))
-            setattr(self.main_module, sg_syn_name, eval(sg_syn_name))
             try:
                 setattr(self.Cxmodule, ng_name, eval(ng_name))
                 setattr(self.Cxmodule, sg_syn_name, eval(sg_syn_name))
