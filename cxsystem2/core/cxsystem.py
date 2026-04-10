@@ -3069,6 +3069,7 @@ class CxSystem:
                     self.current_parameters_s == "input_spikes_filename"
                 ].index.item()
             ]
+            # TODO: the following call looks for input files in the output folder. It fails unless input files have already been copied to the output folder   
             spikes_data = load_from_file(
                 self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
             )
