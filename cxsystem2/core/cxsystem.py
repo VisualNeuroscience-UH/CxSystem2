@@ -2100,12 +2100,7 @@ class CxSystem:
                     "%s.delay=%s['delay']" % (_dyn_syn_name, _dyn_syn_namespace_name),
                     locals=sys._getframe().f_locals,
                 )
-
-            setattr(self.main_module, _dyn_syn_name, eval(_dyn_syn_name))
-            try:
-                setattr(self.Cxmodule, _dyn_syn_name, eval(_dyn_syn_name))
-            except AttributeError:
-                pass
+            setattr(self.Cxmodule, _dyn_syn_name, eval(_dyn_syn_name))
 
             self.monitors(monitors.split(" "), _dyn_syn_name)
 
