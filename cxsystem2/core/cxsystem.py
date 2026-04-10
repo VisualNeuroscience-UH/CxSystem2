@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import platform
 import shutil
+import subprocess
 import sys
 import threading
 import time
@@ -359,23 +360,33 @@ class CxSystem:
                 with open(tmp_physio_path2, "w") as f:
                     json.dump(physiology_config, f)
                 physiology_config = tmp_physio_path2
-            # this is vulnerable to code injection
-            if sys.platform == "linux":
-                # Local
-                from cxsystem2.hpc.array_run import ArrayRun
 
-                # When in cluster, here you run the individual parameter set. The tmp_anat_path and tmp_physio_path are dataframes with correct params.
-                ArrayRun(
+            if sys.platform == "linux":
+                stdout_arg = (
+                    "None"
+                    if self.array_run_stdout_file is None
+                    else str(self.array_run_stdout_file)
+                )
+                command = [
+                    sys.executable,
+                    array_run_path,
                     tmp_anat_path,
                     tmp_physio_path,
-                    suffix,
-                    int(cluster_run_start_idx),
-                    int(cluster_run_step),
-                    anatomy_and_system_config,
-                    physiology_config,
-                    cluster_flag,
-                    self.array_run_stdout_file,
-                )
+                    str(suffix),
+                    str(int(cluster_run_start_idx)),
+                    str(int(cluster_run_step)),
+                    str(anatomy_and_system_config),
+                    str(physiology_config),
+                    str(cluster_flag),
+                    stdout_arg,
+                ]
+                try:
+                    subprocess.run(command, check=True)
+                except subprocess.CalledProcessError as exc:
+                    raise RuntimeError(
+                        f"array_run.py failed with exit code {exc.returncode}"
+                    ) from exc
+                
             else:
                 command = "python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}".format(
                     array_run=array_run_path,
