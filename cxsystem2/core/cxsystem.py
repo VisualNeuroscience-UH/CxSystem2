@@ -452,7 +452,7 @@ class CxSystem:
 
     def _get_total_conductances(self):
         self.total_conductance_dict = {
-            ng["subtype"]: {"ge": 0 * nS, "gi": 0 * nS}
+            ng["subtype"]: {"ge": 0 * nS, "gi": 0 * nS} # noqa: F405
             for ng in self.customized_neurons_list
             if "subtype" in ng
         }
