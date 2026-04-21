@@ -819,7 +819,7 @@ class CxSystem:
             return
         self.imported_connections = self.workspace.import_connections()
         print(
-            " -  Connection file loaded from {}".format(
+            "\n -  Connection file loaded from {}\n".format(
                 self.workspace.imported_connections_path.as_posix()
             )
         )
@@ -1882,17 +1882,10 @@ class CxSystem:
 
             # Technical preparations & parameter parsing first
             _syn_ref_name = (
-                self.neurongroups_list[int(current_pre_syn_idx)][
-                    self.neurongroups_list[int(current_pre_syn_idx)].index("_") + 1 :
-                ]
+                self.neurongroups_list[int(current_pre_syn_idx)]
                 + "__to__"
                 + self.neurongroups_list[
                     self.customized_synapses_list[-1]["post_group_idx"]
-                ][
-                    self.neurongroups_list[
-                        self.customized_synapses_list[-1]["post_group_idx"]
-                    ].index("_")
-                    + 1 :
                 ]
                 + self.customized_synapses_list[-1]["post_comp_name"]
             )

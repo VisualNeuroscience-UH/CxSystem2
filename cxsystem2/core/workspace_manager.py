@@ -103,32 +103,57 @@ class Workspace:
         self.imported_connections_path = Path(path).expanduser()
 
     def import_connections(self):
-        assert (
-            self.imported_connections_path.suffix
-            in self.compression_to_extension.values()
-        ), " -  Compression method {} is not supported. Supported methods are gzip (gz), bzip2 (bz2) or pickle (pkl)".format(
-            self.imported_connections_path.suffix
-        )
-        if not self.imported_connections_path.is_absolute():
-            if self.workspace_path.joinpath(self.imported_connections_path).is_file():
-                self.imported_connections_path = self.workspace_path.joinpath(
-                    self.imported_connections_path
-                )
-            elif Path.cwd().joinpath(self.imported_connections_path).is_file():
-                self.imported_connections_path = Path.cwd().joinpath(
-                    self.imported_connections_path
-                )
-            elif Path.cwd().parent.joinpath(self.imported_connections_path).is_file():
-                self.imported_connections_path = Path.cwd().parent.joinpath(
-                    self.imported_connections_path
-                )
+
+        def _find_most_recent_pattern(path, pattern):
+            files = list(Path(path).glob(pattern))
+
+            if not files:
+                raise FileNotFoundError(f"\nNo {pattern} found in {path}")
             else:
-                raise FileNotFoundError(
-                    " -  Connection file not found: {}".format(
-                        self.imported_connections_path.as_posix()
-                    )
-                )
-        return load_from_file(self.imported_connections_path)
+                # Take most recent matching file
+                print(
+                    f"\n -  Multiple {pattern} found in {path}. Taking the most recent one:"
+                )  # noqa: E501
+                return max(files, key=os.path.getmtime)
+
+        if self.imported_connections_path.is_file():
+            connections_fullpath_filename = self.imported_connections_path
+        elif self.imported_connections_path.is_dir():
+            # Find most recent *connections*.gz file in the specified folder
+            connections_fullpath_filename = _find_most_recent_pattern(
+                self.imported_connections_path,
+                "*connections*{}".format(self.output_extension),
+            )
+        elif self.workspace_path.joinpath(self.imported_connections_path).is_file():
+            # Assume the path is relative to workspace
+            connections_fullpath_filename = self.workspace_path.joinpath(
+                self.imported_connections_path
+            )
+
+        elif (
+            self.workspace_path.joinpath(self.simulation_name)
+            .joinpath(self.imported_connections_path)
+            .is_file()
+        ):
+            # Assume the path is relative to workspace
+            connections_fullpath_filename = self.workspace_path.joinpath(
+                self.simulation_name
+            ).joinpath(self.imported_connections_path)
+
+        elif self.workspace_path.joinpath(self.imported_connections_path).is_dir():
+            # Find most recent *connections*.gz file in the specified folder relative to workspace
+            connections_fullpath_filename = _find_most_recent_pattern(
+                self.workspace_path.joinpath(self.imported_connections_path),
+                "*connections*{}".format(self.output_extension),
+            )
+
+        else:
+            raise FileNotFoundError(
+                f" -  Connection file not found: {self.imported_connections_path.as_posix()}"
+            )
+
+        self.imported_connections_path = connections_fullpath_filename
+        return load_from_file(connections_fullpath_filename.as_posix())
 
     def create_results_key(self, key):
         """
