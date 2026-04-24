@@ -609,8 +609,16 @@ class CxSystem:
 
             if self.device not in ["cpp", "cuda"]:
                 b2.run(self.runtime, report="text")
+            elif self.device == "cpp":
+                target_directory = (
+                self.workspace.get_simulation_folder().joinpath("standalone_code")
+                )   
+                b2.run(self.runtime, report="text")
+                b2.device.build(directory=target_directory, run=False, compile=True)
+                b2.device.run()
             else:
                 b2.run(self.runtime, report="text")
+            
             if self.profiling == 1:
                 print()
                 if len(b2.profiling_summary().names) < 20:
@@ -693,11 +701,12 @@ class CxSystem:
                     .as_posix()
                 )
             elif self.device == "cpp":
-                shutil.rmtree(
-                    self.workspace.get_simulation_folder()
-                    .joinpath(self.suffix[1:])
-                    .as_posix()
-                )
+                dt = b2.device.defaultclock.dt
+                b2.device.delete(code=True, data=True, run_args=True, directory=True)
+                b2.device.reinit()
+                b2.device.activate()
+                b2.device.defaultclock = b2.Clock(dt=dt, name="defaultclock")
+
             return results
 
     def set_runtime_parameters(self):
@@ -767,7 +776,7 @@ class CxSystem:
         if self.device == "cuda":
             b2.set_device("cuda_standalone", directory=target_directory)
         elif self.device == "cpp":
-            b2.set_device("cpp_standalone", directory=target_directory)
+            b2.set_device('cpp_standalone', build_on_run=False)
 
     def _set_runtime(self, *args):
         assert (
