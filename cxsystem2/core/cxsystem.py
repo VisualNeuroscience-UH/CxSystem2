@@ -386,7 +386,7 @@ class CxSystem:
                     raise RuntimeError(
                         f"array_run.py failed with exit code {exc.returncode}"
                     ) from exc
-                
+
             else:
                 command = "python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}".format(
                     array_run=array_run_path,
@@ -452,7 +452,7 @@ class CxSystem:
 
     def _get_total_conductances(self):
         self.total_conductance_dict = {
-            ng["subtype"]: {"ge": 0 * nS, "gi": 0 * nS} # noqa: F405
+            ng["subtype"]: {"ge": 0 * nS, "gi": 0 * nS}  # noqa: F405
             for ng in self.customized_neurons_list
             if "subtype" in ng
         }
@@ -610,15 +610,15 @@ class CxSystem:
             if self.device not in ["cpp", "cuda"]:
                 b2.run(self.runtime, report="text")
             elif self.device == "cpp":
-                target_directory = (
-                self.workspace.get_simulation_folder().joinpath("standalone_code")
-                )   
+                target_directory = self.workspace.get_simulation_folder().joinpath(
+                    "standalone_code"
+                )
                 b2.run(self.runtime, report="text")
                 b2.device.build(directory=target_directory, run=False, compile=True)
                 b2.device.run()
             else:
                 b2.run(self.runtime, report="text")
-            
+
             if self.profiling == 1:
                 print()
                 if len(b2.profiling_summary().names) < 20:
@@ -776,7 +776,7 @@ class CxSystem:
         if self.device == "cuda":
             b2.set_device("cuda_standalone", directory=target_directory)
         elif self.device == "cpp":
-            b2.set_device('cpp_standalone', build_on_run=False)
+            b2.set_device("cpp_standalone", build_on_run=False)
 
     def _set_runtime(self, *args):
         assert (
@@ -3082,7 +3082,7 @@ class CxSystem:
                     self.current_parameters_s == "input_spikes_filename"
                 ].index.item()
             ]
-            # TODO: the following call looks for input files in the output folder. It fails unless input files have already been copied to the output folder   
+            # TODO: the following call looks for input files in the output folder. It fails unless input files have already been copied to the output folder
             spikes_data = load_from_file(
                 self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
             )
