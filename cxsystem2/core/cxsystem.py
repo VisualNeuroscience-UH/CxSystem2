@@ -386,7 +386,7 @@ class CxSystem:
                     raise RuntimeError(
                         f"array_run.py failed with exit code {exc.returncode}"
                     ) from exc
-                
+
             else:
                 command = "python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}".format(
                     array_run=array_run_path,
@@ -452,7 +452,7 @@ class CxSystem:
 
     def _get_total_conductances(self):
         self.total_conductance_dict = {
-            ng["subtype"]: {"ge": 0 * nS, "gi": 0 * nS} # noqa: F405
+            ng["subtype"]: {"ge": 0 * nS, "gi": 0 * nS}  # noqa: F405
             for ng in self.customized_neurons_list
             if "subtype" in ng
         }
@@ -610,15 +610,15 @@ class CxSystem:
             if self.device not in ["cpp", "cuda"]:
                 b2.run(self.runtime, report="text")
             elif self.device == "cpp":
-                target_directory = (
-                self.workspace.get_simulation_folder().joinpath("standalone_code")
-                )   
+                target_directory = self.workspace.get_simulation_folder().joinpath(
+                    "standalone_code"
+                )
                 b2.run(self.runtime, report="text")
                 b2.device.build(directory=target_directory, run=False, compile=True)
                 b2.device.run()
             else:
                 b2.run(self.runtime, report="text")
-            
+
             if self.profiling == 1:
                 print()
                 if len(b2.profiling_summary().names) < 20:
@@ -776,7 +776,7 @@ class CxSystem:
         if self.device == "cuda":
             b2.set_device("cuda_standalone", directory=target_directory)
         elif self.device == "cpp":
-            b2.set_device('cpp_standalone', build_on_run=False)
+            b2.set_device("cpp_standalone", build_on_run=False)
 
     def _set_runtime(self, *args):
         assert (
@@ -907,9 +907,11 @@ class CxSystem:
         ###################################################
         ###            Parameter preprocessing          ###
         ###################################################
-        assert self.sys_mode != "", " -  System mode is not defined."
-        _all_columns = [
+
+        # Neurongroup metadata columns and default values
+        ng_metadata_columns = [
             "idx",
+            "area",
             "number_of_neurons",
             "neuron_type",
             "layer_idx",
@@ -919,144 +921,132 @@ class CxSystem:
             "n_background_inhibition",
             "neuron_subtype",
         ]
-        _obligatory_params = [0, 1, 2, 3]
-        assert len(self.current_values_s) >= len(_all_columns), (
-            " -  One or more of of the columns for NeuronGroups definition \
-        is missing. Following obligatory columns should be defined:\n%s\n "
-            % str([_all_columns[ii] for ii in _obligatory_params])
-        )
-        obligatory_columns = list(np.array(_all_columns)[_obligatory_params])
-        obligatory_indices = [
-            next(iter(self.current_parameters_s[self.current_parameters_s == ii].index))
-            for ii in obligatory_columns
-        ]
-        assert not np.any(
-            self.current_values_s.loc[obligatory_indices] == "--"
-        ), ' -  Following obligatory values cannot be "--":\n%s' % str(
-            [_all_columns[ii] for ii in _obligatory_params]
-        )
-        assert len(self.current_values_s) == self.current_parameters_s_orig_len, (
-            " -  One or more of of the columns for NeuronGroup definition is missing in the following"
-            " line (lengths not equal: {} and {}):\n {} \n {}  ".format(
-                len(self.current_values_s),
-                self.current_parameters_s_orig_len,
-                self.current_parameters_s,
-                self.current_values_s,
-            )
-        )
-        local_namespace = {
+
+        neurongroup_metadata = {
             "idx": -1,
-            "net_center": 0 + 0j,
+            "area": "",
+            "net_center": complex(0 + 0j),
             "number_of_neurons": 0,
-            "n_background_inputs": "",
-            "n_background_inhibition": "",
+            "n_background_inputs": 0,
+            "n_background_inhibition": 0,
             "neuron_subtype": "",
             "neuron_type": "",
             "layer_idx": 0,
             "monitors": "",
         }
 
-        for column in _all_columns:
-            try:
-                tmp_value_idx = int(
-                    next(
-                        iter(
-                            self.current_parameters_s[
-                                self.current_parameters_s == column
-                            ].index
-                        ),
-                        "no match",
-                    )
-                )
-                tmp_var_str = "local_namespace['%s']=self.current_values_s[%d]" % (
-                    column,
-                    tmp_value_idx,
-                )
-                exec(tmp_var_str, locals=sys._getframe().f_locals)
-            except ValueError:
-                exec(
-                    "local_namespace['%s']='--'" % column,
-                    locals=sys._getframe().f_locals,
-                )
+        # Data integrity checks
+        if self.sys_mode == "":
+            raise ValueError(" -  System mode is not defined.")
 
-        idx = local_namespace["idx"]
-        net_center = local_namespace["net_center"]
-        number_of_neurons = local_namespace["number_of_neurons"]
-        n_background_inputs = local_namespace["n_background_inputs"]
-        n_background_inhibition = local_namespace["n_background_inhibition"]
-        monitors = local_namespace["monitors"]
-        neuron_type = local_namespace["neuron_type"]
-        neuron_subtype = local_namespace["neuron_subtype"]
+        required_columns = ng_metadata_columns[0:4]
+        missing = [
+            item
+            for item in required_columns
+            if item not in self.current_parameters_s.values
+        ]
+        if missing:
+            raise ValueError(
+                f"Column(s) {missing} are missing for NeuronGroup definition."
+                "Columns 'idx', 'area', 'number_of_neurons, and 'neuron_type'"
+                "must be provided for all neuron groups in the anatomy csv file."
+            )
 
-        assert (
-            idx not in self.NG_indices
-        ), " -  Multiple indices with same values exist in the configuration file."
-        self.NG_indices.append(idx)
-        if net_center == "--":
-            net_center = (
-                0 + 0j
-            )  # center position of the neuron group in visual field coordinates,
-            # description can be found in configuration file tutorial.
-        net_center = complex(net_center)
-        current_idx = len(self.customized_neurons_list)
+        required_values = self.current_values_s[
+            self.current_parameters_s.isin(required_columns)
+        ]
+        if "--" in required_values:
+            raise ValueError(
+                " -  Columns 'idx', 'area', 'number_of_neurons, and 'neuron_type' "
+                "in the anatomy csv file cannot contain the value '--'."
+            )
 
-        if n_background_inputs == "--":
-            n_background_inputs = "0"
-        if n_background_inhibition == "--":
-            n_background_inhibition = "0"
+        # Replace defaults in neurongroup_metadata with values from self.current_parameters_s, if existing
+        for column in ng_metadata_columns:
+            current_index = self.current_parameters_s.index[
+                self.current_parameters_s == column
+            ][0]
+            current_value = self.current_values_s.get(current_index)
+            if current_value is not None and current_value != "--":
+                neurongroup_metadata[column] = current_value
 
-        # assert 'V' in str(noise_sigma.get_best_unit()), ' -  The unit of noise_sigma should be volt'
-        if neuron_type == "PC":  # extract the layer index of PC neurons separately
-            if local_namespace["layer_idx"].isdigit():
-                local_namespace["layer_idx"] = local_namespace["layer_idx"]
-            else:
-                local_namespace["layer_idx"] = eval(
-                    local_namespace["layer_idx"].replace("->", ",")
-                )
-        layer_idx = local_namespace["layer_idx"]
+        # Code downstream expects number_of_neurons as a separate variable
+        number_of_neurons = neurongroup_metadata["number_of_neurons"]
+
+        # More data checks
         try:
             number_of_neurons = str(round(float(number_of_neurons) * self.scale))
-        except AttributeError:
-            pass
+        except ValueError as e:
+            raise ValueError(
+                " -  Provide a whole number of neurons for each of the neurongroups "
+                f"in the anatomy csv file. Value provided: {number_of_neurons} "
+                f"for the neurongroup with index: {neurongroup_metadata["idx"]}."
+            ) from e
+
+        if neurongroup_metadata["idx"] in self.NG_indices:
+            raise ValueError(
+                " -  Multiple neuron groups with the same index value "
+                "exist in the anatomy csv file."
+            )
+
+        # Values for downstream use
+        self.NG_indices.append(neurongroup_metadata["idx"])
+        current_idx = len(self.customized_neurons_list)
+        neurongroup_metadata["net_center"] = complex(neurongroup_metadata["net_center"])
+
+        if (
+            neurongroup_metadata["neuron_type"] == "PC"
+        ):  # extract the layer index of PC neurons separately
+            if not neurongroup_metadata["layer_idx"].isdigit():
+                neurongroup_metadata["layer_idx"] = eval(
+                    neurongroup_metadata["layer_idx"].replace("->", ",")
+                )
 
         ###################################################
         ###        Generation of neuron reference       ###
         ###################################################
         self.customized_neurons_list.append(
             NeuronReference(
-                idx,
+                neurongroup_metadata["idx"],
                 number_of_neurons,
-                neuron_type,
-                layer_idx,
+                neurongroup_metadata["area"],
+                neurongroup_metadata["neuron_type"],
+                neurongroup_metadata["layer_idx"],
                 self.general_grid_radius,
                 self.min_distance,
                 self.physio_config_df,
                 self.unit_coords_df,
-                network_center=net_center,
-                cell_subtype=neuron_subtype,
+                network_center=neurongroup_metadata["net_center"],
+                cell_subtype=neurongroup_metadata["neuron_subtype"],
             ).output_neuron
         )  # creating a
         # NeuronReference() object and passing the positional arguments to it. The main member of the class called
         # output_neuron is then appended to customized_neurons_list.
 
         # Generating variable names for Groups, NeuronNumbers, Equations, Threshold, Reset, Refractory and Namespace
-        if neuron_subtype == "--":
+        if neurongroup_metadata["neuron_subtype"] == "--":
             _dyn_neurongroup_name = (
                 self._NeuronGroup_prefix
                 + str(current_idx)
                 + "_"
-                + neuron_type
+                + neurongroup_metadata["neuron_type"]
                 + "_L"
-                + str(layer_idx).replace(", ", "toL").replace("[", "").replace("]", "")
+                + str(neurongroup_metadata["layer_idx"])
+                .replace(", ", "toL")
+                .replace("[", "")
+                .replace("]", "")
             )
         else:
             _dyn_neurongroup_name = (
                 self._NeuronGroup_prefix
                 + str(current_idx)
                 + "_"
-                + neuron_subtype
+                + neurongroup_metadata["neuron_subtype"]
                 + "_L"
-                + str(layer_idx).replace(", ", "toL").replace("[", "").replace("]", "")
+                + str(neurongroup_metadata["layer_idx"])
+                .replace(", ", "toL")
+                .replace("[", "")
+                .replace("]", "")
             )
         self.neurongroups_list.append(_dyn_neurongroup_name)
         _dyn_neuronnumber_name = self._NeuronNumber_prefix + str(current_idx)
@@ -1162,7 +1152,7 @@ class CxSystem:
                 {
                     "type": "Fixed_rand_wght",
                     "pre_group_type": "SS",
-                    "post_group_type": neuron_type,
+                    "post_group_type": neurongroup_metadata["neuron_type"],
                 },
                 self.physio_config_df,
             )
@@ -1170,12 +1160,12 @@ class CxSystem:
                 {
                     "type": "Fixed_rand_wght",
                     "pre_group_type": "BC",
-                    "post_group_type": neuron_type,
+                    "post_group_type": neurongroup_metadata["neuron_type"],
                 },
                 self.physio_config_df,
             )
 
-            if neuron_type in ["L1i", "BC", "MC"]:
+            if neurongroup_metadata["neuron_type"] in ["L1i", "BC", "MC"]:
                 background_weight = value_extractor(
                     self.physio_config_df, "background_E_I_weight"
                 )
@@ -1219,7 +1209,7 @@ class CxSystem:
                     background_weight = repr(background_weight)
                     background_weight_inhibition = repr(background_weight_inhibition)
 
-            if neuron_type != "PC":
+            if neurongroup_metadata["neuron_type"] != "PC":
                 try:
                     excitation_model = value_extractor(
                         self.physio_config_df, "excitation_model"
@@ -1251,7 +1241,7 @@ class CxSystem:
                             poisson_target,
                             _dyn_neurongroup_name,
                             receptor,
-                            n_background_inputs,
+                            neurongroup_metadata["n_background_inputs"],
                             background_rate,
                             background_weight,
                         ),
@@ -1270,7 +1260,7 @@ class CxSystem:
                             poisson_target_inh,
                             _dyn_neurongroup_name,
                             receptor,
-                            n_background_inhibition,
+                            neurongroup_metadata["n_background_inhibition"],
                             background_rate_inhibition,
                             background_weight_inhibition,
                         ),
@@ -1305,7 +1295,8 @@ class CxSystem:
                     int(self.customized_neurons_list[-1]["total_comp_num"]) - 1
                 )  # No excitatory input to soma
                 n_inputs_to_each_comp = int(
-                    int(n_background_inputs) / n_target_compartments
+                    int(neurongroup_metadata["n_background_inputs"])
+                    / n_target_compartments
                 )
                 target_comp_list = ["basal", "a0"]
                 target_comp_list.extend(
@@ -1343,7 +1334,7 @@ class CxSystem:
                             poisson_target_inh,
                             _dyn_neurongroup_name,
                             receptor,
-                            n_background_inhibition,
+                            neurongroup_metadata["n_background_inhibition"],
                             background_rate_inhibition,
                             background_weight_inhibition,
                         ),
@@ -1445,7 +1436,9 @@ class CxSystem:
         setattr(self.Cxmodule, _dyn_neurongroup_name, eval(_dyn_neurongroup_name))
 
         # passing remainder of the arguments to monitors() method to take care of the arguments.
-        self.monitors(str(monitors).split(" "), _dyn_neurongroup_name)
+        self.monitors(
+            str(neurongroup_metadata["monitors"]).split(" "), _dyn_neurongroup_name
+        )
 
     def synapse(self):
         """
@@ -2868,6 +2861,7 @@ class CxSystem:
                     current_idx,
                     int(number_of_neurons),
                     "VPM",
+                    "VPM",
                     "0",
                     eval(radius),
                     self.min_distance,
@@ -3082,7 +3076,7 @@ class CxSystem:
                     self.current_parameters_s == "input_spikes_filename"
                 ].index.item()
             ]
-            # TODO: the following call looks for input files in the output folder. It fails unless input files have already been copied to the output folder   
+            # TODO: the following call looks for input files in the output folder. It fails unless input files have already been copied to the output folder
             spikes_data = load_from_file(
                 self.workspace.get_simulation_folder().joinpath(input_spikes_filename)
             )

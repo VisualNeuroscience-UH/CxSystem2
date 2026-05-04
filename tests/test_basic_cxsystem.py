@@ -94,8 +94,8 @@ class TestConfigurationExecutor:
             CM.customized_neurons_list[0]["z_positions"][0], np.complex128
         )
         assert len(CM.customized_neurons_list[0].keys()) == 5
-        assert len(CM.customized_neurons_list[1].keys()) == 18
-        assert len(CM.customized_neurons_list[2].keys()) == 18
+        assert len(CM.customized_neurons_list[1].keys()) == 19
+        assert len(CM.customized_neurons_list[2].keys()) == 19
 
     def test__set_scale(self):
         assert isinstance(CM.scale, float)

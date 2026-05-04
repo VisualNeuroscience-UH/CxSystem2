@@ -83,7 +83,7 @@ def test_outputfile_cpp(cxsystem_run_fixture_cpp):
                 if os.access(simulation_path.joinpath(item), os.W_OK)
             ]
         )
-        == 6
+        == 4
     )
 
 

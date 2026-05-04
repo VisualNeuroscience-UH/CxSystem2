@@ -34,6 +34,7 @@ class NeuronReference:
         self,
         idx,
         number_of_neurons,
+        area,
         cell_type,
         layers_idx,
         general_grid_radius,
@@ -92,6 +93,7 @@ class NeuronReference:
         self.output_neuron = {
             "idx": int(idx),
             "number_of_neurons": int(number_of_neurons),
+            "area": area,
             "threshold": "vm>Vcut",
             "reset": "vm=V_res",
             "refractory": "4 * ms",
