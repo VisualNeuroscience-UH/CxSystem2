@@ -209,8 +209,47 @@ depressing and facilitating synapses are defined in the :ref:`Physiology configu
 
         :code:`custom_weight{float*unit}`: Synaptic weight for this specific connection, e.g. 1.5*nS. Overrides :ref:`more general weight definitions <connection_params>`.
 
-        :code:`spatial_decay{float,[ij],float[ij]}`: When sys_mode is expanded, provides lambda (spatial decay parameter) for  weight * p * exp(-lambda * d); d is the distance between neurons in mm. [ij] stands for 1-to-1 connections, and useful only when you have the same N units in the pre- and postsynaptic groups.
+        :code:`spatial_decay{float,[ij],float[ij]}`: Defines the distance-dependent decay of connection probability in **expanded mode**. The parameter accepts three formats:
 
+          * :code:`spatial_decay = "0"` or :code:`float` (e.g., 0.1):
+                Connection probability is uniform (if :code:`spatial_decay = "0"`) or decays exponentially with distance (if :code:`float`).
+                The formula for decay is: :code:`p * exp(-lambda * d)`, where:
+                :code:`p` is the base connection probability (from the :code:`p` parameter),
+                :code:`lambda` is the value of :code:`spatial_decay` (in units of 1/mm),
+                :code:`d` is the Euclidean distance between neurons (in mm).
+                **Autoconnections (`i=j`) are excluded** (equivalent to :code:`condition='i!=j'` in Brian2).
+
+                Example:
+                If :code:`spatial_decay = "0"` and :code:`p = 0.5`, all non-self connections have probability 0.5.
+                If :code:`spatial_decay = 0.1` and :code:`p = 0.5`, the connection probability at 10 mm is: :code:`0.5 * exp(-0.1 * 10) ≈ 0.184`. No self connections at distance = 0 mm.
+
+            * :code:`spatial_decay = "[ij]"`:
+                Enforces **one-to-one connections** between pre- and postsynaptic neurons.
+                Only valid if the pre- and postsynaptic groups have the same number of neurons.
+                **Autoconnections (:code:`i=j`) are allowed**.
+                The connection probability :code:`p` is ignored; each neuron in the presynaptic group connects to the neuron with the same index in the postsynaptic group.
+
+                Example:
+                If :code:`pre_syn_idx = 1` (100 neurons) and :code:`post_syn_idx = 2` (100 neurons), neuron 0 in group 1 connects to neuron 0 in group 2, neuron 1 to neuron 1, etc.
+
+            * :code:`spatial_decay = "float[ij]"` (e.g., 0.1[ij]):
+                Applies **exponential decay** to the connection probability, but **does not exclude autoconnections (:code:`i=j`)**.
+                The formula for connection probability between neuron :code:`i` and neuron :code:`j` is: :code:`p * exp(-lambda * d_ij)`, where:
+                :code:`lambda` is the :code:`float` value extracted from :code:`float[ij]` (in units of 1/mm),
+                :code:`d_ij` is the distance between neuron :code:`i` and neuron :code:`j` (in mm).
+                **All possible connections (including `i=j`) are considered**, and their probabilities are determined by the decay formula.
+                The :code:`[ij]` tag does not enforce one-to-one connections; it only indicates that autoconnections are not excluded from the probability distribution.
+
+                Example:
+                If :code:`spatial_decay = 0.1[ij]` and :code:`p = 0.5`, the connection probability for any pair (:code:`i, j`) (including :code:`i=j`) is: :code:`0.5 * exp(-0.1 * d_ij)`.
+                For :code:`i=j`, :code:`d_ij = 0`, so the probability is :code:`0.5 * 1 = 0.5`.
+                For :code:`i≠j`, the probability depends on the distance :code:`d_ij`.
+
+            * :code:`spatial_decay = "--"` or missing:
+                Defaults to :code:`"0[ij]"` in **expanded mode**, which is equivalent to:
+                Uniform probability (no decay).
+                **Autoconnections (`i=j`) are not excluded**.
+                In **local mode**, :code:`spatial_decay` is ignored, and all connections are distance-independent (uniform probability, excluding :code:`i=j`).
 
 If the postsynaptic unit is a multicompartmental neuron model, the target compartment must be defined using the :code:`[C]` tag.
 Compartmental indexing starts from zero at the soma layer and increases towards the distal apical dendrite. The soma, and the basal
