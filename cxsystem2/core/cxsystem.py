@@ -2030,6 +2030,8 @@ class CxSystem:
                         return syn_con_str
 
                     # If spatial_decay includes '[i=j]' but also numerical value, connect one-to-one and lambda
+                    # "0[ij]" comes here as p*exp(-0*distance) = p, i.e. no decay with distance but not excluding i=j connections
+                    # which is the same as the local mode. 
                     if "[ij]" in spatial_decay and not spatial_decay == "[ij]":
                         syn_con_str = "%s.connect(p= " % _dyn_syn_name
                         spatial_decay = spatial_decay.replace(
@@ -2044,7 +2046,6 @@ class CxSystem:
                         "'%f*exp(-(%f/mm)*(sqrt((x_pre-x_post)**2+(y_pre-y_post)**2)))'"
                         % (float(p_arg), float(spatial_decay))
                     )
-
                     return syn_con_str
 
                 # Check if p_arg exists, set to None if not
@@ -2064,17 +2065,6 @@ class CxSystem:
                         # If the length constant has not been defined, set it to 0, including i=j connections,
                         # corresponding to local mode, ie no decay with distance
                         spatial_decay = "0[ij]"
-
-                if (
-                    "_relay_vpm" in self.neurongroups_list[int(current_pre_syn_idx)]
-                    and p_arg is None
-                ):
-                    spatial_decay = str(1 / (2 * 0.025**2))
-
-                elif (
-                    "_relay_spikes" in self.neurongroups_list[int(current_pre_syn_idx)]
-                ):
-                    spatial_decay = "0[ij]"
 
                 syn_con_str = exp_distance_function(
                     p_arg=p_arg, spatial_decay=spatial_decay
