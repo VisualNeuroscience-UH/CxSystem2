@@ -1533,7 +1533,7 @@ class CxSystem:
             pass
         try:
             index_of_spatial_decay = int(
-                np.where(self.current_parameters_s.values == "spatial_decay")[0]
+                np.where(self.current_parameters_s.values == "spatial_decay")[0][0]
             )
         except TypeError:
             pass
