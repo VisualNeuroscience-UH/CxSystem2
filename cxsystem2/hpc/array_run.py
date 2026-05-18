@@ -202,7 +202,7 @@ class ArrayRun:
         ):
             meta_columns.append("Dimension-%d Parameter" % meta_col_idx)
             meta_columns.append("Dimension-%d Value" % meta_col_idx)
-        meta_columns.extend(["Full path"])
+        meta_columns.extend(["Full_path"])
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
         anat_variations = []
         physio_variations = []
@@ -262,7 +262,7 @@ class ArrayRun:
 
     def _prepare_one_dim_arrun_metadata(self):
         meta_columns = []
-        meta_columns.extend(["Dimension-1 Parameter", "Dimension-1 Value", "Full path"])
+        meta_columns.extend(["Dimension-1 Parameter", "Dimension-1 Value", "Full_path"])
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
         if self.anatomy_arrun_cell_indices:
             df_anat_array, anatomy_namings = self.generate_dataframes_for_param_search(
@@ -395,7 +395,7 @@ class ArrayRun:
             )
 
         for item in list(paths.keys()):
-            self.final_metadata_df.loc[item, "Full path"] = paths[item]
+            self.final_metadata_df.loc[item, "Full_path"] = paths[item]
 
         metadata_path = os.path.join(
             os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename

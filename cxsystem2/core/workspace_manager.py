@@ -177,7 +177,7 @@ class Workspace:
 
     def save_results_to_file(self):
         print(" -  Saving results to file ...")
-        self.results["Full path"] = self.results_export_path.as_posix()
+        self.results["Full_path"] = self.results_export_path.as_posix()
         while self.results_export_path.is_file():
             idx = 1
             self.results_export_path = self.results_export_path.parent.joinpath(
@@ -197,7 +197,7 @@ class Workspace:
 
     def save_connections_to_file(self):
         print(" -  Saving connections to file ...")
-        self.connections["Full path"] = self.connections_export_path.as_posix()
+        self.connections["Full_path"] = self.connections_export_path.as_posix()
         while self.connections_export_path.is_file():
             idx = 1
             self.connections_export_path = self.connections_export_path.parent.joinpath(
