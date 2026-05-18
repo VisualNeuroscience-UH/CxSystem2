@@ -247,7 +247,7 @@ class NeuronReference:
         ###                Creating positions                   ###
         ############################################################
 
-        if unit_coords_df is not None:
+        if unit_coords_df is not None and self.output_neuron.get("idx") in unit_coords_df["idx"].astype("int").values:
             self.output_neuron["z_positions"] = unit_coords_df.loc[
                 unit_coords_df["idx"].astype("int") == self.output_neuron.get("idx"),
                 "z_coords",
