@@ -258,8 +258,8 @@ class NeuronReference:
             ].values[0]
         else:
             self.output_neuron["z_center"] = network_center
-            self.output_neuron["w_center"] = 17 * np.log(
-                self.output_neuron["z_center"] + 1
+            self.output_neuron["w_center"] = 12.2 * np.log(
+                self.output_neuron["z_center"] + 0.94
             )
             self.output_neuron["w_positions"] = self._get_w_positions(
                 self.output_neuron["number_of_neurons"],

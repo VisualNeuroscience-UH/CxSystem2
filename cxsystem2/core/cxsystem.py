@@ -2546,8 +2546,8 @@ class CxSystem:
                     ] = np.squeeze(inp.get_input_positions())
                     self.customized_neurons_list[self.video_input_idx][
                         "w_positions"
-                    ] = 17 * np.log(
-                        relay_group["z_positions"] + 1
+                    ] = 12.2 * np.log(
+                        relay_group["z_positions"] + 0.94
                     )  # NOTE Hard coded scaling from z to w
 
                 # setting the position of the neurons based on the positions in the .mat input file:
