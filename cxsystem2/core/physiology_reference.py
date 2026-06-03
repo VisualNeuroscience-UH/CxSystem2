@@ -89,12 +89,16 @@ class NeuronReference:
                 cell_type != "PC"
             ), " -  Cell type is PC but the start and end of the neuron is not defined in layers_idx"
 
+        # Add actual voltage threshold value, in mV
+        V_threshold = value_extractor(self.physio_config_df, "VT")
+
         # final neuron is the output neuron containing equation, parameters
         self.output_neuron = {
             "idx": int(idx),
             "number_of_neurons": int(number_of_neurons),
             "area": area,
             "threshold": "vm>Vcut",
+            "V_threshold": V_threshold,
             "reset": "vm=V_res",
             "refractory": "4 * ms",
             "type": cell_type,
@@ -247,7 +251,11 @@ class NeuronReference:
         ###                Creating positions                   ###
         ############################################################
 
-        if unit_coords_df is not None and self.output_neuron.get("idx") in unit_coords_df["idx"].astype("int").values:
+        if (
+            unit_coords_df is not None
+            and self.output_neuron.get("idx")
+            in unit_coords_df["idx"].astype("int").values
+        ):
             self.output_neuron["z_positions"] = unit_coords_df.loc[
                 unit_coords_df["idx"].astype("int") == self.output_neuron.get("idx"),
                 "z_coords",
@@ -329,10 +337,8 @@ class NeuronReference:
         self.output_neuron["reset"] = x.get_reset_statements()
         self.output_neuron["refractory"] = x.get_refractory_period()
 
-        self.output_neuron["equation"] += b2.Equations(
-            """x : meter
-            y : meter"""
-        )
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
 
     def PC(self):
         """
@@ -548,10 +554,8 @@ class NeuronReference:
                 vmpre="vm",
             )
 
-        self.output_neuron["equation"] += b2.Equations(
-            """x : meter
-                            y : meter"""
-        )
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+                            y : meter""")
 
     def BC(self):
         """
@@ -590,10 +594,8 @@ class NeuronReference:
         self.output_neuron["reset"] = x.get_reset_statements()
         self.output_neuron["refractory"] = x.get_refractory_period()
 
-        self.output_neuron["equation"] += b2.Equations(
-            """x : meter
-            y : meter"""
-        )
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
 
     def L1i(self):
         """
@@ -632,10 +634,8 @@ class NeuronReference:
         self.output_neuron["reset"] = x.get_reset_statements()
         self.output_neuron["refractory"] = x.get_refractory_period()
 
-        self.output_neuron["equation"] += b2.Equations(
-            """x : meter
-            y : meter"""
-        )
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
 
     def MC(self):
         """
@@ -675,10 +675,8 @@ class NeuronReference:
         self.output_neuron["reset"] = x.get_reset_statements()
         self.output_neuron["refractory"] = x.get_refractory_period()
 
-        self.output_neuron["equation"] += b2.Equations(
-            """x : meter
-            y : meter"""
-        )
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
 
     def SS(self):
         """
@@ -717,10 +715,8 @@ class NeuronReference:
         self.output_neuron["reset"] = x.get_reset_statements()
         self.output_neuron["refractory"] = x.get_refractory_period()
 
-        self.output_neuron["equation"] += b2.Equations(
-            """x : meter
-            y : meter"""
-        )
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
 
     def CI(self):
         """
@@ -811,10 +807,8 @@ class NeuronReference:
         self.output_neuron["reset"] = x.get_reset_statements()
         self.output_neuron["refractory"] = x.get_refractory_period()
 
-        self.output_neuron["equation"] += b2.Equations(
-            """x : meter
-            y : meter"""
-        )
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
 
     def VPM(self):
         """
@@ -958,29 +952,22 @@ class SynapseReference:
 
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
             wght : siemens
             dapre/dt = -apre/taupre : siemens (event-driven) # r1 or x_moving_average_plus
             dapost/dt = -apost/taupost : siemens (event-driven) # o1 or y_moving_average_minus
-            """
-        )
+            """)
 
-        self.output_synapse["pre_eq"] = (
-            """
+        self.output_synapse["pre_eq"] = """
             %s+=wght
             apre += Apre
             wght =- eta_ltd * apost
-            """
-            % (
-                self.output_synapse["receptor"]
-                + self.output_synapse["post_comp_name"]
-                + "_post"
-            )
+            """ % (
+            self.output_synapse["receptor"]
+            + self.output_synapse["post_comp_name"]
+            + "_post"
         )
-        self.output_synapse[
-            "post_eq"
-        ] = """
+        self.output_synapse["post_eq"] = """
             apost += Apost
             wght =+ eta_ltp * apre
             """
@@ -990,30 +977,23 @@ class SynapseReference:
         The method for implementing the Vogels_2011_Science synaptic connection.
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
             wght : siemens
             dapre/dt = -apre/taupre : siemens (event-driven)
             dapost/dt = -apost/taupost : siemens (event-driven)
-            """
-        )
+            """)
 
-        self.output_synapse["pre_eq"] = (
-            """
+        self.output_synapse["pre_eq"] = """
             %s+=wght
             apre += Apre
             wght += eta * (apost - alpha)
             wght = clip(wght, 0 * siemens, wght_max)
-            """
-            % (
-                self.output_synapse["receptor"]
-                + self.output_synapse["post_comp_name"]
-                + "_post"
-            )
+            """ % (
+            self.output_synapse["receptor"]
+            + self.output_synapse["post_comp_name"]
+            + "_post"
         )
-        self.output_synapse[
-            "post_eq"
-        ] = """
+        self.output_synapse["post_eq"] = """
             apost += Apost
             wght += eta * apre
             wght = clip(wght, 0 * siemens, wght_max)
@@ -1024,8 +1004,7 @@ class SynapseReference:
         The method for implementing the deBrito_2024_PLoSComputBiol synaptic connection.
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
             dwght/dt = -wght/tau_wght : siemens (clock-driven)    
             dx_dirac/dt = -x_dirac/tau_x : 1  (clock-driven) # apre
             dy_dirac/dt = -y_dirac/tau_y : 1  (clock-driven) # apost
@@ -1033,25 +1012,19 @@ class SynapseReference:
             dx_avg/dt = (x_dirac - x_avg)/tau_x_avg : 1 (clock-driven)
             dy_avg/dt = (y_dirac - y_avg)/tau_y_avg : 1 (clock-driven)
             dahomeo/dt = (y_dirac * y_dirac - ahomeo)/tauhomeo : 1 (clock-driven)
-            """
-        )
+            """)
 
-        self.output_synapse["pre_eq"] = (
-            """
+        self.output_synapse["pre_eq"] = """
             %s+=wght
             wght -= eta_ltd * ahomeo * x_dirac * y_avg * nS
             x_dirac += Apre
             wght = clip(wght, 0*nS, wght_max)
-            """
-            % (
-                self.output_synapse["receptor"]
-                + self.output_synapse["post_comp_name"]
-                + "_post"
-            )
+            """ % (
+            self.output_synapse["receptor"]
+            + self.output_synapse["post_comp_name"]
+            + "_post"
         )
-        self.output_synapse[
-            "post_eq"
-        ] = """
+        self.output_synapse["post_eq"] = """
             y_dirac += Apost
             wght += eta_ltp * y_dirac * y_avg * x_avg * nS
             wght = clip(wght, 0*nS, wght_max)
@@ -1063,11 +1036,9 @@ class SynapseReference:
 
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
             wght:siemens
-            """
-        )
+            """)
 
         pre_eq_lines = [
             "%s += wght\n"
@@ -1083,11 +1054,9 @@ class SynapseReference:
 
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
             wght:siemens
-            """
-        )
+            """)
 
         pre_eq_lines = [
             "%s += wght\n"
@@ -1103,11 +1072,9 @@ class SynapseReference:
         with factor coming from Anatomy csv.
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
             wght:siemens
-            """
-        )
+            """)
 
         # Assigning the multiplier here enables later addition of wght equation into this method .
 
@@ -1128,12 +1095,10 @@ class SynapseReference:
 
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
         dR/dt = (1-R)/tau_d : 1 (event-driven)
         wght : siemens
-        """
-        )
+        """)
 
         pre_eq_lines = []
         for true_receptor in self.true_receptors:
@@ -1151,13 +1116,11 @@ class SynapseReference:
 
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
         dR/dt = (1-R)/tau_fd : 1 (event-driven)
         du/dt = (U_f-u)/tau_f : 1 (event-driven) 
         wght : siemens
-        """
-        )
+        """)
 
         pre_eq_lines = []
         for true_receptor in self.true_receptors:
@@ -1165,12 +1128,10 @@ class SynapseReference:
                 true_receptor + str(self.output_synapse["post_comp_name"]) + "_post"
             )
             pre_eq_lines.append(new_line)
-        pre_eq_lines.append(
-            """
+        pre_eq_lines.append("""
         R = R - u * R
         u = u + U_f * (1-u)
-        """
-        )
+        """)
         pre_eq = "".join(pre_eq_lines).strip()
         self.output_synapse["pre_eq"] = pre_eq
 
@@ -1180,12 +1141,10 @@ class SynapseReference:
 
         """
 
-        self.output_synapse["equation"] = b2.Equations(
-            """
+        self.output_synapse["equation"] = b2.Equations("""
             wght:siemens
             Igap_post = wght * (vm_pre - vm_post) : amp (summed)
-            """
-        )
+            """)
 
         self.output_synapse["post_eq"] = ""
         self.output_synapse["pre_eq"] = ""
