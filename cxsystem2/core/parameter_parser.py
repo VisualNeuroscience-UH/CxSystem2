@@ -276,6 +276,7 @@ class SynapseParser:
                 "STDP",
                 "Vogels",
                 "deBrito",
+                "minimal_triplet_STDP",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
                 "Fixed_multiply",
@@ -568,6 +569,48 @@ class SynapseParser:
 
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "deb_wght_max"
+        )
+
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
+
+    def minimal_triplet_STDP(self):
+        """
+        The method for assigning the plasticity from Pfister_2006_JNeurosci synaptic 
+        connection following Ruslim_2025_PLoSCB parameters to the customized_synapses() object.
+        """
+        self.output_namespace["eta_ltp"] = value_extractor(
+            self.physio_config_df, "mtSTDP_eta_ltp"
+        )
+        self.output_namespace["eta_ltd"] = value_extractor(
+            self.physio_config_df, "mtSTDP_eta_ltd"
+        )
+        self.output_namespace["Apre"] = value_extractor(
+            self.physio_config_df, "mtSTDP_Apre"
+        )
+        self.output_namespace["Apost"] = value_extractor(
+            self.physio_config_df, "mtSTDP_Apost"
+        )
+
+        self.output_namespace["tau_x"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_x"
+        )
+        self.output_namespace["tau_y"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_y"
+        )
+        self.output_namespace["tau_y_avg"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_y_avg"
+        )
+
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])
+            print(f"\n -  Using custom weight: {mean_wght / nS:.2f} nS")  # noqa: F405
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "mtSTDP_wght_init")
+        self.output_namespace["wght_init"] = mean_wght
+
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "mtSTDP_wght_max"
         )
 
         mean_delay = self._get_mean_delay()

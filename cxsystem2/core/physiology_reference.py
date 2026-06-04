@@ -869,6 +869,7 @@ class SynapseReference:
                 "STDP",
                 "Vogels",
                 "deBrito",
+                "minimal_triplet_STDP",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
                 "Fixed_multiply",
@@ -1052,8 +1053,45 @@ class SynapseReference:
         self.output_synapse[
             "post_eq"
         ] = """
-            y_dirac += Apost
             wght += eta_ltp * y_dirac * y_avg * x_avg * nS
+            y_dirac += Apost
+            wght = clip(wght, 0*nS, wght_max)
+            """
+
+    def minimal_triplet_STDP(self):
+        """
+        The method for implementing the Pfister_2006_JNeurosci synaptic connection following Ruslim_2025_PLoSCB implementation.
+        """
+
+        self.output_synapse["equation"] = b2.Equations(
+            # dwght/dt = -wght/tau_wght : siemens (clock-driven)    
+            """
+            wght : siemens   
+            dx_dirac/dt = -x_dirac/tau_x : 1  (event-driven) # apre
+            dy_dirac/dt = -y_dirac/tau_y : 1  (event-driven) # apost
+            
+            dy_avg/dt = (y_dirac - y_avg)/tau_y_avg : 1 (event-driven)
+            """
+        )
+
+        self.output_synapse["pre_eq"] = (
+            """
+            %s+=wght
+            wght -= eta_ltd * y_dirac * nS
+            x_dirac += Apre
+            wght = clip(wght, 0*nS, wght_max)
+            """
+            % (
+                self.output_synapse["receptor"]
+                + self.output_synapse["post_comp_name"]
+                + "_post"
+            )
+        )
+        self.output_synapse[
+            "post_eq"
+        ] = """
+            wght += eta_ltp * x_dirac * y_avg *  nS
+            y_dirac += Apost 
             wght = clip(wght, 0*nS, wght_max)
             """
 
