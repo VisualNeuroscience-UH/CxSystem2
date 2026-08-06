@@ -1379,9 +1379,9 @@ class CxSystem:
             )
         except ValueError as e:
             raise ValueError(
-                e.message
-                + " -  You are probably trying to load the positions from a file that does not contain the same number of cells."
-            )
+                " -  You are probably trying to load the positions from a file that does not contain the same number of cells."
+            ) from e
+
         # Saving the neurons' positions both in visual field and cortical coordinates in save_data() object.
         self.workspace.results["positions_all"]["z_coord"][_dyn_neurongroup_name] = (
             self.customized_neurons_list[current_idx]["z_positions"]
