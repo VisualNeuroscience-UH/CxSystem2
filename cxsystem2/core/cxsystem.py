@@ -611,7 +611,7 @@ class CxSystem:
                 b2.run(self.runtime, report="text")
             elif self.device == "cpp":
                 target_directory = self.workspace.get_simulation_folder().joinpath(
-                    "standalone_code"
+                    "standalone_code", self.suffix[1:]
                 )
                 b2.run(self.runtime, report="text")
                 b2.device.build(directory=target_directory, run=False, compile=True)
