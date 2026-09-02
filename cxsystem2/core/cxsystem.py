@@ -607,11 +607,9 @@ class CxSystem:
     def run(self):
         if not self.array_run:
 
-            if self.device not in ["cpp", "cuda"]:
-                b2.run(self.runtime, report="text")
-            elif self.device == "cpp":
+            if self.device == "cpp":
                 target_directory = self.workspace.get_simulation_folder().joinpath(
-                    "standalone_code"
+                    "standalone_code", self.suffix[1:]
                 )
                 b2.run(self.runtime, report="text")
                 b2.device.build(directory=target_directory, run=False, compile=True)
