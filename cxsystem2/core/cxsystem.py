@@ -978,7 +978,7 @@ class CxSystem:
             raise ValueError(
                 " -  Provide a whole number of neurons for each of the neurongroups "
                 f"in the anatomy csv file. Value provided: {number_of_neurons} "
-                f"for the neurongroup with index: {neurongroup_metadata["idx"]}."
+                f"for the neurongroup with index: {neurongroup_metadata['idx']}."
             ) from e
 
         if neurongroup_metadata["idx"] in self.NG_indices:
