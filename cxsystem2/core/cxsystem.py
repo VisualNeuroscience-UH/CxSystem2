@@ -615,15 +615,16 @@ class CxSystem:
                 b2.device.build(directory=target_directory, run=False, compile=True)
                 b2.device.run()
             else:
-                b2.run(self.runtime, report="text")
+                b2.run(self.runtime, report="text", profile=self.profiling)
 
-            if self.profiling == 1:
-                print()
-                if len(b2.profiling_summary().names) < 20:
-                    print(b2.profiling_summary(show=len(b2.profiling_summary().names)))
-                else:
-                    print(b2.profiling_summary(show=20))
-                self.workspace.results["profiling_data"] = b2.profiling_summary()
+                if self.profiling == 1:
+                    print()
+                    if len(b2.profiling_summary().names) < 20:
+                        print(b2.profiling_summary(show=len(b2.profiling_summary().names)))
+                    else:
+                        print(b2.profiling_summary(show=20))
+                    self.workspace.results["profiling_data"] = b2.profiling_summary()
+            
             if self.benchmark:
                 self.benchmarking_data = {}
                 titles = [
