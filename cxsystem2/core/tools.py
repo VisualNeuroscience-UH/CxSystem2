@@ -38,7 +38,7 @@ def write_to_file(save_path, data):
         # Check data dictionary for TimedArray objects and remove them
         data = _remove_timed_arrays(data)
         with open(save_path.as_posix(), "wb") as fb:
-            fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 9))
+            fb.write(zlib.compress(pickle.dumps(data, pickle.HIGHEST_PROTOCOL), 1))
     elif save_path.suffix == ".bz2":
         with bz2.BZ2File(save_path.as_posix(), "wb") as fb:
             pickle.dump(data, fb, pickle.HIGHEST_PROTOCOL)
