@@ -863,7 +863,8 @@ class SynapseReference:
                 "STDP",
                 "Vogels",
                 "deBrito",
-                "minimal_triplet_STDP",
+                "mtSTDP",
+                "mtSTDP_homeo",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
                 "Fixed_multiply",
@@ -1033,7 +1034,7 @@ class SynapseReference:
             wght = clip(wght, 0*nS, wght_max)
             """
 
-    def minimal_triplet_STDP(self):
+    def mtSTDP(self):
         """
         The method for implementing the Pfister_2006_JNeurosci synaptic connection following Ruslim_2025_PLoSCB implementation.
         """
@@ -1042,18 +1043,17 @@ class SynapseReference:
             # dwght/dt = -wght/tau_wght : siemens (clock-driven)    
             """
             wght : siemens   
-            dx_dirac/dt = -x_dirac/tau_x : 1  (event-driven) # apre
-            dy_dirac/dt = -y_dirac/tau_y : 1  (event-driven) # apost
-            
-            dy_avg/dt = (y_dirac - y_avg)/tau_y_avg : 1 (event-driven)
+            dpre_trace/dt = -pre_trace/tau_pre : 1  (event-driven) # apre
+            dpost_trace/dt = -post_trace/tau_post : 1  (event-driven) # apost
+            dpost_trace_slow/dt = -post_trace_slow/tau_post_slow : 1 (event-driven)
             """
         )
 
         self.output_synapse["pre_eq"] = (
             """
             %s+=wght
-            wght -= eta_ltd * y_dirac * nS
-            x_dirac += Apre
+            wght -= eta_ltd * post_trace * nS
+            pre_trace += Apre
             wght = clip(wght, 0*nS, wght_max)
             """
             % (
@@ -1065,8 +1065,47 @@ class SynapseReference:
         self.output_synapse[
             "post_eq"
         ] = """
-            wght += eta_ltp * x_dirac * y_avg *  nS
-            y_dirac += Apost 
+            wght += eta_ltp * pre_trace * post_trace_slow *  nS
+            post_trace += Apost 
+            wght = clip(wght, 0*nS, wght_max)
+            """
+
+    def mtSTDP_homeo(self):
+        """
+        The method for implementing the Pfister_2006_JNeurosci synaptic connection with synaptic homeostatic factor.
+        """
+
+        self.output_synapse["equation"] = b2.Equations(
+
+            """
+            wght : siemens
+            dpre_trace/dt = -pre_trace/tau_pre : 1  (event-driven) # apre
+            dpost_trace/dt = -post_trace/tau_post : 1  (event-driven) # apost
+            dpost_trace_slow/dt = -post_trace_slow/tau_post_slow : 1 (event-driven)
+            dpost_trace_homeo/dt = (post_trace - post_trace_homeo)/tau_post_homeo : 1 (event-driven)
+            """
+        )
+
+        self.output_synapse["pre_eq"] = (
+            """
+            %s+=wght
+            wght -= eta_ltd * post_trace * nS
+            pre_trace += Apre
+            wght = clip(wght, 0*nS, wght_max)
+            """
+            % (
+                self.output_synapse["receptor"]
+                + self.output_synapse["post_comp_name"]
+                + "_post"
+            )
+        )
+        self.output_synapse[
+            "post_eq"
+        ] = """
+            wght += eta_ltp * pre_trace * post_trace_slow  *  nS
+            wght -= eta_homeo * post_trace_homeo * wght
+            post_trace += Apost 
+            post_trace_slow += Apost
             wght = clip(wght, 0*nS, wght_max)
             """
 

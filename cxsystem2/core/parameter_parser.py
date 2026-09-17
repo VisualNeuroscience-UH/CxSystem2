@@ -276,7 +276,8 @@ class SynapseParser:
                 "STDP",
                 "Vogels",
                 "deBrito",
-                "minimal_triplet_STDP",
+                "mtSTDP",
+                "mtSTDP_homeo",
                 "Fixed_rand_wght",
                 "Fixed_const_wght",
                 "Fixed_multiply",
@@ -445,10 +446,7 @@ class SynapseParser:
         :param mean_wght: The mean value of the initial weight in nS.
         :return: A string representing the randomized initial weight in nS.
         """
-        wght_init_str = "(%f + %f * rand()) * nS" % (
-            mean_wght / 2.0,
-            mean_wght,
-        )
+        wght_init_str = f"({mean_wght / 2.0} + {mean_wght} * rand()) * nS"
         return wght_init_str
 
     def STDP(self):
@@ -574,7 +572,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def minimal_triplet_STDP(self):
+    def mtSTDP(self):
         """
         The method for assigning the plasticity from Pfister_2006_JNeurosci synaptic 
         connection following Ruslim_2025_PLoSCB parameters to the customized_synapses() object.
@@ -592,14 +590,14 @@ class SynapseParser:
             self.physio_config_df, "mtSTDP_Apost"
         )
 
-        self.output_namespace["tau_x"] = value_extractor(
-            self.physio_config_df, "mtSTDP_tau_x"
+        self.output_namespace["tau_pre"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_pre"
         )
-        self.output_namespace["tau_y"] = value_extractor(
-            self.physio_config_df, "mtSTDP_tau_y"
+        self.output_namespace["tau_post"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_post"
         )
-        self.output_namespace["tau_y_avg"] = value_extractor(
-            self.physio_config_df, "mtSTDP_tau_y_avg"
+        self.output_namespace["tau_post_slow"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_post_slow"
         )
 
         try:
@@ -609,6 +607,57 @@ class SynapseParser:
             mean_wght = value_extractor(self.physio_config_df, "mtSTDP_wght_init")
         self.output_namespace["wght_init"] = mean_wght
 
+        self.output_namespace["wght_max"] = value_extractor(
+            self.physio_config_df, "mtSTDP_wght_max"
+        )
+
+        mean_delay = self._get_mean_delay()
+        self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
+
+    def mtSTDP_homeo(self):
+        """
+        The method for assigning the plasticity from Pfister_2006_JNeurosci synaptic 
+        connection following Ruslim_2025_PLoSCB parameters to the customized_synapses() object.
+        """
+        self.output_namespace["eta_ltp"] = value_extractor(
+            self.physio_config_df, "mtSTDP_eta_ltp"
+        )
+        self.output_namespace["eta_ltd"] = value_extractor(
+            self.physio_config_df, "mtSTDP_eta_ltd"
+        )
+        self.output_namespace["eta_homeo"] = value_extractor(
+            self.physio_config_df, "mtSTDP_eta_homeo"
+        )
+        self.output_namespace["Apre"] = value_extractor(
+            self.physio_config_df, "mtSTDP_Apre"
+        )
+        self.output_namespace["Apost"] = value_extractor(
+            self.physio_config_df, "mtSTDP_Apost"
+        )
+
+        self.output_namespace["tau_pre"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_pre"
+        )
+        self.output_namespace["tau_post"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_post"
+        )
+        self.output_namespace["tau_post_slow"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_post_slow"
+        )
+        self.output_namespace["tau_post_homeo"] = value_extractor(
+            self.physio_config_df, "mtSTDP_tau_post_homeo"
+        )
+
+        try:
+            mean_wght = eval(self.output_synapse["custom_weight"])
+            print(f"\n -  Using custom weight: {mean_wght / nS:.2f} nS")  # noqa: F405
+        except:  # noqa: E722
+            mean_wght = value_extractor(self.physio_config_df, "mtSTDP_wght_init")
+        # TÄHÄN JÄIT: RAND WEIGHT MENEE NOLLAAN
+        
+        self.output_namespace["wght_init"] = self._mean_rand_wght_init(mean_wght / nS)
+        # self.output_namespace["wght_init"] = mean_wght
+        # breakpoint()
         self.output_namespace["wght_max"] = value_extractor(
             self.physio_config_df, "mtSTDP_wght_max"
         )
