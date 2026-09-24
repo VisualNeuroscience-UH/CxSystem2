@@ -653,7 +653,6 @@ class SynapseParser:
             print(f"\n -  Using custom weight: {mean_wght / nS:.2f} nS")  # noqa: F405
         except:  # noqa: E722
             mean_wght = value_extractor(self.physio_config_df, "mtSTDP_wght_init")
-        # TÄHÄN JÄIT: RAND WEIGHT MENEE NOLLAAN
         
         self.output_namespace["wght_init"] = self._mean_rand_wght_init(mean_wght / nS)
         # self.output_namespace["wght_init"] = mean_wght
