@@ -118,35 +118,5 @@ to convert the `json` configuration files to `csv` and vice versa:
       cxconfig ./sample_conf.csv
         converts the file `sample_conf.csv` in current directory to csv and saves it as `sample_conf.json`
 
-:code:`cxcluster`
------------------
-
-After submitting jobs to cluster, `CxSystem` stores the data corresponding to the job to a metadata file. To retrieve the results
-when they are ready, you can use the :code:`cxcluster` command as follows:
-
-.. code-block:: console
-
-    $ cxcluster -h
-    cxcluster -- cxsystem cluster result downloader
-
-    Usage:
-      cxcluster (-h | --help)
-      cxcluster META_FILE_PATH
-
-
-    Downloads result data of `CxSystem` from cluster.
-
-    Arguments:
-      META_FILE_PATH            Path to cluster run metadata file
-
-    Options:
-      -h --help                 Show this screen
-
-    Description:
-
-      cxcluster ./sample_meta.pkl
-        Uses the information in the metadata file to download the results if ready, and otherwise wait for the results.
-        User will be prompted for the remote password.
-
 
 

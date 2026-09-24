@@ -17,7 +17,6 @@ import pandas as pd
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import load_from_file, parameter_finder, write_to_file
-from cxsystem2.hpc.cluster_run import ClusterRun
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
@@ -36,11 +35,8 @@ class ArrayRun:
         anatomy_dataframe,
         physiology_dataframe,
         job_suffix,
-        cluster_start_idx,
-        cluster_step,
         anatomy_file_path,
         physio_file_path,
-        array_run_is_in_cluster=0,
         array_run_stdout_file=None,
     ):
         """
@@ -50,17 +46,12 @@ class ArrayRun:
         :param physiology_dataframe: The dataframe containing the physiology configurations that has an instance for ArrayRun in it.
         :param job_suffix: The job_suffix for the metadata file containing the filename and changing parameters in each of the simulations.
         """
-        self.suffix = job_suffix  # At cluster this is global suffix (one for whole requested array)
-        self.cluster_start_idx = int(cluster_start_idx)
-        self.cluster_step = int(cluster_step)
-        self.array_run_is_in_cluster = array_run_is_in_cluster
+        self.suffix = job_suffix  
         self.array_run_stdout_file = (
             None if array_run_stdout_file == "None" else array_run_stdout_file
         )
 
-        self.metadata_filename = self._get_metadata_filename(
-            self.cluster_start_idx, self.cluster_step, job_suffix
-        )
+        self.metadata_filename = self._get_metadata_filename(job_suffix)
 
         # these two are the original config files containing the array_run info:
         self.anatomy_df = (
@@ -80,9 +71,6 @@ class ArrayRun:
         self.benchmark = self._get_benchmark_flag()
         self.trials_per_config = self._get_trials_per_config()
         self.device = self._get_device()
-        self.run_in_cluster = self._get_run_in_cluster_flag()
-        self.cluster_job_file_path = self._get_cluster_job_file_path()
-        self.cluster_number_of_nodes = self._get_cluster_number_of_nodes()
 
         # get indices of pandas cells containing the arrayruns
         self.anatomy_arrun_cell_indices = self._get_arrun_cell_indices_from_df(
@@ -117,80 +105,9 @@ class ArrayRun:
         print(
             " -  array of Dataframes for anatomical and physiological configuration are ready"
         )
-        if self._should_submit_to_cluster():
-            self.total_configs = len(self.list_of_anatomy_dfs) * self.trials_per_config
-            self.config_per_node = math.ceil(
-                self.total_configs / self.cluster_number_of_nodes
-            )
-            self.clipping_indices = np.arange(
-                0, self.total_configs, self.config_per_node
-            )
-            ClusterRun(
-                self, Path(anatomy_file_path), Path(physio_file_path), self.suffix
-            )
 
-            tmp_folder_path = (
-                Path(parameter_finder(self.anatomy_df, "workspace_path"))
-                .expanduser()
-                .joinpath(".tmp" + self.suffix)
-                .as_posix()
-            )
+        self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
 
-            # Next we transfer tmp anat and phys csv files to downloads folder for future use
-            self._save_tmp_anat_phys_to_downloads(tmp_folder_path)
-
-            print(" -  removing .tmp folder")
-            print("cleaning tmp folders " + tmp_folder_path)
-            shutil.rmtree(tmp_folder_path)
-
-        elif self._is_running_in_cluster():
-            self.spawn_processes(self.cluster_start_idx, self.cluster_step)
-
-        elif self._is_running_locally():
-            self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
-
-    def _save_tmp_anat_phys_to_downloads(self, tmp_folder_path):
-        # After ClusterRun call metadata master file has been created earlier, we read it here to get the downloads folder address
-        local_workspace = Path(
-            parameter_finder(self.anatomy_df, "workspace_path")
-        ).expanduser()
-        local_cluster_folder = local_workspace.joinpath("cluster_run" + self.suffix)
-        metadata_pkl_fullfile = Path(
-            local_cluster_folder.joinpath("cluster_metadata{}.pkl".format(self.suffix))
-        )
-        metadata_dict = load_from_file(metadata_pkl_fullfile)
-        downloads_folder = metadata_dict["local_cluster_run_download_folder"]
-        # Create downloads folder
-        Path(downloads_folder).mkdir(parents=True, exist_ok=True)
-        # Move anat and phys files to download folder
-        tmp_folder_contents_list = os.listdir(tmp_folder_path)
-        fullfile_source_list = []
-        fullfile_target_list = []
-        for this_file in tmp_folder_contents_list:
-            fullfile_source_list.append(os.path.join(tmp_folder_path, this_file))
-            fullfile_target_list.append(os.path.join(downloads_folder, this_file))
-        [
-            Path(s).replace(t)
-            for s, t in zip(fullfile_source_list, fullfile_target_list)
-            if "anat" in s or "phys" in s
-        ]
-
-    def _should_submit_to_cluster(self):
-        return (
-            self.run_in_cluster == 1
-            and self.cluster_start_idx == -1
-            and self.cluster_step == -1
-        )
-
-    def _is_running_in_cluster(self):
-        return self.cluster_start_idx != -1 and self.cluster_step != -1
-
-    def _is_running_locally(self):
-        return (
-            self.run_in_cluster != 1
-            and self.cluster_start_idx == -1
-            and self.cluster_step == -1
-        )
 
     def _prepare_multi_dim_arrun_metadata(self):
         meta_columns = []
@@ -343,7 +260,6 @@ class ArrayRun:
             self.list_of_physio_dfs[idx],
             output_file_suffix=self.final_namings[idx] + tr_suffix,
             instantiated_from_array_run=1,
-            array_run_in_cluster=self.array_run_is_in_cluster,
         )
         cm.run()
         paths[orig_idx] = cm.workspace.get_results_export_path()
@@ -403,15 +319,14 @@ class ArrayRun:
         write_to_file(metadata_path, self.final_metadata_df)
         print(" -  Array run metadata saved at: %s" % metadata_path)
 
-        if self._is_running_locally() is True:
-            tmp_folder_path = (
-                Path(parameter_finder(self.anatomy_df, "workspace_path"))
-                .expanduser()
-                .joinpath(".tmp" + self.suffix)
-                .as_posix()
-            )
-            print("cleaning tmp folders " + tmp_folder_path)
-            shutil.rmtree(tmp_folder_path)
+        tmp_folder_path = (
+            Path(parameter_finder(self.anatomy_df, "workspace_path"))
+            .expanduser()
+            .joinpath(".tmp" + self.suffix)
+            .as_posix()
+        )
+        print("cleaning tmp folders " + tmp_folder_path)
+        shutil.rmtree(tmp_folder_path)
 
     def generate_dataframes_for_param_search(
         self,
@@ -702,49 +617,8 @@ class ArrayRun:
             )
         return device
 
-    def _get_run_in_cluster_flag(self):
-        run_in_cluster = 0
-        try:
-            run_in_cluster = int(
-                eval(parameter_finder(self.anatomy_df, "run_in_cluster"))
-            )
-        except (TypeError, NameError):
-            pass
-        return run_in_cluster
-
-    def _get_cluster_job_file_path(self):
-        cluster_job_file_path = None
-        try:
-            cluster_job_file_path = parameter_finder(
-                self.anatomy_df, "cluster_job_file_path"
-            )
-        except (TypeError, NameError):
-            pass
-        return cluster_job_file_path
-
-    def _get_cluster_number_of_nodes(self):
-        cluster_number_of_nodes = 1
-        try:
-            cluster_number_of_nodes = int(
-                float(parameter_finder(self.anatomy_df, "cluster_number_of_nodes"))
-            )
-        except (TypeError, NameError):
-            pass
-        if cluster_number_of_nodes > 40:
-            raise Exception(
-                " -  Number of nodes cannot be higher than 40 for your own safety."
-            )
-        return cluster_number_of_nodes
-
-    def _get_metadata_filename(self, cluster_start_idx, cluster_step, job_suffix):
+    def _get_metadata_filename(self, job_suffix):
         metadata_filename = "metadata_" + job_suffix + ".gz"
-        if cluster_start_idx != -1 and cluster_step != -1:
-            metadata_filename = (
-                "metadata_part_"
-                + str((cluster_start_idx / cluster_step) + 1)
-                + job_suffix
-                + ".gz"
-            )
         return metadata_filename
 
     def _get_arrun_cell_indices_from_df(self, df):
@@ -760,26 +634,20 @@ class ArrayRun:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 10:
-        print("Array run needs 9 arguments and is not built to be called separately")
+    if len(sys.argv) != 7:
+        print("Array run needs 6 arguments and is not built to be called separately")
         sys.exit(1)
     anatomy_df = pd.read_csv(sys.argv[1], header=None)
     physiology_df = pd.read_csv(sys.argv[2])
     suffix = sys.argv[3]
-    cluster_start_idx = int(sys.argv[4])
-    cluster_step = int(sys.argv[5])
-    anat_file_address = sys.argv[6]
-    physio_file_address = sys.argv[7]
-    array_run_in_cluster = int(sys.argv[8])
-    array_run_stdout_file = sys.argv[9]
+    anat_file_address = sys.argv[4]
+    physio_file_address = sys.argv[5]
+    array_run_stdout_file = sys.argv[6]
     ArrayRun(
         anatomy_df,
         physiology_df,
         suffix,
-        cluster_start_idx,
-        cluster_step,
         anat_file_address,
         physio_file_address,
-        array_run_in_cluster,
         array_run_stdout_file,
     )

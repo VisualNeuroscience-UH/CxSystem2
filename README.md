@@ -150,10 +150,6 @@ This command (all in lower letters and case sensitive) can be used to run a simu
 
 CxSystem2 supports `csv` and `json` for importing/exporting configuration files. To convert the configuration files, use the `cxconfig` and pass the path to the configuration file path as its argument. This command recognizes the file type and convert it to the alternative extension.
 
-#### `cxcluster`
-
-Use `cxcluster` to download the results from the cluster. `cxcluster` takes in one argument which is the path to the metadata file saved as a result of cluster-run submission. For convenience, at the end of a cluster-run job submission, `CxSystem2` prints the command that should be run to retrieve the result.
-
 #### `cxvisualize`
 
 This command can be used to visualize the result of the simulation using `visimpl` visualizer. ViSimpl binaries are available at the Modeling and Virtual Reality Group [download page](https://vg-lab.es/visimpl/) at  Universidad Rey Juan Carlos and Universidad Politécnica de Madrid. This command can also be used to generate a pdf of rasterplots from a set of simulations.

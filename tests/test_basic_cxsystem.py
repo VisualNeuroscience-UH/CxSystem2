@@ -53,7 +53,7 @@ class TestInit:
 
     def test_number_of_input_arguments(self):
         assert (
-            CM.__init__.__code__.co_argcount == 10
+            CM.__init__.__code__.co_argcount == 7
         ), "Number of arguments have changed"
 
     def test_input_argument_types(self):
@@ -61,9 +61,6 @@ class TestInit:
         assert isinstance(
             CM.array_run, int
         ), "Indirect test for input arg instantiated_from_array_run"
-        assert isinstance(CM.cluster_run_start_idx, int)
-        assert isinstance(CM.cluster_run_step, int)
-        assert isinstance(CM.array_run_in_cluster, int)
 
 
 class TestConfigurationExecutor:

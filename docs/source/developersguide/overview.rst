@@ -91,9 +91,3 @@ Accordingly, most of the :code:`exec` commands inside the main object :code:`CxS
 
 	globals().update({'NG0':NG0})
 
-Fig.1 illustrates the schematic of the cortical system internal component: 
-
-.. figure:: ../supplementary_data/main_uml.png
-   :align: center 
-
-   Fig.1 simplified UML diagram of the cortical system

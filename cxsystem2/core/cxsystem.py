@@ -83,9 +83,6 @@ class CxSystem:
         output_file_suffix="",
         unit_coords_df=None,
         instantiated_from_array_run=0,
-        cluster_run_start_idx=-1,
-        cluster_run_step=-1,
-        array_run_in_cluster=0,
         array_run_stdout_file=None,
     ):
         """
@@ -144,12 +141,6 @@ class CxSystem:
                 self.passer,
             ],  # this parameter is used by array_run module, so here we just pass
             "trials_per_config": [17, self.passer],
-            "run_in_cluster": [18, self.passer],
-            "cluster_job_file_path": [19, self.passer],
-            "cluster_number_of_nodes": [20, self.passer],
-            "cluster_address": [21, self.passer],
-            "cluster_username": [22, self.passer],
-            "cluster_workspace": [23, self.passer],
             "integration": [24, self.integration],
             # Line definitions:
             "G": [np.nan, self.neuron_group],
@@ -169,8 +160,6 @@ class CxSystem:
         print(" -  Current run filename suffix is: %s" % self.suffix[1:])
         self.scale = 1
         self.benchmark = 0
-        self.cluster_run_start_idx = cluster_run_start_idx
-        self.cluster_run_step = cluster_run_step
         self.current_parameters_s = pd.Series([], dtype=str)
         # current_parameters_s is changing at some point in the code, so the original length of it is needed
         self.current_parameters_s_orig_len = 0
@@ -205,7 +194,6 @@ class CxSystem:
         self.do_save_connections = 0
         self.load_positions = 0
         self.profiling = 0
-        self.array_run_in_cluster = array_run_in_cluster
         self.awaited_conf_lines = []
         self.array_run_stdout_file = array_run_stdout_file
 
@@ -326,25 +314,6 @@ class CxSystem:
                 .joinpath("array_run.py")
                 .as_posix()
             )
-            cluster_flag = 0
-
-            # next condition means CxSystem is running in cluster and is trying to spawn an array run on a node
-            if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:
-                array_run_suffix = (
-                    "_"
-                    + Path(anatomy_and_system_config).stem.split("_")[-2]
-                    + "_"
-                    + Path(anatomy_and_system_config).stem.split("_")[-1]
-                )
-                print(
-                    "spawning index: %d, step: %d"
-                    % (int(cluster_run_start_idx), int(cluster_run_step))
-                )
-                cluster_flag = 1
-                # When in cluster, suffix is the global suffix, for whole arrayrun. The self.suffix is local suffix for one job.
-                suffix = array_run_suffix
-                # during cluster run, we need to save the current job suffix for removal of the tmp files later
-                self.current_cluster_job_suffix = self.suffix
 
             if isinstance(anatomy_and_system_config, dict):
                 tmp_anat_path2 = tmp_folder_path.joinpath(
@@ -373,11 +342,8 @@ class CxSystem:
                     tmp_anat_path,
                     tmp_physio_path,
                     str(suffix),
-                    str(int(cluster_run_start_idx)),
-                    str(int(cluster_run_step)),
                     str(anatomy_and_system_config),
                     str(physiology_config),
-                    str(cluster_flag),
                     stdout_arg,
                 ]
                 try:
@@ -388,52 +354,13 @@ class CxSystem:
                     ) from exc
 
             else:
-                command = "python {array_run} {anat_df} {physio_df} {suffix} {start} {step} {anat_path} {physio_path} {cluster} {stdout_file}".format(
-                    array_run=array_run_path,
-                    anat_df=tmp_anat_path,
-                    physio_df=tmp_physio_path,
-                    suffix=suffix,
-                    start=int(cluster_run_start_idx),
-                    step=int(cluster_run_step),
-                    anat_path=anatomy_and_system_config,
-                    physio_path=physiology_config,
-                    cluster=cluster_flag,
-                    stdout_file=self.array_run_stdout_file,
+                raise OSError(
+                    " -  CxSystem is running on a non-linux platform. Array run is only supported on linux."
                 )
-                if (
-                    platform.node() == "hbp-bsp-cxsys2"
-                ):  # this is for hbp vm to activate the virtuanenv before running array run
-                    command = (
-                        "source /webapp/cxsys2/CxSystem2/venv_cxsys2/bin/activate &&"
-                        + command
-                    )
-                if sys.platform == "linux" or sys.platform == "darwin":
-                    command = '/bin/bash -c "' + command + '"'
-                os.system(command)
-
-            # Teardown code for cluster run, moved here from array_ryn.py>spawn_processes
-            if self.cluster_run_start_idx != -1 and self.cluster_run_step != -1:
-                print("cleaning tmp folders " + str(tmp_folder_path))
-                try:
-                    shutil.rmtree(tmp_folder_path)
-                except FileNotFoundError:
-                    print("already removed, passing")
-                    pass
 
             self.array_run = 1
             return
 
-        if self.array_run == 0:
-            try:
-                tmp_cluster = parameter_finder(
-                    self.anat_and_sys_conf_df, "run_in_cluster"
-                )
-                if tmp_cluster == "1":
-                    print(
-                        " -  Warning: Config file is set to run in cluster but it does not contain an array run; run_in_cluster will be ignored "
-                    )
-            except NameError:
-                pass
         self.configuration_executor()
         if not isinstance(self.awaited_conf_lines, list):
             if self.thr.is_alive():
@@ -531,23 +458,8 @@ class CxSystem:
         print(" -  Default clock is set to %s" % str(b2.defaultclock.dt))
 
     def set_workspace(self, *args):
-        if (
-            self.cluster_run_start_idx == -1
-            and self.cluster_run_step == -1
-            and self.array_run_in_cluster == 0
-        ):
-            self.workspace = Workspace(args[0], self.suffix)
-        else:  # this means cxsystem is running in cluster
-            print(" -  CxSystem is running in Cluster ... ")
-            self.workspace = Workspace(
-                parameter_finder(self.anat_and_sys_conf_df, "cluster_workspace"),
-                self.suffix,
-            )
-            print(
-                " -  CxSystem knows it's running in cluster and set the output folder to : {}".format(
-                    self.workspace.get_workspace_folder()
-                )
-            )
+        self.workspace = Workspace(args[0], self.suffix)
+
 
     def set_compression_method(self, *args):
         self.workspace.set_compression_method(args[0])

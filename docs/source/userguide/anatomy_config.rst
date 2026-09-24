@@ -63,22 +63,6 @@ The necessary parameters for running simulations locally are:
 
         :code:`profiling{True, False}` Defines whether CxSystem should report the benchmark using the built-in Brian profiler.
 
-        :code:`run_in_cluster{True, False}` Run the simulation on a cluster.
-
-
-If you want to run simulations on a cluster, you will also need to define:
-
-    :Simulation:  :code:`cluster_job_file_path{string}`: Absolute path and filename of the local batch file. Slurm example provided.
-
-        :code:`cluster_number_of_nodes{int}`: Number of nodes to be employed on the HPC server.
-
-        :code:`cluster_address{string}`: Address of the HPC server.
-
-        :code:`cluster_login_node{string}`: Address of the login node in case there is one.
-
-        :code:`cluster_username{string}`: Username on the HPC system.
-
-        :code:`cluster_workspace{string}`: Workspace path on the HPC server.
 
 
 .. _external_input:
