@@ -293,10 +293,7 @@ class ArrayRun:
         self.final_metadata_df = self.final_metadata_df.loc[
             np.repeat(self.final_metadata_df.index.values, self.trials_per_config)
         ].reset_index(drop=True)
-        assert len(self.final_namings) < 1000, (
-            " -  The array run is trying to run more than 1000 simulations, this is not allowed unless you"
-            " REALLY want it and if you REALLY want it you should know what to do."
-        )
+        
         while next_idx < end_idx or active_jobs:
             while next_idx < end_idx and len(active_jobs) < self.number_of_process:
                 process = context.Process(
