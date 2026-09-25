@@ -7,6 +7,7 @@ import os
 import shutil
 import sys
 import time
+from multiprocessing.connection import wait
 from pathlib import Path
 
 # Third-party
@@ -229,7 +230,7 @@ class ArrayRun:
             self.metadata_dict["default_config"] = ["default_config"]
             self.all_titles = ["default_config"]
 
-    def run_parameter_search(self, idx, working, paths, results, stdout_file):
+    def run_parameter_search(self, idx, paths, results, stdout_file):
         """
         The function that each spawned process runs and parallel instances of CxSystems are created here.
 
@@ -241,7 +242,6 @@ class ArrayRun:
         if stdout_file:
             sys.stdout = open(stdout_file, "a+")
         orig_idx = idx
-        working.value += 1
         np.random.seed(idx)
         tr = idx % self.trials_per_config
         idx = int(idx / self.trials_per_config)
@@ -265,7 +265,6 @@ class ArrayRun:
         paths[orig_idx] = cm.workspace.get_results_export_path()
         result_key = f"{self.final_namings[idx].removeprefix('_')}{tr_suffix}"
         results[result_key] = sim_results
-        working.value -= 1
 
     def spawn_processes(self, start_idx, steps_from_start):
         """
@@ -285,9 +284,11 @@ class ArrayRun:
         context = multiprocessing.get_context("spawn")
         manager = context.Manager()
         jobs = []
-        working = manager.Value("i", 0, lock=True)
         paths = manager.dict()
         results = manager.dict()
+        active_jobs = set()
+        next_idx = start_idx
+        end_idx = start_idx + steps_from_start
 
         self.final_metadata_df = self.final_metadata_df.loc[
             np.repeat(self.final_metadata_df.index.values, self.trials_per_config)
@@ -296,18 +297,33 @@ class ArrayRun:
             " -  The array run is trying to run more than 1000 simulations, this is not allowed unless you"
             " REALLY want it and if you REALLY want it you should know what to do."
         )
-        while len(jobs) < steps_from_start:
-            time.sleep(1.5)
-            if working.value < self.number_of_process:
-                idx = start_idx + len(jobs)
-                p = context.Process(
-                        target=self.run_parameter_search,
-                        args=(idx, working, paths, results, self.array_run_stdout_file),
+        while next_idx < end_idx or active_jobs:
+            while next_idx < end_idx and len(active_jobs) < self.number_of_process:
+                process = context.Process(
+                    target=self.run_parameter_search,
+                    args=(next_idx, paths, results, self.array_run_stdout_file),
                 )
-                jobs.append(p)
-                p.start()
-        for j in jobs:
-            j.join()
+                process.start()
+                jobs.append(process)
+                active_jobs.add(process)
+                next_idx += 1
+
+            if not active_jobs:
+                continue
+
+            ready_sentinels = wait([process.sentinel for process in active_jobs])
+
+            for process in tuple(active_jobs):
+                if process.sentinel not in ready_sentinels:
+                    continue
+
+                process.join()
+                active_jobs.remove(process)
+
+                if process.exitcode != 0:
+                    raise RuntimeError(
+                        f"Array-run worker {process.pid} failed with exit code {process.exitcode}"
+                    )
 
         if len(paths) == 0:
             raise RuntimeError(
