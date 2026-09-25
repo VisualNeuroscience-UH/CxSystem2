@@ -106,7 +106,7 @@ class ArrayRun:
             " -  array of Dataframes for anatomical and physiological configuration are ready"
         )
 
-        self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
+        self.results = self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
 
 
     def _prepare_multi_dim_arrun_metadata(self):
@@ -229,7 +229,7 @@ class ArrayRun:
             self.metadata_dict["default_config"] = ["default_config"]
             self.all_titles = ["default_config"]
 
-    def run_parameter_search(self, idx, working, paths, stdout_file):
+    def run_parameter_search(self, idx, working, paths, results, stdout_file):
         """
         The function that each spawned process runs and parallel instances of CxSystems are created here.
 
@@ -261,8 +261,10 @@ class ArrayRun:
             output_file_suffix=self.final_namings[idx] + tr_suffix,
             instantiated_from_array_run=1,
         )
-        cm.run()
+        sim_results = cm.run()
         paths[orig_idx] = cm.workspace.get_results_export_path()
+        result_key = f"{self.final_namings[idx].removeprefix('_')}{tr_suffix}"
+        results[result_key] = sim_results
         working.value -= 1
 
     def spawn_processes(self, start_idx, steps_from_start):
@@ -280,10 +282,12 @@ class ArrayRun:
             )
         )
 
-        manager = multiprocessing.Manager()
+        context = multiprocessing.get_context("spawn")
+        manager = context.Manager()
         jobs = []
         working = manager.Value("i", 0, lock=True)
         paths = manager.dict()
+        results = manager.dict()
 
         self.final_metadata_df = self.final_metadata_df.loc[
             np.repeat(self.final_metadata_df.index.values, self.trials_per_config)
@@ -296,9 +300,9 @@ class ArrayRun:
             time.sleep(1.5)
             if working.value < self.number_of_process:
                 idx = start_idx + len(jobs)
-                p = multiprocessing.Process(
-                    target=self.run_parameter_search,
-                    args=(idx, working, paths, self.array_run_stdout_file),
+                p = context.Process(
+                        target=self.run_parameter_search,
+                        args=(idx, working, paths, results, self.array_run_stdout_file),
                 )
                 jobs.append(p)
                 p.start()
@@ -328,6 +332,10 @@ class ArrayRun:
         print("cleaning tmp folders " + tmp_folder_path)
         shutil.rmtree(tmp_folder_path)
 
+        final_results = dict(results)
+        manager.shutdown()
+        return final_results
+    
     def generate_dataframes_for_param_search(
         self,
         original_df,
@@ -634,16 +642,19 @@ class ArrayRun:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 7:
-        print("Array run needs 6 arguments and is not built to be called separately")
+    if len(sys.argv) != 8:
+        print("Array run needs 7 arguments and is not built to be called separately")
         sys.exit(1)
+
     anatomy_df = pd.read_csv(sys.argv[1], header=None)
     physiology_df = pd.read_csv(sys.argv[2])
     suffix = sys.argv[3]
     anat_file_address = sys.argv[4]
     physio_file_address = sys.argv[5]
     array_run_stdout_file = sys.argv[6]
-    ArrayRun(
+    array_results_path = sys.argv[7]
+
+    array_run = ArrayRun(
         anatomy_df,
         physiology_df,
         suffix,
@@ -651,3 +662,4 @@ if __name__ == "__main__":
         physio_file_address,
         array_run_stdout_file,
     )
+    write_to_file(array_results_path, array_run.results)

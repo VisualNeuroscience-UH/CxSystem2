@@ -331,11 +331,17 @@ class CxSystem:
                 physiology_config = tmp_physio_path2
 
             if sys.platform == "linux":
+                array_results_path = (
+                    self.workspace.get_simulation_folder()
+                    .joinpath(f"array_results{self.suffix}.gz")
+                    .as_posix()
+                )
                 stdout_arg = (
                     "None"
                     if self.array_run_stdout_file is None
                     else str(self.array_run_stdout_file)
                 )
+
                 command = [
                     sys.executable,
                     array_run_path,
@@ -345,6 +351,7 @@ class CxSystem:
                     str(anatomy_and_system_config),
                     str(physiology_config),
                     stdout_arg,
+                    array_results_path,
                 ]
                 try:
                     subprocess.run(command, check=True)
@@ -352,7 +359,12 @@ class CxSystem:
                     raise RuntimeError(
                         f"array_run.py failed with exit code {exc.returncode}"
                     ) from exc
-
+                
+                self.array_results = load_from_file(array_results_path)
+                os.remove(array_results_path)
+                self.array_run = 1
+                return
+            
             else:
                 raise OSError(
                     " -  CxSystem is running on a non-linux platform. Array run is only supported on linux."
@@ -517,108 +529,109 @@ class CxSystem:
         print(" -  CxSystem is running on {} device".format(self.device))
 
     def run(self):
-        if not self.array_run:
+        if self.array_run:
+            return self.array_results
 
-            if self.device == "cpp":
-                target_directory = self.workspace.get_simulation_folder().joinpath(
-                    "standalone_code", self.suffix[1:]
-                )
-                b2.run(self.runtime, report="text")
-                b2.device.build(directory=target_directory, run=False, compile=True)
-                b2.device.run()
-            else:
-                b2.run(self.runtime, report="text", profile=self.profiling)
-
-                if self.profiling == 1:
-                    print()
-                    if len(b2.profiling_summary().names) < 20:
-                        print(b2.profiling_summary(show=len(b2.profiling_summary().names)))
-                    else:
-                        print(b2.profiling_summary(show=20))
-                    self.workspace.results["profiling_data"] = b2.profiling_summary()
-            
-            if self.benchmark:
-                self.benchmarking_data = {}
-                titles = [
-                    "Computer Name",
-                    "Device",
-                    "File Suffix",
-                    "Simulation Time",
-                    "Python Compilation",
-                    "Brian Code generation",
-                    "Device-Specific Compilation",
-                    "Run",
-                    "Extract and Save Result",
-                    "Total Time",
-                ]
-                self.benchmarking_data["Simulation Time"] = str(self.runtime)
-                self.benchmarking_data["Device"] = self.device
-                self.benchmarking_data["File Suffix"] = self.suffix[1:]
-                if self.device != "python":
-                    self.benchmarking_data["Python Compilation"] = (
-                        builtins.code_generation_start - self.start_time
-                    )
-                    self.benchmarking_data["Brian Code generation"] = (
-                        builtins.compile_start - builtins.code_generation_start
-                    )
-                    self.benchmarking_data["Device-Specific Compilation"] = (
-                        builtins.run_start - builtins.compile_start
-                    )
-                else:
-                    self.benchmarking_data["Python Compilation"] = (
-                        builtins.run_start - self.start_time
-                    )
-                    self.benchmarking_data["Brian Code generation"] = "-"
-                    self.benchmarking_data["Device-Specific Compilation"] = "-"
-                self.saving_start_time = time.time()
-                self.benchmarking_data["Run"] = (
-                    self.saving_start_time - builtins.run_start
-                )
-
-            results = self.gather_result()
-            self.end_time = time.time()
-            if self.benchmark:
-                self.benchmarking_data["Extract and Save Result"] = (
-                    self.end_time - self.saving_start_time
-                )
-                self.benchmarking_data["Total Time"] = self.end_time - self.start_time
-                self.benchmarking_data["Computer Name"] = platform.node()
-                write_titles = (
-                    1
-                    if not self.workspace.get_simulation_folder()
-                    .joinpath("benchmark.csv")
-                    .is_file()
-                    else 0
-                )
-                with open(
-                    self.workspace.get_simulation_folder()
-                    .joinpath("benchmark.csv")
-                    .as_posix(),
-                    "ab",
-                ) as f:
-                    w = csv.DictWriter(f, titles)
-                    if write_titles:
-                        w.writeheader()
-                    w.writerow(self.benchmarking_data)
-                    print(" -  Benchmarking data saved")
-            print(
-                " -  Simulating %s took in total %f s"
-                % (str(self.runtime), self.end_time - self.start_time)
+        if self.device == "cpp":
+            target_directory = self.workspace.get_simulation_folder().joinpath(
+                "standalone_code", self.suffix[1:]
             )
-            if self.device == "cuda":
-                shutil.rmtree(
-                    self.workspace.get_simulation_folder()
-                    .joinpath(self.suffix[1:])
-                    .as_posix()
-                )
-            elif self.device == "cpp":
-                dt = b2.device.defaultclock.dt
-                b2.device.delete(code=True, data=True, run_args=True, directory=True)
-                b2.device.reinit()
-                b2.device.activate()
-                b2.device.defaultclock = b2.Clock(dt=dt, name="defaultclock")
+            b2.run(self.runtime, report="text")
+            b2.device.build(directory=target_directory, run=False, compile=True)
+            b2.device.run()
+        else:
+            b2.run(self.runtime, report="text", profile=self.profiling)
 
-            return results
+            if self.profiling == 1:
+                print()
+                if len(b2.profiling_summary().names) < 20:
+                    print(b2.profiling_summary(show=len(b2.profiling_summary().names)))
+                else:
+                    print(b2.profiling_summary(show=20))
+                self.workspace.results["profiling_data"] = b2.profiling_summary()
+        
+        if self.benchmark:
+            self.benchmarking_data = {}
+            titles = [
+                "Computer Name",
+                "Device",
+                "File Suffix",
+                "Simulation Time",
+                "Python Compilation",
+                "Brian Code generation",
+                "Device-Specific Compilation",
+                "Run",
+                "Extract and Save Result",
+                "Total Time",
+            ]
+            self.benchmarking_data["Simulation Time"] = str(self.runtime)
+            self.benchmarking_data["Device"] = self.device
+            self.benchmarking_data["File Suffix"] = self.suffix[1:]
+            if self.device != "python":
+                self.benchmarking_data["Python Compilation"] = (
+                    builtins.code_generation_start - self.start_time
+                )
+                self.benchmarking_data["Brian Code generation"] = (
+                    builtins.compile_start - builtins.code_generation_start
+                )
+                self.benchmarking_data["Device-Specific Compilation"] = (
+                    builtins.run_start - builtins.compile_start
+                )
+            else:
+                self.benchmarking_data["Python Compilation"] = (
+                    builtins.run_start - self.start_time
+                )
+                self.benchmarking_data["Brian Code generation"] = "-"
+                self.benchmarking_data["Device-Specific Compilation"] = "-"
+            self.saving_start_time = time.time()
+            self.benchmarking_data["Run"] = (
+                self.saving_start_time - builtins.run_start
+            )
+
+        results = self.gather_result()
+        self.end_time = time.time()
+        if self.benchmark:
+            self.benchmarking_data["Extract and Save Result"] = (
+                self.end_time - self.saving_start_time
+            )
+            self.benchmarking_data["Total Time"] = self.end_time - self.start_time
+            self.benchmarking_data["Computer Name"] = platform.node()
+            write_titles = (
+                1
+                if not self.workspace.get_simulation_folder()
+                .joinpath("benchmark.csv")
+                .is_file()
+                else 0
+            )
+            with open(
+                self.workspace.get_simulation_folder()
+                .joinpath("benchmark.csv")
+                .as_posix(),
+                "ab",
+            ) as f:
+                w = csv.DictWriter(f, titles)
+                if write_titles:
+                    w.writeheader()
+                w.writerow(self.benchmarking_data)
+                print(" -  Benchmarking data saved")
+        print(
+            " -  Simulating %s took in total %f s"
+            % (str(self.runtime), self.end_time - self.start_time)
+        )
+        if self.device == "cuda":
+            shutil.rmtree(
+                self.workspace.get_simulation_folder()
+                .joinpath(self.suffix[1:])
+                .as_posix()
+            )
+        elif self.device == "cpp":
+            dt = b2.device.defaultclock.dt
+            b2.device.delete(code=True, data=True, run_args=True, directory=True)
+            b2.device.reinit()
+            b2.device.activate()
+            b2.device.defaultclock = b2.Clock(dt=dt, name="defaultclock")
+
+        return results
 
     def set_runtime_parameters(self):
         if not np.any(self.current_parameters_s.str.contains("runtime")):
