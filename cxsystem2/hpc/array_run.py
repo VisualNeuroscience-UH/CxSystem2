@@ -38,6 +38,7 @@ class ArrayRun:
         anatomy_file_path,
         physio_file_path,
         array_run_stdout_file=None,
+        unit_coords_path=None,
     ):
         """
         Initialize the ArrayRun for running several instances of CxSystem in parallel.
@@ -46,7 +47,10 @@ class ArrayRun:
         :param physiology_dataframe: The dataframe containing the physiology configurations that has an instance for ArrayRun in it.
         :param job_suffix: The job_suffix for the metadata file containing the filename and changing parameters in each of the simulations.
         """
-        self.suffix = job_suffix  
+        self.suffix = job_suffix
+        self.unit_coords_df = (
+            pd.read_pickle(unit_coords_path) if unit_coords_path != "None" else None
+        )
         self.array_run_stdout_file = (
             None if array_run_stdout_file == "None" else array_run_stdout_file
         )
@@ -107,7 +111,6 @@ class ArrayRun:
         )
 
         self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
-
 
     def _prepare_multi_dim_arrun_metadata(self):
         meta_columns = []
@@ -259,6 +262,7 @@ class ArrayRun:
             self.list_of_anatomy_dfs[idx],
             self.list_of_physio_dfs[idx],
             output_file_suffix=self.final_namings[idx] + tr_suffix,
+            unit_coords_df=self.unit_coords_df,
             instantiated_from_array_run=1,
         )
         cm.run()
@@ -634,8 +638,8 @@ class ArrayRun:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 7:
-        print("Array run needs 6 arguments and is not built to be called separately")
+    if len(sys.argv) != 8:
+        print("Array run needs 7 arguments and is not built to be called separately")
         sys.exit(1)
     anatomy_df = pd.read_csv(sys.argv[1], header=None)
     physiology_df = pd.read_csv(sys.argv[2])
@@ -643,6 +647,7 @@ if __name__ == "__main__":
     anat_file_address = sys.argv[4]
     physio_file_address = sys.argv[5]
     array_run_stdout_file = sys.argv[6]
+    unit_coords_path = sys.argv[7]
     ArrayRun(
         anatomy_df,
         physiology_df,
@@ -650,4 +655,5 @@ if __name__ == "__main__":
         anat_file_address,
         physio_file_address,
         array_run_stdout_file,
+        unit_coords_path,
     )

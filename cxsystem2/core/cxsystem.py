@@ -329,6 +329,12 @@ class CxSystem:
                 with open(tmp_physio_path2, "w") as f:
                     json.dump(physiology_config, f)
                 physiology_config = tmp_physio_path2
+            unit_coords_path = tmp_folder_path / f"unit_coords{self.suffix}.parquet"
+            if isinstance(self.unit_coords_df, pd.DataFrame):
+                self.unit_coords_df.to_pickle(unit_coords_path)
+                unit_coords_path = str(unit_coords_path)
+            else:
+                unit_coords_path = "None"
 
             if sys.platform == "linux":
                 stdout_arg = (
@@ -345,6 +351,7 @@ class CxSystem:
                     str(anatomy_and_system_config),
                     str(physiology_config),
                     stdout_arg,
+                    unit_coords_path,
                 ]
                 try:
                     subprocess.run(command, check=True)
@@ -459,7 +466,6 @@ class CxSystem:
 
     def set_workspace(self, *args):
         self.workspace = Workspace(args[0], self.suffix)
-
 
     def set_compression_method(self, *args):
         self.workspace.set_compression_method(args[0])
