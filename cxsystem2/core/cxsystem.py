@@ -535,7 +535,27 @@ class CxSystem:
             target_directory = self.workspace.get_simulation_folder().joinpath(
                 "standalone_code", self.suffix[1:]
             )
-            b2.run(self.runtime, report="text")
+            for n in range(1, 21):
+                start_time = n * 1000 * second
+                on_filename = f"/opt3/projects/smart/layer_4c/input_data/input_data/parasol_on_69033f0b02_{n:02d}_results.gz"
+                off_filename = f"/opt3/projects/smart/layer_4c/input_data/input_data/parasol_off_422ebfe1d9_{n:02d}_results.gz"
+                import pickle, zlib
+
+                on_data = pickle.loads(zlib.decompress(open(on_filename, "rb").read()))
+                off_data = pickle.loads(
+                    zlib.decompress(open(off_filename, "rb").read())
+                )
+                self.Cxmodule.spk_generator_0.set_spikes(
+                    on_data["spikes_0"][0],
+                    on_data["spikes_0"][1] + start_time,
+                    sorted=True,
+                )
+                self.Cxmodule.spk_generator_1.set_spikes(
+                    off_data["spikes_0"][0],
+                    off_data["spikes_0"][1] + start_time,
+                    sorted=True,
+                )
+                b2.run(self.runtime, report="text")
             b2.device.build(directory=target_directory, run=False, compile=True)
             b2.device.run()
         else:
