@@ -1040,7 +1040,6 @@ class SynapseReference:
         """
 
         self.output_synapse["equation"] = b2.Equations(
-            # dwght/dt = -wght/tau_wght : siemens (clock-driven)    
             """
             wght : siemens   
             dpre_trace/dt = -pre_trace/tau_pre : 1  (event-driven) # apre
@@ -1065,8 +1064,9 @@ class SynapseReference:
         self.output_synapse[
             "post_eq"
         ] = """
-            wght += eta_ltp * pre_trace * post_trace_slow *  nS
+            wght += eta_ltp * pre_trace * post_trace_slow * nS
             post_trace += Apost 
+            post_trace_slow += Apost
             wght = clip(wght, 0*nS, wght_max)
             """
 
@@ -1102,7 +1102,7 @@ class SynapseReference:
         self.output_synapse[
             "post_eq"
         ] = """
-            wght += eta_ltp * pre_trace * post_trace_slow  *  nS
+            wght += eta_ltp * pre_trace * post_trace_slow * nS
             wght -= eta_homeo * post_trace_homeo * wght
             post_trace += Apost 
             post_trace_slow += Apost
