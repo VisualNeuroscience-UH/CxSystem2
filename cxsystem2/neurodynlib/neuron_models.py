@@ -10,6 +10,8 @@
 # Neuron models that were used from the exercise code repository are:
 # AdEx, passive_cable, exp_IF, HH, LIF, NeuronAbstract, NeuronTypeOne, NeuronTypeTwo, fitzhugh_nagumo
 
+# ruff: noqa: RUF012
+
 # Built-in
 import copy
 import json
@@ -79,10 +81,12 @@ class PointNeuron:
 
     def __init__(self, is_pyramidal=False, compartment="soma"):
         """
-        Initializes the point neuron object
-
-        :param bool is_pyramidal: whether the point neuron model is part of a pyramidal/multicompartmental cell
-        :param string compartment: name of the compartment (eg. soma, basal, a3)
+        Parameters
+        ----------
+        is_pyramidal : bool
+            whether the point neuron model is part of a pyramidal/multicompartmental cell
+        compartment : string
+            name of the compartment (eg. soma, basal, a3)
         """
 
         self.is_pyramidal = is_pyramidal
@@ -151,9 +155,17 @@ class PointNeuron:
         Compiles the membrane equation from the template for use in Brian2.
         This should be the only function where the template equation is used.
 
-        :param dict substitute_ad_hoc: dictionary of temporary values to use in the equation template
-        :param bool return_string: If True, returns equations as a string. Otherwise, returns a b2.Equations object.
-        :return: string (or b2.Equations object)
+        Parameters
+        ----------
+        substitute_ad_hoc : dict, optional
+            dictionary of temporary values to use in the equation template
+        return_string : bool, optional
+            If True, returns equations as a string. Otherwise, returns a b2.Equations object.
+
+        Returns
+        -------
+        string or b2.Equations
+            string (or b2.Equations object)
         """
 
         # Get the generic template
@@ -195,8 +207,14 @@ class PointNeuron:
         """
         Compiles the membrane equation and adds compartment name to all compartment-specific variables
 
-        :param string compartment_name: name of the compartment
-        :return: string
+        Parameters
+        ----------
+        compartment_name : string
+            name of the compartment
+
+        Returns
+        -------
+        string
         """
         membrane_eq = self.get_membrane_equation(return_string=True)
 
@@ -212,7 +230,9 @@ class PointNeuron:
         """
         Method to query for the URL describing the neuron model
 
-        :return: url
+        Returns
+        -------
+        url
         """
 
         return self.link_to_book
@@ -221,7 +241,10 @@ class PointNeuron:
         """
         Returns the membrane equations in a form that prints out nicely in Jupyter Notebook
 
-        :return: b2.Equations object
+        Returns
+        -------
+        b2.Equations
+            b2.Equations object
         """
 
         s = self.get_membrane_equation(return_string=True)
@@ -231,7 +254,9 @@ class PointNeuron:
         """
         Shows all the parameter names that can/must be defined
 
-        :return: list
+        Returns
+        -------
+        list
         """
         return self.default_neuron_parameters.keys()
 
@@ -239,7 +264,9 @@ class PointNeuron:
         """
         Shows all the current parameter names and values
 
-        :return: dict
+        Returns
+        -------
+        dict
         """
         return self.neuron_parameters
 
@@ -249,7 +276,10 @@ class PointNeuron:
         If you don't know the correct units, use get_neuron_parameters() first to get the default parameters with
         correct units.
 
-        :param kwargs: new parameter values are given as arguments
+        Parameters
+        ----------
+        **kwargs
+            new parameter values are given as arguments
         """
         self.neuron_parameters.update(kwargs)
 
@@ -257,7 +287,9 @@ class PointNeuron:
         """
         Get the statements that will be executed once the neuron hits the threshold.
 
-        :return: string
+        Returns
+        -------
+        string
         """
         return self.reset_statements
 
@@ -265,7 +297,9 @@ class PointNeuron:
         """
         Get the spike threshold condition.
 
-        :return: string
+        Returns
+        -------
+        string
         """
         return self.threshold_condition
 
@@ -273,7 +307,10 @@ class PointNeuron:
         """
         Get the refractory period (after a spike).
 
-        :return: duration (typically in ms)
+        Returns
+        -------
+        duration
+            typically in ms
         """
 
         return self.neuron_parameters["refractory_period"]
@@ -282,7 +319,9 @@ class PointNeuron:
         """
         Get initial values. If the initial value of vm is None, will replace it with EL (reversal potential of leak).
 
-        :return:
+        Returns
+        -------
+        dict
         """
         init_vals = dict(self.initial_values)
         if init_vals["vm"] is None:
@@ -295,7 +334,9 @@ class PointNeuron:
         """
         Get state variables to monitor (for method plot_states())
 
-        :return: list
+        Returns
+        -------
+        list
         """
         return self.states_to_monitor
 
@@ -303,9 +344,12 @@ class PointNeuron:
         """
         Set the value of a template placeholder.
 
-        :param string key: placeholder name
-        :param string string_to_set: placeholder value
-
+        Parameters
+        ----------
+        key : string
+            placeholder name
+        string_to_set : string
+            placeholder value
         """
         self.full_model_defns[key] = string_to_set
 
@@ -313,9 +357,12 @@ class PointNeuron:
         """
         Append a string to a template placeholder.
 
-        :param string key: placeholder name
-        :param string_to_add: string to append to the placeholder
-
+        Parameters
+        ----------
+        key : string
+            placeholder name
+        string_to_add : string
+            string to append to the placeholder
         """
         try:
             self.full_model_defns[key] += string_to_add
@@ -324,18 +371,28 @@ class PointNeuron:
 
     def simulate_neuron(
         self,
-        I_stim=input_factory.get_zero_current(),
+        I_stim=None,
         simulation_time=1000 * ms,
         **kwargs,
     ):
         """
         Simulate/stimulate the neuron
 
-        :param I_stim: input stimulus (use the input_factory to create the stimulus)
-        :param simulation_time: duration (usually in milliseconds, eg. 3000*ms)
-        :param kwargs: custom neuron parameters can be given as arguments
-        :return: b2.StateMonitor, b2.SpikeMonitor
+        Parameters
+        ----------
+        I_stim
+            input stimulus (use the input_factory to create the stimulus)
+        simulation_time
+            duration (usually in milliseconds, eg. 3000*ms)
+        **kwargs
+            custom neuron parameters can be given as arguments
+
+        Returns
+        -------
+        b2.StateMonitor, b2.SpikeMonitor
         """
+        if I_stim is None:
+            I_stim = input_factory.get_zero_current()
 
         neuron_parameters = dict(
             self.neuron_parameters
@@ -386,11 +443,16 @@ class PointNeuron:
         """
         Simple example that stimulates the neuron with a step and a sinusoidal current.
 
-        :param step_amplitude: step current amplitude (in amps)
-        :param sine_amplitude: sine current amplitude (in amps)
-        :param sine_freq: sine current frequency (in Hz)
-        :param sine_dc: constant current to inject during the sine stimulation (in amps)
-        :return:
+        Parameters
+        ----------
+        step_amplitude
+            step current amplitude (in amps)
+        sine_amplitude
+            sine current amplitude (in amps)
+        sine_freq
+            sine current frequency (in Hz)
+        sine_dc
+            constant current to inject during the sine stimulation (in amps)
         """
         # specify step current
         step_current = input_factory.get_step_current(
@@ -414,7 +476,7 @@ class PointNeuron:
             title="Step current",
             firing_threshold=firing_threshold,
         )
-        print("nr of spikes: {}".format(len(spike_monitor.t)))
+        print(f"nr of spikes: {len(spike_monitor.t)}")
         plt.show()
 
         # second example: sinusoidal current. note the higher resolution 0.1 * ms
@@ -437,7 +499,7 @@ class PointNeuron:
             title="Sinusoidal input current",
             firing_threshold=firing_threshold,
         )
-        print("nr of spikes: {}".format(spike_monitor.count[0]))
+        print(f"nr of spikes: {spike_monitor.count[0]}")
         plt.show()
 
     def plot_fi_curve(
@@ -452,12 +514,23 @@ class PointNeuron:
         """
         Plot the frequency-current (f-I) curve.
 
-        :param min_current: minimum current (in amps)
-        :param max_current: maximum current (in amps)
-        :param step_size: current step (in amps)
-        :param bool plot: whether to plot the results or not
-        :param max_rate: maximum frequency to show in the plot
-        :return: steps, counts (if plot is False)
+        Parameters
+        ----------
+        min_current
+            minimum current (in amps)
+        max_current
+            maximum current (in amps)
+        step_size
+            current step (in amps)
+        plot : bool, optional
+            whether to plot the results or not
+        max_rate
+            maximum frequency to show in the plot
+
+        Returns
+        -------
+        steps, counts
+            if plot is False
         """
         # Compute current steps
         steps = np.arange(min_current, max_current, step_size) * amp
@@ -530,8 +603,10 @@ class PointNeuron:
         """
         Plots the vm from a state monitor
 
-        :param state_monitor: b2.StateMonitor with vm recording
-
+        Parameters
+        ----------
+        state_monitor
+            b2.StateMonitor with vm recording
         """
 
         plt.figure(figsize=(12, 4))
@@ -545,8 +620,12 @@ class PointNeuron:
         """
         Plots pre-defined state variables from a state monitor
 
-        :param state_monitor: b2.StateMonitor
-        :param parameters: list of parameters
+        Parameters
+        ----------
+        state_monitor
+            b2.StateMonitor
+        parameters
+            list of parameters
         """
         if parameters is None:
             print("No parameters specified. Plotting membrane voltage.")
@@ -567,8 +646,14 @@ class PointNeuron:
         """
         Creates a JSON string of parameter names and values (units are discarded).
 
-        :param bool include_neuron_name: whether to include the neuron name
-        :return: string
+        Parameters
+        ----------
+        include_neuron_name : bool, optional
+            whether to include the neuron name
+
+        Returns
+        -------
+        string
         """
         neuron_parameters_wo_units = dict()
         neuron_parameters_wo_units[self.neuron_name] = dict()
@@ -586,8 +671,10 @@ class PointNeuron:
         """
         Saves the neuron parameters in a JSON file.
 
-        :param string filename: Path to file. If None, will save as neuron_name.json
-
+        Parameters
+        ----------
+        filename : string, optional
+            Path to file. If None, will save as neuron_name.json
         """
 
         if filename is None:
@@ -601,9 +688,12 @@ class PointNeuron:
         """
         Read and load parameters from a JSON file.
 
-        :param string filename: Path to file
-        :param string neuron_name: the name of the neuron to read from the file
-
+        Parameters
+        ----------
+        filename : string
+            Path to file
+        neuron_name : string, optional
+            the name of the neuron to read from the file
         """
 
         with open(filename, "r") as fi:
@@ -625,8 +715,14 @@ class PointNeuron:
         """
         List neuron types (sets of parameters) in a JSON file
 
-        :param string filename: Path to file
-        :return: list
+        Parameters
+        ----------
+        filename : string
+            Path to file
+
+        Returns
+        -------
+        list
         """
 
         with open(filename, "r") as fi:
@@ -638,9 +734,12 @@ class PointNeuron:
         """
         Adds tonic current injection to the neuron
 
-        :param tonic_current: amplitude of current injection (in amps)
-        :param tau_rampup: time constant for current ramp-up (in milliseconds)
-
+        Parameters
+        ----------
+        tonic_current
+            amplitude of current injection (in amps)
+        tau_rampup
+            time constant for current ramp-up (in milliseconds)
         """
 
         assert (
@@ -664,9 +763,12 @@ class PointNeuron:
         """
         Adds an external current to the neuron
 
-        :param string current_name: name of the current
-        :param string current_eqs: equations describing the external current
-        :return:
+        Parameters
+        ----------
+        current_name : string, optional
+            name of the current
+        current_eqs : string, optional
+            equations describing the external current
         """
         self.add_model_definition("EXT_CURRENTS", "+ " + current_name)
         if current_eqs is None:
@@ -682,8 +784,9 @@ class PointNeuron:
         Adds a stochastic component to the membrane equation as explained in
         `Brian2 documentation <https://brian2.readthedocs.io/en/stable/user/models.html#noise>`_
 
-        :param noise_sigma:
-        :return:
+        Parameters
+        ----------
+        noise_sigma
         """
         self.set_model_definition("VM_NOISE", "+ noise_sigma*xi*taum_soma**-0.5")
         C = self.neuron_parameters["C"]
@@ -694,8 +797,10 @@ class PointNeuron:
         """
         Sets the excitatory receptors.
 
-        :param string receptor_name: name of receptor model (see neurodynlib.receptor_models)
-
+        Parameters
+        ----------
+        receptor_name : string
+            name of receptor model (see neurodynlib.receptor_models)
         """
         assert (
             receptor_name in ReceptorModel.ExcModelNames
@@ -714,8 +819,10 @@ class PointNeuron:
         """
         Sets the inhibitory receptors.
 
-        :param string receptor_name: name of receptor model (see neurodynlib.receptor_models)
-
+        Parameters
+        ----------
+        receptor_name : string
+            name of receptor model (see neurodynlib.receptor_models)
         """
         assert (
             receptor_name in ReceptorModel.InhModelNames
@@ -734,8 +841,14 @@ class PointNeuron:
         """
         Makes a Brian2 NeuronGroup
 
-        :param int n: number of neurons
-        :return: b2.NeuronGroup object
+        Parameters
+        ----------
+        n : int
+            number of neurons
+
+        Returns
+        -------
+        b2.NeuronGroup
         """
 
         neuron_pop = b2.NeuronGroup(
@@ -756,9 +869,6 @@ class LifNeuron(PointNeuron):
 
     Requires setting the following parameters: EL, gL, C, V_res, VT.
     """
-
-    # __OBFUSCATION_FACTORS = [543, 622, 9307, 584, 2029, 211]
-
     # The large gL and capacitance are from the original code
     default_neuron_parameters = {
         "EL": -70 * mV,
@@ -1180,9 +1290,7 @@ class IzhikevichNeuron(PointNeuron):
         plt.show()
 
 
-class LifAscNeuron(
-    PointNeuron
-):  # TODO - Figure out why output different from plots in cell type atlas
+class LifAscNeuron(PointNeuron):  
     """
     Leaky Integrate-and-Fire with After-spike Currents (LIFASC).
     One of the generalized LIF (GLIF_3) models used in the Allen Brain Institute.
@@ -1197,15 +1305,15 @@ class LifAscNeuron(
     # The default parameters correspond to neuronal_model_id = 637925685 available at
     # https://celltypes.brain-map.org/experiment/electrophysiology/623893177
     default_neuron_parameters = {
-        "EL": -77.01623281 * mvolt,
-        "C": 233.02310736 * pfarad,
-        "gL": 8.10525954 * nsiemens,
-        "A_asc1": -56.75679504 * pamp,
+        "EL": -77.0 * mvolt,
+        "C": 233.0 * pfarad,
+        "gL": 8.1 * nsiemens,
+        "A_asc1": -56.8 * pamp,
         "tau_asc1": 100.0 * msecond,
-        "A_asc2": -0.60597377 * namp,
+        "A_asc2": -0.6 * namp,
         "tau_asc2": 10.0 * msecond,
         "V_res": -77.0 * mvolt,
-        "VT": -49.31118264 * mvolt,
+        "VT": -49.3 * mvolt,
         "refractory_period": 2.0 * msecond,
     }
 
