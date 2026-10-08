@@ -7,6 +7,7 @@ import os
 import shutil
 import sys
 import time
+from multiprocessing.connection import wait
 from pathlib import Path
 
 # Third-party
@@ -46,7 +47,7 @@ class ArrayRun:
         :param physiology_dataframe: The dataframe containing the physiology configurations that has an instance for ArrayRun in it.
         :param job_suffix: The job_suffix for the metadata file containing the filename and changing parameters in each of the simulations.
         """
-        self.suffix = job_suffix  
+        self.suffix = job_suffix
         self.array_run_stdout_file = (
             None if array_run_stdout_file == "None" else array_run_stdout_file
         )
@@ -106,8 +107,9 @@ class ArrayRun:
             " -  array of Dataframes for anatomical and physiological configuration are ready"
         )
 
-        self.spawn_processes(0, len(self.final_namings) * self.trials_per_config)
-
+        self.results = self.spawn_processes(
+            0, len(self.final_namings) * self.trials_per_config
+        )
 
     def _prepare_multi_dim_arrun_metadata(self):
         meta_columns = []
@@ -229,7 +231,7 @@ class ArrayRun:
             self.metadata_dict["default_config"] = ["default_config"]
             self.all_titles = ["default_config"]
 
-    def run_parameter_search(self, idx, working, paths, stdout_file):
+    def run_parameter_search(self, idx, paths, results, stdout_file):
         """
         The function that each spawned process runs and parallel instances of CxSystems are created here.
 
@@ -241,7 +243,6 @@ class ArrayRun:
         if stdout_file:
             sys.stdout = open(stdout_file, "a+")
         orig_idx = idx
-        working.value += 1
         np.random.seed(idx)
         tr = idx % self.trials_per_config
         idx = int(idx / self.trials_per_config)
@@ -261,9 +262,10 @@ class ArrayRun:
             output_file_suffix=self.final_namings[idx] + tr_suffix,
             instantiated_from_array_run=1,
         )
-        cm.run()
+        sim_results = cm.run()
         paths[orig_idx] = cm.workspace.get_results_export_path()
-        working.value -= 1
+        result_key = f"{self.final_namings[idx].removeprefix('_')}{tr_suffix}"
+        results[result_key] = sim_results
 
     def spawn_processes(self, start_idx, steps_from_start):
         """
@@ -280,30 +282,46 @@ class ArrayRun:
             )
         )
 
-        manager = multiprocessing.Manager()
+        context = multiprocessing.get_context("spawn")
+        manager = context.Manager()
         jobs = []
-        working = manager.Value("i", 0, lock=True)
         paths = manager.dict()
+        results = manager.dict()
+        active_jobs = set()
+        next_idx = start_idx
+        end_idx = start_idx + steps_from_start
 
         self.final_metadata_df = self.final_metadata_df.loc[
             np.repeat(self.final_metadata_df.index.values, self.trials_per_config)
         ].reset_index(drop=True)
-        assert len(self.final_namings) < 1000, (
-            " -  The array run is trying to run more than 1000 simulations, this is not allowed unless you"
-            " REALLY want it and if you REALLY want it you should know what to do."
-        )
-        while len(jobs) < steps_from_start:
-            time.sleep(1.5)
-            if working.value < self.number_of_process:
-                idx = start_idx + len(jobs)
-                p = multiprocessing.Process(
+
+        while next_idx < end_idx or active_jobs:
+            while next_idx < end_idx and len(active_jobs) < self.number_of_process:
+                process = context.Process(
                     target=self.run_parameter_search,
-                    args=(idx, working, paths, self.array_run_stdout_file),
+                    args=(next_idx, paths, results, self.array_run_stdout_file),
                 )
-                jobs.append(p)
-                p.start()
-        for j in jobs:
-            j.join()
+                process.start()
+                jobs.append(process)
+                active_jobs.add(process)
+                next_idx += 1
+
+            if not active_jobs:
+                continue
+
+            ready_sentinels = wait([process.sentinel for process in active_jobs])
+
+            for process in tuple(active_jobs):
+                if process.sentinel not in ready_sentinels:
+                    continue
+
+                process.join()
+                active_jobs.remove(process)
+
+                if process.exitcode != 0:
+                    raise RuntimeError(
+                        f"Array-run worker {process.pid} failed with exit code {process.exitcode}"
+                    )
 
         if len(paths) == 0:
             raise RuntimeError(
@@ -327,6 +345,10 @@ class ArrayRun:
         )
         print("cleaning tmp folders " + tmp_folder_path)
         shutil.rmtree(tmp_folder_path)
+
+        final_results = dict(results)
+        manager.shutdown()
+        return final_results
 
     def generate_dataframes_for_param_search(
         self,
@@ -634,16 +656,19 @@ class ArrayRun:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 7:
-        print("Array run needs 6 arguments and is not built to be called separately")
+    if len(sys.argv) != 8:
+        print("Array run needs 7 arguments and is not built to be called separately")
         sys.exit(1)
+
     anatomy_df = pd.read_csv(sys.argv[1], header=None)
     physiology_df = pd.read_csv(sys.argv[2])
     suffix = sys.argv[3]
     anat_file_address = sys.argv[4]
     physio_file_address = sys.argv[5]
     array_run_stdout_file = sys.argv[6]
-    ArrayRun(
+    array_results_path = sys.argv[7]
+
+    array_run = ArrayRun(
         anatomy_df,
         physiology_df,
         suffix,
@@ -651,3 +676,4 @@ if __name__ == "__main__":
         physio_file_address,
         array_run_stdout_file,
     )
+    write_to_file(array_results_path, array_run.results)
