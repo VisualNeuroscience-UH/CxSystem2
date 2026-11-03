@@ -1,3 +1,6 @@
+# ruff: noqa: RUF012
+
+
 class ReceptorModel:
     """
     Receptor models are added to neuron unit membrane equations.
@@ -28,7 +31,7 @@ class ReceptorModel:
         "I_NDF",
     ]
 
-    SynapticExcInhModels = dict()
+    SynapticExcInhModels = {}
 
     ############################################################
     ###           NeCo excitation/inhibition models          ###
