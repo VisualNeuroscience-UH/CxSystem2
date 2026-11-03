@@ -170,36 +170,21 @@ class TestPhysiologyReference:
         assert all(
             np.round(CM.customized_neurons_list[0]["z_positions"], decimals=2)
             == np.round(
-                list(
-                    map(
-                        lambda x: np.e ** (x / 17) - 1,
-                        CM.customized_neurons_list[0]["w_positions"],
-                    )
-                ),
+                [np.e ** (x / 17) - 1 for x in CM.customized_neurons_list[0]["w_positions"]],
                 decimals=2,
             )
         )
         assert all(
             np.round(CM.customized_neurons_list[1]["z_positions"], decimals=2)
             == np.round(
-                list(
-                    map(
-                        lambda x: np.e ** (x / 17) - 1,
-                        CM.customized_neurons_list[1]["w_positions"],
-                    )
-                ),
+                [np.e ** (x / 17) - 1 for x in CM.customized_neurons_list[1]["w_positions"]],
                 decimals=2,
             )
         )
         assert all(
             np.round(CM.customized_neurons_list[2]["z_positions"], decimals=2)
             == np.round(
-                list(
-                    map(
-                        lambda x: np.e ** (x / 17) - 1,
-                        CM.customized_neurons_list[2]["w_positions"],
-                    )
-                ),
+                [np.e ** (x / 17) - 1 for x in CM.customized_neurons_list[2]["w_positions"]],
                 decimals=2,
             )
         )
@@ -310,11 +295,7 @@ def test_spikecount_report(cxsystem_run_fixture, capsys, get_spike_data):
     for key in keys:
         spike_count_proportion = new_spikes_all[key]["N"] / spikes_all[key]["N"]
         with capsys.disabled():
-            print(
-                "Proportion of spike counts (new/old) for {0} is {1:.2f}".format(
-                    key, spike_count_proportion
-                )
-            )
+            print(f"Proportion of spike counts (new/old) for {key} is {spike_count_proportion:.2f}")
 
 
 def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
@@ -372,8 +353,4 @@ def test_spiketiming_report(cxsystem_run_fixture, capsys, get_spike_data):
 
         # report mean of these stats
         with capsys.disabled():
-            print(
-                "Mean Wasserstein Distance (spike shift) for {0} is {1:.2f} ms".format(
-                    key, mean_wd
-                )
-            )
+            print(f"Mean Wasserstein Distance (spike shift) for {key} is {mean_wd:.2f} ms")

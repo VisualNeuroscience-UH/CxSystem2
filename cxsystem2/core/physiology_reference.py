@@ -13,7 +13,6 @@ from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser, value_e
 from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
-
 """
 The preliminary version of this software has been developed at Aalto University 2012-2015, 
 and the full version at the University of Helsinki 2013-2017. The software is distributed 
@@ -77,7 +76,7 @@ class NeuronReference:
             general_grid_radius > min_distance
         ), " -  The distance between cells should be less than the grid radius"
         assert cell_type in NeuronReference._celltypes, (
-            " -  Cell type '%s' is not defined" % cell_type
+            f" -  Cell type '{cell_type}' is not defined"
         )
         assert len(layers_idx) < 3, " -  Length of layers_idx array is larger than 2"
         if len(layers_idx) == 2:
@@ -134,8 +133,8 @@ class NeuronReference:
             except:  # noqa: E722
                 self.pc_neuron_model = self.neuron_model
                 print(
-                    " !  No pyramidal cell neuron model defined, using %s"
-                    % self.neuron_model
+                    f" !  No pyramidal cell neuron model defined, "
+                    f"using {self.neuron_model}"
                 )
 
             try:
@@ -145,8 +144,8 @@ class NeuronReference:
             except:  # noqa: E722
                 self.pc_excitation_model = self.excitation_model
                 print(
-                    " !  No pyramidal cell excitation model defined, using %s"
-                    % self.excitation_model
+                    f" !  No pyramidal cell excitation model defined, "
+                    f"using {self.excitation_model}"
                 )
 
             try:
@@ -156,8 +155,8 @@ class NeuronReference:
             except:  # noqa: E722
                 self.pc_inhibition_model = self.inhibition_model
                 print(
-                    " !  No pyramidal cell inhibition model defined, using %s"
-                    % self.inhibition_model
+                    f" !  No pyramidal cell inhibition model defined, "
+                    f"using {self.inhibition_model}"
                 )
 
         # For other non-pyramidal groups
@@ -166,7 +165,7 @@ class NeuronReference:
                 self.ci_neuron_model = value_extractor(
                     self.physio_config_df, "ci_neuron_model"
                 ).upper()
-                print(" -  CI neuron model is %s " % self.ci_neuron_model)
+                print(f" -  CI neuron model is {self.ci_neuron_model} ")
             except:  # noqa: E722
                 self.ci_neuron_model = "EIF"
                 print(" !  No CI neuron model defined, using EIF")
@@ -193,7 +192,7 @@ class NeuronReference:
                 self.neuron_model = value_extractor(
                     self.physio_config_df, "neuron_model"
                 ).upper()
-                print(" -  Neuron model is %s " % self.neuron_model)
+                print(f" -  Neuron model is {self.neuron_model} ")
             except:  # noqa: E722
                 self.neuron_model = "EIF"
                 print(" !  No point neuron model defined, using EIF")
@@ -275,9 +274,9 @@ class NeuronReference:
                 general_grid_radius,
                 min_distance,
             )
-            self.output_neuron["z_positions"] = list(
-                map(lambda x: np.e ** (x / 17) - 1, self.output_neuron["w_positions"])
-            )
+            self.output_neuron["z_positions"] = [
+                np.e ** (x / 17) - 1 for x in self.output_neuron["w_positions"]
+            ]
 
         print(
             " -  Customized "
@@ -323,11 +322,11 @@ class NeuronReference:
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
-        if "noise_sigma" in self.output_neuron["namespace"].keys():
+        if "noise_sigma" in self.output_neuron["namespace"]:
             noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
             x.add_vm_noise(noise_sigma)
 
-        if "tonic_current" in self.output_neuron["namespace"].keys():
+        if "tonic_current" in self.output_neuron["namespace"]:
             tonic_current = self.output_neuron["namespace"]["tonic_current"]
             tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
             x.add_tonic_current(tonic_current, tau_tonic_rampup)
@@ -458,31 +457,31 @@ class NeuronReference:
         ):  # extra dendritic compartment in the same level of soma
             self.output_neuron["equation"] += b2.Equations(
                 eq_template_dend,
-                vm="vm_a%d" % _ii,
+                vm=f"vm_a{_ii}",
                 C=self.output_neuron["namespace"]["C"][_ii],
                 gL=self.output_neuron["namespace"]["gL"][_ii],
-                ge="ge_a%d" % _ii,
-                gi="gi_a%d" % _ii,
-                geX="geX_a%d" % _ii,
-                gealpha="gealpha_a%d" % _ii,
-                gialpha="gialpha_a%d" % _ii,
-                gealphaX="gealphaX_a%d" % _ii,
-                I_dendr="Idendr_a%d" % _ii,
-                gealpha1="gealpha1_a%d" % _ii,
-                gialpha1="gialpha1_a%d" % _ii,
-                g_ampa="g_ampa_a%d" % _ii,
-                g_ampa_alpha="g_ampa_alpha_a%d" % _ii,
-                g_ampa_alpha1="g_ampa_alpha1_a%d" % _ii,
-                g_nmda="g_nmda_a%d" % _ii,
-                g_nmda_alpha="g_nmda_alpha_a%d" % _ii,
-                g_nmda_alpha1="g_nmda_alpha1_a%d" % _ii,
-                g_gabaa="g_gabaa_a%d" % _ii,
-                g_gabaa_alpha="g_gabaa_alpha_a%d" % _ii,
-                g_gabaa_alpha1="g_gabaa_alpha1_a%d" % _ii,
-                g_gabab="g_gabab_a%d" % _ii,
-                g_gabab_alpha="g_gabab_alpha_a%d" % _ii,
-                g_gabab_alpha1="g_gabab_alpha1_a%d" % _ii,
-                B="B_a%d" % _ii,
+                ge=f"ge_a{_ii}",
+                gi=f"gi_a{_ii}",
+                geX=f"geX_a{_ii}",
+                gealpha=f"gealpha_a{_ii}",
+                gialpha=f"gialpha_a{_ii}",
+                gealphaX=f"gealphaX_a{_ii}",
+                I_dendr=f"Idendr_a{_ii}",
+                gealpha1=f"gealpha1_a{_ii}",
+                gialpha1=f"gialpha1_a{_ii}",
+                g_ampa=f"g_ampa_a{_ii}",
+                g_ampa_alpha=f"g_ampa_alpha_a{_ii}",
+                g_ampa_alpha1=f"g_ampa_alpha1_a{_ii}",
+                g_nmda=f"g_nmda_a{_ii}",
+                g_nmda_alpha=f"g_nmda_alpha_a{_ii}",
+                g_nmda_alpha1=f"g_nmda_alpha1_a{_ii}",
+                g_gabaa=f"g_gabaa_a{_ii}",
+                g_gabaa_alpha=f"g_gabaa_alpha_a{_ii}",
+                g_gabaa_alpha1=f"g_gabaa_alpha1_a{_ii}",
+                g_gabab=f"g_gabab_a{_ii}",
+                g_gabab_alpha=f"g_gabab_alpha_a{_ii}",
+                g_gabab_alpha1=f"g_gabab_alpha1_a{_ii}",
+                B=f"B_a{_ii}",
             )
 
         # Defining decay between soma and basal dendrite & apical dendrites
@@ -524,24 +523,24 @@ class NeuronReference:
                     gapre=1 / (self.output_neuron["namespace"]["Ra"][_ii + Ra_idx_add]),
                     gapost=1
                     / (self.output_neuron["namespace"]["Ra"][_ii - 1 + Ra_idx_add]),
-                    I_dendr="Idendr_a%d" % _ii,
-                    vmself="vm_a%d" % _ii,
-                    vmpre="vm_a%d" % (_ii + 1),
-                    vmpost="vm_a%d" % (_ii - 1),
+                    I_dendr=f"Idendr_a{_ii}",
+                    vmself=f"vm_a{_ii}",
+                    vmpre=f"vm_a{_ii + 1}",
+                    vmpost=f"vm_a{_ii - 1}",
                 )
 
             # Last compartment
             self.output_neuron["equation"] += b2.Equations(
                 "I_dendr = gapost*(vmpost-vmself) : amp",
-                I_dendr="Idendr_a%d" % self.output_neuron["dend_comp_num"],
+                I_dendr=f"Idendr_a{self.output_neuron['dend_comp_num']}",
                 gapost=1
                 / (
                     self.output_neuron["namespace"]["Ra"][
                         dendritic_extent - 1 + Ra_idx_add
                     ]
                 ),
-                vmself="vm_a%d" % self.output_neuron["dend_comp_num"],
-                vmpost="vm_a%d" % (self.output_neuron["dend_comp_num"] - 1),
+                vmself=f"vm_a{self.output_neuron['dend_comp_num']}",
+                vmpost=f"vm_a{self.output_neuron['dend_comp_num'] - 1}",
             )
 
         # If dendritic_extent is zero ie. there's only one apical dendrite compartment
@@ -576,16 +575,16 @@ class NeuronReference:
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
-        if "noise_sigma" in self.output_neuron["namespace"].keys():
+        if "noise_sigma" in self.output_neuron["namespace"]:
             noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
             x.add_vm_noise(noise_sigma)
 
-        if "tonic_current" in self.output_neuron["namespace"].keys():
+        if "tonic_current" in self.output_neuron["namespace"]:
             tonic_current = self.output_neuron["namespace"]["tonic_current"]
             tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
             x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
-        if "refractory_period" in self.output_neuron["namespace"].keys():
+        if "refractory_period" in self.output_neuron["namespace"]:
             refractory_period = self.output_neuron["namespace"]["refractory_period"]
             x.set_neuron_parameters(refractory_period=refractory_period)
 
@@ -616,16 +615,16 @@ class NeuronReference:
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
-        if "noise_sigma" in self.output_neuron["namespace"].keys():
+        if "noise_sigma" in self.output_neuron["namespace"]:
             noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
             x.add_vm_noise(noise_sigma)
 
-        if "tonic_current" in self.output_neuron["namespace"].keys():
+        if "tonic_current" in self.output_neuron["namespace"]:
             tonic_current = self.output_neuron["namespace"]["tonic_current"]
             tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
             x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
-        if "refractory_period" in self.output_neuron["namespace"].keys():
+        if "refractory_period" in self.output_neuron["namespace"]:
             refractory_period = self.output_neuron["namespace"]["refractory_period"]
             x.set_neuron_parameters(refractory_period=refractory_period)
 
@@ -657,16 +656,16 @@ class NeuronReference:
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
-        if "noise_sigma" in self.output_neuron["namespace"].keys():
+        if "noise_sigma" in self.output_neuron["namespace"]:
             noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
             x.add_vm_noise(noise_sigma)
 
-        if "tonic_current" in self.output_neuron["namespace"].keys():
+        if "tonic_current" in self.output_neuron["namespace"]:
             tonic_current = self.output_neuron["namespace"]["tonic_current"]
             tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
             x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
-        if "refractory_period" in self.output_neuron["namespace"].keys():
+        if "refractory_period" in self.output_neuron["namespace"]:
             refractory_period = self.output_neuron["namespace"]["refractory_period"]
             x.set_neuron_parameters(refractory_period=refractory_period)
 
@@ -697,16 +696,16 @@ class NeuronReference:
         x.set_excitatory_receptors(self.excitation_model)
         x.set_inhibitory_receptors(self.inhibition_model)
 
-        if "noise_sigma" in self.output_neuron["namespace"].keys():
+        if "noise_sigma" in self.output_neuron["namespace"]:
             noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
             x.add_vm_noise(noise_sigma)
 
-        if "tonic_current" in self.output_neuron["namespace"].keys():
+        if "tonic_current" in self.output_neuron["namespace"]:
             tonic_current = self.output_neuron["namespace"]["tonic_current"]
             tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
             x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
-        if "refractory_period" in self.output_neuron["namespace"].keys():
+        if "refractory_period" in self.output_neuron["namespace"]:
             refractory_period = self.output_neuron["namespace"]["refractory_period"]
             x.set_neuron_parameters(refractory_period=refractory_period)
 
@@ -739,20 +738,20 @@ class NeuronReference:
         x.set_excitatory_receptors(self.ci_excitation_model)
         x.set_inhibitory_receptors(self.ci_inhibition_model)
 
-        if "noise_sigma" in self.output_neuron["namespace"].keys():
+        if "noise_sigma" in self.output_neuron["namespace"]:
             noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
             x.add_vm_noise(noise_sigma)
 
-        if "tonic_current" in self.output_neuron["namespace"].keys():
+        if "tonic_current" in self.output_neuron["namespace"]:
             tonic_current = self.output_neuron["namespace"]["tonic_current"]
             tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
             x.add_tonic_current(tonic_current, tau_tonic_rampup)
 
-        if "refractory_period" in self.output_neuron["namespace"].keys():
+        if "refractory_period" in self.output_neuron["namespace"]:
             refractory_period = self.output_neuron["namespace"]["refractory_period"]
             x.set_neuron_parameters(refractory_period=refractory_period)
 
-        if "vclamp" in self.output_neuron["namespace"].keys():
+        if "vclamp" in self.output_neuron["namespace"]:
             x.add_external_current(
                 current_name="gclamp * (vclamp - vm) ",
                 current_eqs="""
@@ -767,7 +766,7 @@ class NeuronReference:
         # It reads current injection from external file. Filepath and filenames are set in the
         # physiology.csv as neuron subtype-specific parameters cibasepath and cifilename. The
         # cimultiplier is used to multiply the current injection in an array run.
-        if "cibasepath" in self.output_neuron["namespace"].keys():
+        if "cibasepath" in self.output_neuron["namespace"]:
             # Built-in
             import os
 
@@ -874,7 +873,7 @@ class SynapseReference:
             ]
         )
         assert syn_type in SynapseReference.syntypes, (
-            " -  Synapse type '%s' is not defined" % syn_type
+            f" -  Synapse type '{syn_type}' is not defined"
         )
         self.output_synapse = {
             "type": syn_type,
@@ -901,7 +900,7 @@ class SynapseReference:
             self.excitation_model = value_extractor(
                 physio_config_df, "excitation_model"
             ).upper()
-        except:  # noqa: E722
+        except:  
             self.excitation_model = "SIMPLE_E"
 
         try:
@@ -1040,7 +1039,6 @@ class SynapseReference:
         """
 
         self.output_synapse["equation"] = b2.Equations(
-            # dwght/dt = -wght/tau_wght : siemens (clock-driven)    
             """
             wght : siemens   
             dpre_trace/dt = -pre_trace/tau_pre : 1  (event-driven) # apre
@@ -1065,8 +1063,9 @@ class SynapseReference:
         self.output_synapse[
             "post_eq"
         ] = """
-            wght += eta_ltp * pre_trace * post_trace_slow *  nS
+            wght += eta_ltp * pre_trace * post_trace_slow * nS
             post_trace += Apost 
+            post_trace_slow += Apost
             wght = clip(wght, 0*nS, wght_max)
             """
 
@@ -1102,7 +1101,7 @@ class SynapseReference:
         self.output_synapse[
             "post_eq"
         ] = """
-            wght += eta_ltp * pre_trace * post_trace_slow  *  nS
+            wght += eta_ltp * pre_trace * post_trace_slow * nS
             wght -= eta_homeo * post_trace_homeo * wght
             post_trace += Apost 
             post_trace_slow += Apost
@@ -1158,11 +1157,8 @@ class SynapseReference:
         # Assigning the multiplier here enables later addition of wght equation into this method .
 
         pre_eq_lines = [
-            "%s += %s * wght\n"
-            % (
-                true_receptor + str(self.output_synapse["post_comp_name"]) + "_post",
-                str(self.output_synapse["multiply_weight"]),
-            )
+            f"{true_receptor}{self.output_synapse['post_comp_name']}_post += "
+            f"{self.output_synapse['multiply_weight']} * wght\n"
             for true_receptor in self.true_receptors
         ]
         pre_eq = "".join(pre_eq_lines).rstrip()
