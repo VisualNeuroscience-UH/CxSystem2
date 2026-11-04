@@ -53,8 +53,6 @@ The necessary parameters for running simulations locally are:
 
         :code:`init_vms{True, False}`: If True, randomize initial membrane voltages between V_init_min and V_init_max. If False, the initial membrane voltage is set as V_init.
 
-        :code:`load_positions_only{True, False}`: Import unit positions from connectivity file but randomize connections.
-
         :code:`benchmark{True, False}`: Only for development. Needs modified copy of brian2 library.
 
         :code:`save_input_video{True, False}`: Defines whether the generated video input is to be saved or not. This is essential in case the users wants to use the identical input on different runs, so the input can be saved by setting this to 1 and used later.
