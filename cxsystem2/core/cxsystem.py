@@ -82,6 +82,7 @@ class CxSystem:
         physiology_config=None,
         output_file_suffix="",
         unit_coords_df=None,
+        rng_seed=None,
         instantiated_from_array_run=0,
         array_run_stdout_file=None,
     ):
