@@ -1,15 +1,16 @@
 # Built-in
-import random as rnd
 from copy import deepcopy
 
 # Third-party
 import brian2 as b2
 import numpy as np
+import pandas as pd
 from brian2.units import *  # noqa: F403
 
 # Local
 from cxsystem2.core import equation_templates as eqt
 from cxsystem2.core.parameter_parser import NeuronParser, SynapseParser, value_extractor
+from cxsystem2.core.workspace_manager import RandomManager
 from cxsystem2.neurodynlib.neuron_models import neuron_factory
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
@@ -31,38 +32,50 @@ class NeuronReference:
 
     def __init__(
         self,
-        idx,
-        number_of_neurons,
-        area,
-        cell_type,
-        layers_idx,
-        general_grid_radius,
-        min_distance,
-        physio_config_df,
-        unit_coords_df=None,
-        network_center=0 + 0j,
-        cell_subtype="--",
-    ):
+        idx: int,
+        number_of_neurons: int,
+        area: str,
+        cell_type: str,
+        layers_idx: np.ndarray,
+        general_grid_radius: b2.units.Quantity,
+        min_distance: b2.units.Quantity,
+        physio_config_df: pd.DataFrame,
+        unit_coords_df: pd.DataFrame | None = None,
+        network_center: complex = 0 + 0j,
+        cell_subtype: str = "--",
+    ) -> None:
         """
-        initialize the NeuronReference based on the arguments.
+        Initialize the NeuronReference based on the arguments.
 
-        :param number_of_neurons: number of neurons in the NeuronGroup() object.
-        :param cell_type: type of cell in the NeuronGroup: currently PC, SS, BC, MC and L1i.
-        :param layers_idx: indicating the layer in which the cell group is located. In case of SS, BC, MC and L1i it is an integer but for PC
-                            which is a multi-compartmental neuron, it is a tuple array. This tuple numpy array defines the first and last
-                            layers in which the neuron resides. So np.array([4,1]) means that the soma resides in layer 4 and the apical
-                            dendrites which are (2 compartments) extend to layer 2/3 and 1. To avoid confusion, layer 2 is used as the indicator
-                            of layer 2/3. Hence, if the last compartment of a neuron is in layer 2/3, use number 2.
-        :param network_center: as the name implies, this argument defines the center of teh NeuronGroup() in visual field coordinates.
-                                The default value is 0+0j.
-        :param resolution: resolution for formation of neurons in the grid. Default value is 0.1
+        Parameters
+        ----------
+        number_of_neurons : int
+            Number of neurons in the NeuronGroup() object.
+        cell_type : str
+            Type of cell in the NeuronGroup: currently PC, SS, BC, MC and L1i.
+        layers_idx : array-like
+            Layer(s) in which the cell group is located. For SS, BC, MC and L1i it is
+            an integer; for PC (multi-compartmental) it is a tuple array defining the
+            first and last layers of the neuron, e.g. ``np.array([4, 1])`` means soma
+            in layer 4 and apical dendrites (2 compartments) extending to layers 2/3
+            and 1 (layer 2 indicates layer 2/3).
+        network_center : complex, optional
+            Center of the NeuronGroup() in visual field coordinates. Default ``0+0j``.
 
+        Notes
+        -----
         Main internal variables:
 
-        * output_neuron: the main dictionary containing all the data about current Customized_neuron_group including: number of neurons, threshold,
-                         reset, refractory, neuron type, soma position(layer), dendrites layer, total number of compartments, namespace, equation,
-                         positions (both in cortical and visual coordinates).
+        - ``output_neuron``: main dictionary with all data about the current customized
+          neuron group: number of neurons, threshold, reset, refractory, neuron type,
+          soma layer, dendrites layer, total compartments, namespace, equation, and
+          positions (cortical and visual coordinates).
         """
+
+        # Set random number generator
+        manager = RandomManager()
+        self.rng = manager.rng
+
 
         ############################################################
         ###        Initialization of general neuron model        ###
@@ -288,22 +301,28 @@ class NeuronReference:
             + " neurons."
         )
 
-    def _get_w_positions(self, n, layout, general_grid_radius, min_distance):
-
+    def _get_w_positions(
+        self,
+        n: int,
+        layout: str,
+        general_grid_radius: b2.units.Quantity,
+        min_distance: b2.units.Quantity,
+    ) -> list[complex]:
         # w position = position in cortex, in millimeters
         r = general_grid_radius / mm  # noqa: F405
         possible_pos_idx = arange(-r, r, min_distance / mm)  # noqa: F405
         _positions = []
+        choice = self.rng.choice
         if layout == "fixed_grid":
             _positions = [
-                (rnd.choice(possible_pos_idx), rnd.choice(possible_pos_idx))
+                (choice(possible_pos_idx), choice(possible_pos_idx))
                 for _, _ in zip(list(range(n)), list(range(n)))
             ]
             for idx, item in enumerate(_positions):
                 while np.sqrt(_positions[idx][0] ** 2 + _positions[idx][1] ** 2) > r:
                     _positions[idx] = (
-                        rnd.choice(possible_pos_idx),
-                        rnd.choice(possible_pos_idx),
+                        choice(possible_pos_idx),
+                        choice(possible_pos_idx),
                     )
             _positions = [
                 complex(_itm[0], _itm[1]) + self.output_neuron["w_center"]
@@ -311,11 +330,9 @@ class NeuronReference:
             ]
         return _positions
 
-    def NDNEURON(self):
+    def NDNEURON(self) -> None:
         """
-        NDNEURON type, just for testing Neurodynlib
-
-        :return:
+        NDNEURON type, just for testing Neurodynlib.
         """
 
         x = neuron_factory().get_class(self.neuron_model)
@@ -339,42 +356,40 @@ class NeuronReference:
         self.output_neuron["equation"] += b2.Equations("""x : meter
             y : meter""")
 
-    def PC(self):
+    def PC(self) -> None:
         """
-        This method build up the equation for PC neurons based on the number of compartments.
-        The final equation is then saved in output_neuron['equation'].
+        Build the equation for PC neurons based on the number of compartments.
 
+        The final equation is saved in ``output_neuron['equation']``.
+
+        Notes
+        -----
         Main internal variables:
 
-        * eq_template_soma: Contains template somatic equation, the variables in side the equation could be
-            replaced later using "Equation" function in brian2. :
+        - ``eq_template_soma``: template somatic equation, whose variables are replaced
+          later using brian2 ``Equations``::
 
-            ::
+            dvm/dt = (gL*(EL-vm) + gealpha * (Ee-vm) + gealphaX * (Ee-vm) + gialpha * (Ei-vm)
+                     + gL * DeltaT * exp((vm-VT) / DeltaT) +I_dendr) / C : volt (unless refractory)
+            dge/dt = -ge/tau_e : siemens
+            dgealpha/dt = (ge-gealpha)/tau_e : siemens
+            dgeX/dt = -geX/tau_eX : siemens
+            dgealphaX/dt = (geX-gealphaX)/tau_eX : siemens
+            dgi/dt = -gi/tau_i : siemens
+            dgialpha/dt = (gi-gialpha)/tau_i : siemens
+            x : meter
+            y : meter
 
-                dvm/dt = (gL*(EL-vm) + gealpha * (Ee-vm) + gealphaX * (Ee-vm) + gialpha * (Ei-vm)
-                         + gL * DeltaT * exp((vm-VT) / DeltaT) +I_dendr) / C : volt (unless refractory)
-                dge/dt = -ge/tau_e : siemens
-                dgealpha/dt = (ge-gealpha)/tau_e : siemens
-                dgeX/dt = -geX/tau_eX : siemens
-                dgealphaX/dt = (geX-gealphaX)/tau_eX : siemens
-                dgi/dt = -gi/tau_i : siemens
-                dgialpha/dt = (gi-gialpha)/tau_i : siemens
-                x : meter
-                y : meter
+        - ``eq_template_dend``: template dendritic equation::
 
-        * eq_template_dend: Contains template dendritic equation:
-
-            ::
-
-                dvm/dt = (gL*(EL-vm) + gealpha * (Ee-vm) + gealphaX * (Ee-vm) + gialpha * (Ei-vm)
-                         + I_dendr) / C : volt (unless refractory)
-                dge/dt = -ge/tau_e : siemens
-                dgealpha/dt = (ge-gealpha)/tau_e : siemens
-                dgeX/dt = -geX/tau_eX : siemens
-                dgealphaX/dt = (geX-gealphaX)/tau_eX : siemens
-                dgi/dt = -gi/tau_i : siemens
-                dgialpha/dt = (gi-gialpha)/tau_i : siemens
-
+            dvm/dt = (gL*(EL-vm) + gealpha * (Ee-vm) + gealphaX * (Ee-vm) + gialpha * (Ei-vm)
+                     + I_dendr) / C : volt (unless refractory)
+            dge/dt = -ge/tau_e : siemens
+            dgealpha/dt = (ge-gealpha)/tau_e : siemens
+            dgeX/dt = -geX/tau_eX : siemens
+            dgealphaX/dt = (geX-gealphaX)/tau_eX : siemens
+            dgi/dt = -gi/tau_i : siemens
+            dgialpha/dt = (gi-gialpha)/tau_i : siemens
         """
 
         eq_template_soma = eqt.PCEquationHelper(
@@ -556,59 +571,20 @@ class NeuronReference:
         self.output_neuron["equation"] += b2.Equations("""x : meter
                             y : meter""")
 
-    def BC(self):
+    def BC(self) -> None:
         """
-        This method build up the equation for BC neurons. The final equation is then saved in output_neuron['equation'].
+        Build the equation for BC neurons. The final equation is saved in
+        ``output_neuron['equation']``.
 
-        * The equation of the neuron is as follows:
+        Notes
+        -----
+        The equation of the neuron is as follows::
 
-            ::
-
-                dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
-                dge_soma/dt = -ge_soma/tau_e : siemens
-                dgi_soma/dt = -gi_soma/tau_i : siemens
-                x : meter
-                y : meter
-        """
-
-        x = neuron_factory().get_class(self.neuron_model)
-        x.set_excitatory_receptors(self.excitation_model)
-        x.set_inhibitory_receptors(self.inhibition_model)
-
-        if "noise_sigma" in self.output_neuron["namespace"]:
-            noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
-            x.add_vm_noise(noise_sigma)
-
-        if "tonic_current" in self.output_neuron["namespace"]:
-            tonic_current = self.output_neuron["namespace"]["tonic_current"]
-            tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
-            x.add_tonic_current(tonic_current, tau_tonic_rampup)
-
-        if "refractory_period" in self.output_neuron["namespace"]:
-            refractory_period = self.output_neuron["namespace"]["refractory_period"]
-            x.set_neuron_parameters(refractory_period=refractory_period)
-
-        self.output_neuron["equation"] = x.get_compartment_equations("soma")
-        self.output_neuron["threshold"] = x.get_threshold_condition()
-        self.output_neuron["reset"] = x.get_reset_statements()
-        self.output_neuron["refractory"] = x.get_refractory_period()
-
-        self.output_neuron["equation"] += b2.Equations("""x : meter
-            y : meter""")
-
-    def L1i(self):
-        """
-        This method build up the equation for Layer 1 inhibitory (L1i) neurons. The final equation is then saved in output_neuron['equation'].
-
-        * The equation of the neuron is as follows:
-
-            ::
-
-                dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
-                dge_soma/dt = -ge_soma/tau_e : siemens
-                dgi_soma/dt = -gi_soma/tau_i : siemens
-                x : meter
-                y : meter
+            dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
+            dge_soma/dt = -ge_soma/tau_e : siemens
+            dgi_soma/dt = -gi_soma/tau_i : siemens
+            x : meter
+            y : meter
         """
 
         x = neuron_factory().get_class(self.neuron_model)
@@ -636,60 +612,20 @@ class NeuronReference:
         self.output_neuron["equation"] += b2.Equations("""x : meter
             y : meter""")
 
-    def MC(self):
+    def L1i(self) -> None:
         """
-        This method build up the equation for MC neurons. The final equation is then saved in output_neuron['equation'].
+        Build the equation for Layer 1 inhibitory (L1i) neurons. The final equation is
+        saved in ``output_neuron['equation']``.
 
-        * The equation of the neuron is as follows:
+        Notes
+        -----
+        The equation of the neuron is as follows::
 
-            ::
-
-                dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT)
-                        + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
-                dge_soma/dt = -ge_soma/tau_e : siemens
-                dgi_soma/dt = -gi_soma/tau_i : siemens
-                x : meter
-                y : meter
-        """
-
-        x = neuron_factory().get_class(self.neuron_model)
-        x.set_excitatory_receptors(self.excitation_model)
-        x.set_inhibitory_receptors(self.inhibition_model)
-
-        if "noise_sigma" in self.output_neuron["namespace"]:
-            noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
-            x.add_vm_noise(noise_sigma)
-
-        if "tonic_current" in self.output_neuron["namespace"]:
-            tonic_current = self.output_neuron["namespace"]["tonic_current"]
-            tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
-            x.add_tonic_current(tonic_current, tau_tonic_rampup)
-
-        if "refractory_period" in self.output_neuron["namespace"]:
-            refractory_period = self.output_neuron["namespace"]["refractory_period"]
-            x.set_neuron_parameters(refractory_period=refractory_period)
-
-        self.output_neuron["equation"] = x.get_compartment_equations("soma")
-        self.output_neuron["threshold"] = x.get_threshold_condition()
-        self.output_neuron["reset"] = x.get_reset_statements()
-        self.output_neuron["refractory"] = x.get_refractory_period()
-
-        self.output_neuron["equation"] += b2.Equations("""x : meter
-            y : meter""")
-
-    def SS(self):
-        """
-        This method build up the equation for SS neurons. The final equation is then saved in output_neuron['equation'].
-
-        * The equation of the neuron is as follows:
-
-            ::
-
-                dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
-                dge_soma/dt = -ge_soma/tau_e : siemens
-                dgi_soma/dt = -gi_soma/tau_i : siemens
-                x : meter
-                y : meter
+            dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
+            dge_soma/dt = -ge_soma/tau_e : siemens
+            dgi_soma/dt = -gi_soma/tau_i : siemens
+            x : meter
+            y : meter
         """
 
         x = neuron_factory().get_class(self.neuron_model)
@@ -717,21 +653,106 @@ class NeuronReference:
         self.output_neuron["equation"] += b2.Equations("""x : meter
             y : meter""")
 
-    def CI(self):
+    def MC(self) -> None:
         """
-        This method build up the equation for CI neurons. CI stands for current injection as timed array directly to neuron model.
-        The final equation is then saved in output_neuron['equation'].
+        Build the equation for MC neurons. The final equation is saved in
+        ``output_neuron['equation']``.
 
-        * The equation of the neuron is as follows:
+        Notes
+        -----
+        The equation of the neuron is as follows::
 
-            ::
+            dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT)
+                    + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
+            dge_soma/dt = -ge_soma/tau_e : siemens
+            dgi_soma/dt = -gi_soma/tau_i : siemens
+            x : meter
+            y : meter
+        """
 
-                dvm/dt = (gL*(EL-vm)  + ge_soma * 1 * vm + gi_soma * 1 * vm + I_ext(t,i) / C : volt (unless refractory)
-                dge_soma/dt = -ge_soma/tau_e : siemens
-                dgi_soma/dt = -gi_soma/tau_i : siemens
-                x : meter
-                y : meter
-                I_ext : amp
+        x = neuron_factory().get_class(self.neuron_model)
+        x.set_excitatory_receptors(self.excitation_model)
+        x.set_inhibitory_receptors(self.inhibition_model)
+
+        if "noise_sigma" in self.output_neuron["namespace"]:
+            noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
+            x.add_vm_noise(noise_sigma)
+
+        if "tonic_current" in self.output_neuron["namespace"]:
+            tonic_current = self.output_neuron["namespace"]["tonic_current"]
+            tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
+            x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+        if "refractory_period" in self.output_neuron["namespace"]:
+            refractory_period = self.output_neuron["namespace"]["refractory_period"]
+            x.set_neuron_parameters(refractory_period=refractory_period)
+
+        self.output_neuron["equation"] = x.get_compartment_equations("soma")
+        self.output_neuron["threshold"] = x.get_threshold_condition()
+        self.output_neuron["reset"] = x.get_reset_statements()
+        self.output_neuron["refractory"] = x.get_refractory_period()
+
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
+
+    def SS(self) -> None:
+        """
+        Build the equation for SS neurons. The final equation is saved in
+        ``output_neuron['equation']``.
+
+        Notes
+        -----
+        The equation of the neuron is as follows::
+
+            dvm/dt = (gL*(EL-vm) + gL * DeltaT * exp((vm-VT) / DeltaT) + ge_soma * (Ee-vm) + gi_soma * (Ei-vm)) / C : volt (unless refractory)
+            dge_soma/dt = -ge_soma/tau_e : siemens
+            dgi_soma/dt = -gi_soma/tau_i : siemens
+            x : meter
+            y : meter
+        """
+
+        x = neuron_factory().get_class(self.neuron_model)
+        x.set_excitatory_receptors(self.excitation_model)
+        x.set_inhibitory_receptors(self.inhibition_model)
+
+        if "noise_sigma" in self.output_neuron["namespace"]:
+            noise_sigma = self.output_neuron["namespace"]["noise_sigma"]
+            x.add_vm_noise(noise_sigma)
+
+        if "tonic_current" in self.output_neuron["namespace"]:
+            tonic_current = self.output_neuron["namespace"]["tonic_current"]
+            tau_tonic_rampup = self.output_neuron["namespace"]["tau_tonic_rampup"]
+            x.add_tonic_current(tonic_current, tau_tonic_rampup)
+
+        if "refractory_period" in self.output_neuron["namespace"]:
+            refractory_period = self.output_neuron["namespace"]["refractory_period"]
+            x.set_neuron_parameters(refractory_period=refractory_period)
+
+        self.output_neuron["equation"] = x.get_compartment_equations("soma")
+        self.output_neuron["threshold"] = x.get_threshold_condition()
+        self.output_neuron["reset"] = x.get_reset_statements()
+        self.output_neuron["refractory"] = x.get_refractory_period()
+
+        self.output_neuron["equation"] += b2.Equations("""x : meter
+            y : meter""")
+
+    def CI(self) -> None:
+        """
+        Build the equation for CI neurons.
+
+        CI stands for current injection as a timed array directly to the neuron model.
+        The final equation is saved in ``output_neuron['equation']``.
+
+        Notes
+        -----
+        The equation of the neuron is as follows::
+
+            dvm/dt = (gL*(EL-vm)  + ge_soma * 1 * vm + gi_soma * 1 * vm + I_ext(t,i) / C : volt (unless refractory)
+            dge_soma/dt = -ge_soma/tau_e : siemens
+            dgi_soma/dt = -gi_soma/tau_i : siemens
+            x : meter
+            y : meter
+            I_ext : amp
         """
 
         x = neuron_factory().get_class(self.ci_neuron_model)
@@ -809,7 +830,7 @@ class NeuronReference:
         self.output_neuron["equation"] += b2.Equations("""x : meter
             y : meter""")
 
-    def VPM(self):
+    def VPM(self) -> None:
         """
         This method build up the equation for VPM neurons. No equation is needed.
         """
@@ -825,37 +846,49 @@ class SynapseReference:
 
     def __init__(
         self,
-        receptor,
-        pre_group_idx,
-        post_group_idx,
-        syn_type,
-        pre_type,
-        post_type,
-        physio_config_df,
-        post_comp_name="_soma",
-        custom_weight="--",
-        multiply_weight=1,
-    ):
+        receptor: str,
+        pre_group_idx: int,
+        post_group_idx: int,
+        syn_type: str,
+        pre_type: str,
+        post_type: str,
+        physio_config_df: pd.DataFrame,
+        post_comp_name: str = "_soma",
+        custom_weight: str = "--",
+        multiply_weight: float = 1,
+    ) -> None:
         """
-        initializes the SynapseReference based on its arguments.
+        Initialize the SynapseReference based on its arguments.
 
-        :param receptor: defines the type of the receptor in the synaptic connection. Currently ge and gi are implemented.
-        :param pre_group_idx: The index of the pre-synaptic group.
-        :param post_group_idx: The index of the post-synaptic group.
-        :param syn_type: Type of the synaptic connection.
-        :param pre_type: Type of the pre-synaptic NeuronGroup.
-        :param post_type: Type of the post-synaptic NeuronGroup.
-        :param post_comp_name: Name of the target compartment in the cells of the post-synaptic NeuronGroup.
-                                The default value is "_soma" as usually soma is being targeted. In case other compartments are targeted in a PC cell,
-                                e.g. basal or apical dendrites, _basal or _apical will be used.
+        Parameters
+        ----------
+        receptor : str
+            Type of the receptor in the synaptic connection. Currently ``ge`` and ``gi``.
+        pre_group_idx : int
+            Index of the pre-synaptic group.
+        post_group_idx : int
+            Index of the post-synaptic group.
+        syn_type : str
+            Type of the synaptic connection.
+        pre_type : str
+            Type of the pre-synaptic NeuronGroup.
+        post_type : str
+            Type of the post-synaptic NeuronGroup.
+        post_comp_name : str, optional
+            Name of the target compartment in the post-synaptic NeuronGroup. Default is
+            ``"_soma"``; for other PC compartments (basal/apical dendrites) use
+            ``_basal`` or ``_apical``.
 
+        Notes
+        -----
         Main internal variables:
 
-        * output_synapse: the main dictionary containing all the data about current customized_synapse_group including: synaptic equations
-                          (model, pre, post), type of synapse, type of receptor, index and type of pre- and post-synaptic group, namespace
-                          for the Synapses() object, spatial_decay.
-        * _name_space: An instance of brian2_obj_namespaces() object which contains all the constant parameters for this synaptic equation.
-
+        - ``output_synapse``: main dictionary with all data about the current customized
+          synapse group: synaptic equations (model, pre, post), synapse and receptor
+          type, pre- and post-synaptic group indices and types, namespace for the
+          Synapses() object, spatial_decay.
+        - ``_name_space``: ``SynapseParser`` instance holding the constant parameters for
+          this synaptic equation.
         """
         SynapseReference.syntypes = np.array(
             [
@@ -947,7 +980,7 @@ class SynapseReference:
 
         getattr(self, self.output_synapse["type"])()
 
-    def STDP(self):
+    def STDP(self) -> None:
         """
         The method for implementing the STDP synaptic connection.
 
@@ -959,21 +992,17 @@ class SynapseReference:
             dapost/dt = -apost/taupost : siemens (event-driven) # o1 or y_moving_average_minus
             """)
 
-        self.output_synapse["pre_eq"] = """
-            %s+=wght
+        self.output_synapse["pre_eq"] = f"""
+            {self.output_synapse["receptor"]             + self.output_synapse["post_comp_name"]             + "_post"}+=wght
             apre += Apre
             wght =- eta_ltd * apost
-            """ % (
-            self.output_synapse["receptor"]
-            + self.output_synapse["post_comp_name"]
-            + "_post"
-        )
+            """
         self.output_synapse["post_eq"] = """
             apost += Apost
             wght =+ eta_ltp * apre
             """
 
-    def Vogels(self):
+    def Vogels(self) -> None:
         """
         The method for implementing the Vogels_2011_Science synaptic connection.
         """
@@ -984,23 +1013,19 @@ class SynapseReference:
             dapost/dt = -apost/taupost : siemens (event-driven)
             """)
 
-        self.output_synapse["pre_eq"] = """
-            %s+=wght
+        self.output_synapse["pre_eq"] = f"""
+            {self.output_synapse["receptor"]             + self.output_synapse["post_comp_name"]             + "_post"}+=wght
             apre += Apre
             wght += eta * (apost - alpha)
             wght = clip(wght, 0 * siemens, wght_max)
-            """ % (
-            self.output_synapse["receptor"]
-            + self.output_synapse["post_comp_name"]
-            + "_post"
-        )
+            """
         self.output_synapse["post_eq"] = """
             apost += Apost
             wght += eta * apre
             wght = clip(wght, 0 * siemens, wght_max)
             """
 
-    def deBrito(self):
+    def deBrito(self) -> None:
         """
         The method for implementing the deBrito_2024_PLoSComputBiol synaptic connection.
         """
@@ -1015,16 +1040,12 @@ class SynapseReference:
             dahomeo/dt = (y_dirac * y_dirac - ahomeo)/tauhomeo : 1 (clock-driven)
             """)
 
-        self.output_synapse["pre_eq"] = """
-            %s+=wght
+        self.output_synapse["pre_eq"] = f"""
+            {self.output_synapse["receptor"]             + self.output_synapse["post_comp_name"]             + "_post"}+=wght
             wght -= eta_ltd * ahomeo * x_dirac * y_avg * nS
             x_dirac += Apre
             wght = clip(wght, 0*nS, wght_max)
-            """ % (
-            self.output_synapse["receptor"]
-            + self.output_synapse["post_comp_name"]
-            + "_post"
-        )
+            """
         self.output_synapse[
             "post_eq"
         ] = """
@@ -1033,7 +1054,7 @@ class SynapseReference:
             wght = clip(wght, 0*nS, wght_max)
             """
 
-    def mtSTDP(self):
+    def mtSTDP(self) -> None:
         """
         The method for implementing the Pfister_2006_JNeurosci synaptic connection following Ruslim_2025_PLoSCB implementation.
         """
@@ -1048,17 +1069,12 @@ class SynapseReference:
         )
 
         self.output_synapse["pre_eq"] = (
-            """
-            %s+=wght
+            f"""
+            {self.output_synapse["receptor"]                 + self.output_synapse["post_comp_name"]                 + "_post"}+=wght
             wght -= eta_ltd * post_trace * nS
             pre_trace += Apre
             wght = clip(wght, 0*nS, wght_max)
             """
-            % (
-                self.output_synapse["receptor"]
-                + self.output_synapse["post_comp_name"]
-                + "_post"
-            )
         )
         self.output_synapse[
             "post_eq"
@@ -1069,7 +1085,7 @@ class SynapseReference:
             wght = clip(wght, 0*nS, wght_max)
             """
 
-    def mtSTDP_homeo(self):
+    def mtSTDP_homeo(self) -> None:
         """
         The method for implementing the Pfister_2006_JNeurosci synaptic connection with synaptic homeostatic factor.
         """
@@ -1086,17 +1102,12 @@ class SynapseReference:
         )
 
         self.output_synapse["pre_eq"] = (
-            """
-            %s+=wght
+            f"""
+            {self.output_synapse["receptor"]                 + self.output_synapse["post_comp_name"]                 + "_post"}+=wght
             wght -= eta_ltd * post_trace * nS
             pre_trace += Apre
             wght = clip(wght, 0*nS, wght_max)
             """
-            % (
-                self.output_synapse["receptor"]
-                + self.output_synapse["post_comp_name"]
-                + "_post"
-            )
         )
         self.output_synapse[
             "post_eq"
@@ -1108,7 +1119,7 @@ class SynapseReference:
             wght = clip(wght, 0*nS, wght_max)
             """
 
-    def Fixed_rand_wght(self):
+    def Fixed_rand_wght(self) -> None:
         """
         The method for implementing the fixed randomized synaptic connection weights    .
 
@@ -1119,14 +1130,13 @@ class SynapseReference:
             """)
 
         pre_eq_lines = [
-            "%s += wght\n"
-            % (true_receptor + str(self.output_synapse["post_comp_name"]) + "_post")
+            f'{true_receptor + str(self.output_synapse["post_comp_name"]) + "_post"} += wght\n'
             for true_receptor in self.true_receptors
         ]
         pre_eq = "".join(pre_eq_lines).rstrip()
         self.output_synapse["pre_eq"] = pre_eq
 
-    def Fixed_const_wght(self):
+    def Fixed_const_wght(self) -> None:
         """
         The method for implementing one constant weight across all connections.
 
@@ -1137,14 +1147,13 @@ class SynapseReference:
             """)
 
         pre_eq_lines = [
-            "%s += wght\n"
-            % (true_receptor + str(self.output_synapse["post_comp_name"]) + "_post")
+            f'{true_receptor + str(self.output_synapse["post_comp_name"]) + "_post"} += wght\n'
             for true_receptor in self.true_receptors
         ]
         pre_eq = "".join(pre_eq_lines).rstrip()
         self.output_synapse["pre_eq"] = pre_eq
 
-    def Fixed_multiply(self):
+    def Fixed_multiply(self) -> None:
         """
         The method for implementing the fixed random synaptic connection weights which are multiplied
         with factor coming from Anatomy csv.
@@ -1164,7 +1173,7 @@ class SynapseReference:
         pre_eq = "".join(pre_eq_lines).rstrip()
         self.output_synapse["pre_eq"] = pre_eq
 
-    def Depressing(self):
+    def Depressing(self) -> None:
         """
         Depressing non-stochastic Tsodyks-Markram synapse
 
@@ -1177,15 +1186,13 @@ class SynapseReference:
 
         pre_eq_lines = []
         for true_receptor in self.true_receptors:
-            new_line = "%s += R * U * wght\n" % (
-                true_receptor + str(self.output_synapse["post_comp_name"]) + "_post"
-            )
+            new_line = f'{true_receptor + str(self.output_synapse["post_comp_name"]) + "_post"} += R * U * wght\n'
             pre_eq_lines.append(new_line)
         pre_eq_lines.append("R = R - U * R")
         pre_eq = "".join(pre_eq_lines).rstrip()
         self.output_synapse["pre_eq"] = pre_eq
 
-    def Facilitating(self):
+    def Facilitating(self) -> None:
         """
         Facilitating non-stochastic Tsodyks-Markram synapse
 
@@ -1199,9 +1206,7 @@ class SynapseReference:
 
         pre_eq_lines = []
         for true_receptor in self.true_receptors:
-            new_line = "%s += R * u * wght\n" % (
-                true_receptor + str(self.output_synapse["post_comp_name"]) + "_post"
-            )
+            new_line = f'{true_receptor + str(self.output_synapse["post_comp_name"]) + "_post"} += R * u * wght\n'
             pre_eq_lines.append(new_line)
         pre_eq_lines.append("""
         R = R - u * R
@@ -1210,7 +1215,7 @@ class SynapseReference:
         pre_eq = "".join(pre_eq_lines).strip()
         self.output_synapse["pre_eq"] = pre_eq
 
-    def Gap_junction(self):
+    def Gap_junction(self) -> None:
         """
         The method for implementing gap junctions.
 

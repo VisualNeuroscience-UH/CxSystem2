@@ -1,3 +1,6 @@
+# Built-in
+from typing import Any
+
 # Third-party
 import numpy as np
 import pandas as pd
@@ -18,7 +21,7 @@ nan = np.nan
 array = np.array
 
 
-def value_extractor(df, key_name):
+def value_extractor(df: pd.DataFrame, key_name: str) -> Any:
     """
     This method parses the physiology configuration dataframe.
 
@@ -40,7 +43,7 @@ def value_extractor(df, key_name):
     keys = df["Key"].dropna().str.replace(" ", "")
     value = None
 
-    def check_special_cases(df, value):
+    def check_special_cases(df: pd.DataFrame, value: Any) -> Any:
         # Get nested top-level reference value
         if value in variables.to_list():
             value = value_extractor(df, value)
@@ -102,7 +105,7 @@ def value_extractor(df, key_name):
             value = check_special_cases(df, value)
     else:
         raise ParameterNotFoundError(
-            "Parameter %s not found in the configuration file." % key_name
+            f"Parameter {key_name} not found in the configuration file."
         )
 
     # Strings need to be evaluated to brian unit quantities or numbers
@@ -115,14 +118,16 @@ def value_extractor(df, key_name):
 class NeuronParser:
     """This class embeds all parameter sets associated to all neuron types and will return it as a namespace in form of dictionary"""
 
-    def __init__(self, output_neuron, physio_config_df):
+    def __init__(
+        self, output_neuron: dict[str, Any], physio_config_df: pd.DataFrame
+    ) -> None:
 
         self.physio_config_df = physio_config_df
         NeuronParser.type_ref = np.array(
             ["PC", "SS", "BC", "MC", "L1i", "VPM", "HH_E", "HH_I", "NDNEURON", "CI"]
         )
         assert output_neuron["type"] in NeuronParser.type_ref, (
-            " -  Cell type '%s' is not defined." % output_neuron["type"]
+            f""" -  Cell type '{output_neuron["type"]}' is not defined."""
         )
 
         # Handling of "neuron subtype" parameters; new since Aug 2018
@@ -137,8 +142,7 @@ class NeuronParser:
                 ].index[0]
             except IndexError:
                 print(
-                    " !  No parameters for %s found, using %s parameters instead"
-                    % (output_neuron["subtype"], output_neuron["type"])
+                    f' !  No parameters for {output_neuron["subtype"]} found, using {output_neuron["type"]} parameters instead'
                 )
                 neuron_type_to_find = output_neuron["type"]
 
@@ -183,19 +187,20 @@ class NeuronParser:
 
         getattr(self, "_" + output_neuron["type"])(output_neuron)
 
-    def _NDNEURON(self, output_neuron):
+    def _NDNEURON(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _CI(self, output_neuron):
+    def _CI(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _PC(self, output_neuron):
+    def _PC(self, output_neuron: dict[str, Any]) -> None:
         """
-        :param parameters_type: The type of parameters associated to compartmental neurons. 'Generic' is the common type.
-                        Other types could be defined when discovered in literature.
-        :type parameters_type: String
-        :return:
-        :rtype:
+        Set parameters for compartmental (PC) neurons.
+
+        Parameters
+        ----------
+        output_neuron : dict
+            The output neuron dictionary to which the namespace parameters are added.
         """
 
         if "spine_factor" not in self.output_namespace:
@@ -221,35 +226,39 @@ class NeuronParser:
             self.output_namespace["C"][1] / self.output_namespace["gL"][1]
         )
 
-    def _BC(self, output_neuron):
+    def _BC(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _L1i(self, output_neuron):
+    def _L1i(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _VPM(self, output_neuron):
+    def _VPM(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _MC(self, output_neuron):
+    def _MC(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _SS(self, output_neuron):
+    def _SS(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _HH_E(self, output_neuron):
+    def _HH_E(self, output_neuron: dict[str, Any]) -> None:
         pass
 
-    def _HH_I(self, output_neuron):
+    def _HH_I(self, output_neuron: dict[str, Any]) -> None:
         pass
 
 
 class SynapseParser:
     """
-    This class contains all the variables that are required for the Synapses() object namespaces.
-    There are several reference dictionaries in this class for:
+    Class containing all variables required for the Synapses() object namespaces.
 
-    * cw: connection weights for any connection between NeuronGroup()s.
-    * STDP: values for A_pre, A_post, tau_pre and tau_post for any connection between NeuronGroup()s.
+    Notes
+    -----
+    Reference dictionaries in this class:
+
+    - ``cw``: connection weights for any connection between NeuronGroup()s.
+    - ``STDP``: values for A_pre, A_post, tau_pre and tau_post for any connection
+      between NeuronGroup()s.
     """
 
     # For _change_calcium()
@@ -259,13 +268,18 @@ class SynapseParser:
     _steep_post = _excitatory_groups + _steep_post_inhibitory_groups
     _shallow_post = _shallow_post_inhibitory_groups
 
-    def __init__(self, output_synapse, physio_config_df):
+    def __init__(
+        self, output_synapse: dict[str, Any], physio_config_df: pd.DataFrame
+    ) -> None:
         """
-        The initialization method for namespaces() object.
+        Initialize the SynapseParser (namespaces object).
 
-        :param output_synapse: This is the dictionary created in NeuronReference() in brian2_obj_namespaces module. This contains all the
-                               information about the synaptic connection. In this class, Synaptic namespace parameters are directly added to
-                               it.
+        Parameters
+        ----------
+        output_synapse : dict
+            The dictionary created in SynapseReference() containing all information
+            about the synaptic connection; synaptic namespace parameters are added
+            directly to it.
         """
 
         self.output_synapse = output_synapse
@@ -287,7 +301,7 @@ class SynapseParser:
             ]
         )
         assert output_synapse["type"] in SynapseParser.type_ref, (
-            " -  Synapse type '%s' is not defined." % output_synapse["type"]
+            f""" -  Synapse type '{output_synapse["type"]}' is not defined."""
         )
         self.output_namespace = {}
 
@@ -302,7 +316,7 @@ class SynapseParser:
         # Set (initial) weights for chosen synapse type
         getattr(SynapseParser, output_synapse["type"])(self)
 
-    def _set_calcium_dependency(self):
+    def _set_calcium_dependency(self) -> None:
         """
         Sets the dissociation constant for calcium-dependent modulation of synaptic weight
         # NB! It's not only E->E and E->I connections that get scaled. Goes both ways. See Markram suppl p16.
@@ -337,13 +351,21 @@ class SynapseParser:
         else:
             self._K12 = np.average([2.79, 1.09])
 
-    def scale_by_calcium(self, ca, cw=None):
+    def scale_by_calcium(self, ca: float, cw: float | None = None) -> float:
         """
-        Scales synaptic weight depending on calcium level
+        Scales synaptic weight depending on calcium level.
 
-        :param ca: float, calcium concentration in mM
-        :param cw: float, connection weight with calcium level 2.0mM (optional)
-        :return: float, scaled synaptic weight
+        Parameters
+        ----------
+        ca : float
+            Calcium concentration in mM.
+        cw : float, optional
+            Connection weight at calcium level 2.0 mM.
+
+        Returns
+        -------
+        float
+            Scaled synaptic weight.
         """
 
         # if cw is None:
@@ -360,7 +382,9 @@ class SynapseParser:
 
         return final_synapse_strength
 
-    def _set_utilization_factor(self, is_facilitating=False, ca=2.0):
+    def _set_utilization_factor(
+        self, is_facilitating: bool = False, ca: float = 2.0
+    ) -> None:
         excitatory_groups = ["PC", "SS", "CI", "in"]
         inhibitory_groups = ["BC", "MC", "L1i"]
 
@@ -374,9 +398,7 @@ class SynapseParser:
                 self.output_namespace["U"] = self.scale_by_calcium(ca, u_i)
             else:
                 print(
-                    "Warning! Unrecognized group type %s will have "
-                    "outbound synapses with averaged utilization factor"
-                    % self.output_synapse["pre_group_type"]
+                    f'Warning! Unrecognized group type {self.output_synapse["pre_group_type"]} will have outbound synapses with averaged utilization factor'
                 )
                 u = np.average([u_e, u_i])
                 self.output_namespace["U"] = self.scale_by_calcium(ca, u)
@@ -387,31 +409,34 @@ class SynapseParser:
 
     def _mean_to_rand_delay(self, mean_delay: float) -> str:
         """
-        Method for assigning randomized delay to the customized_synapses() object.
+        Assign a randomized delay to the customized_synapses() object.
 
-        :param mean_delay: The mean value of the delay in ms.
-        :return: A string representing the randomized delay in ms.
+        Parameters
+        ----------
+        mean_delay : float
+            The mean value of the delay in ms.
+
+        Returns
+        -------
+        str
+            A string representing the randomized delay in ms.
         """
-        delay_str = "(%f + %f * rand()) * ms" % (
-            mean_delay / 2.0,
-            mean_delay,
-        )
+        delay_str = f"({mean_delay / 2.0:f} + {mean_delay:f} * rand()) * ms"
         return delay_str
 
     def _get_mean_delay(self) -> float:
         """
-        Method for extracting the mean delay value from the physiology configuration dataframe.
+        Extract the mean delay value from the physiology configuration dataframe.
 
-        :return: The mean delay value in ms.
+        Returns
+        -------
+        float
+            The mean delay value in ms.
         """
         mean_delay = (
             value_extractor(
                 self.physio_config_df,
-                "delay_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
+                f'delay_{self.output_synapse["pre_group_type"]}_{self.output_synapse["post_group_type"]}',
             )
             / ms  # noqa: F405
         )
@@ -419,9 +444,12 @@ class SynapseParser:
 
     def _get_mean_wght(self) -> float:
         """
-        Method for extracting the initial weight value from the physiology configuration dataframe.
+        Extract the initial weight value from the physiology configuration dataframe.
 
-        :return: The initial weight value in nS.
+        Returns
+        -------
+        float
+            The initial weight value in nS.
         """
         try:
             mean_wght = eval(self.output_synapse["custom_weight"]) / nS  # noqa: F405
@@ -429,11 +457,7 @@ class SynapseParser:
         except:  # noqa: E722
             mean_wght = value_extractor(
                 self.physio_config_df,
-                "cw_%s_%s"
-                % (
-                    self.output_synapse["pre_group_type"],
-                    self.output_synapse["post_group_type"],
-                ),
+                f'cw_{self.output_synapse["pre_group_type"]}_{self.output_synapse["post_group_type"]}',
             )
             mean_wght = mean_wght / nS  # noqa: F405
 
@@ -441,15 +465,22 @@ class SynapseParser:
 
     def _mean_rand_wght_init(self, mean_wght: float) -> str:
         """
-        Method for assigning randomized initial weight to the customized_synapses() object.
+        Assign a randomized initial weight to the customized_synapses() object.
 
-        :param mean_wght: The mean value of the initial weight in nS.
-        :return: A string representing the randomized initial weight in nS.
+        Parameters
+        ----------
+        mean_wght : float
+            The mean value of the initial weight in nS.
+
+        Returns
+        -------
+        str
+            A string representing the randomized initial weight in nS.
         """
         wght_init_str = f"({mean_wght / 2.0} + {mean_wght} * rand()) * nS"
         return wght_init_str
 
-    def STDP(self):
+    def STDP(self) -> None:
         """
         Method for assigning the spike timing dependent plasticity parameters to the customized_synapses() object.
 
@@ -485,7 +516,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def Vogels(self):
+    def Vogels(self) -> None:
         """
         Method for assigning the plasticity from Vogels_2011_Science parameters to the customized_synapses() object.
         """
@@ -522,7 +553,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def deBrito(self):
+    def deBrito(self) -> None:
         """
         Method for assigning the plasticity from deBrito_2024_PLoSComputBiol parameters to the customized_synapses() object.
         """
@@ -572,7 +603,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def mtSTDP(self):
+    def mtSTDP(self) -> None:
         """
         The method for assigning the plasticity from Pfister_2006_JNeurosci synaptic 
         connection following Ruslim_2025_PLoSCB parameters to the customized_synapses() object.
@@ -614,7 +645,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def mtSTDP_homeo(self):
+    def mtSTDP_homeo(self) -> None:
         """
         The method for assigning the plasticity from Pfister_2006_JNeurosci synaptic 
         connection following Ruslim_2025_PLoSCB parameters to the customized_synapses() object.
@@ -664,7 +695,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def Fixed_rand_wght(self):
+    def Fixed_rand_wght(self) -> None:
         """
         Method for assigning the randomized fixed weight synaptic connection to the customized_synapses() object.
         """
@@ -677,26 +708,26 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def Fixed_const_wght(self):
+    def Fixed_const_wght(self) -> None:
         """
         Method for assigning constant weight synaptic connection to the customized_synapses() object.
         """
 
         # Weight
         mean_wght = self._get_mean_wght()
-        self.output_namespace["wght_init"] = "%f * nS" % (mean_wght)
+        self.output_namespace["wght_init"] = f"{mean_wght:f} * nS"
 
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def Fixed_multiply(self):
+    def Fixed_multiply(self) -> None:
         """
         Method using constant weight but assigning multiplier further on to synaptic weight. This enables array search for
         loaded connection strengths.
         """
         self.Fixed_const_wght()
 
-    def Depressing(self):
+    def Depressing(self) -> None:
         """
         Depressing synapse
 
@@ -715,7 +746,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def Facilitating(self):
+    def Facilitating(self) -> None:
         """
         Facilitating synapse
 
@@ -738,7 +769,7 @@ class SynapseParser:
         mean_delay = self._get_mean_delay()
         self.output_namespace["delay"] = self._mean_to_rand_delay(mean_delay)
 
-    def Gap_junction(self):
+    def Gap_junction(self) -> None:
         """
         Method for assigning gap junction connection to the customized_synapses() object.
         """

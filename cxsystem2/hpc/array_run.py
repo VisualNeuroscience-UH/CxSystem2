@@ -9,6 +9,7 @@ import sys
 import time
 from multiprocessing.connection import wait
 from pathlib import Path
+from typing import Any
 
 # Third-party
 import numpy as np
@@ -33,19 +34,27 @@ class ArrayRun:
 
     def __init__(
         self,
-        anatomy_dataframe,
-        physiology_dataframe,
-        job_suffix,
-        anatomy_file_path,
-        physio_file_path,
-        array_run_stdout_file=None,
-    ):
+        anatomy_dataframe: pd.DataFrame | str,
+        physiology_dataframe: pd.DataFrame | str,
+        job_suffix: str,
+        anatomy_file_path: str,
+        physio_file_path: str,
+        array_run_stdout_file: str | None = None,
+    ) -> None:
         """
         Initialize the ArrayRun for running several instances of CxSystem in parallel.
 
-        :param  anatomy_dataframe: The dataframe containing the anatomical and system configurations that has an instance for ArrayRun in it.
-        :param physiology_dataframe: The dataframe containing the physiology configurations that has an instance for ArrayRun in it.
-        :param job_suffix: The job_suffix for the metadata file containing the filename and changing parameters in each of the simulations.
+        Parameters
+        ----------
+        anatomy_dataframe : DataFrame or str
+            The dataframe containing the anatomical and system configurations
+            that has an instance for ArrayRun in it.
+        physiology_dataframe : DataFrame or str
+            The dataframe containing the physiology configurations that has
+            an instance for ArrayRun in it.
+        job_suffix : str
+            The job_suffix for the metadata file containing the filename and
+            changing parameters in each of the simulations.
         """
         self.suffix = job_suffix
         self.array_run_stdout_file = (
@@ -111,7 +120,7 @@ class ArrayRun:
             0, len(self.final_namings) * self.trials_per_config
         )
 
-    def _prepare_multi_dim_arrun_metadata(self):
+    def _prepare_multi_dim_arrun_metadata(self) -> None:
         meta_columns = []
         for meta_col_idx in range(
             1,
@@ -119,8 +128,8 @@ class ArrayRun:
             + len(self.anatomy_arrun_cell_indices)
             + len(self.physio_arrun_cell_indices),
         ):
-            meta_columns.append("Dimension-%d Parameter" % meta_col_idx)
-            meta_columns.append("Dimension-%d Value" % meta_col_idx)
+            meta_columns.append(f"Dimension-{meta_col_idx} Parameter")
+            meta_columns.append(f"Dimension-{meta_col_idx} Value")
         meta_columns.extend(["Full_path"])
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
         anat_variations = []
@@ -174,12 +183,12 @@ class ArrayRun:
         )
         self.final_metadata_df = self.final_metadata_df.reindex(self.tmp_df.index)
         for col_idx, col_title in enumerate(self.all_titles):
-            self.final_metadata_df["Dimension-%d Parameter" % (col_idx + 1)] = col_title
-            self.final_metadata_df["Dimension-%d Value" % (col_idx + 1)] = self.tmp_df[
+            self.final_metadata_df[f"Dimension-{col_idx + 1} Parameter"] = col_title
+            self.final_metadata_df[f"Dimension-{col_idx + 1} Value"] = self.tmp_df[
                 col_title
             ]
 
-    def _prepare_one_dim_arrun_metadata(self):
+    def _prepare_one_dim_arrun_metadata(self) -> None:
         meta_columns = []
         meta_columns.extend(["Dimension-1 Parameter", "Dimension-1 Value", "Full_path"])
         self.final_metadata_df = pd.DataFrame(index=[0], columns=meta_columns)
@@ -217,11 +226,10 @@ class ArrayRun:
                 self.final_metadata_df.loc[counter, "Dimension-1 Value"] = val
                 counter += 1
 
-    def _check_single_experiment_multi_trials(self):
+    def _check_single_experiment_multi_trials(self) -> None:
         if not self.list_of_anatomy_dfs and not self.list_of_physio_dfs:
             print(
-                " -  No parameter for array run found, the default configurations are going to be simulated %d times"
-                % self.trials_per_config
+                f" -  No parameter for array run found, the default configurations are going to be simulated {self.trials_per_config} times"
             )
             self.list_of_anatomy_dfs = [
                 self.default_anatomy_df
@@ -231,26 +239,37 @@ class ArrayRun:
             self.metadata_dict["default_config"] = ["default_config"]
             self.all_titles = ["default_config"]
 
-    def run_parameter_search(self, idx, paths, results, stdout_file):
+    def run_parameter_search(
+        self,
+        idx: int,
+        paths: dict[int, str],
+        results: dict[str, Any],
+        stdout_file: str | None,
+    ) -> None:
         """
-        The function that each spawned process runs and parallel instances of CxSystems are created here.
+        Run a single parallel instance of CxSystem in a spawned process.
 
-        :param idx: index of the requested parallel CxSystem.
-        :param working: the index of the process that is being currently performed. This is to keep track of running processes
-                to prevent spawning more than required processes.
-        :param paths: The path for saving the output of the current instance of CxSystem.
+        Parameters
+        ----------
+        idx : int
+            Index of the requested parallel CxSystem.
+        paths : dict
+            Shared dict where the results export path of this instance is stored.
+        results : dict
+            Shared dict where the simulation results are stored.
+        stdout_file : str or None
+            Path to a file to redirect stdout to, or None to keep the console.
         """
         if stdout_file:
             sys.stdout = open(stdout_file, "a+")
         orig_idx = idx
-        np.random.seed(idx)
+        # np.random.seed(idx) # this may cause unexpected behavior.
         tr = idx % self.trials_per_config
         idx = int(idx / self.trials_per_config)
 
         print(
-            "################### Trial %d/%d started running for "
-            "simulation number %d: %s ##########################"
-            % (tr + 1, self.trials_per_config, idx, self.final_namings[idx][1:])
+            f"################### Trial {tr + 1}/{self.trials_per_config} started running for "
+            f"simulation number {idx}: {self.final_namings[idx][1:]} ##########################"
         )
         tr_suffix = ""
         if self.trials_per_config > 1:
@@ -267,19 +286,16 @@ class ArrayRun:
         result_key = f"{self.final_namings[idx].removeprefix('_')}{tr_suffix}"
         results[result_key] = sim_results
 
-    def spawn_processes(self, start_idx, steps_from_start):
+    def spawn_processes(
+        self, start_idx: int, steps_from_start: int
+    ) -> dict[str, Any]:
         """
         Spawns processes each dedicated to an instance of CxSystem.
         """
         print(
-            " -  Following configurations are going to be simulated with "
-            "%d processes using %s device (printed only in letters and numbers): "
-            "\n %s"
-            % (
-                self.number_of_process,
-                self.device,
-                str(self.final_namings).replace("_", ""),
-            )
+            f" -  Following configurations are going to be simulated with "
+            f"{self.number_of_process} processes using {self.device} device (printed only in letters and numbers): "
+            f"\n {str(self.final_namings).replace('_', '')}"
         )
 
         context = multiprocessing.get_context("spawn")
@@ -335,7 +351,7 @@ class ArrayRun:
             os.path.dirname(paths[list(paths.keys())[0]]), self.metadata_filename
         )
         write_to_file(metadata_path, self.final_metadata_df)
-        print(" -  Array run metadata saved at: %s" % metadata_path)
+        print(f" -  Array run metadata saved at: {metadata_path}")
 
         tmp_folder_path = (
             Path(parameter_finder(self.anatomy_df, "workspace_path"))
@@ -352,20 +368,27 @@ class ArrayRun:
 
     def generate_dataframes_for_param_search(
         self,
-        original_df,
-        index_of_array_variable,
-        df_type,
-        naming_prefix="",
-        recursion_counter=1,
-    ):
+        original_df: pd.DataFrame,
+        index_of_array_variable: list[tuple[int, int]],
+        df_type: str,
+        naming_prefix: str = "",
+        recursion_counter: int = 1,
+    ) -> tuple[list[pd.DataFrame], list[str]]:
         """
-        Generates new configuration dataframes for each of the scenarios from the original dataframe.
+        Generate new configuration dataframes for each scenario from the original dataframe.
 
-        :param original_df: original dataframe.
-        :param index_of_array_variable: index of the cell with array variable.
-        :param df_type: type of the dataframe (anatomy_and_system/physiology)
-        :param naming_prefix: generated name from previous iteration (when recursion is needed)
-        :param recursion_counter: counting the iteration (when recursion is needed)
+        Parameters
+        ----------
+        original_df : DataFrame
+            Original dataframe.
+        index_of_array_variable : list of tuple
+            Index of the cell with array variable.
+        df_type : str
+            Type of the dataframe (anatomy_and_system/physiology).
+        naming_prefix : str, optional
+            Generated name from previous iteration (when recursion is needed).
+        recursion_counter : int, optional
+            Counting the iteration (when recursion is needed).
         """
         array_of_dfs = []
         run_namings = []
@@ -384,9 +407,9 @@ class ArrayRun:
             )  # removing default value
         elif ":" in array_variable:
             print(
-                " -  The default value set for %s is omitted since the "
+                f" -  The default value set for {array_variable} is omitted since the "
                 "array run is multidimensional (multidimension_array_run "
-                "flag is set to 1)" % array_variable
+                "flag is set to 1)"
             )
             colon_idx = array_variable.index(":")
             array_variable = array_variable.replace(
@@ -399,8 +422,8 @@ class ArrayRun:
             + array_variable[closing_braket_idx + 1 :]
         )
         assert not ("|" in array_variable and "&" in array_variable), (
-            " -  The following array run should be defined either using | or & not both of them:"
-            % array_variable
+            f" -  The following array run should be defined either using | or & not both of them:"
+            f"{array_variable}"
         )
         variables_to_iterate = []
         if "|" in array_variable:
@@ -460,7 +483,7 @@ class ArrayRun:
 
         return array_of_dfs, run_namings
 
-    def default_df_extractor(self, df_):
+    def default_df_extractor(self, df_: pd.DataFrame) -> pd.DataFrame:
         if self.param_search_num_of_params == 1 or self.multidimension_array_run:
             # in case there is just one parameter for array run OR we are having a multidimension array_run then default finding is not needed
             return df_
@@ -476,8 +499,7 @@ class ArrayRun:
         for to_default_idx in arrays_idx_:
             value_to_default = df.loc[to_default_idx[0]][to_default_idx[1]]
             assert ":" in value_to_default, (
-                " -  The default value should be defined for %s if the system is running for one-dimensional parameter search"
-                % value_to_default
+                f" -  The default value should be defined for {value_to_default} if the system is running for one-dimensional parameter search"
             )
             default = value_to_default[
                 value_to_default.index("{") + 1 : value_to_default.index(":")
@@ -492,9 +514,11 @@ class ArrayRun:
             )
         return df
 
-    def _set_titles_and_metadata_dict(self):
+    def _set_titles_and_metadata_dict(self) -> None:
 
-        def _get_title_and_unique_values(tmp_value_list):
+        def _get_title_and_unique_values(
+            tmp_value_list: list[Any],
+        ) -> tuple[str, list[str]]:
 
             unique_values_raw = list(set(tmp_value_list))
             if "*" in unique_values_raw[0]:
@@ -540,13 +564,20 @@ class ArrayRun:
             self.metadata_dict[title] = unique_values
             tmp_value_list = []
 
-    def filename_generator(self, df, idx, df_type):
+    def filename_generator(
+        self, df: pd.DataFrame, idx: list[tuple[int, int]], df_type: str
+    ) -> tuple[str, str, str]:
         """
-        Generates filenames for each of the runs in ArrayRun.
+        Generate filenames for each of the runs in ArrayRun.
 
-        :param df: input dataframe.
-        :param idx: index of the cell based on which the name is going to be generated.
-        :param df_type: type of dataframe.
+        Parameters
+        ----------
+        df : DataFrame
+            Input dataframe.
+        idx : list of tuple
+            Index of the cell based on which the name is going to be generated.
+        df_type : str
+            Type of dataframe.
         """
         idx = idx[0]
         whitelist = set(
@@ -585,7 +616,7 @@ class ArrayRun:
 
         return title, value, naming
 
-    def _get_multidim_array_run_flag(self):
+    def _get_multidim_array_run_flag(self) -> int:
         multi_dim_flag = 0
         try:
             multi_dim_flag = int(
@@ -595,7 +626,7 @@ class ArrayRun:
             pass
         return multi_dim_flag
 
-    def _get_num_of_process(self):
+    def _get_num_of_process(self) -> int:
         number_of_process = int(multiprocessing.cpu_count() * 3 / 4)
         try:
             number_of_process = int(
@@ -604,11 +635,11 @@ class ArrayRun:
         except TypeError:
             print(
                 " -  number_of_process is not defined in the configuration file, the default number of processes are"
-                " 3/4*number of CPU cores: %d processes" % self.number_of_process
+                f" 3/4*number of CPU cores: {self.number_of_process} processes"
             )
         return number_of_process
 
-    def _get_benchmark_flag(self):
+    def _get_benchmark_flag(self) -> int:
         benchmark = 0
         try:
             benchmark = int(eval(parameter_finder(self.anatomy_df, "benchmark")))
@@ -616,7 +647,7 @@ class ArrayRun:
             pass
         return benchmark
 
-    def _get_trials_per_config(self):
+    def _get_trials_per_config(self) -> int:
         trials_per_config = 1
         try:
             trials_per_config = int(
@@ -629,7 +660,7 @@ class ArrayRun:
             )
         return trials_per_config
 
-    def _get_device(self):
+    def _get_device(self) -> str:
         device = "Python"
         try:
             device = parameter_finder(self.anatomy_df, "device")
@@ -639,11 +670,13 @@ class ArrayRun:
             )
         return device
 
-    def _get_metadata_filename(self, job_suffix):
+    def _get_metadata_filename(self, job_suffix: str) -> str:
         metadata_filename = "metadata_" + job_suffix + ".gz"
         return metadata_filename
 
-    def _get_arrun_cell_indices_from_df(self, df):
+    def _get_arrun_cell_indices_from_df(
+        self, df: pd.DataFrame
+    ) -> list[tuple[int, int]]:
         arrun_search_result = df[
             df.map(lambda x: True if ("|" in str(x) or "&" in str(x)) else False)
         ]
