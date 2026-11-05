@@ -36,7 +36,7 @@ import cxsystem2 as cxmodule
 from cxsystem2.core.cxsystem import CxSystem
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run CxSystem with anatomy and physiology files.",
         usage=""" cxsystem2 (-h | --help)
@@ -62,7 +62,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print("CxSystem2 Version {}".format(cxmodule.__version__))
+        print(f"CxSystem2 Version {cxmodule.__version__}")
         return
 
     if args.anatomy and args.physiology:

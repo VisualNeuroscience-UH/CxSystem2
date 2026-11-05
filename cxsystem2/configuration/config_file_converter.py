@@ -15,7 +15,7 @@ This file converts the two types of configuration files, i.e. CSV and JSON to ea
 
 class ConfigConverter:
 
-    def __init__(self, input_data):
+    def __init__(self, input_data: dict | str | Path) -> None:
         if type(input_data) == dict:
             self.json_data = input_data
         else:
@@ -35,7 +35,7 @@ class ConfigConverter:
         }
         # suffix_to_method_mapping[self.original_path.suffix.lower()]()
 
-    def json_to_csv(self):
+    def json_to_csv(self) -> None:
         if self.original_path.suffix == ".json":
             new_filename = self.filename_without_extension + ".csv"
             self.new_filepath = self.directory.joinpath(new_filename)
@@ -151,7 +151,7 @@ class ConfigConverter:
                             ]
                             csv_file.writerow(row)
 
-    def json_data_to_csv(self):
+    def json_data_to_csv(self) -> None:
 
         # let's find the total number of rows so that we can save the csv properly otherwise pandas will raise errors
         total_number_of_rows = 0
@@ -287,7 +287,7 @@ class ConfigConverter:
                     csv_string += ",".join(row) + "\n"
         return csv_string
 
-    def csv_to_json(self):
+    def csv_to_json(self) -> None:
         if self.original_path.suffix == ".csv":
             new_filename = self.filename_without_extension + ".json"
             self.new_filepath = self.directory.joinpath(new_filename)
@@ -557,11 +557,11 @@ class ConfigConverter:
             with open(self.new_filepath.as_posix(), "w") as f:
                 json.dump(self.output, f)
 
-    def get_path_of_converted_file(self):
+    def get_path_of_converted_file(self) -> Path:
         assert self.new_filepath != "", "No file has been converted yet"
         return self.new_filepath
 
-    def get_csv(self, clean=True):
+    def get_csv(self, clean: bool = True) -> pd.DataFrame:
         self.json_to_csv()
         if self.new_filepath.suffix == ".csv":
             csv_data = pandas.read_csv(self.new_filepath, header=None)
@@ -571,7 +571,7 @@ class ConfigConverter:
             self.clean()
         return csv_data
 
-    def get_csv_from_json_data(self):
+    def get_csv_from_json_data(self) -> pd.DataFrame:
         with open(Path.home().joinpath("tmp.json").as_posix(), "w") as f:
             json.dump(self.json_data, f)
         self.original_path = Path.home().joinpath("tmp.json")
@@ -586,7 +586,7 @@ class ConfigConverter:
         os.remove(Path.home().joinpath("tmp.json").as_posix())
         return csv_data
 
-    def get_json(self, clean=True):
+    def get_json(self, clean: bool = True) -> dict:
         self.csv_to_json()
         if self.new_filepath.suffix == ".json":
             with open(self.new_filepath.as_posix(), "r") as f:
@@ -599,15 +599,15 @@ class ConfigConverter:
             self.clean()
         return json_data
 
-    def clean(self):
+    def clean(self) -> None:
         os.remove(self.new_filepath.as_posix())
 
-    def save_as_json(self, overwrite=False):
+    def save_as_json(self, overwrite: bool = False) -> Path:
         self.overwrite = overwrite
         self.get_json(clean=False)
         return self.new_filepath
 
-    def save_as_csv(self, overwrite=False):
+    def save_as_csv(self, overwrite: bool = False) -> Path:
         self.overwrite = overwrite
         self.get_csv(clean=False)
         return self.new_filepath

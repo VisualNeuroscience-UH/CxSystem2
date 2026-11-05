@@ -27,19 +27,36 @@ import numpy
 from cxsystem2.neurodynlib.tools import spike_tools
 
 
-def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing_threshold=None, legend_location=0, save_name=None):
-    """Not implemented! plots voltage and current .
+def plot_voltage_and_current_traces(
+    voltage_monitor: b2.StateMonitor,
+    current: b2.TimedArray,
+    title: str | None = None,
+    firing_threshold: b2.units.Quantity | None = None,
+    legend_location: int = 0,
+    save_name: str | None = None,
+) -> tuple[plt.Axes, plt.Axes]:
+    """
+    Plot voltage and current traces.
 
-    Args:
-        voltage_monitor (StateMonitor): recorded voltage
-        current (TimedArray): injected current
-        title (string, optional): title of the figure
-        firing_threshold (Quantity, optional): if set to a value, the firing threshold is plotted.
-        legend_location (int): legend location. default = 0 (="best")
-        save_name (string, optional): if set, the figure is saved to this file name
+    Parameters
+    ----------
+    voltage_monitor : b2.StateMonitor
+        Recorded voltage.
+    current : b2.TimedArray
+        Injected current.
+    title : str, optional
+        Title of the figure.
+    firing_threshold : Quantity, optional
+        If set, the firing threshold is plotted.
+    legend_location : int, optional
+        Legend location. Default is 0 ("best").
+    save_name : str, optional
+        If set, the figure is saved to this file name.
 
-    Returns:
-        the figure
+    Returns
+    -------
+    tuple of Axes
+        The current (top) and voltage (bottom) axes.
     """
 
     assert isinstance(voltage_monitor, b2.StateMonitor), "voltage_monitor is not of type StateMonitor"
@@ -58,7 +75,7 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
     if margin > 0.:
         plt.ylim((min_current - margin) / b2.amp, (max_current + margin) / b2.amp)
 
-    plt.ylabel("Input current [A] \n min: {0} \nmax: {1}".format(min_current, max_current))
+    plt.ylabel(f"Input current [A] \n min: {min_current} \nmax: {max_current}")
     plt.grid()
     axis_v = plt.subplot(212)
     plt.plot(time_values_ms, voltage_monitor[0].vm / b2.mV, lw=2)
@@ -76,7 +93,7 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
     margin = 0.05 * (max_val - min_val)
     plt.ylim((min_val - margin) / b2.mV, (max_val + margin) / b2.mV)
     plt.xlabel("t [ms]")
-    plt.ylabel("membrane voltage [mV]\n min: {0}\n max: {1}".format(min_val, max_val))
+    plt.ylabel(f"membrane voltage [mV]\n min: {min_val}\n max: {max_val}")
     plt.grid()
 
     if firing_threshold is not None:
@@ -93,37 +110,55 @@ def plot_voltage_and_current_traces(voltage_monitor, current, title=None, firing
     return axis_c, axis_v
 
 
-def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spike_train_idx_list=None,
-                          t_min=None, t_max=None, N_highlighted_spiketrains=3, avg_window_width=None,
-                          sup_title=None, figure_size=(10, 4)):
+def plot_network_activity(
+    rate_monitor: b2.PopulationRateMonitor,
+    spike_monitor: b2.SpikeMonitor,
+    voltage_monitor: b2.StateMonitor | None = None,
+    spike_train_idx_list: list | None = None,
+    t_min: b2.units.Quantity | None = None,
+    t_max: b2.units.Quantity | None = None,
+    N_highlighted_spiketrains: int = 3,
+    avg_window_width: b2.units.Quantity | None = None,
+    sup_title: str | None = None,
+    figure_size: tuple = (10, 4),
+) -> tuple[plt.Figure, plt.Axes, plt.Axes, plt.Axes | None]:
     """
-    Not implemented!
-    Visualizes the results of a network simulation: spike-train, population activity and voltage-traces.
+    Visualize the results of a network simulation: spike train, population
+    activity and voltage traces.
 
-    Args:
-        rate_monitor (PopulationRateMonitor): rate of the population
-        spike_monitor (SpikeMonitor): spike trains of individual neurons
-        voltage_monitor (StateMonitor): optional. voltage traces of some (same as in spike_train_idx_list) neurons
-        spike_train_idx_list (list): optional. A list of neuron indices whose spike-train is plotted.
-        If no list is provided, all (up to 500) spike-trains in the spike_monitor are plotted. If None, the
-        the list in voltage_monitor.record is used.
-        t_min (Quantity): optional. lower bound of the plotted time interval.
-        if t_min is None, it is set to the larger of [0ms, (t_max - 100ms)]
-        t_max (Quantity): optional. upper bound of the plotted time interval.
-        if t_max is None, it is set to the timestamp of the last spike in
-        N_highlighted_spiketrains (int): optional. Number of spike trains visually highlighted, defaults to 3
-        If N_highlighted_spiketrains==0 and voltage_monitor is not None, then all voltage traces of
-        the voltage_monitor are plotted. Otherwise N_highlighted_spiketrains voltage traces are plotted.
-        avg_window_width (Quantity): optional. Before plotting the population rate (PopulationRateMonitor), the rate
-        is smoothed using a window of width = avg_window_width. Defaults is 1.0ms
-        sup_title (String): figure suptitle. Default is None.
-        figure_size (tuple): (width,height) tuple passed to pyplot's figsize parameter.
+    Parameters
+    ----------
+    rate_monitor : b2.PopulationRateMonitor
+        Rate of the population.
+    spike_monitor : b2.SpikeMonitor
+        Spike trains of individual neurons.
+    voltage_monitor : b2.StateMonitor, optional
+        Voltage traces of some neurons (same as in ``spike_train_idx_list``).
+    spike_train_idx_list : list, optional
+        Neuron indices whose spike train is plotted. If None, all (up to 5000)
+        spike trains are plotted, or ``voltage_monitor.record`` if a voltage
+        monitor is given.
+    t_min : Quantity, optional
+        Lower bound of the plotted time interval. If None, set to the larger of
+        [0 ms, t_max - 100 ms].
+    t_max : Quantity, optional
+        Upper bound of the plotted time interval. If None, set to the timestamp
+        of the last spike.
+    N_highlighted_spiketrains : int, optional
+        Number of spike trains visually highlighted. Default is 3. If 0 and a
+        voltage monitor is given, all its voltage traces are plotted.
+    avg_window_width : Quantity, optional
+        Width of the smoothing window applied to the population rate before
+        plotting. Default is 1.0 ms.
+    sup_title : str, optional
+        Figure suptitle.
+    figure_size : tuple, optional
+        (width, height) passed to pyplot's ``figsize``.
 
-    Returns:
-        Figure: The whole figure
-        Axes: Top panel, Raster plot
-        Axes: Middle panel, population activity
-        Axes: Bottom panel, voltage traces. None if no voltage monitor is provided.
+    Returns
+    -------
+    tuple
+        (figure, raster axes, rate axes, voltage axes or None).
     """
     if avg_window_width is None:
         avg_window_width = 1.0 * b2.ms
@@ -170,7 +205,9 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
         fig, (ax_raster, ax_rate, ax_voltage) = plt.subplots(3, 1, sharex=True, figsize=figure_size)
 
     # nested helpers to plot the parts, note that they use parameters defined outside.
-    def get_spike_train_ts_indices(spike_train):
+    def get_spike_train_ts_indices(
+        spike_train: b2.units.Quantity,
+    ) -> tuple[numpy.ndarray, numpy.ndarray]:
         """
         Helper. Extracts the spikes within the time window from the spike train
         """
@@ -181,7 +218,7 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
         ts_spikes = ts[idx_spikes]
         return idx_spikes, ts_spikes
 
-    def plot_raster():
+    def plot_raster() -> None:
         """
         Helper. Plots the spike trains of the spikes in spike_train_idx_list
         """
@@ -193,7 +230,7 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
             neuron_counter += 1
         ax_raster.set_ylim([0, neuron_counter])
 
-    def highlight_raster(neuron_idxs):
+    def highlight_raster(neuron_idxs: list) -> None:
         """
         Helper. Highlights three spike trains
         """
@@ -209,7 +246,7 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
         ax_raster.set_ylabel("neuron #")
         ax_raster.set_title("Raster Plot", fontsize=10)
 
-    def plot_population_activity(window_width=0.5*b2.ms):
+    def plot_population_activity(window_width: b2.units.Quantity = 0.5 * b2.ms) -> None:
         """
         Helper. Plots the population rate and a mean
         """
@@ -221,7 +258,7 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
         ax_rate.set_ylabel("A(t) [Hz]")
         ax_rate.set_title("Population Activity", fontsize=10)
 
-    def plot_voltage_traces(voltage_traces_i):
+    def plot_voltage_traces(voltage_traces_i: list[int] | range) -> None:
         """
         Helper. Plots three voltage traces
         """
@@ -261,19 +298,28 @@ def plot_network_activity(rate_monitor, spike_monitor, voltage_monitor=None, spi
     return fig, ax_raster, ax_rate, ax_voltage
 
 
-def plot_ISI_distribution(spike_stats, hist_nr_bins=50, xlim_max_ISI=None):
+def plot_ISI_distribution(
+    spike_stats: spike_tools.PopulationSpikeStats,
+    hist_nr_bins: int = 50,
+    xlim_max_ISI: b2.units.Quantity | None = None,
+) -> plt.Figure:
     """
-    Not implemented!
-    Computes the ISI distribution of the given spike_monitor and displays the distribution in a histogram
+    Compute and display the ISI distribution of a population as a histogram.
 
-    Args:
-        spike_stats (neurodynex.tools.spike_tools.PopulationSpikeStats): statistics of a population activity
-        hist_nr_bins (int): Number of histrogram bins. Default:50
-        xlim_max_ISI (Quantity):  Default: None. In not None, the upper xlim of the plot is set to xlim_max_ISI.
-        The CV does not change if this bound is set.
+    Parameters
+    ----------
+    spike_stats : spike_tools.PopulationSpikeStats
+        Statistics of a population activity.
+    hist_nr_bins : int, optional
+        Number of histogram bins. Default is 50.
+    xlim_max_ISI : Quantity, optional
+        If set, the upper xlim of the plot is set to this value. The CV does
+        not change if this bound is set.
 
-    Returns:
-        the figure
+    Returns
+    -------
+    plt.Figure
+        The figure.
     """
     assert isinstance(spike_stats, spike_tools.PopulationSpikeStats), \
         "spike_stats is not of type spike_tools.PopulationSpikeStats"
@@ -289,27 +335,44 @@ def plot_ISI_distribution(spike_stats, hist_nr_bins=50, xlim_max_ISI=None):
     if xlim_max_ISI is not None:
         xmax = xlim_max_ISI / b2.ms
         plt.xlim([0, xmax])
-    plt.title("ISI histogram, CV={}".format(round(spike_stats.CV, 3)))
+    plt.title(f"ISI histogram, CV={round(spike_stats.CV, 3)}")
     plt.xlabel("ISI [ms]")
     return f
 
 
-def plot_spike_train_power_spectrum(freq, mean_ps, all_ps, max_freq,
-                                    nr_highlighted_neurons=2, mean_firing_freqs_per_neuron=None, plot_f0=False):
+def plot_spike_train_power_spectrum(
+    freq: numpy.ndarray,
+    mean_ps: numpy.ndarray,
+    all_ps: dict,
+    max_freq: b2.units.Quantity,
+    nr_highlighted_neurons: int = 2,
+    mean_firing_freqs_per_neuron: dict | None = None,
+    plot_f0: bool = False,
+) -> tuple[plt.Figure, list]:
     """
-    Not implemented!
-    Visualizes the power spectrum of the spike trains.
+    Visualize the power spectrum of spike trains.
 
-    Args:
-        freq: frequencies (= x axis)
-        mean_ps: average power taken over all neurons (typically all of a subsample).
-        all_ps (dict): power spectra for each single neuron
-        max_freq (Quantity): The x-lim of the plot is [-0.05*max_freq, max_freq]
-        mean_firing_freqs_per_neuron (float): None or the mean firing rate averaged across the neurons. Default is
-        None in which case the value is not shown in the legend
-        plot_f0 (bool): if true, the power at frequency 0 is plotted. Default is False and the value is not plotted.
-    Returns:
-        the figure and the index of the random neuron for which the PS is computed: all_ps[random_neuron_index]
+    Parameters
+    ----------
+    freq : ndarray
+        Frequencies (x axis).
+    mean_ps : ndarray
+        Average power over all neurons.
+    all_ps : dict
+        Power spectra for each single neuron.
+    max_freq : Quantity
+        The x-lim of the plot is [-0.05*max_freq, max_freq].
+    nr_highlighted_neurons : int, optional
+        Number of single-neuron spectra highlighted. Default is 2.
+    mean_firing_freqs_per_neuron : dict, optional
+        Mean firing rate per neuron. If None, not shown in the legend.
+    plot_f0 : bool, optional
+        If True, the power at frequency 0 is plotted. Default is False.
+
+    Returns
+    -------
+    tuple
+        The figure and the list of highlighted neuron indices.
     """
     nr_neurons = len(all_ps)
     f = plt.figure()
@@ -329,10 +392,11 @@ def plot_spike_train_power_spectrum(freq, mean_ps, all_ps, max_freq,
         msize = 8
         random_neuron_index.append(rand_key)
         if mean_firing_freqs_per_neuron is None:
-            legend_text.append("PS Neuron #{}".format(rand_key))
+            legend_text.append(f"PS Neuron #{rand_key}")
         else:
-            legend_text.append("PS Neuron #{}, avg rate={}"
-                               .format(rand_key, round(mean_firing_freqs_per_neuron[rand_key], 1)))
+            legend_text.append(
+                f"PS Neuron #{rand_key}, avg rate={round(mean_firing_freqs_per_neuron[rand_key], 1)}"
+            )
 
     plt.plot(freq[first_idx_to_plot:], mean_ps[first_idx_to_plot:], ".b")
 
@@ -340,7 +404,7 @@ def plot_spike_train_power_spectrum(freq, mean_ps, all_ps, max_freq,
         legend_text.append("averaged PS")
     else:
         avg_rate = numpy.mean(mean_firing_freqs_per_neuron.values())
-        legend_text.append("averaged PS, avg rate={}".format(round(avg_rate, 1)))
+        legend_text.append(f"averaged PS, avg rate={round(avg_rate, 1)}")
 
     plt.legend(legend_text)
     plt.xlim([-0.05*max_freq/b2.Hz, max_freq/b2.Hz])
@@ -352,19 +416,33 @@ def plot_spike_train_power_spectrum(freq, mean_ps, all_ps, max_freq,
     return f, random_neuron_index
 
 
-def plot_population_activity_power_spectrum(freq, ps, max_freq, average_At=None, plot_f0=False):
+def plot_population_activity_power_spectrum(
+    freq: numpy.ndarray,
+    ps: numpy.ndarray,
+    max_freq: b2.units.Quantity,
+    average_At: b2.units.Quantity | None = None,
+    plot_f0: bool = False,
+) -> plt.Figure:
     """
-    Not implemented!
-    Plots the power spectrum of the population activity A(t)
+    Plot the power spectrum of the population activity A(t).
 
-    Args:
-        freq: frequencies (= x axis)
-        ps: power spectrum of the population activity
-        max_freq (Quantity): The data is plotted in the interval [-.05*max_freq, max_freq]
-        plot_f0 (bool): if true, the power at frequency 0 is plotted. Default is False and the value is not plotted.
+    Parameters
+    ----------
+    freq : ndarray
+        Frequencies (x axis).
+    ps : ndarray
+        Power spectrum of the population activity.
+    max_freq : Quantity
+        Data is plotted in the interval [-0.05*max_freq, max_freq].
+    average_At : Quantity, optional
+        Average population rate, shown in the title if given.
+    plot_f0 : bool, optional
+        If True, the power at frequency 0 is plotted. Default is False.
 
-    Returns:
-        the figure
+    Returns
+    -------
+    plt.Figure
+        The figure.
     """
     first_idx_to_plot = 0 if plot_f0 else 1
     f = plt.figure()
@@ -377,5 +455,5 @@ def plot_population_activity_power_spectrum(freq, ps, max_freq, average_At=None,
     if average_At is None:
         plt.title("Power Spectrum of population activity A(t).")
     else:
-        plt.title("Power Spectrum of population activity A(t). Avg. rate = {}".format(round(average_At, 1)))
+        plt.title(f"Power Spectrum of population activity A(t). Avg. rate = {round(average_At, 1)}")
     return f

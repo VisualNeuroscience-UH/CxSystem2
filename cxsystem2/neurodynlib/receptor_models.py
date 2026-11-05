@@ -264,17 +264,17 @@ class ReceptorModel:
         "I_ALPHA_GABAB": ["gi"],
     }
 
-    def __init__(self, receptor_model):
+    def __init__(self, receptor_model: str) -> None:
         self.receptor_model = receptor_model
         self.receptor_model_eqs = self.SynapticExcInhModels[receptor_model]
 
-    def get_receptor_equations(self):
+    def get_receptor_equations(self) -> dict[str, str]:
         return self.receptor_model_eqs
 
-    def get_compartment_specific_variables(self):
+    def get_compartment_specific_variables(self) -> list[str]:
         return self.CompSpecificVariables[self.receptor_model]
 
-    def get_receptor_names(self):
+    def get_receptor_names(self) -> list[str]:
         return self.Receptors[self.receptor_model]
 
 

@@ -7,10 +7,6 @@ class ParameterNotFoundError(Exception):
     pass
 
 
-class ClusterNotReachableError(Exception):
-    pass
-
-
 class RelativePathError(Exception):
     pass
 

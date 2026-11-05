@@ -49,7 +49,7 @@ def test_dataframe_delimiters():
 
 class TestInit:
     def test_csv_shape(self):
-        assert CM.anat_and_sys_conf_df.shape[1] == 27
+        assert CM.anat_and_sys_conf_df.shape[1] == 20
 
     def test_number_of_input_arguments(self):
         assert CM.__init__.__code__.co_argcount == 8, "Number of arguments have changed"

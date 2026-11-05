@@ -12,7 +12,9 @@ from cxsystem2.core.tools import load_from_file
 
 
 class rasterplot_pdf_generator:
-    def __init__(self, workspace_path, timestamp, sampling_rate):
+    def __init__(
+        self, workspace_path: str | Path, timestamp: str, sampling_rate: str
+    ) -> None:
         matplotlib.use("Agg")
         self.workspace_path = Path(workspace_path)
         self.timestamp = timestamp.strip("_")
@@ -25,11 +27,11 @@ class rasterplot_pdf_generator:
             if x.is_file() and timestamp in x.as_posix() and "results" in x.as_posix()
         ]
         self.out_filename = self.workspace_path.joinpath(
-            "plot_{}.pdf".format(self.timestamp)
+            f"plot_{self.timestamp}.pdf"
         )
         self.generate_pdf()
 
-    def generate_pdf(self):
+    def generate_pdf(self) -> None:
         idx_in_fig = 0
         pdf_height = 12.69
         # pdf_height = 7.69
@@ -43,7 +45,7 @@ class rasterplot_pdf_generator:
             f.set_figheight(pdf_height)
             f.set_figwidth(pdf_width)
             for file in self.files:
-                print("Current file: {}".format(file))
+                print(f"Current file: {file}")
                 all_axes = []
                 idx_in_fig = -1
                 tmp_dat = load_from_file(file.as_posix())
@@ -97,15 +99,13 @@ class rasterplot_pdf_generator:
                         pdf.savefig(f)
                 except KeyError:
                     print(
-                        "The file '{}' is not a brian data file, skipping ...".format(
-                            file.name
-                        )
+                        f"The file '{file.name}' is not a brian data file, skipping ..."
                     )
             print(
                 f"Requested sampling rate of {int(self.sampling_rate * 100)}%. Rasterplots at steps of {step} between spikes. True sampling rate is {100/step:.1f}%"
             )
 
-    def get_output_file_path(self):
+    def get_output_file_path(self) -> str:
         return self.out_filename.as_posix()
 
 

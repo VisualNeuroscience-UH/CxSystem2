@@ -29,18 +29,34 @@ import numpy as np
 ###############
 # Input Currents
 ###############
-def get_step_current(t_start, t_end, unit_time, amplitude, append_zero=True):
+def get_step_current(
+    t_start: int,
+    t_end: int,
+    unit_time: b2.units.Quantity,
+    amplitude: b2.units.Quantity,
+    append_zero: bool = True,
+) -> b2.TimedArray:
     """
-    Creates a step current. If t_start == t_end, then a single
-    entry in the values array is set to amplitude.
+    Create a step current. If ``t_start == t_end``, a single entry in the
+    values array is set to ``amplitude``.
 
-    :param int t_start: start of the step
-    :param int t_end: end of the step
-    :param unit_time: unit of t_start and t_end. e.g. 0.1*brian2.ms
-    :param amplitude: amplitude of the step. e.g. 3.5*brian2.uamp
-    :param append_zero: if true, 0Amp is appended at t_end+1.  Without that trailing 0, Brian reads out the last
-            value in the array (=amplitude) for all indices > t_end.
-    :return: Brian2.TimedArray
+    Parameters
+    ----------
+    t_start : int
+        Start of the step.
+    t_end : int
+        End of the step.
+    unit_time : Quantity
+        Unit of t_start and t_end, e.g. ``0.1*brian2.ms``.
+    amplitude : Quantity
+        Amplitude of the step, e.g. ``3.5*brian2.uamp``.
+    append_zero : bool, optional
+        If True, 0 Amp is appended at ``t_end + 1``. Without that trailing 0,
+        Brian reads out the last value (= amplitude) for all indices > t_end.
+
+    Returns
+    -------
+    b2.TimedArray
     """
 
     assert isinstance(t_start, int), "t_start_ms must be of type int"
@@ -56,17 +72,36 @@ def get_step_current(t_start, t_end, unit_time, amplitude, append_zero=True):
     return curr
 
 
-def get_ramp_current(t_start, t_end, unit_time, amplitude_start, amplitude_end, append_zero=True):
+def get_ramp_current(
+    t_start: int,
+    t_end: int,
+    unit_time: b2.units.Quantity,
+    amplitude_start: b2.units.Quantity,
+    amplitude_end: b2.units.Quantity,
+    append_zero: bool = True,
+) -> b2.TimedArray:
     """
-    Creates a ramp current. If t_start == t_end, then ALL entries are 0.
+    Create a ramp current. If ``t_start == t_end``, all entries are 0.
 
-    :param int t_start: start of the ramp
-    :param int t_end: end of the ramp
-    :param unit_time: unit of t_start and t_end. e.g. 0.1*ms
-    :param amplitude_start: amplitude of the ramp at t_start. e.g. 3.5*uamp
-    :param amplitude_end: amplitude of the ramp at t_end. e.g. 4.5*uamp
-    :param bool append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0, Brian reads out the last value in the array (=amplitude_end) for all indices > t_end.
-    :return: Brian2.TimedArray
+    Parameters
+    ----------
+    t_start : int
+        Start of the ramp.
+    t_end : int
+        End of the ramp.
+    unit_time : Quantity
+        Unit of t_start and t_end, e.g. ``0.1*ms``.
+    amplitude_start : Quantity
+        Amplitude of the ramp at t_start, e.g. ``3.5*uamp``.
+    amplitude_end : Quantity
+        Amplitude of the ramp at t_end, e.g. ``4.5*uamp``.
+    append_zero : bool, optional
+        If True, 0 Amp is appended at ``t_end + 1``. Without that trailing 0,
+        Brian reads out the last value (= amplitude_end) for all indices > t_end.
+
+    Returns
+    -------
+    b2.TimedArray
     """
 
     assert isinstance(t_start, int), "t_start_ms must be of type int"
@@ -88,21 +123,42 @@ def get_ramp_current(t_start, t_end, unit_time, amplitude_start, amplitude_end, 
     return curr
 
 
-def get_sinusoidal_current(t_start, t_end, unit_time,
-                           amplitude, frequency, direct_current, phase_offset=0.,
-                           append_zero=True):
+def get_sinusoidal_current(
+    t_start: int,
+    t_end: int,
+    unit_time: b2.units.Quantity,
+    amplitude: b2.units.Quantity,
+    frequency: b2.units.Quantity,
+    direct_current: b2.units.Quantity,
+    phase_offset: float = 0.0,
+    append_zero: bool = True,
+) -> b2.TimedArray:
     """
-    Creates a sinusoidal current. If t_start == t_end, then ALL entries are 0.
+    Create a sinusoidal current. If ``t_start == t_end``, all entries are 0.
 
-    :param int t_start: start of the sine wave
-    :param int t_end: end of the sine wave
-    :param unit_time: unit of t_start and t_end. e.g. 0.1*ms
-    :param amplitude: maximum amplitude of the sinus e.g. 3.0*uamp
-    :param frequency: Frequency of the sine. e.g. 0.5*kHz
-    :param direct_current: DC-component (=offset) of the current, e.g. 1.5*uamp
-    :param float phase_offset: phase at t_start. Default = 0
-    :param bool append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0, Brian reads out the last value in the array for all indices > t_end.
-    :return: Brian2.TimedArray
+    Parameters
+    ----------
+    t_start : int
+        Start of the sine wave.
+    t_end : int
+        End of the sine wave.
+    unit_time : Quantity
+        Unit of t_start and t_end, e.g. ``0.1*ms``.
+    amplitude : Quantity
+        Maximum amplitude of the sine, e.g. ``3.0*uamp``.
+    frequency : Quantity
+        Frequency of the sine, e.g. ``0.5*kHz``.
+    direct_current : Quantity
+        DC component (offset) of the current, e.g. ``1.5*uamp``.
+    phase_offset : float, optional
+        Phase at t_start. Default is 0.
+    append_zero : bool, optional
+        If True, 0 Amp is appended at ``t_end + 1``. Without that trailing 0,
+        Brian reads out the last value for all indices > t_end.
+
+    Returns
+    -------
+    b2.TimedArray
     """
 
     assert isinstance(t_start, int), "t_start_ms must be of type int"
@@ -129,7 +185,7 @@ def get_sinusoidal_current(t_start, t_end, unit_time,
     return curr
 
 
-def get_zero_current():
+def get_zero_current() -> b2.TimedArray:
     """
     Returns a TimedArray with one entry: 0 Amp
 
@@ -140,18 +196,34 @@ def get_zero_current():
     return get_step_current(0, 0, b2.ms, amp, append_zero=False)
 
 
-def get_spikes_current(t_spikes, unit_time, amplitude, append_zero=True):
-    """Creates a two dimensional TimedArray wich has one column for each value in t_spikes.
-    All values in each column are 0 except one, the spike time as specified in t_spikes is set to amplitude.
-    Note: This function is provided to easily insert pulse currents into a cable. For other use of
-    spike input, search the Brian2 documentation for SpikeGeneration.
+def get_spikes_current(
+    t_spikes: list[int],
+    unit_time: b2.units.Quantity,
+    amplitude: b2.units.Quantity,
+    append_zero: bool = True,
+) -> b2.TimedArray:
+    """
+    Create a 2D TimedArray with one column per value in ``t_spikes``.
 
-    :param int t_spikes: list of spike times
-    :param unit_time: unit of t_spikes . e.g. 1*ms
-    :param amplitude:  amplitude of the spike. All spikes have the same amplitude
-    :param bool append_zero: if true, 0Amp is appended at t_end+1. Without that trailing 0,
-        Brian reads out the last value in the array for all indices > t_end.
-    :return: Brian2.TimedArray
+    All values in each column are 0 except one: the spike time given in
+    ``t_spikes`` is set to ``amplitude``. Provided to easily insert pulse
+    currents into a cable; for other spike input, see Brian2's SpikeGenerator.
+
+    Parameters
+    ----------
+    t_spikes : list of int
+        Spike times.
+    unit_time : Quantity
+        Unit of t_spikes, e.g. ``1*ms``.
+    amplitude : Quantity
+        Amplitude of the spikes (all spikes have the same amplitude).
+    append_zero : bool, optional
+        If True, 0 Amp is appended at ``t_end + 1``. Without that trailing 0,
+        Brian reads out the last value for all indices > t_end.
+
+    Returns
+    -------
+    b2.TimedArray
     """
     assert isinstance(t_spikes, list), "t_spikes must be of type list"
     assert b2.units.fundamentalunits.have_same_dimensions(amplitude, b2.amp), \
@@ -168,7 +240,7 @@ def get_spikes_current(t_spikes, unit_time, amplitude, append_zero=True):
     return curr
 
 
-def plot_step_current_example():
+def plot_step_current_example() -> None:
     """
     Example for get_step_current.
     """
@@ -180,7 +252,7 @@ def plot_step_current_example():
     plt.ylabel("value")
 
 
-def plot_ramp_current_example():
+def plot_ramp_current_example() -> None:
     """
     Example for get_ramp_current
     """
@@ -192,7 +264,7 @@ def plot_ramp_current_example():
     plt.ylabel("value")
 
 
-def plot_sinusoidal_current_example():
+def plot_sinusoidal_current_example() -> None:
     """
     Example for get_sinusoidal_current
     """
@@ -208,7 +280,7 @@ def plot_sinusoidal_current_example():
     plt.ylabel("value")
 
 
-def getting_started():
+def getting_started() -> None:
     # plot examples
     plot_step_current_example()
     plt.show()

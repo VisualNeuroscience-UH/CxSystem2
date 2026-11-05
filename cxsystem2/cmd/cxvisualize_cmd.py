@@ -53,7 +53,7 @@ from cxsystem2.visualization.spikedata_to_csvs import SpikeData
 VISIMPL_BINARY = ""
 
 
-def check_visimpl():
+def check_visimpl() -> None:
     global VISIMPL_BINARY
     if which("visimpl.AppImage") is None:
         VISIMPL_BINARY = "~/visimpl/visimpl.AppImage"
@@ -63,13 +63,13 @@ def check_visimpl():
         VISIMPL_BINARY = "visimpl.AppImage"
 
 
-def _convert(filepath):
+def _convert(filepath: str | Path) -> tuple:
     x = SpikeData(filepath)
     structure_csv, spikes_csv, subsets_json = x.save_for_visimpl()
     return structure_csv, spikes_csv, subsets_json
 
 
-def _run_visimpl(structure_csv, spikes_csv, subsets_json):
+def _run_visimpl(structure_csv: str | Path, spikes_csv: str | Path, subsets_json: str | Path) -> None:
     run_visimpl_cmd = (
         VISIMPL_BINARY
         + " -csv "
@@ -82,7 +82,7 @@ def _run_visimpl(structure_csv, spikes_csv, subsets_json):
     os.system(run_visimpl_cmd)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="cxvisualize -- cxsystem visualizer\n\n"
         "A tool for visualizing `CxSystem` spike data in ViSimpl.",

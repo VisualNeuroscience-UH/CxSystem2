@@ -31,7 +31,7 @@ from pathlib import Path
 from cxsystem2.configuration.config_file_converter import ConfigConverter
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Convert configuration files between JSON and CSV formats.\n\n"
         "Converts the specified file to the opposite format (JSON <-> CSV).",

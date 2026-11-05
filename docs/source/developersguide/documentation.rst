@@ -77,10 +77,11 @@ method of that class that should be parsed. In this case only `__init__()` will
 be parsed. Next, the `autofunction` directive defines which functions from the
 `spike_tools.py` should be parsed.
 
-For the docstrings, make sure to use the `sphinxy` docstring for consistency.
-Moreover, make sure at least you include the parameters and return names and
-types and the description of the method/function. This is a simple example how
-the docstring should be formatted:
+For the docstrings, use the `NumPy` docstring style for consistency; it is
+rendered by the ``sphinx.ext.napoleon`` extension enabled in ``conf.py``.
+Make sure to include the parameters and return names and types and the
+description of the method/function. This is a simple example of how the
+docstring should be formatted:
 
 .. code-block:: python
 
@@ -88,13 +89,23 @@ the docstring should be formatted:
 
             """This function does something.
 
-            :param name: The name to use.
-            :type name: str.
-            :param state: Current state to be in.
-            :type state: bool.
-            :returns:  int -- the return code.
-            :raises: AttributeError, KeyError
+            Parameters
+            ----------
+            name : str
+                The name to use.
+            state : bool, optional
+                Current state to be in. Default is None.
+
+            Returns
+            -------
+            int
+                The return code.
+
+            Raises
+            ------
+            AttributeError, KeyError
+                If something goes wrong.
 
             """
 
-Lots of more examples of docstrings are available `here <https://pythonhosted.org/an_example_pypi_project/sphinx.html#full-code-example>`__.
+Lots of more examples of docstrings are available `here <https://numpydoc.readthedocs.io/en/latest/format.html>`__.

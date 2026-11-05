@@ -12,12 +12,6 @@ Arguments:
 
 Options:
   -h --help                 Show this screen
-
-Description:
-
-  cxcluster ./sample_meta.tar.gz
-    shows the information inside `sample_meta.tar.gz`
-
 """
 
 import argparse
@@ -33,7 +27,7 @@ pd.set_option("display.max_columns", 30)
 pd.set_option("display.max_colwidth", None)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Load and display metadata from a file.",
         usage=""" cxmetadata (-h | --help)
@@ -52,7 +46,7 @@ def main():
     metadata_path = args.META_FILE_PATH
 
     if not metadata_path.is_file():
-        print("Error: metadata file {} not found".format(metadata_path.as_posix()))
+        print(f"Error: metadata file {metadata_path.as_posix()} not found")
         sys.exit(1)
 
     metadata_df = load_from_file(metadata_path.as_posix())

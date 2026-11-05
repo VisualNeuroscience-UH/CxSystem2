@@ -15,6 +15,7 @@
 # Built-in
 import copy
 import json
+from typing import Any, KeysView
 from datetime import datetime
 from string import Template
 
@@ -79,7 +80,7 @@ class PointNeuron:
     default_neuron_parameters = {}
     model_info_url = "http://neuronaldynamics.epfl.ch/online/"
 
-    def __init__(self, is_pyramidal=False, compartment="soma"):
+    def __init__(self, is_pyramidal: bool = False, compartment: str = 'soma') -> None:
         """
         Parameters
         ----------
@@ -150,7 +151,11 @@ class PointNeuron:
         # multicompartmental neurons are set, see module multicompartment_models.py
         self.compartment_vars_and_consts = []
 
-    def get_membrane_equation(self, substitute_ad_hoc=None, return_string=True):
+    def get_membrane_equation(
+        self,
+        substitute_ad_hoc: dict[str, str] | None = None,
+        return_string: bool = True,
+    ) -> str | b2.Equations:
         """
         Compiles the membrane equation from the template for use in Brian2.
         This should be the only function where the template equation is used.
@@ -203,7 +208,7 @@ class PointNeuron:
         else:
             return b2.Equations(model_membrane_equation)
 
-    def get_compartment_equations(self, compartment_name):
+    def get_compartment_equations(self, compartment_name: str) -> b2.Equations:
         """
         Compiles the membrane equation and adds compartment name to all compartment-specific variables
 
@@ -226,7 +231,7 @@ class PointNeuron:
 
         return compartment_eq
 
-    def what_is_this(self):
+    def what_is_this(self) -> str:
         """
         Method to query for the URL describing the neuron model
 
@@ -237,7 +242,7 @@ class PointNeuron:
 
         return self.link_to_book
 
-    def get_neuron_equations(self):
+    def get_neuron_equations(self) -> b2.Equations:
         """
         Returns the membrane equations in a form that prints out nicely in Jupyter Notebook
 
@@ -250,7 +255,7 @@ class PointNeuron:
         s = self.get_membrane_equation(return_string=True)
         return b2.Equations(s)
 
-    def get_parameter_names(self):
+    def get_parameter_names(self) -> KeysView[str]:
         """
         Shows all the parameter names that can/must be defined
 
@@ -260,7 +265,7 @@ class PointNeuron:
         """
         return self.default_neuron_parameters.keys()
 
-    def get_neuron_parameters(self):
+    def get_neuron_parameters(self) -> dict[str, Any]:
         """
         Shows all the current parameter names and values
 
@@ -270,7 +275,7 @@ class PointNeuron:
         """
         return self.neuron_parameters
 
-    def set_neuron_parameters(self, **kwargs):
+    def set_neuron_parameters(self, **kwargs: Any) -> None:
         """
         Set neuron parameters.
         If you don't know the correct units, use get_neuron_parameters() first to get the default parameters with
@@ -283,7 +288,7 @@ class PointNeuron:
         """
         self.neuron_parameters.update(kwargs)
 
-    def get_reset_statements(self):
+    def get_reset_statements(self) -> str:
         """
         Get the statements that will be executed once the neuron hits the threshold.
 
@@ -293,7 +298,7 @@ class PointNeuron:
         """
         return self.reset_statements
 
-    def get_threshold_condition(self):
+    def get_threshold_condition(self) -> str:
         """
         Get the spike threshold condition.
 
@@ -303,7 +308,7 @@ class PointNeuron:
         """
         return self.threshold_condition
 
-    def get_refractory_period(self):
+    def get_refractory_period(self) -> b2.units.Quantity:
         """
         Get the refractory period (after a spike).
 
@@ -315,7 +320,7 @@ class PointNeuron:
 
         return self.neuron_parameters["refractory_period"]
 
-    def get_initial_values(self):  # Model-specific
+    def get_initial_values(self) -> dict[str, Any]:
         """
         Get initial values. If the initial value of vm is None, will replace it with EL (reversal potential of leak).
 
@@ -330,7 +335,7 @@ class PointNeuron:
 
         return init_vals
 
-    def get_states_to_monitor(self):
+    def get_states_to_monitor(self) -> list[str]:
         """
         Get state variables to monitor (for method plot_states())
 
@@ -340,7 +345,7 @@ class PointNeuron:
         """
         return self.states_to_monitor
 
-    def set_model_definition(self, key, string_to_set):
+    def set_model_definition(self, key: str, string_to_set: str) -> None:
         """
         Set the value of a template placeholder.
 
@@ -353,7 +358,7 @@ class PointNeuron:
         """
         self.full_model_defns[key] = string_to_set
 
-    def add_model_definition(self, key, string_to_add):
+    def add_model_definition(self, key: str, string_to_add: str) -> None:
         """
         Append a string to a template placeholder.
 
@@ -371,10 +376,10 @@ class PointNeuron:
 
     def simulate_neuron(
         self,
-        I_stim=None,
-        simulation_time=1000 * ms,
-        **kwargs,
-    ):
+        I_stim: Any = None,
+        simulation_time: b2.units.Quantity = 1000 * ms,
+        **kwargs: Any,
+    ) -> tuple[b2.StateMonitor, b2.SpikeMonitor]:
         """
         Simulate/stimulate the neuron
 
@@ -435,11 +440,11 @@ class PointNeuron:
 
     def getting_started(
         self,
-        step_amplitude=1.2 * nA,
-        sine_amplitude=2.5 * nA,
-        sine_freq=150 * Hz,
-        sine_dc=2 * nA,
-    ):
+        step_amplitude: b2.units.Quantity = 1.2 * nA,
+        sine_amplitude: b2.units.Quantity = 2.5 * nA,
+        sine_freq: b2.units.Quantity = 150 * Hz,
+        sine_dc: b2.units.Quantity = 2 * nA,
+    ) -> None:
         """
         Simple example that stimulates the neuron with a step and a sinusoidal current.
 
@@ -504,13 +509,13 @@ class PointNeuron:
 
     def plot_fi_curve(
         self,
-        min_current=0 * pA,
-        max_current=1 * nA,
-        step_size=10 * pA,
-        plot=True,
-        max_rate=None,
-        save_name=None,
-    ):
+        min_current: b2.units.Quantity = 0 * pA,
+        max_current: b2.units.Quantity = 1 * nA,
+        step_size: b2.units.Quantity = 10 * pA,
+        plot: bool = True,
+        max_rate: float | None = None,
+        save_name: str | None = None,
+    ) -> tuple[np.ndarray, Any] | None:
         """
         Plot the frequency-current (f-I) curve.
 
@@ -599,7 +604,7 @@ class PointNeuron:
         else:
             return steps, counts
 
-    def plot_vm(self, state_monitor):
+    def plot_vm(self, state_monitor: b2.StateMonitor) -> None:
         """
         Plots the vm from a state monitor
 
@@ -616,7 +621,11 @@ class PointNeuron:
         plt.ylabel("vm [mV]")
         plt.show()
 
-    def plot_states(self, state_monitor, parameters=None):
+    def plot_states(
+        self,
+        state_monitor: b2.StateMonitor,
+        parameters: list[str] | None = None,
+    ) -> None:
         """
         Plots pre-defined state variables from a state monitor
 
@@ -642,7 +651,7 @@ class PointNeuron:
                 axs[i].set_xlabel("time [ms]")
                 axs[i].set_ylabel(f"{parameter} [{this_unit}]")
 
-    def get_json(self, include_neuron_name=True):
+    def get_json(self, include_neuron_name: bool = True) -> str:
         """
         Creates a JSON string of parameter names and values (units are discarded).
 
@@ -667,7 +676,7 @@ class PointNeuron:
         else:
             return json.dumps(neuron_parameters_wo_units[self.neuron_name])
 
-    def save_json(self, filename=None):
+    def save_json(self, filename: str | None = None) -> None:
         """
         Saves the neuron parameters in a JSON file.
 
@@ -684,7 +693,7 @@ class PointNeuron:
             fi.write(self.get_json())
             fi.close()
 
-    def read_json(self, filename, neuron_name=None):
+    def read_json(self, filename: str, neuron_name: str | None = None) -> None:
         """
         Read and load parameters from a JSON file.
 
@@ -711,7 +720,7 @@ class PointNeuron:
 
         self.neuron_parameters = imported_params
 
-    def list_neurons_in_json(self, filename):
+    def list_neurons_in_json(self, filename: str) -> list[str]:
         """
         List neuron types (sets of parameters) in a JSON file
 
@@ -730,7 +739,11 @@ class PointNeuron:
 
         return list(params_dict.keys())
 
-    def add_tonic_current(self, tonic_current=50 * pA, tau_rampup=None):
+    def add_tonic_current(
+        self,
+        tonic_current: b2.units.Quantity = 50 * pA,
+        tau_rampup: b2.units.Quantity | None = None,
+    ) -> None:
         """
         Adds tonic current injection to the neuron
 
@@ -759,7 +772,11 @@ class PointNeuron:
 
         self.add_model_definition("EXT_CURRENTS", ext_currents_string)
 
-    def add_external_current(self, current_name="I_ext", current_eqs=None):
+    def add_external_current(
+        self,
+        current_name: str = 'I_ext',
+        current_eqs: str | None = None,
+    ) -> None:
         """
         Adds an external current to the neuron
 
@@ -779,7 +796,7 @@ class PointNeuron:
         else:
             self.add_model_definition("EXT_CURRENTS_EQS", "\n" + current_eqs)
 
-    def add_vm_noise(self, noise_sigma=2 * mV):
+    def add_vm_noise(self, noise_sigma: b2.units.Quantity = 2 * mV) -> None:
         """
         Adds a stochastic component to the membrane equation as explained in
         `Brian2 documentation <https://brian2.readthedocs.io/en/stable/user/models.html#noise>`_
@@ -793,7 +810,7 @@ class PointNeuron:
         gL = self.neuron_parameters["gL"]
         self.set_neuron_parameters(noise_sigma=noise_sigma, taum_soma=C / gL)
 
-    def set_excitatory_receptors(self, receptor_name):
+    def set_excitatory_receptors(self, receptor_name: str) -> None:
         """
         Sets the excitatory receptors.
 
@@ -815,7 +832,7 @@ class PointNeuron:
             receptor_model.get_compartment_specific_variables()
         )
 
-    def set_inhibitory_receptors(self, receptor_name):
+    def set_inhibitory_receptors(self, receptor_name: str) -> None:
         """
         Sets the inhibitory receptors.
 
@@ -837,7 +854,7 @@ class PointNeuron:
             receptor_model.get_compartment_specific_variables()
         )
 
-    def make_neuron_group(self, n):
+    def make_neuron_group(self, n: int) -> b2.NeuronGroup:
         """
         Makes a Brian2 NeuronGroup
 
@@ -882,7 +899,7 @@ class LifNeuron(PointNeuron):
     neuron_model_defns = {"I_NEURON_MODEL": "gL*(EL-vm)"}
     model_info_url = "http://neuronaldynamics.epfl.ch/online/Ch1.S3.html"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
 
@@ -912,7 +929,7 @@ class EifNeuron(PointNeuron):
     }
     model_info_url = "http://neuronaldynamics.epfl.ch/online/Ch5.S2.html"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.threshold_condition = "vm > Vcut"
         new_parameter_units = {"DeltaT": mV, "Vcut": mV}
@@ -920,11 +937,11 @@ class EifNeuron(PointNeuron):
 
     def getting_started(
         self,
-        step_amplitude=0.8 * nA,
-        sine_amplitude=1.6 * nA,
-        sine_freq=150 * Hz,
-        sine_dc=1.3 * nA,
-    ):
+        step_amplitude: b2.units.Quantity = 0.8 * nA,
+        sine_amplitude: b2.units.Quantity = 1.6 * nA,
+        sine_freq: b2.units.Quantity = 150 * Hz,
+        sine_dc: b2.units.Quantity = 1.3 * nA,
+    ) -> None:
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
 
@@ -961,8 +978,7 @@ class AdexGapNeuron(PointNeuron):
     }
     model_info_url = "http://neuronaldynamics.epfl.ch/online/Ch6.S1.html"
 
-    def __init__(self):
-
+    def __init__(self) -> None:
         super().__init__()
         self.threshold_condition = "vm > Vcut"
         self.reset_statements = "vm = V_res; w += b"
@@ -1008,8 +1024,7 @@ class AdexNeuron(PointNeuron):
     }
     model_info_url = "http://neuronaldynamics.epfl.ch/online/Ch6.S1.html"
 
-    def __init__(self):
-
+    def __init__(self) -> None:
         super().__init__()
         self.threshold_condition = "vm > Vcut"
         self.reset_statements = "vm = V_res; w += b"
@@ -1022,19 +1037,30 @@ class AdexNeuron(PointNeuron):
 
     def getting_started(
         self,
-        step_amplitude=65 * pA,
-        sine_amplitude=125 * pA,
-        sine_freq=150 * Hz,
-        sine_dc=100 * pA,
-    ):
+        step_amplitude: b2.units.Quantity = 65 * pA,
+        sine_amplitude: b2.units.Quantity = 125 * pA,
+        sine_freq: b2.units.Quantity = 150 * Hz,
+        sine_dc: b2.units.Quantity = 100 * pA,
+    ) -> None:
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
-    def plot_states(self, state_monitor, spike_monitor=None, save_name=None):
+    def plot_states(
+        self,
+        state_monitor: b2.StateMonitor,
+        spike_monitor: b2.SpikeMonitor | None = None,
+        save_name: str | None = None,
+    ) -> None:
         """
-        Visualizes the state variables: w-t, vm-t and phase-plane w-vm
+        Visualize the state variables: w-t, vm-t and phase-plane w-vm.
 
-        :param state_monitor: b2.StateMonitor
-
+        Parameters
+        ----------
+        state_monitor : b2.StateMonitor
+            State monitor with vm and w recordings.
+        spike_monitor : b2.SpikeMonitor, optional
+            Spike monitor; spikes are drawn as dashed vertical lines.
+        save_name : str, optional
+            If given, save the figure to this file (.png/.eps).
         """
         parameters = self.get_neuron_parameters()
         if save_name is None or save_name == "":
@@ -1081,20 +1107,20 @@ class AdexNeuron(PointNeuron):
             plt.subplot(2, n_hor_panels, 3)
 
             plt.axis("off")
-            plt.text(0.1, 0.9, "EL = %.2f mV" % (parameters["EL"] / mV), fontsize=10)
+            plt.text(0.1, 0.9, f'EL = {parameters["EL"] / mV:.2f} mV', fontsize=10)
             plt.text(
-                0.1, 0.8, "V_res = %.2f mV" % (parameters["V_res"] / mV), fontsize=10
+                0.1, 0.8, f'V_res = {parameters["V_res"] / mV:.2f} mV', fontsize=10
             )
-            plt.text(0.1, 0.7, "VT = %.2f mV" % (parameters["VT"] / mV), fontsize=10)
-            plt.text(0.1, 0.6, "gL = %.2f nS" % (parameters["gL"] / nS), fontsize=10)
-            plt.text(0.1, 0.5, "C = %.2f pF" % (parameters["C"] / pF), fontsize=10)
+            plt.text(0.1, 0.7, f'VT = {parameters["VT"] / mV:.2f} mV', fontsize=10)
+            plt.text(0.1, 0.6, f'gL = {parameters["gL"] / nS:.2f} nS', fontsize=10)
+            plt.text(0.1, 0.5, f'C = {parameters["C"] / pF:.2f} pF', fontsize=10)
             plt.text(
-                0.1, 0.4, "DeltaT = %.2f mV" % (parameters["DeltaT"] / mV), fontsize=10
+                0.1, 0.4, f'DeltaT = {parameters["DeltaT"] / mV:.2f} mV', fontsize=10
             )
-            plt.text(0.1, 0.3, "a = %.2f nS" % (parameters["a"] / nS), fontsize=10)
-            plt.text(0.1, 0.2, "b = %.2f pA" % (parameters["b"] / pA), fontsize=10)
+            plt.text(0.1, 0.3, f'a = {parameters["a"] / nS:.2f} nS', fontsize=10)
+            plt.text(0.1, 0.2, f'b = {parameters["b"] / pA:.2f} pA', fontsize=10)
             plt.text(
-                0.1, 0.1, "tau_w = %.2f ms" % (parameters["tau_w"] / ms), fontsize=10
+                0.1, 0.1, f'tau_w = {parameters["tau_w"] / ms:.2f} ms', fontsize=10
             )
 
             if save_name[-4:] != ".png" and save_name[-4:] != ".eps":
@@ -1140,8 +1166,7 @@ class HodgkinHuxleyNeuron(PointNeuron):
     }
     model_info_url = "http://neuronaldynamics.epfl.ch/online/Ch2.S2.html"
 
-    def __init__(self):
-
+    def __init__(self) -> None:
         super().__init__()
         self.threshold_condition = "vm > V_spike"
         self.reset_statements = ""
@@ -1151,12 +1176,14 @@ class HodgkinHuxleyNeuron(PointNeuron):
         new_parameter_units = {"EK": mV, "ENa": mV, "gK": nS, "gNa": nS, "V_spike": mV}
         self.parameter_units.update(new_parameter_units)
 
-    def plot_states(self, state_monitor):
+    def plot_states(self, state_monitor: b2.StateMonitor) -> None:
         """
-        Plots the state variables vm, m, n, h vs. time.
+        Plot the state variables vm, m, n, h vs. time.
 
-        :param state_monitor: b2.StateMonitor
-
+        Parameters
+        ----------
+        state_monitor : b2.StateMonitor
+            State monitor with vm, m, n, h recordings.
         """
         plt.subplots(3, 1, sharex=True)
 
@@ -1207,11 +1234,11 @@ class HodgkinHuxleyNeuron(PointNeuron):
 
     def getting_started(
         self,
-        step_amplitude=7.2 * uA,
-        sine_amplitude=3.6 * uA,
-        sine_freq=150 * Hz,
-        sine_dc=2.9 * nA,
-    ):
+        step_amplitude: b2.units.Quantity = 7.2 * uA,
+        sine_amplitude: b2.units.Quantity = 3.6 * uA,
+        sine_freq: b2.units.Quantity = 150 * Hz,
+        sine_dc: b2.units.Quantity = 2.9 * nA,
+    ) -> None:
         super().getting_started(step_amplitude, sine_amplitude, sine_freq, sine_dc)
 
 
@@ -1246,7 +1273,7 @@ class IzhikevichNeuron(PointNeuron):
     }
     model_info_url = "http://neuronaldynamics.epfl.ch/online/Ch6.S1.html"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.threshold_condition = "vm > Vcut"
         self.reset_statements = "vm = V_res; u += d"
@@ -1262,12 +1289,14 @@ class IzhikevichNeuron(PointNeuron):
         }
         self.parameter_units.update(new_parameter_units)
 
-    def plot_states(self, state_monitor):
+    def plot_states(self, state_monitor: b2.StateMonitor) -> None:
         """
-        Visualizes the state variables: u-t, vm-t and phase-plane u-vm
+        Visualize the state variables: u-t, vm-t and phase-plane u-vm.
 
-        :param state_monitor: b2.StateMonitor
-
+        Parameters
+        ----------
+        state_monitor : b2.StateMonitor
+            State monitor with vm and u recordings.
         """
 
         plt.subplot(2, 2, 1)
@@ -1326,7 +1355,7 @@ class LifAscNeuron(PointNeuron):
     }
     model_info_url = "https://www.nature.com/articles/s41467-017-02717-4"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.threshold_condition = "vm > VT"
         self.reset_statements = "vm = V_res; I_asc1 += A_asc1; I_asc2 += A_asc2"
@@ -1340,9 +1369,10 @@ class LifAscNeuron(PointNeuron):
         }
         self.parameter_units.update(new_parameter_units)
 
-    def read_abi_neuron_config(self, neuron_config):
+    def read_abi_neuron_config(self, neuron_config: dict[str, Any]) -> None:
         """
-        Method for importing parameters from the Allen Brain Institute's cell type atlas.
+        Import parameters from the Allen Brain Institute's cell type atlas.
+
         Parameters can be obtained by downloading the json from their website.
 
         You can also use the AllenSDK::
@@ -1350,8 +1380,10 @@ class LifAscNeuron(PointNeuron):
            from allensdk.api.queries.glif_api import GlifApi
            neuron_config = GlifApi().get_neuron_configs([neuronal_model_id])[neuronal_model_id]
 
-        :param neuron_config:
-        :return:
+        Parameters
+        ----------
+        neuron_config : dict
+            The ABI neuron config dictionary.
         """
 
         if len(neuron_config["asc_amp_array"]) > 2:
@@ -1377,7 +1409,7 @@ class LifAscNeuron(PointNeuron):
 
 
 class neuron_factory:
-    def __init__(self):
+    def __init__(self) -> None:
         self.name_to_class = {
             "LIF": LifNeuron,
             "LifNeuron": LifNeuron,
@@ -1395,7 +1427,7 @@ class neuron_factory:
             "LifAscNeuron": LifAscNeuron,
         }
 
-    def get_class(self, neuron_model_name):
+    def get_class(self, neuron_model_name: str) -> PointNeuron:
         return copy.deepcopy(self.name_to_class[neuron_model_name]())
 
 

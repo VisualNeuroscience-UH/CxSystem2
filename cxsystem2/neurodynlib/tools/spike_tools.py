@@ -33,21 +33,28 @@ import brian2 as b2
 import numpy as np
 
 
-def get_spike_time(voltage_monitor, spike_threshold):
+def get_spike_time(
+    voltage_monitor: b2.StateMonitor, spike_threshold: b2.units.Quantity
+) -> np.ndarray:
     """
-    Not implemented!
-    Detects the spike times in the voltage. Here, the spike time is DEFINED as the value in
-    voltage_monitor.t for which voltage_monitor.v[idx] is above threshold AND
-    voltage_monitor.v[idx-1] is below threshold (crossing from below).
-    Note: currently only the spike times of the first column in voltage_monitor are detected. Matrix-like
-    monitors are not supported.
+    Detect spike times in the voltage.
 
-    Args:
-        voltage_monitor (StateMonitor): A state monitor with at least the fields "v: and "t" spike_threshold (Quantity):
-        The spike threshold voltage. e.g. -50*b2.mV
+    A spike time is defined as the value in ``voltage_monitor.t`` for which
+    ``voltage_monitor.v[idx]`` is above threshold AND ``voltage_monitor.v[idx-1]``
+    is below threshold (crossing from below). Only the first column of the
+    monitor is used; matrix-like monitors are not supported.
 
-    Returns:
-        A list of spike times (Quantity)
+    Parameters
+    ----------
+    voltage_monitor : b2.StateMonitor
+        A state monitor with at least the fields "v" and "t".
+    spike_threshold : Quantity
+        The spike threshold voltage, e.g. ``-50*b2.mV``.
+
+    Returns
+    -------
+    np.ndarray
+        The spike times.
     """
     assert isinstance(
         voltage_monitor, b2.StateMonitor
@@ -63,23 +70,27 @@ def get_spike_time(voltage_monitor, spike_threshold):
     return spike_times
 
 
-def get_spike_stats(voltage_monitor, spike_threshold):
+def get_spike_stats(
+    voltage_monitor: b2.StateMonitor, spike_threshold: b2.units.Quantity
+) -> tuple[int, np.ndarray, np.ndarray, b2.units.Quantity, b2.units.Quantity, b2.units.Quantity]:
     """
-    Not implemented!
-    Detects spike times and computes ISI, mean ISI and firing frequency.
-    Here, the spike time is DEFINED as the value in
-    voltage_monitor.t for which voltage_monitor.v[idx] is above threshold AND
-    voltage_monitor.v[idx-1] is below threshold (crossing from below).
-    Note: meanISI and firing frequency are set to numpy.nan if less than two spikes are detected
-    Note: currently only the spike times of the first column in voltage_monitor are detected. Matrix-like
-    monitors are not supported.
+    Detect spike times and compute ISI, mean ISI and firing frequency.
 
-    Args:
-        voltage_monitor (StateMonitor): A state monitor with at least the fields "v: and "t"
-        spike_threshold (Quantity): The spike threshold voltage. e.g. -50*b2.mV
+    Spike times are defined as in :func:`get_spike_time`. Mean ISI and firing
+    frequency are set to NaN if fewer than two spikes are detected. Only the
+    first column of the monitor is used.
 
-    Returns:
-        tuple: (nr_of_spikes, spike_times, isi, mean_isi, spike_rate)
+    Parameters
+    ----------
+    voltage_monitor : b2.StateMonitor
+        A state monitor with at least the fields "v" and "t".
+    spike_threshold : Quantity
+        The spike threshold voltage, e.g. ``-50*b2.mV``.
+
+    Returns
+    -------
+    tuple
+        (nr_of_spikes, spike_times, isi, mean_isi, spike_rate, var_isi).
     """
     spike_times = get_spike_time(voltage_monitor, spike_threshold)
     isi = np.diff(spike_times)
@@ -95,31 +106,37 @@ def get_spike_stats(voltage_monitor, spike_threshold):
     return nr_of_spikes, spike_times, isi, mean_isi, spike_rate, var_isi
 
 
-def pretty_print_spike_train_stats(voltage_monitor, spike_threshold):
+def pretty_print_spike_train_stats(
+    voltage_monitor: b2.StateMonitor, spike_threshold: b2.units.Quantity
+) -> tuple[np.ndarray, np.ndarray, b2.units.Quantity, b2.units.Quantity, b2.units.Quantity]:
     """
-    Not implemented!
-    Computes and returns the same values as get_spike_stats. Additionally prints these values to the console.
+    Compute and print the spike-train stats (same values as :func:`get_spike_stats`).
 
-    Args:
-        voltage_monitor:
-        spike_threshold:
+    Parameters
+    ----------
+    voltage_monitor : b2.StateMonitor
+        A state monitor with at least the fields "v" and "t".
+    spike_threshold : Quantity
+        The spike threshold voltage.
 
-    Returns:
-        tuple: (nr_of_spikes, spike_times, isi, mean_isi, spike_rate)
+    Returns
+    -------
+    tuple
+        (spike_times, ISI, mean_isi, spike_freq, var_isi).
     """
     nr_of_spikes, spike_times, ISI, mean_isi, spike_freq, var_isi = get_spike_stats(
         voltage_monitor, spike_threshold
     )
-    print("nr of spikes: {}".format(nr_of_spikes))
-    print("mean ISI: {}".format(mean_isi))
-    print("ISI variance: {}".format(var_isi))
-    print("spike freq: {}".format(spike_freq))
+    print(f"nr of spikes: {nr_of_spikes}")
+    print(f"mean ISI: {mean_isi}")
+    print(f"ISI variance: {var_isi}")
+    print(f"spike freq: {spike_freq}")
     if nr_of_spikes > 20:
         print("spike times: too many values")
         print("ISI: too many values")
     else:
-        print("spike times: {}".format(spike_times))
-        print("ISI: {}".format(ISI))
+        print(f"spike times: {spike_times}")
+        print(f"ISI: {ISI}")
     return spike_times, ISI, mean_isi, spike_freq, var_isi
 
 
@@ -128,20 +145,26 @@ class PopulationSpikeStats:
     Not implemented! Wraps a few spike-train related properties.
     """
 
-    def __init__(self, nr_neurons, nr_spikes, all_ISI, filtered_spike_trains):
+    def __init__(
+        self,
+        nr_neurons: int,
+        nr_spikes: int,
+        all_ISI: np.ndarray,
+        filtered_spike_trains: dict,
+    ) -> None:
         """
+        Wrap a few spike-train related properties.
 
-        Args:
-            nr_neurons:
-            nr_spikes:
-            mean_isi:
-            std_isi:
-            all_ISI: list of ISI values (can be used to plot a histrogram)
-            filtered_spike_trains the spike trains used to compute the stats. It's a time-window filtered copy of
-            the original spike_monitor.all_spike_trains.
-
-        Returns:
-            An instance of PopulationSpikeStats
+        Parameters
+        ----------
+        nr_neurons : int
+            Number of neurons in the original population.
+        nr_spikes : int
+            Number of spikes.
+        all_ISI : ndarray
+            List of ISI values (can be used to plot a histogram).
+        filtered_spike_trains : dict
+            Time-window filtered copy of the original ``spike_monitor.spike_trains()``.
         """
         self._nr_neurons = nr_neurons
         self._nr_spikes = nr_spikes
@@ -149,28 +172,28 @@ class PopulationSpikeStats:
         self._filtered_spike_trains = filtered_spike_trains
 
     @property
-    def nr_neurons(self):
+    def nr_neurons(self) -> int:
         """
         Number of neurons in the original population
         """
         return self._nr_neurons
 
     @property
-    def nr_spikes(self):
+    def nr_spikes(self) -> int:
         """
         Nr of spikes
         """
         return self._nr_spikes
 
     @property
-    def filtered_spike_trains(self):
+    def filtered_spike_trains(self) -> dict:
         """
         a time-window filtered copy of the original spike_monitor.all_spike_trains
         """
         return self._filtered_spike_trains
 
     @property
-    def mean_isi(self):
+    def mean_isi(self) -> b2.units.Quantity:
         """
         Mean Inter Spike Interval
         """
@@ -178,7 +201,7 @@ class PopulationSpikeStats:
         return mean_isi
 
     @property
-    def std_isi(self):
+    def std_isi(self) -> b2.units.Quantity:
         """
         Standard deviation of the ISI
         """
@@ -186,14 +209,14 @@ class PopulationSpikeStats:
         return std_isi
 
     @property
-    def all_ISI(self):
+    def all_ISI(self) -> np.ndarray:
         """
         all ISIs in no specific order
         """
         return self._all_ISI
 
     @property
-    def CV(self):
+    def CV(self) -> float:
         """
         Coefficient of Variation
         """
@@ -204,25 +227,31 @@ class PopulationSpikeStats:
 
 
 def filter_spike_trains(
-    spike_trains, window_t_min=0.0 * b2.ms, window_t_max=None, idx_subset=None
-):
+    spike_trains: dict,
+    window_t_min: b2.units.Quantity = 0.0 * b2.ms,
+    window_t_max: b2.units.Quantity | None = None,
+    idx_subset: list | None = None,
+) -> dict:
     """
-    Not implemented!
-    creates a new dictionary neuron_idx=>spike_times where all spike_times are in the
-        half open interval [window_t_min,window_t_max)
+    Create a new dict neuron_idx -> spike_times within a time window.
 
-    Args:
-        spike_trains (dict): a dictionary of spike trains. Typically obtained by
-        calling spike_monitor.spike_trains()
-        window_t_min (Quantity): Lower bound of the time window: t>=window_t_min. Default is 0ms.
-        window_t_max (Quantity): Upper bound of the time window: t<window_t_max.
-        Default is None, in which case no upper bound is set.
-        idx_subset (list, optional): a list of neuron indexes (dict keys) specifying a subset of neurons.
-        Neurons NOT in the key list are NOT added to the resulting dictionary. Default is None, in which case
-        all neurons are added to the resulting list.
+    Parameters
+    ----------
+    spike_trains : dict
+        Dictionary of spike trains, typically from ``spike_monitor.spike_trains()``.
+    window_t_min : Quantity, optional
+        Lower bound of the time window: ``t >= window_t_min``. Default is 0 ms.
+    window_t_max : Quantity, optional
+        Upper bound of the time window: ``t < window_t_max``. Default is None
+        (no upper bound).
+    idx_subset : list, optional
+        Neuron indices (dict keys) to include. If None, all neurons are included.
 
-    Returns:
-        a filtered copy of spike_trains
+    Returns
+    -------
+    dict
+        A filtered copy of ``spike_trains`` with all times in
+        [window_t_min, window_t_max).
     """
     assert isinstance(spike_trains, dict), "spike_trains is not of type dict"
 
@@ -251,20 +280,28 @@ def filter_spike_trains(
     return filtered_spike_trains
 
 
-def get_spike_train_stats(spike_monitor, window_t_min=0.0 * b2.ms, window_t_max=None):
+def get_spike_train_stats(
+    spike_monitor: b2.SpikeMonitor,
+    window_t_min: b2.units.Quantity = 0.0 * b2.ms,
+    window_t_max: b2.units.Quantity | None = None,
+) -> PopulationSpikeStats:
     """
-    Not implemented!
-    Analyses the spike monitor and returns a PopulationSpikeStats instance.
+    Analyze a spike monitor and return a PopulationSpikeStats instance.
 
-    Args:
-        spike_monitor (SpikeMonitor): Brian2 spike monitor
-        window_t_min (Quantity): Lower bound of the time window: t>=window_t_min. The stats are computed
-        for spikes within the time window. Default is 0ms
-        window_t_max (Quantity): Upper bound of the time window: t<window_t_max. The stats are computed
-        for spikes within the time window. Default is None, in which case no upper bound is set.
+    Parameters
+    ----------
+    spike_monitor : b2.SpikeMonitor
+        Brian2 spike monitor.
+    window_t_min : Quantity, optional
+        Lower bound of the time window: ``t >= window_t_min``. Default is 0 ms.
+    window_t_max : Quantity, optional
+        Upper bound of the time window: ``t < window_t_max``. Default is None
+        (no upper bound).
 
-    Returns:
-        PopulationSpikeStats
+    Returns
+    -------
+    PopulationSpikeStats
+        The population spike statistics.
     """
     assert isinstance(
         spike_monitor, b2.SpikeMonitor
@@ -290,19 +327,28 @@ def get_spike_train_stats(spike_monitor, window_t_min=0.0 * b2.ms, window_t_max=
     return stats
 
 
-def _spike_train_2_binary_vector(spike_train, vector_length, discretization_dt):
+def _spike_train_2_binary_vector(
+    spike_train: np.ndarray, vector_length: int, discretization_dt: b2.units.Quantity
+) -> np.ndarray:
     """
-    Not implemented!
-    Convert the time-stamps of the spike_train into a binary vector of the given length.
-    Note: if more than one spike fall into the same time bin, only one is counted, surplus spikes are ignored.
+    Convert the spike-time stamps into a binary vector of the given length.
 
-    Args:
-        spike_train:
-        vector_length:
-        discretization_dt:
+    If more than one spike falls into the same time bin, only one is counted;
+    surplus spikes are ignored.
 
-    Returns:
-        Discretized spike train: a fixed-length, binary vector.
+    Parameters
+    ----------
+    spike_train : ndarray
+        The spike times.
+    vector_length : int
+        Length of the output vector.
+    discretization_dt : Quantity
+        Width of one time bin.
+
+    Returns
+    -------
+    np.ndarray
+        The discretized, binary spike train.
     """
     vec = np.zeros(vector_length, int)
     idx = spike_train / discretization_dt
@@ -311,7 +357,9 @@ def _spike_train_2_binary_vector(spike_train, vector_length, discretization_dt):
     return vec
 
 
-def _get_spike_train_power_spectrum(spike_train, delta_t, subtract_mean=False):
+def _get_spike_train_power_spectrum(
+    spike_train: np.ndarray, delta_t: b2.units.Quantity, subtract_mean: bool = False
+) -> tuple[np.ndarray, np.ndarray]:
     st = spike_train / b2.ms
     if subtract_mean:
         data = st - np.mean(st)
@@ -328,32 +376,40 @@ def _get_spike_train_power_spectrum(spike_train, delta_t, subtract_mean=False):
 
 
 def get_averaged_single_neuron_power_spectrum(
-    spike_monitor,
-    sampling_frequency,
-    window_t_min,
-    window_t_max,
-    nr_neurons_average=100,
-    subtract_mean=False,
-):
+    spike_monitor: b2.SpikeMonitor,
+    sampling_frequency: b2.units.Quantity,
+    window_t_min: b2.units.Quantity,
+    window_t_max: b2.units.Quantity,
+    nr_neurons_average: int = 100,
+    subtract_mean: bool = False,
+) -> tuple[np.ndarray, np.ndarray, dict, b2.units.Quantity, dict]:
     """
-    Not implemented!
-    averaged power-spectrum of spike trains in the time window [window_t_min, window_t_max).
-        The power spectrum of every single neuron's spike train is computed. Then the average
-        across all single-neuron powers is computed. In order to limit the compuation time, the
-        number of neurons taken to compute the average is limited to nr_neurons_average which defaults to 100
+    Average the power spectrum of spike trains over a time window.
 
-    Args:
-        spike_monitor (SpikeMonitor) : Brian2 SpikeMonitor
-        sampling_frequency (Quantity): sampling frequency used to discretize the spike trains.
-        window_t_min (Quantity): Lower bound of the time window: t>=window_t_min. Spikes
-        before window_t_min are not taken into account (set a lower bound if you want to exclude an initial
-        transient in the population activity)
-        window_t_max (Quantity): Upper bound of the time window: t<window_t_max.
-        nr_neurons_average (int): Number of neurons over which the average is taken.
-        subtract_mean (bool): If true, the mean value of the signal is subtracted before FFT. Default is False
+    The power spectrum of each single neuron's spike train is computed, then
+    averaged across neurons. The number of neurons averaged over is limited to
+    ``nr_neurons_average`` (default 100) to bound computation time.
 
-    Returns:
-        freq, mean_ps, all_ps_dict, mean_firing_rate, mean_firing_freqs_per_neuron
+    Parameters
+    ----------
+    spike_monitor : b2.SpikeMonitor
+        Brian2 spike monitor.
+    sampling_frequency : Quantity
+        Sampling frequency used to discretize the spike trains.
+    window_t_min : Quantity
+        Lower bound of the time window: ``t >= window_t_min``. Spikes before it
+        are ignored (use it to exclude an initial transient).
+    window_t_max : Quantity
+        Upper bound of the time window: ``t < window_t_max``.
+    nr_neurons_average : int, optional
+        Number of neurons over which the average is taken. Default is 100.
+    subtract_mean : bool, optional
+        If True, subtract the mean of the signal before the FFT. Default is False.
+
+    Returns
+    -------
+    tuple
+        (freq, mean_ps, all_ps_dict, mean_firing_rate, mean_firing_freqs_per_neuron).
     """
 
     assert isinstance(
@@ -409,33 +465,40 @@ def get_averaged_single_neuron_power_spectrum(
 
     mean_ps = np.mean(all_ps, 0)
     mean_firing_rate = spike_count / nr_samples / time_window_size
-    print("mean_firing_rate:{}".format(mean_firing_rate))
+    print(f"mean_firing_rate:{mean_firing_rate}")
     return freq, mean_ps, all_ps_dict, mean_firing_rate, mean_firing_freqs_per_neuron
 
 
 def get_population_activity_power_spectrum(
-    rate_monitor,
-    delta_f,
-    k_repetitions,
-    T_init=100 * b2.ms,
-    subtract_mean_activity=False,
-):
+    rate_monitor: b2.PopulationRateMonitor,
+    delta_f: b2.units.Quantity,
+    k_repetitions: int,
+    T_init: b2.units.Quantity = 100 * b2.ms,
+    subtract_mean_activity: bool = False,
+) -> tuple[np.ndarray, np.ndarray, b2.units.Quantity]:
     """
-    Not implemented!
-    Computes the power spectrum of the population activity A(t) (=rate_monitor.rate)
+    Compute the power spectrum of the population activity A(t) (``rate_monitor.rate``).
 
-    Args:
-        rate_monitor (RateMonitor): Brian2 rate monitor. rate_monitor.rate is the signal being
-        analysed here. The temporal resolution is read from rate_monitor.clock.dt
-        delta_f (Quantity): The desired frequency resolution.
-        k_repetitions (int): The data rate_monitor.rate is split into k_repetitions which are FFT'd
-        independently and then averaged in frequency domain.
-        T_init (Quantity): Rates in the time interval [0, T_init] are removed before doing the
-        Fourier transform. Use this parameter to ignore the initial transient signals of the simulation.
-        subtract_mean_activity (bool): If true, the mean value of the signal is subtracted. Default is False
+    Parameters
+    ----------
+    rate_monitor : b2.PopulationRateMonitor
+        Brian2 rate monitor; its ``rate`` is the analyzed signal. The temporal
+        resolution is read from ``rate_monitor.clock.dt``.
+    delta_f : Quantity
+        The desired frequency resolution.
+    k_repetitions : int
+        The data is split into ``k_repetitions`` segments which are FFT'd
+        independently and then averaged in the frequency domain.
+    T_init : Quantity, optional
+        Rates in [0, T_init] are removed before the Fourier transform (use to
+        ignore the initial transient). Default is 100 ms.
+    subtract_mean_activity : bool, optional
+        If True, subtract the mean of the signal. Default is False.
 
-    Returns:
-        freqs, ps, average_population_rate
+    Returns
+    -------
+    tuple
+        (freqs, ps, average_population_rate).
     """
     data = rate_monitor.rate / b2.Hz
     delta_t = rate_monitor.clock.dt
@@ -449,8 +512,8 @@ def get_population_activity_power_spectrum(
     # print("N_data={}, N_required={}".format(N_data,N_required))
     if N_data < N_required:
         err_msg = (
-            "Inconsistent parameters. k_repetitions require {} samples."
-            " rate_monitor.rate contains {} samples.".format(N_required, N_data)
+            f"Inconsistent parameters. k_repetitions require {N_required} samples."
+            f" rate_monitor.rate contains {N_data} samples."
         )
         raise ValueError(err_msg)
     if N_data > N_required:

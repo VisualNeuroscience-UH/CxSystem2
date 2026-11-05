@@ -1,5 +1,6 @@
 # Built-in
 from string import Template
+from typing import Any
 
 # Third-party
 import brian2 as b2
@@ -345,13 +346,13 @@ class PCEquationHelper:
 
     def __init__(
         self,
-        neuron_model="EIF",
-        is_pyramidal=False,
-        compartment="soma",
-        exc_model="SIMPLE_E",
-        inh_model="SIMPLE_I",
-        custom_strings=None,
-    ):
+        neuron_model: str = "EIF",
+        is_pyramidal: bool = False,
+        compartment: str = "soma",
+        exc_model: str = "SIMPLE_E",
+        inh_model: str = "SIMPLE_I",
+        custom_strings: dict[str, str] | None = None,
+    ) -> None:
         self.neuron_model = neuron_model
         self.is_pyramidal = is_pyramidal
         self.compartment = compartment
@@ -417,7 +418,7 @@ class PCEquationHelper:
             + PCEquationHelper.CompSpecificVariables[inh_model]
         )
 
-    def get_membrane_equation(self, return_string=False):
+    def get_membrane_equation(self, return_string: bool = False) -> str | b2.Equations:
 
         membrane_equation = Template(PCEquationHelper.membrane_eq_template)
         all_membrane_model_strings = dict(self.neuron_model_strings)
@@ -446,7 +447,9 @@ class PCEquationHelper:
 
             return compartment_eq
 
-    def get_dict(self, base_dict=None, specific_compartment="XX"):
+    def get_dict(
+        self, base_dict: dict[str, Any] | None = None, specific_compartment: str = "XX"
+    ) -> dict[str, Any]:
 
         compartment_dict = dict(base_dict)
         substitutables = {

@@ -1,6 +1,7 @@
 # Built-in
 import os
 import shutil
+from typing import Any
 
 # Third-party
 import brian2 as b2
@@ -29,20 +30,27 @@ class Stimuli:
 
     def __init__(
         self,
-        duration,
-        input_mat_path,
-        output_folder,
-        output_file_extension,
-        output_file_suffix="",
-    ):
+        duration: b2.units.Quantity,
+        input_mat_path: str,
+        output_folder: str,
+        output_file_extension: str,
+        output_file_suffix: str = "",
+    ) -> None:
         """
-        Initializes the input module for and instance of CxSystem.
+        Initialize the input module for an instance of CxSystem.
 
-        :param duration:
-        :param input_mat_path: .mat file location
-        :param output_folder: location of the saved output
-        :param output_file_suffix: suffix for the output file
-        :param output_file_extension: extension for the output file, i.e. gz, bz2, pickle
+        Parameters
+        ----------
+        duration : Quantity
+            Duration of the input simulation.
+        input_mat_path : str
+            Path to the .mat file with the input stimulus.
+        output_folder : str
+            Location of the saved output.
+        output_file_extension : str
+            Extension for the output file, i.e. gz, bz2, pickle.
+        output_file_suffix : str, optional
+            Suffix for the output file.
         """
         self.i_patterns = {}
         self.BaseLine = 0 * second
@@ -56,16 +64,21 @@ class Stimuli:
         #       "\nIf you need the spikes regenerated or permanently saved, \nplease rename or remove the previous spike sequence file.\n" % (
         #       self.output_folder,self.output_file_extension)
 
-    def generate_inputs(self, freq):
+    def generate_inputs(self, freq: float) -> None:
         """
-        The method for generating input based on the .mat file, using the internal _initialize_inputs() and _calculate_input_seqs() methods.
+        Generate input based on the .mat file.
 
-        :param freq: frequency.
+        Uses ``initialize_inputs()`` and ``calculate_input_seqs()`` internally.
+
+        Parameters
+        ----------
+        freq : float
+            Frequency factor.
         """
         self.initialize_inputs(freq)
         self.calculate_input_seqs()
 
-    def initialize_inputs(self, freq):
+    def initialize_inputs(self, freq: float) -> None:
         print(" -  Initializing stimuli ...")
 
         # type : video
@@ -95,7 +108,7 @@ class Stimuli:
             np.transpose(sparse_stimulus), dt=frameduration * ms
         )  # video_data has to be shape (frames, neurons), dt=frame duration
         self.frames = frames
-        exec("self.factor = %s" % freq)
+        exec(f"self.factor = {freq}")
         self.i_patterns[len(self.i_patterns)] = (
             frames.values * self.factor
         )  # These must be final firing rates
@@ -109,7 +122,7 @@ class Stimuli:
                 + self.input_mat_path[slash_indices[-1] + 1 :]
             )
 
-    def calculate_input_seqs(self):
+    def calculate_input_seqs(self) -> None:
         """
         Calculating input sequence based on the video input.
         """
@@ -145,7 +158,9 @@ class Stimuli:
             os.path.join(self.output_folder, "Input_cpp_run" + self.output_file_suffix)
         )
 
-    def save_input_sequence(self, spike_mons, save_path):
+    def save_input_sequence(
+        self, spike_mons: list[b2.SpikeMonitor], save_path: str
+    ) -> None:
         print(" -  Saving the generated video input...")
         self.generated_input_folder = save_path + self.output_file_extension
         data_to_save = {}
@@ -157,11 +172,20 @@ class Stimuli:
         data_to_save["z_coord"] = self.z_coord
         write_to_file(save_path + self.output_file_extension, data_to_save)
 
-    def load_input_seq(self, input_spike_file_location):
+    def load_input_seq(self, input_spike_file_location: str) -> tuple[Any, Any, int]:
         """
-        Loads spikes from file.
+        Load spikes from file.
 
-        :param input_spike_file_location: Location of the file to load spikes.
+        Parameters
+        ----------
+        input_spike_file_location : str
+            Location of the file to load spikes from; if it is a directory, the
+            input file name is appended to it.
+
+        Returns
+        -------
+        tuple
+            (spike indices, spike times, number of neurons).
         """
         if os.path.isfile(input_spike_file_location):
             input_spike_file_location = input_spike_file_location
@@ -179,7 +203,7 @@ class Stimuli:
         print(" -  Video input loaded")
         return new_spikes[0], new_spikes[1], number_of_neurons
 
-    def get_input_positions(self):
+    def get_input_positions(self) -> np.ndarray:
         """
         Extract the positions from the .mat file.
         """

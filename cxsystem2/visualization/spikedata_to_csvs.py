@@ -4,6 +4,7 @@ import pickle
 import re
 import zlib
 from pathlib import Path
+from typing import Any
 
 import brian2.units as b2u
 
@@ -13,18 +14,21 @@ import numpy as np
 
 class SpikeData:
 
-    def __init__(self, filename):
+    def __init__(self, filename: str | Path) -> None:
 
         self.data_filename = filename
         self.filename_stem = Path(filename).stem
         self.file_dir = Path(filename).parent
         self.data = self.get_spike_data()
 
-    def get_spike_data(self):
+    def get_spike_data(self) -> dict[str, Any]:
         """
-        Reads data from a CxSystem results file
+        Read data from a CxSystem results file.
 
-        :return: dict
+        Returns
+        -------
+        dict
+            The unpickled results data.
         """
 
         fi = open(self.data_filename, "rb")
@@ -32,14 +36,24 @@ class SpikeData:
         data = pickle.loads(data_pickle)
         return data
 
-    def _get_start_indices(self, return_names=False):
+    def _get_start_indices(
+        self, return_names: bool = False
+    ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
         """
-        Returns the starting indices of each neuron group. Last value is the total number of neurons.
-        The neuron group names are returned as a separate array if asked.
-        Counting starts from 1 (unlike in Brian2/Python) to conform with ViSimpl/StackViz.
+        Return the starting indices of each neuron group.
 
-        :param return_names: True/False (default False), whether to get also group names
-        :return:
+        The last value is the total number of neurons. Counting starts from 1
+        (unlike in Brian2/Python) to conform with ViSimpl/StackViz.
+
+        Parameters
+        ----------
+        return_names : bool, optional
+            If True, also return the neuron group names. Default is False.
+
+        Returns
+        -------
+        np.ndarray
+            Starting indices, or (indices, group names) if ``return_names`` is True.
         """
 
         a = np.cumsum(list(self.data["number_of_neurons"].values()))
@@ -54,13 +68,17 @@ class SpikeData:
             group_names = np.array(list(self.data["number_of_neurons"].keys()))
             return abs_start_index, group_names
 
-    def get_spike_list(self):
+    def get_spike_list(self) -> np.ndarray:
         """
-        Creates an N_spikes x 2 matrix of spikes, where N_spikes = number of spikes, column 0 = neuron index,
-        and column 1 = spike time.
-        Spike times saved in seconds since this is the default unit in ViSimpl.
+        Create an N_spikes x 2 matrix of spikes.
 
-        :return: numpy array
+        Column 0 is the neuron index and column 1 is the spike time in seconds
+        (the default unit in ViSimpl).
+
+        Returns
+        -------
+        np.ndarray
+            The N_spikes x 2 spike matrix.
         """
         # Create a list of start indices
         abs_start_index = self._get_start_indices()
@@ -90,14 +108,22 @@ class SpikeData:
 
         return spikelist
 
-    def _get_z_level(self, group_name):
+    def _get_z_level(self, group_name: str) -> float:
         """
-        Returns a (discrete) z coordinate for the group based on the group name.
-        Neurons in CxSystem are not given a z coordinate but they are placed in discrete layers and
-        the layer name is automatically added at the end of the neuron group's name.
+        Return a discrete z coordinate for the group based on the group name.
 
-        :param group_name: str, format NGi_NEURONTYPE_LAYER (layer can be "L5", or for PCs, "L5toL1")
-        :return:
+        Neurons in CxSystem are placed in discrete layers; the layer name is
+        automatically added at the end of the neuron group's name.
+
+        Parameters
+        ----------
+        group_name : str
+            Format NGi_NEURONTYPE_LAYER (layer can be "L5", or for PCs "L5toL1").
+
+        Returns
+        -------
+        float
+            The z level of the layer.
         """
         # Example of a fixed mapping
         # z_level = {'NG0_relay_vpm': 0, 'NG1_L1_L1I_L1': 0.01, 'NG2_L23_PC_L2toL1': 0.02, 'NG3_L23_BC_L2': 0.02,
@@ -120,20 +146,30 @@ class SpikeData:
 
     def get_positions_list(
         self,
-        xy_multiplier=(1500.0 / 50000),
-        z_multiplier=(1500.0 / 50000),
-        return_subsets=True,
-    ):
+        xy_multiplier: float = (1500.0 / 50000),
+        z_multiplier: float = (1500.0 / 50000),
+        return_subsets: bool = True,
+    ) -> np.ndarray | tuple[np.ndarray, dict[str, Any]]:
         """
-        Creates a N_neurons x 3 matrix of neurons, where N_neurons = number of neurons,
-        column 0 = x position, column 1 = y position, and column 2 = z position.
-        Neuron index implicitly encoded by row number (as expected by ViSimpl/StackViz).
-        XY-multipliers set here for visually pleasing results in ViSimpl.
+        Create an N_neurons x 3 matrix of neuron positions.
 
-        :param xy_multiplier: scalar, how much to scale x-y coordinates
-        :param xy_multiplier: scalar, how much to scale z coordinate
-        :param return_subsets: True/False (default x),
-        :return:
+        Column 0 = x, column 1 = y, column 2 = z. The neuron index is implicitly
+        encoded by the row number (as expected by ViSimpl/StackViz).
+
+        Parameters
+        ----------
+        xy_multiplier : float, optional
+            Scaling factor for the x-y coordinates.
+        z_multiplier : float, optional
+            Scaling factor for the z coordinate.
+        return_subsets : bool, optional
+            If True, also return a dict of group subsets. Default is True.
+
+        Returns
+        -------
+        np.ndarray
+            The N_neurons x 3 position matrix, or (matrix, subsets dict) if
+            ``return_subsets`` is True.
         """
         start_ix, group_names = self._get_start_indices(return_names=True)
         N_neurons = start_ix[-1]
@@ -174,12 +210,21 @@ class SpikeData:
 
             return all_positions, subsets_dict
 
-    def _convert_subsets_dict_to_visimpl_json(self, subsets_dict):
+    def _convert_subsets_dict_to_visimpl_json(
+        self, subsets_dict: dict[str, Any]
+    ) -> str:
         """
-        Converts the subsets dict to ViSimpl/Stackviz-specific JSON format
+        Convert the subsets dict to ViSimpl/StackViz-specific JSON format.
 
-        :param subsets_dict: dict with entries group_name: [start_ix, last_ix]
-        :return:
+        Parameters
+        ----------
+        subsets_dict : dict
+            Entries of group_name: [start_ix, last_ix].
+
+        Returns
+        -------
+        str
+            The JSON string.
         """
 
         visimpl_se_dict = {"subsets": [], "timeframes": []}  # se = subsets & events
@@ -192,7 +237,12 @@ class SpikeData:
 
         return json.dumps(visimpl_se_dict)
 
-    def save_for_visimpl(self, structure_csv=None, spikes_csv=None, subsets_json=None):
+    def save_for_visimpl(
+        self,
+        structure_csv: str | Path | None = None,
+        spikes_csv: str | Path | None = None,
+        subsets_json: str | Path | None = None,
+    ) -> tuple[Path | str, Path | str, Path | str]:
         if structure_csv is None:
             structure_csv = self.file_dir.joinpath(
                 Path(self.filename_stem + "_structure.csv")

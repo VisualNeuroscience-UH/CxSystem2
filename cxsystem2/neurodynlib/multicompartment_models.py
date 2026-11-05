@@ -1,3 +1,6 @@
+# Built-in
+from typing import Any
+
 # Third-party
 import brian2 as b2
 from brian2.units import *
@@ -27,7 +30,7 @@ class LeakyCompartment(nd.PointNeuron):
 
     neuron_model_defns = {"I_NEURON_MODEL": "g_leak*(E_leak-vm)", "BRIAN2_FLAGS": ""}
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # self.compartment_vars_and_consts = ['vm', 'g_leak', 'C']
 
@@ -38,7 +41,7 @@ class MulticompartmentNeuron:
     A base class for multicompartmental neuron models.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
 
@@ -55,7 +58,7 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
         "Ra": [1, 1 / 2, 1 / 3, 1 / 4, 1 / 5, 1 / 6] * ohm,
     }
 
-    def __init__(self, n_apical=3):
+    def __init__(self, n_apical: int = 3) -> None:
         super().__init__()
 
         assert n_apical > 0, "PC must have at least one apical compartment"
@@ -78,12 +81,14 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
         # Variable for final eqs
         self.final_eqs = None
 
-    def set_neuron_parameters(self, **kwargs):
+    def set_neuron_parameters(self, **kwargs: Any) -> None:
         self.default_neuron_parameters.update(**kwargs)
 
     def add_tonic_current(
-        self, tonic_current=50 * pA, tau_rampup=None
-    ):  # Used by CxSystem
+        self,
+        tonic_current: b2.units.Quantity = 50 * pA,
+        tau_rampup: b2.units.Quantity | None = None,
+    ) -> None:  # Used by CxSystem
 
         assert (
             "tonic_current" not in self.neuron_parameters.keys()
@@ -102,7 +107,7 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
 
         self.soma_compartment.add_model_definition("EXT_CURRENTS", ext_currents_string)
 
-    def add_vm_noise(self, sigma_noise=2 * mV):  # Used by CxSystem
+    def add_vm_noise(self, sigma_noise: b2.units.Quantity = 2 * mV) -> None:  # Used by CxSystem
         self.soma_compartment.set_model_definition(
             "VM_NOISE", "+ sigma_noise*xi*taum_soma**-0.5"
         )
@@ -114,30 +119,30 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
             sigma_noise=sigma_noise, taum_soma=C / g_leak
         )
 
-    def set_excitatory_receptors(self, receptor_name):
+    def set_excitatory_receptors(self, receptor_name: str) -> None:
 
         self.soma_compartment.set_excitatory_receptors(receptor_name)
         self.basal_compartment.set_excitatory_receptors(receptor_name)
         for i in range(self.n_apical):
             self.apical_compartments[i].set_excitatory_receptors(receptor_name)
 
-    def set_inhibitory_receptors(self, receptor_name):
+    def set_inhibitory_receptors(self, receptor_name: str) -> None:
 
         self.soma_compartment.set_inhibitory_receptors(receptor_name)
         self.basal_compartment.set_inhibitory_receptors(receptor_name)
         for i in range(self.n_apical):
             self.apical_compartments[i].set_inhibitory_receptors(receptor_name)
 
-    def get_threshold_condition(self):
+    def get_threshold_condition(self) -> str:
         return self.soma_compartment.get_threshold_condition()
 
-    def get_reset_statements(self):
+    def get_reset_statements(self) -> str:
         return self.soma_compartment.get_reset_statements()
 
-    def get_refractory_period(self):
+    def get_refractory_period(self) -> b2.units.Quantity:
         return self.soma_compartment.get_refractory_period()
 
-    def make_neuron_equations(self):
+    def make_neuron_equations(self) -> None:
         # Topology here is: (POST) basal -> soma -> a0 -> a1 -> ... (PRE)
         # Multiple different indexes:
         #  - C, g_leak are indexed 0...N from basal...last apical
@@ -190,44 +195,44 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
         for i in range(n_apical - 1):
             temp_eq = b2.Equations(
                 I_dendr_2way,
-                I_dendr="I_dendr_a%d" % i,
-                vmself="vm_a%d" % i,
-                vmpre="vm_a%d" % (i + 1),
+                I_dendr=f"I_dendr_a{i}",
+                vmself=f"vm_a{i}",
+                vmpre=f"vm_a{i + 1}",
                 vmpost="vm_" + post_compartment,
                 gapre=1 / (R_axial[i + 2]),
                 gapost=1 / (R_axial[i + 1]),
             )
             self.apical_compartments[i].add_external_current(
-                "I_dendr_a%d" % i, str(temp_eq)
+                f"I_dendr_a{i}", str(temp_eq)
             )
-            eq_apical = self.apical_compartments[i].get_compartment_equations("a%d" % i)
+            eq_apical = self.apical_compartments[i].get_compartment_equations(f"a{i}")
             eq_apical = b2.Equations(str(eq_apical), C=C[i + 2], g_leak=g_leak[i + 2])
             eq_apicals.append(eq_apical)
-            post_compartment = "a%d" % i
+            post_compartment = f"a{i}"
 
         # The last apical compartment
         last_ix = n_apical - 1
         if n_apical == 1:
             post_compartment = "soma"
         else:
-            post_compartment = "a%d" % (last_ix - 1)
+            post_compartment = f"a{last_ix - 1}"
 
         vm_post = "vm_" + post_compartment
 
         temp_eq = b2.Equations(
             I_dendr_last_apical,
-            I_dendr="I_dendr_a%d" % last_ix,
-            vmself="vm_a%d" % last_ix,
+            I_dendr=f"I_dendr_a{last_ix}",
+            vmself=f"vm_a{last_ix}",
             vmpost=vm_post,
             gapost=1 / (R_axial[-1]),
         )
         # R_axial[-1] can be wrong but we keep it in this legacy version
 
         self.apical_compartments[last_ix].add_external_current(
-            "I_dendr_a%d" % last_ix, str(temp_eq)
+            f"I_dendr_a{last_ix}", str(temp_eq)
         )
         eq_apical = self.apical_compartments[last_ix].get_compartment_equations(
-            "a%d" % last_ix
+            f"a{last_ix}"
         )
         eq_apical = b2.Equations(
             str(eq_apical), C=C[last_ix + 2], g_leak=g_leak[last_ix + 2]
@@ -242,7 +247,7 @@ class LegacyPyramidalCell(MulticompartmentNeuron):
 
         self.final_eqs = b2.Equations(str(final_eq), vm_soma="vm")
 
-    def get_neuron_equations(self):
+    def get_neuron_equations(self) -> b2.Equations:
         if self.final_eqs is None:
             self.make_neuron_equations()
 
