@@ -403,19 +403,19 @@ class CxSystem:
 
         self._set_random_seed(rng_seed)
 
-    def _set_random_seed(self, rng_seed: int | None) -> None:
+    def _set_random_seed(self, rng_seed: int | SeedSequence | None) -> None:
         """
         Set the random seed for reproducibility.
 
         Parameters
         ----------
-        rng_seed : int or None
-            The seed value to set for the random number generator.
+        rng_seed : int, SeedSequence, or None
+            The seed for the RandomManager singleton.
         """
-
         manager = RandomManager(rng_seed)
         self.rng = manager.rng
-        # breakpoint()
+        brian_sequence = manager.seed_sequence.spawn(1)[0]
+        b2.seed(int(brian_sequence.generate_state(1)[0]))
 
     def _get_total_conductances(self) -> None:
         self.total_conductance_dict = {

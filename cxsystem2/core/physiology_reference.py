@@ -73,8 +73,8 @@ class NeuronReference:
         """
 
         # Set random number generator
-        manager = RandomManager()
-        self.rng = manager.rng
+        # manager = RandomManager()
+        # self.rng = manager.rng
 
 
         ############################################################
