@@ -14,11 +14,13 @@ from typing import Any
 # Third-party
 import numpy as np
 import pandas as pd
+from numpy.random import SeedSequence
 
 # Local
 from cxsystem2.core import cxsystem as cx
 from cxsystem2.core.exceptions import InvalidConfigurationError
 from cxsystem2.core.tools import load_from_file, parameter_finder, write_to_file
+from cxsystem2.core.workspace_manager import RandomManager
 
 __author__ = "Andalibi, V., Hokkanen H., Vanni, S."
 
@@ -40,6 +42,8 @@ class ArrayRun:
         anatomy_file_path: str,
         physio_file_path: str,
         array_run_stdout_file: str | None = None,
+        array_sequence: SeedSequence | None = None,
+        unit_coords_df: pd.DataFrame | None = None,
     ) -> None:
         """
         Initialize the ArrayRun for running several instances of CxSystem in parallel.
@@ -60,6 +64,8 @@ class ArrayRun:
         self.array_run_stdout_file = (
             None if array_run_stdout_file == "None" else array_run_stdout_file
         )
+        self.unit_coords_df = unit_coords_df
+        self.array_sequence = array_sequence
 
         self.metadata_filename = self._get_metadata_filename(job_suffix)
 
@@ -242,6 +248,7 @@ class ArrayRun:
     def run_parameter_search(
         self,
         idx: int,
+        worker_sequence: SeedSequence,
         paths: dict[int, str],
         results: dict[str, Any],
         stdout_file: str | None,
@@ -279,7 +286,9 @@ class ArrayRun:
             self.list_of_anatomy_dfs[idx],
             self.list_of_physio_dfs[idx],
             output_file_suffix=self.final_namings[idx] + tr_suffix,
+            unit_coords_df=self.unit_coords_df,
             instantiated_from_array_run=1,
+            rng_seed=worker_sequence,
         )
         sim_results = cm.run()
         paths[orig_idx] = cm.workspace.get_results_export_path()
@@ -307,6 +316,9 @@ class ArrayRun:
         next_idx = start_idx
         end_idx = start_idx + steps_from_start
 
+        rng_manager = RandomManager(self.array_sequence)
+        worker_sequences = rng_manager.seed_sequence.spawn(steps_from_start)
+
         self.final_metadata_df = self.final_metadata_df.loc[
             np.repeat(self.final_metadata_df.index.values, self.trials_per_config)
         ].reset_index(drop=True)
@@ -315,7 +327,7 @@ class ArrayRun:
             while next_idx < end_idx and len(active_jobs) < self.number_of_process:
                 process = context.Process(
                     target=self.run_parameter_search,
-                    args=(next_idx, paths, results, self.array_run_stdout_file),
+                    args=(next_idx, worker_sequences[next_idx - start_idx], paths, results, self.array_run_stdout_file),
                 )
                 process.start()
                 jobs.append(process)
@@ -689,8 +701,8 @@ class ArrayRun:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 8:
-        print("Array run needs 7 arguments and is not built to be called separately")
+    if len(sys.argv) != 11:
+        print("Array run needs 10 arguments and is not built to be called separately")
         sys.exit(1)
 
     anatomy_df = pd.read_csv(sys.argv[1], header=None)
@@ -700,6 +712,13 @@ if __name__ == "__main__":
     physio_file_address = sys.argv[5]
     array_run_stdout_file = sys.argv[6]
     array_results_path = sys.argv[7]
+    unit_coords_df = pd.read_pickle(sys.argv[10])
+
+    spawn_key = (
+        tuple(int(k) for k in sys.argv[9].split(".")) if sys.argv[9] else ()
+    )
+    array_sequence = SeedSequence(int(sys.argv[8]), spawn_key=spawn_key)
+
 
     array_run = ArrayRun(
         anatomy_df,
@@ -708,5 +727,7 @@ if __name__ == "__main__":
         anat_file_address,
         physio_file_address,
         array_run_stdout_file,
+        array_sequence,
+        unit_coords_df,
     )
     write_to_file(array_results_path, array_run.results)

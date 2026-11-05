@@ -73,8 +73,7 @@ class NeuronReference:
         """
 
         # Set random number generator
-        # manager = RandomManager()
-        # self.rng = manager.rng
+        self.rng = RandomManager().rng
 
 
         ############################################################
@@ -265,6 +264,7 @@ class NeuronReference:
 
         if (
             unit_coords_df is not None
+            and not unit_coords_df.empty
             and self.output_neuron.get("idx")
             in unit_coords_df["idx"].astype("int").values
         ):
@@ -277,6 +277,7 @@ class NeuronReference:
                 "w_coords",
             ].values[0]
         else:
+            # Creates positions inside CxSystem
             self.output_neuron["z_center"] = network_center
             self.output_neuron["w_center"] = 12.2 * np.log(
                 self.output_neuron["z_center"] + 0.94
@@ -1121,7 +1122,7 @@ class SynapseReference:
 
     def Fixed_rand_wght(self) -> None:
         """
-        The method for implementing the fixed randomized synaptic connection weights    .
+        The method for implementing the fixed randomized synaptic connection weights.
 
         """
 

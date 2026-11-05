@@ -121,7 +121,8 @@ class CxSystem:
         if anatomy_and_system_config is None or physiology_config is None:
             return
 
-        self.unit_coords_df = unit_coords_df
+        self._set_random_seed(rng_seed)
+        self.unit_coords_df = unit_coords_df if unit_coords_df is not None else pd.DataFrame()
         self.start_time = time.time()
         self.Cxmodule = sys.modules[__name__]
         self.parameter_to_method_mapping = {
@@ -353,6 +354,14 @@ class CxSystem:
                     else str(self.array_run_stdout_file)
                 )
 
+                # Derive the sequence for the array-run subprocess, then pass its identity.
+                array_sequence = self.manager.seed_sequence.spawn(1)[0]
+                entropy_arg = str(int(array_sequence.entropy))
+                key_arg = ".".join(str(k) for k in array_sequence.spawn_key)
+
+                tmp_positions_path = tmp_folder_path / "unit_coords_df.pkl"
+                self.unit_coords_df.to_pickle(tmp_positions_path)
+
                 command = [
                     sys.executable,
                     array_run_path,
@@ -363,6 +372,9 @@ class CxSystem:
                     str(physiology_config),
                     stdout_arg,
                     array_results_path,
+                    entropy_arg,
+                    key_arg,
+                    str(tmp_positions_path),
                 ]
                 try:
                     subprocess.run(command, check=True)
@@ -401,8 +413,6 @@ class CxSystem:
             self._report_total_conductances()
             self._report_total_number_of_synapses_and_connections()
 
-        self._set_random_seed(rng_seed)
-
     def _set_random_seed(self, rng_seed: int | SeedSequence | None) -> None:
         """
         Set the random seed for reproducibility.
@@ -412,10 +422,11 @@ class CxSystem:
         rng_seed : int, SeedSequence, or None
             The seed for the RandomManager singleton.
         """
-        manager = RandomManager(rng_seed)
-        self.rng = manager.rng
-        brian_sequence = manager.seed_sequence.spawn(1)[0]
-        b2.seed(int(brian_sequence.generate_state(1)[0]))
+        self.manager = RandomManager(rng_seed)
+        brian_sequence = self.manager.seed_sequence.spawn(1)[0]
+        b2_seed = int(brian_sequence.generate_state(1)[0])
+        # print(f"Setting Brian2 seed to {b2_seed}")
+        b2.seed(b2_seed)
 
     def _get_total_conductances(self) -> None:
         self.total_conductance_dict = {
@@ -1752,9 +1763,6 @@ class CxSystem:
                 locals=sys._getframe().f_locals,
             )
 
-            # creating the initial synaptic connection :
-            # if "rand" in eval("%s['delay']" % _dyn_syn_namespace_name):
-            #     # Do NOT set delay yet
             try:
                 exec(
                     f"{_dyn_syn_name} = "
